@@ -1,0 +1,26 @@
+"""Golden BR-COST-013: so apply_accumulation voi docs/golden/golden_engine.py (khong chep so vao test)."""
+
+import sys
+from pathlib import Path
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "docs" / "golden"))
+import golden_engine as g
+
+from normcore.costing.engine import apply_accumulation
+
+RES, _, _ = g.run(True)
+
+
+@pytest.mark.parametrize("service", ["DV-TEST-A", "DV-TEST-B"])
+def test_TC_COST_04_golden_tich_luy_gia_tinh_toan(service):
+	exp = RES[service]
+	r = apply_accumulation(
+		exp["full"],
+		g.PARAM["accumulation_mode"],
+		g.PARAM["accumulation_rate"],
+		g.PARAM["obligation_rate"],
+	)
+	assert r.accumulation == exp["accumulation"]
+	assert r.calculated_price == exp["calc"]
