@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import check_conventions as cc  # noqa: E402
 
 GOOD = {
+    "doctype": "DocType",
     "name": "NC Quy Trinh",
     "track_changes": 1,
     "fields": [
@@ -122,3 +123,34 @@ def test_bo_qua_docs_va_tham_khao(tmp_path):
     make(tmp_path, bad, base="docs/x")
     make(tmp_path, bad, base="tham-khao/y")
     assert cc.run(tmp_path) == []
+
+
+def test_json_phu_canh_doctype_bi_bo_qua(tmp_path):
+    make(tmp_path, GOOD)
+    d = tmp_path / "app/mod/doctype/nc_quy_trinh"
+    (d / "test_records.json").write_text(json.dumps([{"doctype": "NC Quy Trinh"}]))
+    (d / "phu.json").write_text(json.dumps({"name": "sai", "doctype": "Report"}))
+    assert cc.run(tmp_path) == []
+
+
+def test_file_doctype_khac_loai_bi_bo_qua(tmp_path):
+    make(tmp_path, {"doctype": "Report", "name": "sai"})
+    assert cc.run(tmp_path) == []
+
+
+def test_json_doctype_hong_van_bao_nc00(tmp_path):
+    d = tmp_path / "app/mod/doctype/nc_x"
+    d.mkdir(parents=True)
+    (d / "nc_x.json").write_text("{hong")
+    assert codes(tmp_path) == {"NC-00"}
+
+
+def test_fields_va_permissions_null_khong_van(tmp_path):
+    d = variant(fields=None, permissions=None)
+    make(tmp_path, d)
+    assert codes(tmp_path) == {"NC-05"}
+
+
+def test_fieldname_khong_phai_chuoi(tmp_path):
+    make(tmp_path, variant(fields=[{"fieldname": 123, "fieldtype": "Data", "label": "x"}]))
+    assert codes(tmp_path) == {"NC-02"}

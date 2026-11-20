@@ -21,6 +21,8 @@ def find_doctype_files(root: Path):
         rel = path.relative_to(root)
         if any(part in SKIP_DIRS for part in rel.parts[:-1]):
             continue
+        if path.stem != path.parent.name:  # chỉ file <thư_mục>/<thư_mục>.json
+            continue
         yield path
 
 
@@ -37,10 +39,17 @@ def check_doctype(data: dict, path: str) -> list:
         err("NC-01", f"tên DocType '{name}' không bắt đầu bằng 'NC '")
 
     seen = set()
-    for f in data.get("fields", []):
+    for f in data.get("fields") or []:
+        if not isinstance(f, dict):
+            err("NC-02", "mục trong fields không phải đối tượng")
+            continue
         fname = f.get("fieldname")
         ftype = f.get("fieldtype", "")
         if fname is not None:
+            if not isinstance(fname, str):
+                err("NC-02", f"fieldname {fname!r} không phải chuỗi")
+                seen.add(fname)
+                continue
             if not SNAKE.match(fname):
                 err("NC-02", f"fieldname '{fname}' không phải snake_case tiếng Anh")
             if fname in seen:
@@ -57,8 +66,8 @@ def check_doctype(data: dict, path: str) -> list:
         if not data.get("permissions"):
             err("NC-05", "DocType không có permissions")
 
-    for perm in data.get("permissions", []):
-        if perm.get("role") == AUDITOR:
+    for perm in data.get("permissions") or []:
+        if isinstance(perm, dict) and perm.get("role") == AUDITOR:
             bad = [p for p in AUDITOR_FORBIDDEN if perm.get(p) in (1, True, "1")]
             if bad:
                 err("NC-06", f"{AUDITOR} có quyền không được phép: {', '.join(bad)}")
@@ -74,6 +83,8 @@ def run(root: Path) -> list:
         except (OSError, ValueError) as e:
             errors.append(f"{rel}: [NC-00] không đọc được JSON: {e}")
             continue
+        if isinstance(data, dict) and data.get("doctype") != "DocType":
+            continue  # JSON phụ (test_records, báo cáo...) không phải định nghĩa DocType
         if not isinstance(data, dict):
             errors.append(f"{rel}: [NC-00] JSON không phải đối tượng")
             continue
