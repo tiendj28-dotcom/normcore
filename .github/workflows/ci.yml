@@ -1,0 +1,101 @@
+# CI cho app normcore (Frappe v15, không ERPNext).
+# Agent được sửa tệp này ở giai đoạn bootstrap/integrate nếu cấu trúc app thật khác giả định,
+# nhưng không được bỏ bước kiểm nào.
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-and-unit:
+    name: Tài liệu, golden, unit test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Kiểm bộ tài liệu và golden
+        run: |
+          python3 docs/golden/golden_engine.py
+          python3 docs/golden/golden_engine.py --no-depr
+          python3 docs/golden/golden_cls.py
+          python3 docs/tools/build_rtm.py docs
+      - name: Tài liệu chỉ đọc không bị đổi trong PR
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch -q origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- \
+            docs/srs.md docs/test-cases.md docs/use-cases.md docs/implementation-plan.md \
+            docs/golden docs/tools CLAUDE.md .claude scripts/autopilot.sh .autopilot/prompts)
+          if [ -n "$CHANGED" ]; then echo "Tệp chỉ đọc bị đổi: $CHANGED"; exit 1; fi
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check normcore scripts
+          ruff format --check normcore scripts
+      - name: Unit test thuần + golden + độ phủ
+        run: |
+          pip install pytest pytest-cov
+          pytest normcore/tests/unit normcore/tests/golden \
+            --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90
+      - name: Quét quy ước DocType và quyền
+        run: python3 scripts/check_conventions.py
+
+  site-tests:
+    name: Test trên site Frappe v15
+    runs-on: ubuntu-22.04
+    needs: docs-and-unit
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports: ["3306:3306"]
+        options: --health-cmd="mariadb-admin ping -proot" --health-interval=5s --health-timeout=2s --health-retries=10
+      redis-cache:
+        image: redis:7
+        ports: ["13000:6379"]
+      redis-queue:
+        image: redis:7
+        ports: ["11000:6379"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: app
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Cấu hình MariaDB
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq mariadb-client libmariadb-dev
+          mysql --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL character_set_server = 'utf8mb4'; SET GLOBAL collation_server = 'utf8mb4_unicode_ci';"
+      - name: Dựng bench
+        run: |
+          pip install frappe-bench
+          npm install -g yarn
+          bench init --frappe-branch version-15 --skip-redis-config-generation --skip-assets --python "$(which python)" ~/frappe-bench
+          cd ~/frappe-bench
+          bench set-config -g db_host 127.0.0.1
+          bench set-config -g redis_cache redis://127.0.0.1:13000
+          bench set-config -g redis_queue redis://127.0.0.1:11000
+          bench set-config -g redis_socketio redis://127.0.0.1:13000
+          bench get-app normcore "$GITHUB_WORKSPACE/app"
+          bench new-site normcore.test --mariadb-root-password root --admin-password admin --no-mariadb-socket
+          bench --site normcore.test install-app normcore
+          bench --site normcore.test set-config allow_tests true
+          bench build --app normcore
+      - name: Chạy test trên site
+        run: |
+          cd ~/frappe-bench
+          bench --site normcore.test run-tests --app normcore

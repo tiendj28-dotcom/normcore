@@ -1,0 +1,18 @@
+# Trạng thái chạy cục bộ của autopilot — không commit
+.autopilot/logs/
+.autopilot/run.log
+.autopilot/runs
+.autopilot/counted
+.autopilot/cycles/
+.autopilot/HALT
+
+# Python / Node / Frappe
+__pycache__/
+*.pyc
+*.egg-info/
+.coverage
+htmlcov/
+.pytest_cache/
+node_modules/
+normcore/public/dist/
+.autopilot/PAUSE
