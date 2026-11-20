@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # bước "Tài liệu chỉ đọc" cần lịch sử đầy đủ để git diff base...HEAD tìm được merge-base
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
