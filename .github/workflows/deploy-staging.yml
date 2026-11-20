@@ -1,5 +1,7 @@
 # Tự động cập nhật site staging khi develop có commit mới và CI xanh.
-# Secrets cần đặt trong repo: STAGING_HOST, STAGING_USER, STAGING_SSH_KEY, STAGING_SITE, STAGING_BENCH_DIR
+# Chạy trên self-hosted runner đặt ngay trên VPS (nhãn "normcore-staging", user "staging"):
+# runner tự kéo việc từ GitHub nên VPS không cần mở SSH ra Internet, không cần secret STAGING_*.
+# Staging: bench ~/staging-bench, site normcore-staging, nginx cổng 8100 (chỉ truy cập qua Tailscale).
 name: Deploy staging
 
 on:
@@ -7,6 +9,7 @@ on:
     workflows: [CI]
     types: [completed]
     branches: [develop]
+  workflow_dispatch:
 
 concurrency:
   group: deploy-staging
@@ -14,21 +17,44 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-22.04
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: [self-hosted, normcore-staging]
+    timeout-minutes: 30
+    env:
+      BENCH: /home/staging/staging-bench
+      SITE: normcore-staging
     steps:
-      - name: Cập nhật app trên staging
-        uses: appleboy/ssh-action@v1.0.3
+      - uses: actions/checkout@v4
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
-          script: |
-            set -e
-            cd ${{ secrets.STAGING_BENCH_DIR }}
-            bench --site ${{ secrets.STAGING_SITE }} backup
-            cd apps/normcore && git fetch origin develop && git checkout -q develop && git reset -q --hard origin/develop && cd ../..
-            bench --site ${{ secrets.STAGING_SITE }} migrate
-            bench build --app normcore
-            bench --site ${{ secrets.STAGING_SITE }} clear-cache
-            sudo -n supervisorctl restart all || bench restart
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          path: src
+          fetch-depth: 1
+
+      - name: Cập nhật app trên staging
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          SRC="$GITHUB_WORKSPACE/src"
+          [ -f "$SRC/normcore/hooks.py" ] || { echo "Repo chưa có app normcore (chưa bootstrap) – bỏ qua"; exit 0; }
+          cd "$BENCH"
+          if [ ! -d apps/normcore ]; then
+            bench get-app normcore "$SRC"
+          else
+            bench --site "$SITE" backup
+            git -C apps/normcore fetch -q "$SRC" HEAD
+            git -C apps/normcore reset -q --hard FETCH_HEAD
+            bench setup requirements --python
+          fi
+          bench --site "$SITE" list-apps | grep -q '^normcore' || bench --site "$SITE" install-app normcore
+          bench --site "$SITE" migrate
+          bench build --app normcore
+          bench --site "$SITE" clear-cache
+          sudo -n supervisorctl restart 'staging-bench-web:*' 'staging-bench-workers:*'
+
+      - name: Kiểm tra site sống
+        run: |
+          for i in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:8100/api/method/ping && exit 0
+            sleep 3
+          done
+          echo "Staging không phản hồi sau deploy"; exit 1
