@@ -41,7 +41,7 @@ jobs:
             bench get-app normcore "$SRC"
           else
             bench --site "$SITE" backup
-            git -C apps/normcore fetch -q "$SRC" HEAD
+            git -C apps/normcore fetch -q --update-shallow "$SRC" HEAD
             git -C apps/normcore reset -q --hard FETCH_HEAD
             bench setup requirements --python
           fi
