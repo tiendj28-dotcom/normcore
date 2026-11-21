@@ -2,4 +2,4 @@
 
 | Mã | TBD | FEAT/BR | Lựa chọn | Chỗ trong mã | Trạng thái |
 | :-- | :-- | :-- | :-- | :-- | :-- |
-| ASM-001 | TBD-02 | BR-COST-013 (NORM-4) | Cài đúng như `docs/golden/golden_engine.py`; chế độ tích lũy và các tỷ lệ là tham số, công thức nằm trong một hàm. Đã được duyệt trên issue NORM-4. | `normcore/costing/engine.py::apply_accumulation` | Giả định — chờ Tài chính kế toán xác nhận |
+| ASM-001 | TBD-02 | BR-COST-013 (NORM-4) | Cài đúng như `docs/golden/golden_engine.py`; chế độ tích lũy và các tỷ lệ là tham số, công thức nằm trong một hàm. Đã được duyệt trên issue NORM-4. | `normcore/costing/engine.py::apply_accumulation` | Đã xác nhận (Tài chính kế toán xác nhận công thức trên issue NORM-4, 2026-11-21; không có điểm khác golden) |
