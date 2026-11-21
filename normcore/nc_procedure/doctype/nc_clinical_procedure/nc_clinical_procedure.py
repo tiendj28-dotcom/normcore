@@ -3,21 +3,12 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
 
+from normcore.procedure.codes import next_code
+
 DRAFT = "Nháp"
 PUBLISHED = "Đã ban hành"
 LABOR_TYPE = "Nhân lực"
 LABOR_UOM = "phút"
-
-
-def _next_code(prefix, counter, existing_codes):
-	"""Cấp mã bất biến từ bộ đếm trên bản ghi cha, không tái dùng mã đã xóa (DI-01, ADR-002)."""
-	used = [
-		int(c[len(prefix) :])
-		for c in existing_codes
-		if c and c.startswith(prefix) and c[len(prefix) :].isdigit()
-	]
-	nxt = max([cint(counter), *used]) + 1
-	return nxt, f"{prefix}{nxt:03d}"
 
 
 class NCClinicalProcedure(Document):
@@ -64,7 +55,7 @@ class NCClinicalProcedure(Document):
 		counter = self.next_step_seq
 		for r in self.steps:
 			if not r.step_id:
-				counter, r.step_id = _next_code("S", counter, [s.step_id for s in self.steps])
+				counter, r.step_id = next_code("S", counter, [s.step_id for s in self.steps])
 		self.next_step_seq = max(cint(counter), cint(self.next_step_seq))
 
 	def assign_resource_ids(self):
@@ -77,7 +68,7 @@ class NCClinicalProcedure(Document):
 		counter = self.next_resource_seq
 		for r in self.resources:
 			if not r.resource_row_id:
-				counter, r.resource_row_id = _next_code(
+				counter, r.resource_row_id = next_code(
 					"R", counter, [x.resource_row_id for x in self.resources]
 				)
 		self.next_resource_seq = max(cint(counter), cint(self.next_resource_seq))
