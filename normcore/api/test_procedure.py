@@ -81,9 +81,15 @@ class TestProcedureEditorAPI(FrappeTestCase):
 			api.add_step(name, "Thực hiện", f"Bước {i + 1}", f"Mô tả {i + 1}")
 
 	def _version_data(self, name):
+		user = frappe.session.user
+		frappe.set_user("Administrator")
 		rows = frappe.get_all(
-			"Version", filters={"ref_doctype": "NC Clinical Procedure", "docname": name}, fields=["data", "owner", "creation"], order_by="creation"
+			"Version",
+			filters={"ref_doctype": "NC Clinical Procedure", "docname": name},
+			fields=["data", "owner", "creation"],
+			order_by="creation",
 		)
+		frappe.set_user(user)
 		return [(frappe.parse_json(r.data), r) for r in rows]
 
 	def test_ham_moi_duoc_whitelist(self):
@@ -201,7 +207,7 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self.assertEqual((before, after, owner), ("Mô tả 1", "Mô tả đã sửa", self.clin))
 		self.assertIsNotNone(when)
 		before, after, owner, when = seen[("resources", "quantity")]
-		self.assertEqual((before, after, owner), (2, 5, self.clin))
+		self.assertEqual((float(before), float(after), owner), (2.0, 5.0, self.clin))
 
 	def test_TC_PROC_09_trich_dan(self):
 		name = self._draft()
@@ -275,7 +281,8 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		for user in (self.finance, self.auditor):
 			frappe.set_user(user)
 			for i, call in enumerate(calls):
-				self.assertRaises(frappe.PermissionError, call, msg=f"{user} #{i}")
+				with self.subTest(user=user, call=i), self.assertRaises(frappe.PermissionError):
+					call()
 			self.assertFalse(api.get_procedure(name)["can_edit"])
 		frappe.set_user("Administrator")
 		doc = frappe.get_doc("NC Clinical Procedure", name)
