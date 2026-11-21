@@ -14,6 +14,46 @@ SKIP_DIRS = {"docs", "tham-khao", ".git", "node_modules"}
 NO_LABEL_TYPES = {"Section Break", "Column Break", "Tab Break", "HTML", "Button"}
 AUDITOR = "NC Auditor"
 AUDITOR_FORBIDDEN = ("write", "create", "delete", "submit", "cancel", "amend")
+ROLES = (
+	"NC Clinician",
+	"NC Department Head",
+	"NC Council Member",
+	"NC Finance",
+	"NC Resource Manager",
+	"NC Document Controller",
+	"NC Director",
+	"NC Consultant",
+	"NC Admin",
+	"NC Auditor",
+)
+# Ma trận quyền (docs/data-model.md mục 4), theo thứ tự ROLES. R = đọc; W = đọc, sửa, tạo (ASM-015); - = không.
+# "(khoa)" và "A" (duyệt theo luồng) không phải quyền DocType nên quy về R / W.
+MATRIX = {
+	"Dịch vụ kỹ thuật, chuyên khoa": "R R R R R W R R W R",
+	"Quy trình": "W W R R R R R R R R",
+	"Bộ tham số, chức danh, loại giá": "- - - W R - R R W R",
+	"Bộ định mức": "W W - R R - R R R R",
+	"Lần tính giá, kết quả, đối soát": "- - - W - - R - R R",
+	"Nhật ký AI, sổ sự kiện": "- - - - - - R - R R",
+	# Ma trận không có dòng riêng: căn cứ ghi ở đây (ASM-008, G1 của NORM-12)
+	"NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)": "R R R R R W R R W R",
+	"NC Cost Center (G1: Admin, Finance ghi)": "R R R W R R R R W R",
+}
+DOCTYPE_ROW = {
+	"NC Technical Service": "Dịch vụ kỹ thuật, chuyên khoa",
+	"NC Clinical Procedure": "Quy trình",
+	"NC Costing Parameter Set": "Bộ tham số, chức danh, loại giá",
+	"NC Job Title": "Bộ tham số, chức danh, loại giá",
+	"NC Norm Set": "Bộ định mức",
+	"NC Costing Run": "Lần tính giá, kết quả, đối soát",
+	"NC Service Cost": "Lần tính giá, kết quả, đối soát",
+	"NC AI Log": "Nhật ký AI, sổ sự kiện",
+	"NC Department": "NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)",
+	"NC Cost Center": "NC Cost Center (G1: Admin, Finance ghi)",
+}
+# Q2 của NORM-12: duy nhất NC Admin được xóa, và chỉ trên bốn DocType danh mục
+DELETE_ALLOWED = {"NC Admin": {"NC Department", "NC Cost Center", "NC Job Title", "NC Technical Service"}}
+PERM_TYPES = ("read", "write", "create", "delete", "submit", "cancel", "amend")
 SNAKE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
 
 
@@ -72,6 +112,46 @@ def check_doctype(data: dict, path: str) -> list:
 			bad = [p for p in AUDITOR_FORBIDDEN if perm.get(p) in (1, True, "1")]
 			if bad:
 				err("NC-06", f"{AUDITOR} có quyền không được phép: {', '.join(bad)}")
+	if not is_table:
+		errors.extend(check_permissions(data, path))
+	return errors
+
+
+def _flag(perm, ptype):
+	return perm.get(ptype) in (1, True, "1")
+
+
+def check_permissions(data: dict, path: str) -> list:
+	"""FR-ACC-002, TC-ACC-04: không cấp quyền cho All; quyền từng vai trò khớp ma trận mục 4."""
+	errors = []
+	name = data.get("name", "")
+	perms = [p for p in data.get("permissions") or [] if isinstance(p, dict)]
+	for p in perms:
+		if p.get("role") == "All" and any(_flag(p, t) for t in PERM_TYPES):
+			errors.append(f"{path}: [NC-07] cấp quyền cho vai trò All")
+	row = DOCTYPE_ROW.get(name)
+	if row is None:
+		errors.append(f"{path}: [NC-08] DocType '{name}' chưa có dòng ma trận trong DOCTYPE_ROW")
+		return errors
+	codes = MATRIX[row].split()
+	granted = {}
+	for p in perms:
+		role = p.get("role")
+		if role == "All":
+			continue
+		if role not in ROLES:
+			errors.append(f"{path}: [NC-08] vai trò '{role}' không thuộc 10 vai trò NC")
+			continue
+		granted.setdefault(role, set()).update(t for t in PERM_TYPES if _flag(p, t))
+	for role, code in zip(ROLES, codes):
+		expected = {"R": {"read"}, "W": {"read", "write", "create"}, "-": set()}[code]
+		if name in DELETE_ALLOWED.get(role, ()):
+			expected = expected | {"delete"}
+		got = granted.get(role, set())
+		if got != expected:
+			errors.append(
+				f"{path}: [NC-08] {role} có quyền {sorted(got)}, ma trận ({row}) yêu cầu {sorted(expected)}"
+			)
 	return errors
 
 

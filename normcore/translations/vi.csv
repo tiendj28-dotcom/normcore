@@ -20,3 +20,10 @@ Save the form first.,Lưu biểu mẫu trước.
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 Costing completed.,Đã tính giá xong.
 Costing failed.,Tính giá lỗi.
+Assign user,Gán người dùng
+User,Người dùng
+Assign,Gán
+Unassign,Bỏ gán
+User assigned to department.,Đã gán người dùng vào khoa.
+Assigned users,Người dùng được gán vào khoa
+No users assigned.,Chưa gán người dùng nào.
