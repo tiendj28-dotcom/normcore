@@ -82,8 +82,8 @@ required_apps = []
 # Installation
 # ------------
 
-# before_install = "normcore.install.before_install"
-# after_install = "normcore.install.after_install"
+before_install = "normcore.install.before_install"
+after_install = "normcore.install.after_install"
 
 # Uninstallation
 # ------------
