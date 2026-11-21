@@ -81,7 +81,7 @@ class NCClinicalProcedure(Document):
 
 	def validate_single_active(self):
 		"""DI-02: tối đa một bản đang soạn hoặc đang duyệt cho mỗi (dịch vụ, khoa)."""
-		if (self.workflow_state or DRAFT) in CLOSED_STATES:
+		if (self.workflow_state or DRAFT) in CLOSED_STATES or self.flags.ignore_single_active:
 			return
 		other = frappe.db.get_value(
 			"NC Clinical Procedure",
