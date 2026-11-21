@@ -106,7 +106,9 @@ class NCClinicalProcedure(Document):
 				frappe.throw(_("Trích dẫn dòng {0}: chọn đúng một trong phần hoặc mã bước").format(i))
 			if c.target_step_id and c.target_step_id not in step_ids:
 				frappe.throw(
-					_("Trích dẫn dòng {0}: mã bước {1} không tồn tại trong quy trình").format(i, c.target_step_id)
+					_("Trích dẫn dòng {0}: mã bước {1} không tồn tại trong quy trình").format(
+						i, c.target_step_id
+					)
 				)
 			c.relation = c.relation or "Chưa có căn cứ"
 

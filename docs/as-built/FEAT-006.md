@@ -24,3 +24,4 @@ TC-PROC-01, 02, 03 (đơn vị + tích hợp), 04, 08, 09; FR-PROC-005, FR-PROC-
 - Gợi ý danh mục chỉ cho NC Job Title (ASM-019).
 - Giao diện chưa chụp màn hình 1366 × 768 (cần staging).
 - Phạm vi khoa chưa áp (FEAT-001); gửi duyệt và kiểm FR-PROC-008/012 ở FEAT-007.
+- Hàm `add_step`, `remove_step`, `move` trong `procedure/steps.py` mới chỉ được test dùng (API dùng `reorder`, controller dùng `next_code`); giữ làm logic thuần cho FEAT-008 và FEAT-024.

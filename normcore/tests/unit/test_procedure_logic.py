@@ -21,7 +21,9 @@ class TestProcedureLogic(unittest.TestCase):
 		# đổi thứ tự bước 1 và 3: mã không đổi, thứ tự đổi
 		steps = reorder(steps, ["S003", "S002", "S001"])
 		self.assertEqual([s["step_title"] for s in steps], ["C", "B", "A"])
-		self.assertEqual({s["step_title"]: s["step_id"] for s in steps}, {"A": "S001", "B": "S002", "C": "S003"})
+		self.assertEqual(
+			{s["step_title"]: s["step_id"] for s in steps}, {"A": "S001", "B": "S002", "C": "S003"}
+		)
 
 		# xóa S002, thêm bước mới: nhận S004, không tái dùng S002
 		steps = remove_step(steps, "S002")

@@ -165,12 +165,12 @@ class TestProcedureEditorAPI(FrappeTestCase):
 	def test_TC_PROC_04_nguon_luc_nhan_luc(self):
 		name = self._draft()
 		self._steps(name, 1)
-		out = api.add_resource(
-			name, "S001", "Nhân lực", "Điều dưỡng", 15, None, "NC Job Title", self.job, 2
-		)
+		out = api.add_resource(name, "S001", "Nhân lực", "Điều dưỡng", 15, None, "NC Job Title", self.job, 2)
 		self.assertEqual(out["resource_row_id"], "R001")
 		r = api.get_procedure(name)["resources"][0]
-		self.assertEqual((r["step_id"], r["headcount"], r["linked_name"], r["uom"]), ("S001", 2, self.job, "phút"))
+		self.assertEqual(
+			(r["step_id"], r["headcount"], r["linked_name"], r["uom"]), ("S001", 2, self.job, "phút")
+		)
 		api.update_resource(name, "R001", quantity=20)
 		r = api.get_procedure(name)["resources"][0]
 		self.assertEqual((r["resource_row_id"], r["quantity"]), ("R001", 20))
@@ -223,7 +223,9 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self.assertEqual(cits[b["name"]]["deviation_reason"], "Lý do")
 		self.assertEqual(cits[c["name"]]["relation"], "Chưa có căn cứ")
 		# lọc theo bước hoặc phần đang chọn
-		self.assertEqual([x["name"] for x in api.get_procedure(name, step_id="S001")["citations"]], [a["name"]])
+		self.assertEqual(
+			[x["name"] for x in api.get_procedure(name, step_id="S001")["citations"]], [a["name"]]
+		)
 		self.assertEqual(
 			[x["name"] for x in api.get_procedure(name, section="Chỉ định")["citations"]], [b["name"]]
 		)
@@ -233,7 +235,9 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		)
 		api.delete_citation(name, a["name"])
 		self.assertEqual(len(api.get_procedure(name)["citations"]), 2)
-		self.assertRaises(frappe.ValidationError, api.add_citation, name, target_step_id="S001", target_section="Chỉ định")
+		self.assertRaises(
+			frappe.ValidationError, api.add_citation, name, target_step_id="S001", target_section="Chỉ định"
+		)
 
 	def test_FR_PROC_013_sao_chep(self):
 		src = self._draft()

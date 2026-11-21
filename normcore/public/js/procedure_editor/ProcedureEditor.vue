@@ -220,7 +220,7 @@ export default {
 				.call({ method: API + method, args, freeze: false, error() {} })
 				.then((r) => r.message)
 				.catch((e) => {
-					this.error = __("Could not complete the request. Check your permissions.");
+					this.error = __("Could not complete the request. See the message from the server.");
 					throw e;
 				});
 		},
@@ -318,8 +318,10 @@ export default {
 						// FR-PROC-002 / Q3: dẫn tới bản đã có
 						this.call("find_existing", { technical_service: f.service, department: f.department })
 							.then((x) => {
+								const existing = x.draft || x.published || "";
+								if (!existing) return; // lỗi khác (mã dịch vụ sai, thiếu quyền...): giữ thông báo chung
 								this.error = __("This service already has a procedure for the department:");
-								this.existing = x.draft || x.published || "";
+								this.existing = existing;
 							})
 							.catch(() => {})
 					)
@@ -503,10 +505,10 @@ export default {
 	font-weight: 600;
 }
 .nc-pe__rel--ok {
-	color: var(--green-600);
+	color: var(--green-800);
 }
 .nc-pe__rel--warn {
-	color: var(--orange-600);
+	color: var(--orange-700);
 }
 .nc-pe__rel--none {
 	color: var(--red-600);

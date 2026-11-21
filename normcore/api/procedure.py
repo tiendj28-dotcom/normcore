@@ -99,7 +99,10 @@ def _find_existing(technical_service, department):
 def _refuse_if_exists(technical_service, department):
 	draft, published, version, latest = _find_existing(technical_service, department)
 	if published:
-		message = _("Dịch vụ đã có quy trình ban hành; tạo phiên bản mới thuộc chức năng sửa đổi") + f" ({published})"
+		message = (
+			_("Dịch vụ đã có quy trình ban hành; tạo phiên bản mới thuộc chức năng sửa đổi")
+			+ f" ({published})"
+		)
 		existing = published
 	elif draft:
 		message = _("Dịch vụ này đã có bản đang soạn hoặc đang duyệt của khoa: {0}").format(draft)
