@@ -28,7 +28,7 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           path: src
-          fetch-depth: 1
+          fetch-depth: 0  # đủ lịch sử: git fetch từ bản shallow vào apps/normcore bị từ chối
 
       - name: Cập nhật app trên staging
         run: |
