@@ -35,6 +35,8 @@ class AIResult:
 
 
 def get_provider():
+	if frappe.flags.in_test:  # CLAUDE.md mục 3 luật 6: test luôn dùng provider giả lập, không gọi mạng
+		return MockProvider()
 	kind = (frappe.conf.get("normcore_ai_provider") or "mock").lower()
 	if kind == "mock":
 		return MockProvider()

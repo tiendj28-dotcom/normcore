@@ -128,3 +128,14 @@ class TestNCCostingRun(FrappeTestCase):
 		run.reload()
 		run.run_costing()
 		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 1)
+
+	def test_tinh_loi_duoc_luu_trang_thai(self):
+		ns = _published_norm_set(self.service, self.dept)
+		ns.lock()
+		# hospital_qty âm làm engine ném lỗi; ghi thẳng DB vì validate không cho sửa bộ đã khóa
+		frappe.db.set_value("NC Norm Line", ns.lines[0].name, "hospital_qty", -5)
+		run = _run(self.params)
+		run.run_costing()
+		run.reload()
+		self.assertEqual(run.status, "Tính lỗi")
+		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 0)

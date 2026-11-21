@@ -80,3 +80,36 @@ class TestNCNormSet(FrappeTestCase):
 		ns2.lock()
 		self.assertEqual(frappe.db.get_value("NC Norm Set", ns1.name, "status"), "Đã thay thế")
 		self.assertEqual(frappe.db.get_value("NC Norm Set", ns2.name, "status"), "Đã khóa")
+
+	def test_TC_NORM_02_insert_truc_tiep_tu_quy_trinh_nhap_bi_tu_choi(self):
+		proc = make_procedure(self.service, self.dept)  # còn Nháp
+		ns = frappe.get_doc(
+			{
+				"doctype": "NC Norm Set",
+				"technical_service": self.service,
+				"department": self.dept,
+				"procedure": proc.name,
+				"version_no": 1,
+			}
+		)
+		self.assertRaises(frappe.ValidationError, ns.insert)
+
+	def test_nguon_luc_nhan_luc_chua_gan_chuc_danh_bi_tu_choi(self):
+		proc = make_procedure(self.service, self.dept)
+		proc.resources[0].linked_doctype = None
+		proc.resources[0].linked_name = None
+		proc.save()
+		proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
+		proc.publish()
+		self.assertRaises(frappe.ValidationError, make_norm_set, proc.name)
+
+	def test_phien_ban_dung_max_khong_dung_count(self):
+		p1 = _published(self.service, self.dept, version=1)
+		n1 = make_norm_set(p1.name)
+		p2 = _published(self.service, self.dept, version=2)
+		n2 = make_norm_set(p2.name)
+		frappe.delete_doc("NC Norm Set", n1, force=True)  # xóa bản v1
+		p3 = _published(self.service, self.dept, version=3)
+		n3 = frappe.get_doc("NC Norm Set", make_norm_set(p3.name))
+		self.assertEqual(n3.version_no, 3)
+		self.assertNotEqual(n3.name, n2)

@@ -21,11 +21,16 @@ class NCCostingRun(Document):
 		frappe.has_permission("NC Costing Run", "write", doc=self, throw=True)
 		if self.status not in (DRAFT, FAILED):
 			frappe.throw(_("Chỉ chạy được lần tính giá ở trạng thái Nháp hoặc Tính lỗi"))
+		frappe.db.savepoint("nc_costing_run")
 		try:
 			self._run()
 		except Exception:
+			# Không raise: lỗi sẽ rollback cả request và trạng thái "Tính lỗi" không được lưu (data-model 5.4).
+			frappe.db.rollback(save_point="nc_costing_run")  # bỏ kết quả dở dang, giữ bản ghi lần tính
+			frappe.log_error(title=f"Tính giá lỗi: {self.name}")
 			self.db_set("status", FAILED)
-			raise
+			frappe.msgprint(_("Lần tính giá lỗi, xem Error Log"), indicator="red", alert=True)
+			return self.status
 		self.db_set("status", CALCULATED)
 		return self.status
 
@@ -48,7 +53,7 @@ class NCCostingRun(Document):
 				continue
 			authority = (
 				line.authority_qty or None
-			)  # Frappe lưu Float trống thành 0: 0 = chưa có định mức ban hành (ASM-004)
+			)  # Frappe lưu Float trống thành 0: 0 = chưa có định mức ban hành (ASM-013)
 			priced.append(
 				(
 					line,

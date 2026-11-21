@@ -9,6 +9,7 @@ normcore.ProcedureEditor = class {
 		this.page = page;
 		const mount = $('<div class="nc-procedure-editor"></div>').appendTo(page.main);
 		this.app = createApp(ProcedureEditor, { initialName: name || "" });
+		SetVueGlobals(this.app); // cung cấp __() cho template, như các ứng dụng Vue của Frappe
 		this.vm = this.app.mount(mount[0]);
 	}
 	load(name) {

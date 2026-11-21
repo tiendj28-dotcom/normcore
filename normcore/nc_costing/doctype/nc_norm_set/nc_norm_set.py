@@ -24,6 +24,12 @@ class NCNormSet(Document):
 			frappe.throw(_("Bộ định mức đã khóa, không sửa được."), title=_("Bản ghi đã khóa"))
 		if self.status == LOCKED and not self.flags.allow_lock and not (prev and prev.status == LOCKED):
 			frappe.throw(_("Chỉ khóa bộ định mức bằng nút Khóa"))
+		if (
+			self.is_new()
+			and frappe.db.get_value("NC Clinical Procedure", self.procedure, "workflow_state") != PUBLISHED
+		):
+			# FR-NORM-002, TC-NORM-02: kiểm ở mọi đường tạo, không chỉ make_norm_set
+			frappe.throw(_("Quy trình chưa ban hành, không khởi tạo được bộ định mức"))
 		self.assign_line_ids()
 		self.validate_lines()
 
@@ -79,7 +85,10 @@ class NCNormSet(Document):
 			},
 			pluck="name",
 		):
-			frappe.db.set_value("NC Norm Set", name, "status", REPLACED)
+			old = frappe.get_doc("NC Norm Set", name)
+			old.status = REPLACED
+			old.flags.allow_replace = True  # qua save() để track_changes ghi lịch sử
+			old.save(ignore_permissions=True)
 		self.status = LOCKED
 		self.locked_by = frappe.session.user
 		self.locked_on = now_datetime()
@@ -96,11 +105,13 @@ def make_norm_set(procedure):
 	if proc.workflow_state != PUBLISHED:
 		frappe.throw(_("Quy trình chưa ban hành, không khởi tạo được bộ định mức"))
 	version = (
-		frappe.db.count(
-			"NC Norm Set", {"technical_service": proc.technical_service, "department": proc.department}
+		frappe.db.get_value(
+			"NC Norm Set",
+			{"technical_service": proc.technical_service, "department": proc.department},
+			"max(version_no)",
 		)
-		+ 1
-	)
+		or 0
+	) + 1
 	ns = frappe.new_doc("NC Norm Set")
 	ns.update(
 		{

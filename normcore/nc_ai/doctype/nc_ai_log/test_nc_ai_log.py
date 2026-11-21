@@ -70,3 +70,13 @@ class TestNCAILog(FrappeTestCase):
 		self.assertFalse(frappe.has_permission("NC AI Log", "delete", res.log_name))
 		frappe.set_user(clinician)
 		self.assertFalse(frappe.has_permission("NC AI Log", "read", res.log_name))
+
+	def test_trong_test_luon_dung_provider_gia_lap(self):
+		from normcore.ai.providers.mock import MockProvider
+
+		old = frappe.conf.get("normcore_ai_provider")
+		frappe.conf.normcore_ai_provider = "anthropic"
+		try:
+			self.assertIsInstance(gateway.get_provider(), MockProvider)
+		finally:
+			frappe.conf.normcore_ai_provider = old
