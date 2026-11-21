@@ -54,7 +54,12 @@ class TestPhamViKhoa(FeatBase):
 			with self.assertRaises(PermissionError):
 				make_norm_set(pub_k02.name)
 			new = frappe.get_doc(
-				{"doctype": "NC Clinical Procedure", "technical_service": "DV-TEST-B", "department": K02, "version_no": 9}
+				{
+					"doctype": "NC Clinical Procedure",
+					"technical_service": "DV-TEST-B",
+					"department": K02,
+					"version_no": 9,
+				}
 			)
 			self.assertFalse(frappe.has_permission("NC Clinical Procedure", "create", doc=new))
 			with self.assertRaises(PermissionError):
@@ -127,8 +132,14 @@ class TestPhamViKhoa(FeatBase):
 class TestSoLieuTaiChinh(FeatBase):
 	def _run(self):
 		ps = frappe.get_doc(
-			{"doctype": "NC Costing Run", "title": "Lần tính BImat-777", "fiscal_year": 2031,
-			 "costing_date": "2031-03-01", "parameter_set": self._ps(), "status": "Nháp"}
+			{
+				"doctype": "NC Costing Run",
+				"title": "Lần tính BImat-777",
+				"fiscal_year": 2031,
+				"costing_date": "2031-03-01",
+				"parameter_set": self._ps(),
+				"status": "Nháp",
+			}
 		)
 		ps.insert(ignore_permissions=True)
 		return ps
@@ -163,6 +174,14 @@ class TestSoLieuTaiChinh(FeatBase):
 			self.assertNotIn("2031", text)
 			self.assertFalse(frappe.response.get("docs"))
 
+	def test_TC_ACC_01_auditor_doc_lan_tinh_gia_khong_ghi(self):
+		run = self._run()
+		auditor = make_user("auditor.run@normcore.test", "NC Auditor")
+		frappe.set_user(auditor)
+		self.assertIn(run.name, frappe.get_list("NC Costing Run", pluck="name"))
+		self.assertTrue(frappe.has_permission("NC Costing Run", "read", doc=run))
+		self.assertFalse(frappe.has_permission("NC Costing Run", "write", doc=run))
+
 
 class TestChuaDangNhap(FrappeTestCase):
 	def tearDown(self):
@@ -189,13 +208,20 @@ class TestKhoaVaTrungTamChiPhi(FrappeTestCase):
 		frappe.db.rollback()
 
 	def _dept(self, **kw):
-		base = {"doctype": "NC Department", "department_code": "K03-F1", "department_name": "Khoa CLS",
-		        "department_type": "Cận lâm sàng", "cost_center": "CC-F1"}
+		base = {
+			"doctype": "NC Department",
+			"department_code": "K03-F1",
+			"department_name": "Khoa CLS",
+			"department_type": "Cận lâm sàng",
+			"cost_center": "CC-F1",
+		}
 		return frappe.get_doc({**base, **kw})
 
 	def setUp(self):
 		frappe.set_user("Administrator")
-		ensure("NC Cost Center", "cost_center_code", "CC-F1", cost_center_name="TT CLS", center_type="Lâm sàng")
+		ensure(
+			"NC Cost Center", "cost_center_code", "CC-F1", cost_center_name="TT CLS", center_type="Lâm sàng"
+		)
 
 	def test_TC_ADM_04_khoa_thieu_truong_bat_buoc_bi_tu_choi(self):
 		for missing in ("department_code", "department_name", "department_type", "cost_center"):
@@ -215,7 +241,9 @@ class TestKhoaVaTrungTamChiPhi(FrappeTestCase):
 		self.assertEqual(frappe.get_doc("NC Department", "K03-F1").cost_center, "CC-F1")
 
 	def test_TC_ADM_04_trung_tam_chi_phi_thieu_truong_bi_tu_choi(self):
-		doc = frappe.get_doc({"doctype": "NC Cost Center", "cost_center_code": "CC-X", "cost_center_name": "X"})
+		doc = frappe.get_doc(
+			{"doctype": "NC Cost Center", "cost_center_code": "CC-X", "cost_center_name": "X"}
+		)
 		with self.assertRaises(MandatoryError):
 			doc.insert()
 
@@ -223,7 +251,9 @@ class TestKhoaVaTrungTamChiPhi(FrappeTestCase):
 		from normcore.patches import add_cost_center_to_departments as patch
 
 		frappe.db.sql("update `tabNC Department` set cost_center = null")
-		frappe.db.set_value("NC Department", "K03-F1", "cost_center", None) if frappe.db.exists("NC Department", "K03-F1") else None
+		frappe.db.set_value("NC Department", "K03-F1", "cost_center", None) if frappe.db.exists(
+			"NC Department", "K03-F1"
+		) else None
 		for code, typ in (("KP-1", "Hỗ trợ"), ("KP-2", "Cận lâm sàng")):
 			frappe.db.sql(
 				"insert into `tabNC Department` (name, department_code, department_name, department_type, creation, modified, owner, modified_by) "
@@ -271,7 +301,9 @@ class TestXoaDanhMuc(FeatBase):
 class TestGanKhoa(FeatBase):
 	def test_FR_ACC_006_gan_va_bo_gan_co_hieu_luc_ngay(self):
 		draft_k02 = self.draft(K02, "DV-TEST-B")
-		admin = make_user("admin.f1@normcore.test", "NC Admin")  # không phải Administrator, không System Manager
+		admin = make_user(
+			"admin.f1@normcore.test", "NC Admin"
+		)  # không phải Administrator, không System Manager
 		self.assertNotIn("System Manager", frappe.get_roles(admin))
 		frappe.set_user(self.clin)
 		self.assertFalse(frappe.has_permission("NC Clinical Procedure", "write", doc=draft_k02))
