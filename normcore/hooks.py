@@ -21,6 +21,12 @@ required_apps = []
 # 	}
 # ]
 
+# Fixtures: 10 vai trò (FR-ACC-002) và hai Workflow State của skeleton
+fixtures = [
+	{"dt": "Role", "filters": [["name", "like", "NC %"]]},
+	{"dt": "Workflow State", "filters": [["name", "in", ["Nháp", "Đã ban hành"]]]},
+]
+
 # Includes in <head>
 # ------------------
 
@@ -82,8 +88,8 @@ required_apps = []
 # Installation
 # ------------
 
-# before_install = "normcore.install.before_install"
-# after_install = "normcore.install.after_install"
+before_install = "normcore.install.before_install"
+after_install = "normcore.install.after_install"
 
 # Uninstallation
 # ------------

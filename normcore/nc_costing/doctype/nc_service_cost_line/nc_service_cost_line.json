@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "line_type",
+  "component",
+  "step_id",
+  "norm_line_id",
+  "resource_label",
+  "applied_qty",
+  "unit_rate",
+  "amount",
+  "rate_source"
+ ],
+ "fields": [
+  {
+   "fieldname": "line_type",
+   "label": "Loại dòng",
+   "fieldtype": "Select",
+   "options": "Trực tiếp\nPhân bổ",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "component",
+   "label": "Cấu phần hoặc loại chi phí",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "step_id",
+   "label": "Mã bước",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "norm_line_id",
+   "label": "Dòng định mức",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "resource_label",
+   "label": "Nguồn lực",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "applied_qty",
+   "label": "Lượng áp dụng",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "unit_rate",
+   "label": "Đơn giá",
+   "fieldtype": "Float",
+   "precision": "4"
+  },
+  {
+   "fieldname": "amount",
+   "label": "Thành tiền",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "rate_source",
+   "label": "Nguồn đơn giá",
+   "fieldtype": "Data"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Service Cost Line",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "istable": 1,
+ "editable_grid": 1
+}

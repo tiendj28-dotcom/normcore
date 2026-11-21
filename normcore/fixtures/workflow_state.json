@@ -1,0 +1,12 @@
+[
+ {
+  "doctype": "Workflow State",
+  "name": "Nháp",
+  "workflow_state_name": "Nháp"
+ },
+ {
+  "doctype": "Workflow State",
+  "name": "Đã ban hành",
+  "workflow_state_name": "Đã ban hành"
+ }
+]

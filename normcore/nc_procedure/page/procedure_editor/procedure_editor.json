@@ -1,0 +1,30 @@
+{
+ "content": null,
+ "creation": "2026-11-21 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Procedure",
+ "name": "procedure-editor",
+ "owner": "Administrator",
+ "page_name": "procedure-editor",
+ "roles": [
+  {"role": "NC Clinician"},
+  {"role": "NC Department Head"},
+  {"role": "NC Council Member"},
+  {"role": "NC Finance"},
+  {"role": "NC Resource Manager"},
+  {"role": "NC Document Controller"},
+  {"role": "NC Director"},
+  {"role": "NC Consultant"},
+  {"role": "NC Admin"},
+  {"role": "NC Auditor"}
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Trình soạn quy trình"
+}
