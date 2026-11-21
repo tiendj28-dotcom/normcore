@@ -7,7 +7,9 @@ def execute():
 	frappe.reload_doc("nc_core", "doctype", "nc_cost_center")
 	frappe.reload_doc("nc_core", "doctype", "nc_department")
 	for d in frappe.get_all(
-		"NC Department", fields=["name", "department_name", "department_type"], filters={"cost_center": ["is", "not set"]}
+		"NC Department",
+		fields=["name", "department_name", "department_type"],
+		filters={"cost_center": ["is", "not set"]},
 	):
 		if not frappe.db.exists("NC Cost Center", d.name):
 			frappe.get_doc(

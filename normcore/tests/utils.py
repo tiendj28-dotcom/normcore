@@ -30,7 +30,9 @@ def ensure(doctype, name_field, name, **values):
 
 def make_base(service="DV-TEST-A", department="KHOA-TEST", job="DD"):
 	"""Khoa, dịch vụ, chức danh DD dùng chung."""
-	ensure("NC Cost Center", "cost_center_code", department, cost_center_name="Khoa thử", center_type="Lâm sàng")
+	ensure(
+		"NC Cost Center", "cost_center_code", department, cost_center_name="Khoa thử", center_type="Lâm sàng"
+	)
 	ensure(
 		"NC Department",
 		"department_code",

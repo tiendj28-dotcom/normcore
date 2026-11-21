@@ -125,7 +125,9 @@ def assign_department(user, department):
 
 def unassign_department(user, department):
 	assert_can_assign()
-	names = frappe.get_all("User Permission", {"user": user, "allow": DEPARTMENT, "for_value": department}, pluck="name")
+	names = frappe.get_all(
+		"User Permission", {"user": user, "allow": DEPARTMENT, "for_value": department}, pluck="name"
+	)
 	for name in names:
 		frappe.delete_doc("User Permission", name, ignore_permissions=True)
 	return bool(names)
