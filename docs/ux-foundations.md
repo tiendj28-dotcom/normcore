@@ -241,7 +241,7 @@ Kiểu: **L** danh sách chuẩn, **F** form chuẩn, **P** trang tùy biến, *
 | SCR-DSK-028 | Xuất hồ sơ | Hộp thoại từ phương án hoặc lần tính giá | Chọn loại tệp và xuất | Đang đóng gói; lỗi xuất |
 | SCR-DSK-029 | Cấu hình AI và mẫu lệnh | F | Nhà cung cấp, khóa, hạn mức; mẫu lệnh có phiên bản | Kiểm tra kết nối; AI tắt; vượt hạn mức |
 | SCR-DSK-030 | Nhật ký | L | Sổ sự kiện và nhật ký AI, lọc theo bản ghi, người, thời gian | Chỉ đọc. **[1.1]** NC Auditor truy cập được |
-| SCR-DSK-031 | Khoa, người dùng, tham số vận hành | L + F | Khoa, trung tâm chi phí, phạm vi khoa của người dùng, NC Settings; **[AMD-002]** Nhập dữ liệu từ Excel (Desk Page `import-excel`) | **[1.1]** Số ngày nhắc hạn hồ sơ tuân thủ; loại thiết bị bắt buộc có hồ sơ |
+| SCR-DSK-031 | Khoa, người dùng, tham số vận hành | L + F | Khoa, trung tâm chi phí, phạm vi khoa của người dùng, NC Settings; **[AMD-002]** Nhập dữ liệu từ Excel (Desk Page `import-excel`) | **[1.1]** Số ngày nhắc hạn hồ sơ tuân thủ; loại thiết bị bắt buộc có hồ sơ ; **[AMD-002]** Trang nhập Excel: chưa chọn tệp, đã tải tệp, đã kiểm tra (bật "Xác nhận ghi"), có lỗi theo dòng, không có quyền |
 | SCR-DSK-032 **[1.1]** | Hệ thống xét nghiệm | L + F | Dịch vụ, khoa, thiết bị chính, tỷ trọng; khối tình trạng: bộ định mức, kế hoạch chất lượng, sản lượng, k và giá thành lần tính gần nhất | Ngừng dùng; thiếu kế hoạch nội kiểm (cảnh báo); tổng tỷ trọng của dịch vụ khác 100% |
 | SCR-DSK-033 **[1.1]** | Kế hoạch chất lượng | F | Số ngày chạy; bảng nội kiểm; bảng chuẩn máy; số test ước tính mỗi năm hiển thị ngay | Mặt hàng sai loại (từ chối); đề xuất AI chưa xử lý |
 | SCR-DSK-034 **[1.1]** | Chương trình ngoại kiểm | L + F | Đơn vị, số đợt, số mẫu, phí; bảng dịch vụ tham gia và tỷ lệ | Tổng tỷ lệ khác 100% |
