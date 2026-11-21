@@ -61,3 +61,12 @@ class TestTCACC04(unittest.TestCase):
 		bad = copy.deepcopy(SAMPLE)
 		bad["name"] = "NC Khong Ton Tai"
 		self.assertTrue(any("NC-08" in e for e in cc.check_permissions(bad, "mau.json")))
+
+	def test_TC_ACC_04_dong_ma_tran_thieu_cot_bi_bao_loi(self):
+		saved = cc.MATRIX["Dịch vụ kỹ thuật, chuyên khoa"]
+		try:
+			cc.MATRIX["Dịch vụ kỹ thuật, chuyên khoa"] = "R R R"  # thiếu 7 cột
+			errs = cc.check_permissions(SAMPLE, "mau.json")
+		finally:
+			cc.MATRIX["Dịch vụ kỹ thuật, chuyên khoa"] = saved
+		self.assertTrue(any("NC-08" in e and "cột" in e for e in errs), errs)

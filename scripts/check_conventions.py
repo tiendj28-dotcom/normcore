@@ -134,6 +134,9 @@ def check_permissions(data: dict, path: str) -> list:
 		errors.append(f"{path}: [NC-08] DocType '{name}' chưa có dòng ma trận trong DOCTYPE_ROW")
 		return errors
 	codes = MATRIX[row].split()
+	if len(codes) != len(ROLES):
+		errors.append(f"{path}: [NC-08] dòng ma trận '{row}' có {len(codes)} cột, cần {len(ROLES)}")
+		return errors
 	granted = {}
 	for p in perms:
 		role = p.get("role")
@@ -143,7 +146,7 @@ def check_permissions(data: dict, path: str) -> list:
 			errors.append(f"{path}: [NC-08] vai trò '{role}' không thuộc 10 vai trò NC")
 			continue
 		granted.setdefault(role, set()).update(t for t in PERM_TYPES if _flag(p, t))
-	for role, code in zip(ROLES, codes):
+	for role, code in zip(ROLES, codes, strict=True):
 		expected = {"R": {"read"}, "W": {"read", "write", "create"}, "-": set()}[code]
 		if name in DELETE_ALLOWED.get(role, ()):
 			expected = expected | {"delete"}
