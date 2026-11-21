@@ -243,6 +243,7 @@ erDiagram
 | resources | Nguồn lực | Table NC Procedure Resource | | |
 | citations | Trích dẫn | Table NC Procedure Citation | | |
 | next_step_seq | Số cấp mã bước kế tiếp | Int | | Nội bộ, bảo đảm mã bước không tái dùng |
+| next_resource_seq **[AMD-001]** | Số cấp mã dòng nguồn lực kế tiếp | Int | | Nội bộ, bảo đảm mã dòng `R###` không tái dùng |
 | decision_no | Số quyết định ban hành | Data | | BB khi ban hành [FR-WF-005] |
 | effective_date | Ngày hiệu lực | Date | | BB khi ban hành |
 | copied_from | Sao chép từ | Link NC Clinical Procedure | | |

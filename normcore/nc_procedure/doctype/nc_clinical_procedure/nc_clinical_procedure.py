@@ -9,11 +9,17 @@ DRAFT = "Nháp"
 PUBLISHED = "Đã ban hành"
 LABOR_TYPE = "Nhân lực"
 LABOR_UOM = "phút"
+CLOSED_STATES = (PUBLISHED, "Đã thay thế", "Đã thu hồi")
 
 
 class NCClinicalProcedure(Document):
+	def before_insert(self):
+		self.validate_single_active()  # trước khi đặt tên, để báo lỗi rõ thay vì trùng khóa
+
 	def validate(self):
 		self.check_state_transition()
+		self.validate_single_active()
+		self.validate_citations()
 		self.assign_step_ids()
 		self.assign_resource_ids()
 		self.validate_resources()
@@ -72,6 +78,37 @@ class NCClinicalProcedure(Document):
 					"R", counter, [x.resource_row_id for x in self.resources]
 				)
 		self.next_resource_seq = max(cint(counter), cint(self.next_resource_seq))
+
+	def validate_single_active(self):
+		"""DI-02: tối đa một bản đang soạn hoặc đang duyệt cho mỗi (dịch vụ, khoa)."""
+		if (self.workflow_state or DRAFT) in CLOSED_STATES:
+			return
+		other = frappe.db.get_value(
+			"NC Clinical Procedure",
+			{
+				"technical_service": self.technical_service,
+				"department": self.department,
+				"workflow_state": ["not in", CLOSED_STATES],
+				"name": ["!=", self.name or ""],
+			},
+			"name",
+		)
+		if other:
+			frappe.throw(
+				_("Dịch vụ này đã có bản đang soạn hoặc đang duyệt của khoa: {0}").format(other),
+				title=_("Đã có bản đang soạn"),
+			)
+
+	def validate_citations(self):
+		step_ids = {s.step_id for s in self.steps}
+		for i, c in enumerate(self.citations, 1):
+			if bool(c.target_section) == bool(c.target_step_id):
+				frappe.throw(_("Trích dẫn dòng {0}: chọn đúng một trong phần hoặc mã bước").format(i))
+			if c.target_step_id and c.target_step_id not in step_ids:
+				frappe.throw(
+					_("Trích dẫn dòng {0}: mã bước {1} không tồn tại trong quy trình").format(i, c.target_step_id)
+				)
+			c.relation = c.relation or "Chưa có căn cứ"
 
 	def validate_resources(self):
 		step_ids = {s.step_id for s in self.steps}
