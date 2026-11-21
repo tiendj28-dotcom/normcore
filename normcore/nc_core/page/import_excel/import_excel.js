@@ -120,17 +120,15 @@ normcore.ImportExcel = class ImportExcel {
 			)
 			.join("");
 		const table = rows
-			? `<table class="table table-bordered"><thead><tr><th>${__("Row")}</th><th>${__(
-					"Column"
-			  )}</th><th>${__("Message")}</th></tr></thead><tbody>${rows}</tbody></table>`
+			? `<table class="table table-bordered"><thead><tr><th>${__("Row", null, "Import Excel")}</th><th>${__("Column", null, "Import Excel")}</th><th>${__("Message", null, "Import Excel")}</th></tr></thead><tbody>${rows}</tbody></table>`
 			: "";
 		const warn = (res.warnings || [])
 			.map((w) => `<div class="text-muted">${frappe.utils.escape_html(w)}</div>`)
 			.join("");
 		this.page.main.find(".nc-import-result").html(
 			`<h5>${title}</h5>
-			<p>${__("Created")}: <b>${res.created}</b> · ${__("Updated")}: <b>${res.updated}</b> ·
-			${__("Unchanged")}: <b>${res.unchanged}</b> · ${__("Errors")}: <b>${res.error_count}</b></p>
+			<p>${__("Created", null, "Import Excel")}: <b>${res.created}</b> · ${__("Updated", null, "Import Excel")}: <b>${res.updated}</b> ·
+			${__("Unchanged", null, "Import Excel")}: <b>${res.unchanged}</b> · ${__("Errors", null, "Import Excel")}: <b>${res.error_count}</b></p>
 			${warn}${table}`
 		);
 	}

@@ -30,10 +30,10 @@ You do not have permission to import data.,Bạn không có quyền nhập dữ 
 No file chosen,Chưa chọn tệp
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
 Import result,Kết quả nhập
-Row,Dòng
-Column,Cột
-Message,Thông báo
-Created,Tạo mới
-Updated,Cập nhật
-Unchanged,Không đổi
-Errors,Lỗi
+Row,Dòng,Import Excel
+Column,Cột,Import Excel
+Message,Thông báo,Import Excel
+Created,Tạo mới,Import Excel
+Updated,Cập nhật,Import Excel
+Unchanged,Không đổi,Import Excel
+Errors,Lỗi,Import Excel

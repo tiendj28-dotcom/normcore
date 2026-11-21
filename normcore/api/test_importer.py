@@ -56,7 +56,7 @@ class TestImporterAPI(FrappeTestCase):
 		self.assertEqual((lai["created"], lai["updated"], lai["unchanged"], lai["error_count"]), (0, 0, 1, 0))
 		self.assertEqual(frappe.db.count("NC Job Title"), before + 1)
 
-	def test_cap_nhat_theo_ma_va_loi_validate_cua_dong(self):
+	def test_cap_nhat_theo_ma_va_loi_kieu_cua_dong(self):
 		frappe.set_user(self.finance)
 		api.run_import(KEY, xlsx([HEAD, ["T-1", "Tên 1", "Khác"]]), "ghi")
 		out = api.run_import(KEY, xlsx([HEAD, ["T-1", "Tên mới", None], ["T-2", "Tên 2", "Sai nhóm"]]), "ghi")
@@ -100,3 +100,25 @@ class TestImporterAPI(FrappeTestCase):
 		self.assertEqual(out["created"], 1)
 		with self.assertRaises(frappe.ValidationError):
 			api.import_file("khong_co", f.file_url, "thu")
+
+	def test_FR_ADM_002_loi_validate_cua_frappe_o_mot_dong_khong_lam_hong_dong_khac(self):
+		frappe.set_user(self.finance)
+		frappe.local.message_log = []
+		dai = "x" * 200  # vượt 140 ký tự: Frappe từ chối ở insert()
+		out = api.run_import(
+			KEY,
+			xlsx([HEAD, ["PRB-1", "Tên 1", "Khác"], ["PRB-2", dai, "Khác"], ["PRB-3", "Tên 3", "Khác"]]),
+			"ghi",
+		)
+		self.assertEqual((out["created"], out["error_count"]), (2, 1))
+		self.assertEqual(out["errors"][0]["row"], 3)
+		self.assertTrue(frappe.db.exists("NC Job Title", "PRB-1"))
+		self.assertFalse(frappe.db.exists("NC Job Title", "PRB-2"))
+		self.assertTrue(frappe.db.exists("NC Job Title", "PRB-3"))
+		self.assertEqual(frappe.local.message_log, [])  # không đẩy hộp thoại msgprint lên Desk
+
+	def test_FR_ADM_002_ma_chi_khac_hoa_thuong_la_khong_doi(self):
+		frappe.set_user(self.finance)
+		api.run_import(KEY, xlsx([HEAD, ["VD-HT", "Tên", "Khác"]]), "ghi")
+		out = api.run_import(KEY, xlsx([HEAD, ["vd-ht", "Tên", "Khác"]]), "ghi")
+		self.assertEqual((out["created"], out["updated"], out["unchanged"]), (0, 0, 1))

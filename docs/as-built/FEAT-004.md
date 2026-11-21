@@ -20,7 +20,7 @@ Tải mẫu: quyền đọc DocType đích. Nhập: quyền tạo (và sửa cho
 TC-ADM-02 (`api/test_importer.py`), 17 test `test_FR_ADM_002_*` đơn vị, test quyền, test quy ước giao diện. Kết quả lệnh ở `docs/features/FEAT-004/implementation-log.md`.
 
 ## 7. Giới hạn đã biết và nợ kỹ thuật
-Chưa chụp màn hình 1366 × 768 (cần staging); tệp lớn xử lý đồng bộ (tối đa 5.000 dòng); chỉ `.xlsx`; chưa có nhật ký nhập (FEAT-003 nếu cần); màn hình danh mục chưa có nút mở trang này.
+Chưa chụp màn hình 1366 × 768 (cần staging); tệp lớn xử lý đồng bộ (tối đa 5.000 dòng); chỉ `.xlsx`; chưa có nhật ký nhập (FEAT-003 nếu cần); màn hình danh mục chưa có nút mở trang này; trang chỉ liệt kê bộ nhập mà người dùng có quyền tạo nên vai trò chỉ đọc chưa tải được mẫu từ giao diện (API vẫn cho, ASM-032).
 
 ## Cách một FEAT sau đăng ký bộ nhập mới
 1. Khai báo trong `normcore/core/import_sets.py` (hoặc module riêng được import từ `normcore/api/importer.py`):

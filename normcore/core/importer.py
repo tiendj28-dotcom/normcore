@@ -292,7 +292,7 @@ def parse(import_set: ImportSet, content: bytes, filename=None):
 				row_errors.append(RowError(line, col.label, str(e)))
 		if not row_errors:
 			key = values[import_set.key_field]
-			norm_key = key.casefold()
+			norm_key = str(key).casefold()
 			if norm_key in seen:
 				label = import_set.column(import_set.key_field).label
 				row_errors.append(
@@ -353,7 +353,8 @@ def process(
 			changed = {
 				k: v
 				for k, v in values.items()
-				if normalize_existing(import_set.column(k), existing.get(k)) != v
+				if k != import_set.key_field
+				and normalize_existing(import_set.column(k), existing.get(k)) != v
 			}
 			if not changed:
 				result.unchanged += 1

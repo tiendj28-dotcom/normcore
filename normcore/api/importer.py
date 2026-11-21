@@ -69,6 +69,7 @@ def run_import(import_set_key, content, mode, filename=None):
 
 	def write(action, key, values):
 		frappe.db.savepoint(SAVEPOINT)
+		log_len = len(frappe.local.message_log)
 		try:
 			if action == "tao":
 				doc = frappe.get_doc({"doctype": dt, **values})
@@ -79,6 +80,7 @@ def run_import(import_set_key, content, mode, filename=None):
 				doc.save()
 		except Exception as e:
 			frappe.db.rollback(save_point=SAVEPOINT)
+			del frappe.local.message_log[log_len:]  # lỗi dòng nằm trong bảng lỗi, không bật hộp thoại
 			raise ValueError(_clean(e)) from None
 
 	result = core.process(
