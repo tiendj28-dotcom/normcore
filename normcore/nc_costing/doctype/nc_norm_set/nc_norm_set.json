@@ -1,0 +1,134 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "technical_service",
+  "department",
+  "procedure",
+  "version_no",
+  "status",
+  "lines",
+  "next_line_seq",
+  "locked_by",
+  "locked_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "NC Technical Service",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "NC Department",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "procedure",
+   "label": "Phiên bản quy trình",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "NC Clinical Procedure"
+  },
+  {
+   "fieldname": "version_no",
+   "label": "Phiên bản",
+   "fieldtype": "Int",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "Nháp\nĐã xác nhận chuyên môn\nĐã khóa\nĐã thay thế",
+   "read_only": 1,
+   "default": "Nháp",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "lines",
+   "label": "Dòng định mức",
+   "fieldtype": "Table",
+   "options": "NC Norm Line"
+  },
+  {
+   "fieldname": "next_line_seq",
+   "label": "Số cấp mã dòng kế tiếp",
+   "fieldtype": "Int",
+   "read_only": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "locked_by",
+   "label": "Người khóa",
+   "fieldtype": "Link",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "locked_on",
+   "label": "Thời điểm khóa",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Norm Set",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "format:DM-{technical_service}-{department}-v{version_no}"
+}

@@ -1,0 +1,102 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "costing_run",
+  "technical_service",
+  "department",
+  "norm_set",
+  "calc_status",
+  "calc_message",
+  "direct_labor",
+  "lines"
+ ],
+ "fields": [
+  {
+   "fieldname": "costing_run",
+   "label": "Lần tính giá",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "NC Costing Run",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "options": "NC Technical Service",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa",
+   "fieldtype": "Link",
+   "options": "NC Department"
+  },
+  {
+   "fieldname": "norm_set",
+   "label": "Bộ định mức",
+   "fieldtype": "Link",
+   "options": "NC Norm Set"
+  },
+  {
+   "fieldname": "calc_status",
+   "label": "Kết quả",
+   "fieldtype": "Select",
+   "options": "Thành công\nLỗi\nCảnh báo",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "calc_message",
+   "label": "Thông báo",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "direct_labor",
+   "label": "Chi phí nhân công trực tiếp",
+   "fieldtype": "Currency",
+   "precision": "2"
+  },
+  {
+   "fieldname": "lines",
+   "label": "Dòng chi phí",
+   "fieldtype": "Table",
+   "options": "NC Service Cost Line"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Service Cost",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "SC-.#####",
+ "naming_rule": "Expression (old style)"
+}

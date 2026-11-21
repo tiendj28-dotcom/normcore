@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "technical_service",
+  "department",
+  "version_no",
+  "workflow_state",
+  "steps",
+  "resources",
+  "next_step_seq",
+  "next_resource_seq",
+  "decision_no",
+  "effective_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ kỹ thuật",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "NC Technical Service",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa chủ trì",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "NC Department",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "version_no",
+   "label": "Phiên bản",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "label": "Trạng thái",
+   "fieldtype": "Link",
+   "options": "Workflow State",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "steps",
+   "label": "Các bước",
+   "fieldtype": "Table",
+   "options": "NC Procedure Step"
+  },
+  {
+   "fieldname": "resources",
+   "label": "Nguồn lực",
+   "fieldtype": "Table",
+   "options": "NC Procedure Resource"
+  },
+  {
+   "fieldname": "next_step_seq",
+   "label": "Số cấp mã bước kế tiếp",
+   "fieldtype": "Int",
+   "read_only": 1,
+   "description": "Nội bộ, bảo đảm mã bước không tái dùng",
+   "hidden": 1
+  },
+  {
+   "fieldname": "next_resource_seq",
+   "label": "Số cấp mã dòng nguồn lực kế tiếp",
+   "fieldtype": "Int",
+   "read_only": 1,
+   "description": "Nội bộ, bảo đảm mã dòng không tái dùng",
+   "hidden": 1
+  },
+  {
+   "fieldname": "decision_no",
+   "label": "Số quyết định ban hành",
+   "fieldtype": "Data",
+   "description": "Bắt buộc khi ban hành"
+  },
+  {
+   "fieldname": "effective_date",
+   "label": "Ngày hiệu lực",
+   "fieldtype": "Date",
+   "description": "Bắt buộc khi ban hành"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Procedure",
+ "name": "NC Clinical Procedure",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Council Member",
+   "read": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1
+  },
+  {
+   "role": "NC Document Controller",
+   "read": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "format:QT-{technical_service}-{department}-v{version_no}"
+}

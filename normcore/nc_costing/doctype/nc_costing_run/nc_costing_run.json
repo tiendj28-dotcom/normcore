@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "fiscal_year",
+  "costing_date",
+  "parameter_set",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "label": "Tên",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "label": "Năm tài chính",
+   "fieldtype": "Int",
+   "reqd": 1
+  },
+  {
+   "fieldname": "costing_date",
+   "label": "Ngày tính giá",
+   "fieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parameter_set",
+   "label": "Bộ tham số",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "NC Costing Parameter Set"
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "Nháp\nĐang tính\nĐã tính\nTính lỗi\nĐã khóa",
+   "read_only": 1,
+   "default": "Nháp",
+   "in_list_view": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Costing Run",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "TG-.YYYY.-.###",
+ "naming_rule": "Expression (old style)",
+ "title_field": "title"
+}

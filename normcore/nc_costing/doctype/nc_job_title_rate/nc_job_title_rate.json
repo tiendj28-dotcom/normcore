@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "job_title",
+  "salary_coefficient",
+  "allowance_coefficient",
+  "other_annual_income",
+  "annual_cost_override",
+  "annual_cost",
+  "rate_per_hour"
+ ],
+ "fields": [
+  {
+   "fieldname": "job_title",
+   "label": "Chức danh",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "NC Job Title",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "salary_coefficient",
+   "label": "Hệ số lương",
+   "fieldtype": "Float",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "allowance_coefficient",
+   "label": "Hệ số phụ cấp được tính",
+   "fieldtype": "Float",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "other_annual_income",
+   "label": "Thu nhập khác được tính (năm)",
+   "fieldtype": "Currency"
+  },
+  {
+   "fieldname": "annual_cost_override",
+   "label": "Chi phí năm nhập thẳng",
+   "fieldtype": "Currency"
+  },
+  {
+   "fieldname": "annual_cost",
+   "label": "Chi phí năm",
+   "fieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate_per_hour",
+   "label": "Đơn giá giờ công",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "precision": "4",
+   "in_list_view": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Job Title Rate",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "istable": 1,
+ "editable_grid": 1
+}

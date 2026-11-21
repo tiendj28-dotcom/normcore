@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "effective_from",
+  "base_salary",
+  "employer_contribution_rate",
+  "working_days_per_year",
+  "working_hours_per_day",
+  "job_title_rates",
+  "is_locked"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "label": "Tên",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "effective_from",
+   "label": "Hiệu lực từ",
+   "fieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_salary",
+   "label": "Lương cơ sở",
+   "fieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employer_contribution_rate",
+   "label": "Tỷ lệ đóng góp của đơn vị (%)",
+   "fieldtype": "Percent",
+   "reqd": 1
+  },
+  {
+   "fieldname": "working_days_per_year",
+   "label": "Số ngày làm việc năm",
+   "fieldtype": "Float",
+   "reqd": 1
+  },
+  {
+   "fieldname": "working_hours_per_day",
+   "label": "Số giờ làm việc ngày",
+   "fieldtype": "Float",
+   "reqd": 1
+  },
+  {
+   "fieldname": "job_title_rates",
+   "label": "Chi phí theo chức danh",
+   "fieldtype": "Table",
+   "options": "NC Job Title Rate"
+  },
+  {
+   "fieldname": "is_locked",
+   "label": "Đã được dùng trong lần tính giá khóa",
+   "fieldtype": "Check",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Costing Parameter Set",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "PS-.YYYY.-.##",
+ "naming_rule": "Expression (old style)",
+ "title_field": "title"
+}

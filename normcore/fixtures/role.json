@@ -1,0 +1,72 @@
+[
+ {
+  "doctype": "Role",
+  "name": "NC Clinician",
+  "role_name": "NC Clinician",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Department Head",
+  "role_name": "NC Department Head",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Council Member",
+  "role_name": "NC Council Member",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Finance",
+  "role_name": "NC Finance",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Resource Manager",
+  "role_name": "NC Resource Manager",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Document Controller",
+  "role_name": "NC Document Controller",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Director",
+  "role_name": "NC Director",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Consultant",
+  "role_name": "NC Consultant",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Admin",
+  "role_name": "NC Admin",
+  "desk_access": 1,
+  "disabled": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "NC Auditor",
+  "role_name": "NC Auditor",
+  "desk_access": 1,
+  "disabled": 0
+ }
+]
