@@ -9,7 +9,7 @@ Khác SRS/kế hoạch: luồng có thêm bước khóa bộ định mức vì D
 NC Department, NC Job Title, NC Job Title Rate (bảng con), NC Costing Parameter Set, NC Technical Service, NC Clinical Procedure (+ bảng con NC Procedure Step, NC Procedure Resource), NC Norm Set (+ NC Norm Line), NC Costing Run, NC Service Cost (+ NC Service Cost Line), NC AI Log. Rút gọn so với `data-model.md`: ASM-003, ASM-004, ASM-005.
 
 ## 3. API, tác vụ nền, hook, fixtures
-Phương thức gọi được qua REST: `publish` (NC Clinical Procedure), `lock` (NC Norm Set), `run_costing` (NC Costing Run) qua `run_doc_method`; `normcore.nc_costing.doctype.nc_norm_set.nc_norm_set.make_norm_set`. Vai trò tạo trong `before_install`/`after_install` và patch `ensure_base_data` (ASM-016). Cấu hình AI đọc từ `site_config.json` (ASM-006).
+Phương thức gọi được qua REST: `publish` (NC Clinical Procedure), `lock` (NC Norm Set), `run_costing` (NC Costing Run) qua `run_doc_method`; `normcore.nc_costing.doctype.nc_norm_set.nc_norm_set.make_norm_set`. Vai trò tạo trong `before_install`/`after_install` và patch `ensure_base_data` (ASM-016). Năm nút tạm trên form (NORM-10), ba tệp JS cạnh DocType: NC Clinical Procedure "Ban hành", "Khởi tạo bộ định mức", "Mở trình soạn"; NC Norm Set "Khóa"; NC Costing Run "Chạy tính giá" và "Xem kết quả tính giá" (liên kết tới danh sách NC Service Cost lọc theo lần tính). Nút gọi theo tên bản ghi (`run_doc_method` với `dt`, `dn`), không gửi `docs`; form có thay đổi chưa lưu thì báo lưu trước. Ẩn hiện nút chỉ là tiện ích, quyền do máy chủ kiểm. Cấu hình AI đọc từ `site_config.json` (ASM-006).
 
 ## 4. Quyền và luồng trạng thái
 Quy trình: Nháp → Đã ban hành (ASM-012). Bộ định mức: Nháp → Đã khóa, chỉ NC Finance (ASM-010). Lần tính: Nháp → Đang tính → Đã tính / Tính lỗi. Quyền theo `data-model.md` mục 4; không vai trò nào có quyền xóa (ASM-015).
@@ -25,4 +25,4 @@ Smoke cần ba biến môi trường `SMOKE_URL`, `SMOKE_API_KEY`, `SMOKE_API_SE
 - Giả định ASM-003 đến ASM-016 và xung đột CF-001 (xem `docs/decisions/`).
 - Hai thao tác tạm "Ban hành" (ASM-012) và "Khóa" (ASM-010).
 - Dữ liệu smoke không xóa được trên staging (ASM-015, DI-07): mỗi lượt để lại một dịch vụ, bộ tham số, quy trình, bộ định mức, lần tính; cần dọn tay trước UAT.
-- Skeleton chưa có nút nào trên form: `publish`, `make_norm_set`, `lock`, `run_costing` chỉ gọi được qua REST. Nút "Ban hành" do FEAT-007 thay bằng Workflow, "Khóa" thuộc FEAT-012, "Chạy tính giá" thuộc FEAT-015.
+- Các nút trên form là nút tạm: "Ban hành" do FEAT-007 thay bằng Workflow, "Khóa" thuộc FEAT-012, "Chạy tính giá" thuộc FEAT-015. Nhãn tiếng Việt chỉ hiện khi ngôn ngữ người dùng là `vi` (chuỗi nguồn tiếng Anh, G1).

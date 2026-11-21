@@ -9,3 +9,14 @@ No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đ
 Add step,Thêm bước
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
 Could not complete the request. Check your permissions.,Không thực hiện được yêu cầu. Kiểm tra quyền của bạn.
+Open editor,Mở trình soạn
+Publish,Ban hành
+Create norm set,Khởi tạo bộ định mức
+Lock,Khóa
+Run costing,Chạy tính giá
+View costing results,Xem kết quả tính giá
+Save the form first.,Lưu biểu mẫu trước.
+"After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
+"After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
+Costing completed.,Đã tính giá xong.
+Costing failed.,Tính giá lỗi.
