@@ -21,3 +21,4 @@ TC-ACC-01..05, TC-ADM-04, TC-ADM-05, FR-ACC-006: xanh trên `norm12.test` (toàn
 
 ## 7. Giới hạn đã biết và nợ kỹ thuật
 ASM-026..ASM-034. Số liệu kế toán của NC Consultant "cấp riêng" để FEAT-016; ô "A (khoa)" để FEAT-007, FEAT-012; người có vai trò khác cấp quyền đọc thì thấy mọi khoa.
+- Cảnh báo (ASM-031): User Permission của khoa dùng `applicable_for = "NC Cost Center"`; bộ lọc mặc định của Frappe chỉ không lọc vì NC Cost Center chưa có trường Link tới NC Department. FEAT sau thêm trường Link đó vào NC Cost Center thì phải xử lý (ví dụ `ignore_user_permissions` trên trường).

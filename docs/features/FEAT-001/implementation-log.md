@@ -6,3 +6,8 @@ Site kiểm: `norm12.test` (site `normcore.test` dùng chung có DocType của N
 - T09: toàn app lần đầu `110 tests, FAILED (errors=3)` ở `api/test_procedure.py` (Clinician chưa gán khoa, G5). Người duyệt chọn (a) → thêm một dòng `assign_department` vào `setUp` (ASM-026). Sau đó: `Ran 110 tests ... OK`.
 - `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark` → `43 passed`; engine.py 99%.
 - `pytest normcore/tests/unit -k TC_ACC_04 -v` → 6 passed. `python3 scripts/check_conventions.py` → thoát 0.
+
+## Sửa theo review (PR #14)
+- Lệch quy trình: issue yêu cầu mỗi task một commit `FEAT-001 Tnn:`, nhưng lần đầu push chỉ có một commit WIP gộp T01–T08 (đã push nên không viết lại). Từ lần sửa này mỗi việc một commit.
+- Lint: B905 (`zip(..., strict=True)`, dòng ma trận sai số cột nay báo NC-08 thay vì cắt bớt) và `ruff format` (chỉ khoảng trắng, ngắt dòng). `ruff check normcore scripts && ruff format --check normcore scripts` → thoát 0.
+- R9: thêm `test_TC_ACC_01_auditor_doc_lan_tinh_gia_khong_ghi`. Toàn app trên `norm12.test`: `Ran 112 tests ... OK`.
