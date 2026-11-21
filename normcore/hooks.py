@@ -89,7 +89,11 @@ fixtures = [
 # ------------
 
 before_install = "normcore.install.before_install"
-after_install = "normcore.install.after_install"
+after_install = ["normcore.install.after_install", "normcore.setup.fix_home_page"]
+
+# Migration
+# ------------
+after_migrate = ["normcore.setup.fix_home_page"]
 
 # Uninstallation
 # ------------
