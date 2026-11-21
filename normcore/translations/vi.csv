@@ -20,3 +20,20 @@ Save the form first.,Lưu biểu mẫu trước.
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 Costing completed.,Đã tính giá xong.
 Costing failed.,Tính giá lỗi.
+Import data from Excel,Nhập dữ liệu từ Excel
+Catalog,Danh mục
+Download template,Tải tệp mẫu
+Upload file,Tải tệp lên
+Check,Kiểm tra
+Confirm import,Xác nhận ghi
+You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
+No file chosen,Chưa chọn tệp
+Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
+Import result,Kết quả nhập
+Row,Dòng
+Column,Cột
+Message,Thông báo
+Created,Tạo mới
+Updated,Cập nhật
+Unchanged,Không đổi
+Errors,Lỗi
