@@ -22,8 +22,8 @@ class TestPermissions(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	def test_co_15_doctype_va_10_vai_tro(self):
-		self.assertEqual(len(DOCTYPES), 15)
+	def test_co_16_doctype_va_10_vai_tro(self):
+		self.assertEqual(len(DOCTYPES), 16)
 		for r in ROLES:
 			self.assertTrue(frappe.db.exists("Role", r), r)
 

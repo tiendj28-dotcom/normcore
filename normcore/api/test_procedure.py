@@ -1,6 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from normcore.api import access
 from normcore.api import procedure as api
 from normcore.tests.utils import make_base, make_procedure, make_user
 
@@ -13,6 +14,9 @@ class TestProcedureAPI(FrappeTestCase):
 		self.service, self.dept, self.job = make_base()
 		self.proc = make_procedure(self.service, self.dept)
 		self.clin = make_user("clin.api@normcore.test", "NC Clinician")
+		access.assign_department(
+			self.clin, self.dept
+		)  # FEAT-001 (G5): người dùng phải được gán khoa; người duyệt đã chốt (a)
 		self.auditor = make_user("auditor.api@normcore.test", "NC Auditor")
 		self.finance = make_user("fin.api@normcore.test", "NC Finance")
 
@@ -67,6 +71,7 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self.clin = make_user("clin.edit@normcore.test", "NC Clinician")
 		self.auditor = make_user("auditor.edit@normcore.test", "NC Auditor")
 		self.finance = make_user("fin.edit@normcore.test", "NC Finance")
+		access.assign_department(self.clin, self.dept)  # FEAT-001: Clinician chỉ ghi được ở khoa được gán
 		frappe.set_user(self.clin)
 
 	def tearDown(self):

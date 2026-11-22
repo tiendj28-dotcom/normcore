@@ -1,0 +1,10 @@
+# FEAT-001 tasks
+- [x] T01 NC Cost Center, `cost_center` trên NC Department, quyền xóa NC Admin (done-when: TC-ADM-04, TC-ADM-05 xanh)
+- [x] T02 Patch `add_cost_center_to_departments` (done-when: `test_patch_cost_center_cho_khoa_co_san` xanh, count `cost_center` chưa đặt = 0)
+- [x] T03 `core/permissions.py` + hook, `make_norm_set` kiểm khoa (done-when: TC-ACC-01 xanh)
+- [x] T04 `api/access.py` gán khoa (done-when: FR-ACC-006 xanh)
+- [x] T05 `core/references.py` (done-when: TC-ADM-05 nêu NC Norm Set)
+- [x] T06 Quét quyền NC-07/NC-08 (done-when: TC-ACC-04 ≥ 2 passed, `check_conventions.py` thoát 0)
+- [x] T07 TC-ACC-02, 03, 05 (done-when: xanh)
+- [x] T08 Giao diện SCR-DSK-031 + `vi.csv` (done-when: unit i18n xanh)
+- [x] T09 Cập nhật test cũ theo ASM-037 và tài liệu (done-when: toàn app 110 test OK)

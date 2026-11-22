@@ -45,7 +45,7 @@ jobs:
           ruff format --check normcore scripts
       - name: Unit test thuần + golden + độ phủ
         run: |
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov openpyxl
           pytest normcore/tests/unit normcore/tests/golden \
             --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90
       - name: Quét quy ước DocType và quyền
