@@ -37,9 +37,10 @@ frappe.ui.form.on("NC Department", {
 							)
 							.join("")
 					: `<div class="text-muted">${__("No users assigned.")}</div>`;
-				frm.dashboard.clear_headline();
-				frm.dashboard.set_headline(`<b>${__("Assigned users")}</b>${rows}`);
-				frm.dashboard.wrapper.find("a[data-user]").on("click", (e) => {
+				// show_message vẽ vào frm.layout.message (ngoài dashboard): gắn sự kiện ở đúng vùng đó
+				frm.layout.show_message(); // show_message nối thêm, không thay: xóa trước khi vẽ lại
+				frm.layout.show_message(`<b>${__("Assigned users")}</b>${rows}`, "blue", true);
+				frm.layout.message.off("click.nc_dept").on("click.nc_dept", "a[data-user]", (e) => {
 					e.preventDefault();
 					frappe.call({
 						method: "normcore.api.access.unassign_department",
