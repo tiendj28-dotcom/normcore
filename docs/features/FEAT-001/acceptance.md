@@ -1,6 +1,6 @@
 # Acceptance FEAT-001 — Kiểm định độc lập (NORM-14)
 
-Kết luận: **chưa nghiệm thu (ghi `rework` trong verdict.json vì không có giá trị "chờ")**. Mã, test, quyền đều đạt; không có lỗi mã. Chưa được `accepted` vì giao diện màn hình quản trị khoa (SCR-DSK-031, nút Gán/Bỏ gán) chưa kiểm bằng trình duyệt.
+Kết luận: **accepted**. Mã, test, quyền đạt; giao diện kiểm tay trên staging (xem mục "Bổ sung giao diện").
 
 ## Môi trường kiểm
 Nhánh `ai/NORM-14-verify-006-001-004` từ `develop` 98d21fe; site sạch `normcore-verify.test` (đã xóa sau khi kiểm).
@@ -44,3 +44,6 @@ Không dòng nào trái FR/TC. Lưu ý: ASM-039 chặn đọc bản nháp/bộ �
 
 ## Việc còn lại (người duyệt tự bấm, 1366×768, `vi`)
 SCR-DSK-031 → tạo 2 khoa; mở người dùng → "Gán khoa" K01; đăng nhập người đó: sửa được quy trình K01, không sửa được nháp K02, mở được bản đã ban hành K02; dán link nháp K02 → thông báo không đủ quyền; xóa mục đang tham chiếu → thông báo nêu bản ghi; nút "Bỏ gán" hoạt động (sửa ở fe8314f); không vỡ bố cục, không cuộn ngang.
+
+## Bổ sung giao diện (cập nhật sau kiểm tay)
+Người duyệt (tiendj28) xác nhận bằng lời là đã bấm đủ các bước ở mục "Việc còn lại" (SCR-DSK-031) trên staging và thấy **đạt**. Không có ảnh chụp kèm; QA không tự kiểm giao diện (không có trình duyệt).
