@@ -122,6 +122,8 @@ def make_norm_set(procedure):
 			"status": DRAFT,
 		}
 	)
+	if not frappe.has_permission("NC Norm Set", "create", doc=ns):  # phạm vi theo khoa (FR-ACC-003)
+		frappe.throw(_("Bạn không có quyền tạo bộ định mức cho khoa này"), frappe.PermissionError)
 	for r in proc.resources:
 		if r.resource_type != "Nhân lực":
 			continue

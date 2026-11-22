@@ -76,7 +76,8 @@
    "role": "NC Admin",
    "read": 1,
    "write": 1,
-   "create": 1
+   "create": 1,
+   "delete": 1
   },
   {
    "role": "NC Auditor",

@@ -144,13 +144,16 @@ after_migrate = ["normcore.setup.fix_home_page"]
 # -----------
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+# Phạm vi theo khoa (FR-ACC-003): thêm DocType mới vào core/permissions.py::SCOPE_RULES và hai dict dưới đây
+permission_query_conditions = {
+	"NC Clinical Procedure": "normcore.core.permissions.permission_query_conditions",
+	"NC Norm Set": "normcore.core.permissions.permission_query_conditions",
+}
+
+has_permission = {
+	"NC Clinical Procedure": "normcore.core.permissions.has_permission",
+	"NC Norm Set": "normcore.core.permissions.has_permission",
+}
 
 # DocType Class
 # ---------------
@@ -171,6 +174,12 @@ after_migrate = ["normcore.setup.fix_home_page"]
 # 		"on_trash": "method"
 # 	}
 # }
+
+# FR-ADM-005: từ chối xóa danh mục đang được tham chiếu, nêu bản ghi tham chiếu
+doc_events = {
+	dt: {"on_trash": "normcore.core.references.check_not_referenced"}
+	for dt in ("NC Department", "NC Cost Center", "NC Job Title", "NC Technical Service")
+}
 
 # Scheduled Tasks
 # ---------------

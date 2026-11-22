@@ -23,7 +23,7 @@ class TestPermissions(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	def test_co_14_doctype_va_10_vai_tro(self):
-		self.assertEqual(len(DOCTYPES), 14)
+		self.assertEqual(len(DOCTYPES), 15)
 		for r in ROLES:
 			self.assertTrue(frappe.db.exists("Role", r), r)
 
