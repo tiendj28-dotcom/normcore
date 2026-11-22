@@ -89,19 +89,22 @@
    "fieldtype": "Select",
    "reqd": 1,
    "default": "ON_COST",
-   "options": "NONE\nON_COST\nON_PRICE"
+   "options": "NONE\nON_COST\nON_PRICE",
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)"
   },
   {
    "fieldname": "accumulation_rate",
    "label": "Tỷ lệ tích lũy (%)",
    "fieldtype": "Percent",
-   "default": "5"
+   "default": "5",
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)"
   },
   {
    "fieldname": "obligation_rate",
    "label": "Tỷ lệ nghĩa vụ tài chính (%)",
    "fieldtype": "Percent",
-   "default": "0"
+   "default": "0",
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)"
   },
   {
    "fieldname": "sb_rounding",
@@ -113,7 +116,8 @@
    "label": "Trần hao hụt (%)",
    "fieldtype": "Percent",
    "reqd": 1,
-   "default": "10"
+   "default": "10",
+   "description": "Giả định — chờ xác nhận (ASM-064)"
   },
   {
    "fieldname": "rounding_unit",
@@ -188,21 +192,24 @@
    "label": "Loại chi phí của phí ngoại kiểm",
    "fieldtype": "Select",
    "default": "DRUG_SUPPLY",
-   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED"
+   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-067)"
   },
   {
    "fieldname": "rental_cost_category",
    "label": "Loại chi phí của tiền thuê máy",
    "fieldtype": "Select",
    "default": "DEPRECIATION",
-   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED"
+   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-067)"
   },
   {
    "fieldname": "jv_cost_category",
    "label": "Loại chi phí của hợp đồng liên doanh, liên kết",
    "fieldtype": "Select",
    "default": "DEPRECIATION",
-   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED"
+   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-067)"
   },
   {
    "fieldname": "sb_rates",
@@ -224,7 +231,8 @@
    "fieldname": "is_locked",
    "label": "Đã được dùng trong lần tính giá khóa",
    "fieldtype": "Check",
-   "read_only": 1
+   "read_only": 1,
+   "no_copy": 1
   }
  ],
  "index_web_pages_for_search": 0,

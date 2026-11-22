@@ -1,6 +1,6 @@
 # Verification Report: bộ tài liệu Normcore
 
-> Sinh bởi `docs/tools/build_rtm.py` ngày 2026-11-22 cho bản 1.1. Kiểm tra cơ học về ID và cấu trúc; không thay cho rà soát nghiệp vụ.
+> Sinh bởi `docs/tools/build_rtm.py` ngày 2026-11-23 cho bản 1.1. Kiểm tra cơ học về ID và cấu trúc; không thay cho rà soát nghiệp vụ.
 
 ## Số lượng
 

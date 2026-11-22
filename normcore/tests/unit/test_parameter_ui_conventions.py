@@ -28,3 +28,18 @@ class TestParameterUI(unittest.TestCase):
 
 	def test_nut_nhan_ban_goi_duplicate(self):
 		self.assertIn('method: "duplicate"', FILES[0].read_text(encoding="utf-8"))
+
+	def test_quyen_tao_lay_truoc_khi_disable_form(self):
+		# disable_form() dựng lại frm.perm chỉ còn quyền đọc: phải đọc quyền tạo trước đó
+		text = FILES[0].read_text(encoding="utf-8")
+		self.assertLess(text.index("perm[0].create"), text.index("frm.disable_form()"))
+		self.assertNotRegex(text.split("frm.disable_form()", 1)[1], r"frm\.perm")
+
+	def test_nhan_ban_co_ngu_canh_dich(self):
+		text = FILES[0].read_text(encoding="utf-8")
+		for m in re.findall(r"__\(\s*[\"']Duplicate[\"'][^)]*\)", text):
+			self.assertIn("NC Costing Parameter Set", m)
+		with open(ROOT / "translations" / "vi.csv", encoding="utf-8", newline="") as fh:
+			rows = [r for r in csv.reader(fh) if r and r[0] == "Duplicate"]
+		self.assertTrue(rows)
+		self.assertTrue(all(len(r) >= 3 and r[2] == "NC Costing Parameter Set" for r in rows))

@@ -96,5 +96,5 @@ Active,Đang dùng,NC Technical Service
 Inactive,Ngừng dùng,NC Technical Service
 No permission to view,Không có quyền xem
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
-Duplicate,Nhân bản
+Duplicate,Nhân bản,NC Costing Parameter Set
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.

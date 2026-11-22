@@ -2,6 +2,8 @@
 frappe.ui.form.on("NC Costing Parameter Set", {
 	refresh(frm) {
 		if (frm.is_new()) return;
+		// disable_form() dựng lại frm.perm chỉ còn quyền đọc: lấy quyền tạo trước
+		const can_create = !!(frm.perm[0] && frm.perm[0].create);
 		const in_use = !!(frm.doc.__onload && frm.doc.__onload.in_use);
 		if (in_use) {
 			frm.set_intro(
@@ -10,8 +12,8 @@ frappe.ui.form.on("NC Costing Parameter Set", {
 			);
 			frm.disable_form();
 		}
-		if (frm.perm[0] && frm.perm[0].create) {
-			const btn = frm.add_custom_button(__("Duplicate"), () => {
+		if (can_create) {
+			const btn = frm.add_custom_button(__("Duplicate", null, "NC Costing Parameter Set"), () => {
 				frappe.call({
 					method: "run_doc_method",
 					args: { method: "duplicate", dt: frm.doctype, dn: frm.doc.name },

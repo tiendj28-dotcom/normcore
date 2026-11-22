@@ -25,8 +25,10 @@ def is_in_use(name):
 
 class NCCostingParameterSet(Document):
 	def validate(self):
+		if self.is_new():
+			# bộ mới không bao giờ khởi tạo ở trạng thái đã dùng, dù chép từ bộ khác (Duplicate của Frappe) hay qua API
+			self.set("is_locked", 0)
 		self.check_not_in_use()
-		self.fill_defaults()
 		errors = parameters.check_ranges(self.as_dict())
 		if errors:
 			frappe.throw("<br>".join(_(e) for e in errors))
@@ -50,12 +52,6 @@ class NCCostingParameterSet(Document):
 			).format(self.name, which),
 			frappe.ValidationError,
 		)
-
-	def fill_defaults(self):
-		"""Bản ghi cũ (trước FEAT-011) có thể trống các trường mới: điền mặc định (ASM-065)."""
-		for key, value in parameters.DEFAULTS.items():
-			if self.get(key) in (None, ""):
-				self.set(key, value)
 
 	@frappe.whitelist()
 	def duplicate(self):

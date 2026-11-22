@@ -152,3 +152,35 @@ class TestNCCostingParameterSet(FrappeTestCase):
 			["expired_depreciation_mode", "eqa_cost_category", "wastage_cap"],
 		)
 		self.assertEqual(row, ("ZERO", "DRUG_SUPPLY", 33))
+
+	def test_FR_RES_009_truong_bat_buoc_trong_bi_tu_choi(self):
+		ps = _new().insert()
+		ps.reload()
+		ps.expired_depreciation_mode = ""
+		self.assertRaises(frappe.MandatoryError, ps.save)
+		ps.reload()
+		ps.wastage_cap = None
+		self.assertRaises(frappe.MandatoryError, ps.save)
+
+	def test_FR_RES_009_truong_tuy_chon_de_trong_duoc_giu_trong(self):
+		ps = _new().insert()
+		ps.reload()
+		ps.eqa_cost_category = ""
+		ps.save()
+		self.assertFalse(ps.reload().eqa_cost_category)
+		ps.accumulation_rate = 0
+		ps.save()
+		self.assertEqual(ps.reload().accumulation_rate, 0)
+
+	def test_TC_RES_06_nhan_ban_co_san_cua_frappe_khong_chep_is_locked(self):
+		ps = _new().insert()
+		frappe.db.set_value("NC Costing Parameter Set", ps.name, "is_locked", 1)
+		ps.reload()
+		field = frappe.get_meta("NC Costing Parameter Set").get_field("is_locked")
+		self.assertEqual(field.no_copy, 1)  # Duplicate (Shift+D) của giao diện đọc cờ này
+		self.assertFalse(frappe.copy_doc(ps, ignore_no_copy=False).get("is_locked"))
+		copy = frappe.copy_doc(ps)  # server-side copy_doc vẫn chép cờ: validate phải xóa
+		copy.insert()
+		self.assertEqual(frappe.db.get_value("NC Costing Parameter Set", copy.name, "is_locked"), 0)
+		copy.base_salary = 3200000
+		copy.save()

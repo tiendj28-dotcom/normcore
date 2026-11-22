@@ -16,4 +16,4 @@ Issue NORM-20. FR: FR-RES-009, 010, 011, 012 (chức danh, không đổi), 015. 
 - Đã chạy `bench run-tests` trên site test; chưa mở preview giao diện (không có môi trường preview trong run này).
 
 ## ASM
-ASM-063..068 (`docs/decisions/assumptions.md`). Không có AMD, CF.
+ASM-063..069 (`docs/decisions/assumptions.md`). Không có AMD, CF.
