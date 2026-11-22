@@ -9,27 +9,28 @@ function chain_html(items) {
 				`<span class="indicator-pill ${esc(indicator || "gray")}"><span>${esc(label)}</span></span>`;
 			const head = `<div class="nc-chain-title"><b>${esc(item.label)}</b></div>`;
 			const badges = (item.badges || []).map((b) => pill(b.label, b.indicator)).join(" ");
+			const rows_html = (item.rows || [])
+				.map((row) => {
+					const dept = `<div class="text-muted">${esc(row.department_name || row.department)}</div>`;
+					if (row.state === "no_permission") return `<div class="nc-chain-row">${dept}${pill(__("No permission to view"), "gray")}</div>`;
+					if (row.state !== "ok") return `<div class="nc-chain-row">${dept}${pill(row.status, "gray")}</div>`;
+					const date = row.date ? frappe.datetime.str_to_user(row.date) : "";
+					const extra = (row.badges || []).map((b) => pill(b.label, b.indicator)).join(" ");
+					return (
+						`<div class="nc-chain-row">${dept}` +
+						`<a href="${esc(row.route)}">${esc(row.name)}</a> ` +
+						`${pill(row.status, row.indicator)} ${extra} <span class="text-muted">${esc(date)}</span></div>`
+					);
+				})
+				.join("");
 			let body = "";
-			if (item.state === "no_permission") {
-				body = pill(item.message, "gray");
-			} else if (item.key === "price") {
+			if (item.key === "price") {
 				body = `<a href="#nc-chain-price" class="nc-chain-price-link">${esc(item.message)}</a>`;
-			} else if (item.state === "empty" && !(item.rows || []).length) {
-				body = pill(item.message || __("None yet"), "gray");
+			} else if (item.state === "ok") {
+				body = rows_html;
 			} else {
-				body = item.rows
-					.map((row) => {
-						const dept = `<div class="text-muted">${esc(row.department_name || row.department)}</div>`;
-						if (row.state !== "ok") return `<div class="nc-chain-row">${dept}${pill(row.status, "gray")}</div>`;
-						const date = row.date ? frappe.datetime.str_to_user(row.date) : "";
-						const extra = (row.badges || []).map((b) => pill(b.label, b.indicator)).join(" ");
-						return (
-							`<div class="nc-chain-row">${dept}` +
-							`<a href="${esc(row.route)}">${esc(row.name)}</a> ` +
-							`${pill(row.status, row.indicator)} ${extra} <span class="text-muted">${esc(date)}</span></div>`
-						);
-					})
-					.join("");
+				// empty hoặc no_permission: nhãn của mục (ASM-047: "Chưa có trong phạm vi khoa của bạn"), rồi các dòng khoa nếu có
+				body = pill(item.message || __("None yet"), "gray") + rows_html;
 			}
 			const attrs = item.key === "price" ? ' id="nc-chain-price" tabindex="-1"' : "";
 			return `<div class="nc-chain-card"${attrs}>${head}${badges}${body}</div>`;
@@ -61,6 +62,7 @@ function load_chain(frm) {
 			wrapper.html(chain_html(r.message.items));
 			wrapper.find(".nc-chain-price-link").on("click", (e) => {
 				e.preventDefault();
+				e.stopPropagation(); // Frappe gắn handler trên body cho mọi thẻ a href="#..." và gọi set_route
 				const el = wrapper.find("#nc-chain-price").get(0);
 				el.scrollIntoView({ block: "nearest" });
 				el.focus();
@@ -79,9 +81,6 @@ function load_chain(frm) {
 
 frappe.ui.form.on("NC Technical Service", {
 	refresh(frm) {
-		load_chain(frm);
-	},
-	after_save(frm) {
 		load_chain(frm);
 	},
 });

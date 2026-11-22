@@ -28,12 +28,6 @@ class ChainBase(FrappeTestCase):
 		frappe.db.rollback()
 
 	def _assign(self, svc, *depts):
-		frappe.db.set_value(
-			"NC Technical Service",
-			svc,
-			"modified",
-			frappe.db.get_value("NC Technical Service", svc, "modified"),
-		)
 		doc = frappe.get_doc("NC Technical Service", svc)
 		for d in depts:
 			doc.append("departments", {"department": d})
@@ -53,6 +47,18 @@ class TestChainStatus(ChainBase):
 		from normcore.tests.utils import make_procedure
 
 		make_procedure(self.service, K2, job=self.job)
+		# bộ định mức version lớn hơn bản "Đã khóa" nhưng Nháp hoặc Đã thay thế: không được chọn
+		for version, status in ((7, "Nháp"), (8, "Đã thay thế")):
+			frappe.get_doc(
+				{
+					"doctype": "NC Norm Set",
+					"technical_service": self.service,
+					"department": K,
+					"procedure": data.procedure,
+					"version_no": version,
+					"status": status,
+				}
+			).insert(ignore_permissions=True)
 		res = get_chain_status(self.service)
 		proc, norm = res["items"][0], res["items"][1]
 		self.assertEqual([r["department"] for r in proc["rows"]], [K, K2])
@@ -100,7 +106,11 @@ class TestChainStatus(ChainBase):
 		res = get_chain_status(self.service)
 		self.assertEqual(res["items"][1], without)
 		self.assertEqual(res["items"][1]["state"], "no_permission")
-		self.assertEqual(res["items"][1]["rows"], [])
+		# giữ dòng khoa của dịch vụ: chỉ có tên khoa và state (5.3 điểm 4-5)
+		rows = res["items"][1]["rows"]
+		self.assertEqual([(r["department"], r["state"]) for r in rows], [(K, "no_permission")])
+		for key in ("name", "route", "status", "date", "doctype"):
+			self.assertFalse(rows[0][key], key)
 		dumped = json.dumps(res, ensure_ascii=False)
 		self.assertNotIn(data.norm_set, dumped)
 		self.assertNotIn(data.cost, dumped)
@@ -108,12 +118,16 @@ class TestChainStatus(ChainBase):
 
 	def test_FR_SVC_004_khong_hien_tien(self):
 		make_chain_data(self.service, K, self.job)
-		for role in ("NC Finance", "NC Director", "NC Auditor", "NC Clinician"):
-			frappe.set_user("Administrator")
-			frappe.set_user(make_user(f"chain.m.{role[3:6]}@normcore.test", role))
+		self._assign(self.service, K)
+		users = {r: make_user(f"chain.m{i}@normcore.test", r) for i, r in enumerate(ROLES)}
+		for role in ("NC Clinician", "NC Department Head"):
+			access.assign_department(users[role], K)
+		for role, email in users.items():
+			frappe.set_user(email)
 			text = json.dumps(get_chain_status(self.service))
 			for k in MONEY_KEYS:
-				self.assertNotIn(k, text)
+				self.assertNotIn(k, text, role)
+		frappe.set_user("Administrator")
 		frappe.set_user("Administrator")
 		frappe.set_user(make_user("chain.fin3@normcore.test", "NC Finance"))
 		cost = get_chain_status(self.service)["items"][2]

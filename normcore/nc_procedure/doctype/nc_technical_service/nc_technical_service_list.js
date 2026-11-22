@@ -3,8 +3,8 @@ frappe.listview_settings["NC Technical Service"] = {
 	add_fields: ["is_active"],
 	get_indicator(doc) {
 		return doc.is_active
-			? [__("Active"), "green", "is_active,=,1"]
-			: [__("Inactive"), "darkgrey", "is_active,=,0"];
+			? [__("Active", null, "NC Technical Service"), "green", "is_active,=,1"]
+			: [__("Inactive", null, "NC Technical Service"), "darkgrey", "is_active,=,0"];
 	},
 	onload(listview) {
 		listview.page.add_field({

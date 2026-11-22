@@ -105,24 +105,35 @@ def test_FR_SVC_004_build_item_ok_va_lien_ket():
 
 def test_FR_ACC_005_khoa_ngoai_pham_vi_khong_lo_thong_tin():
 	with_data = chain.pick_norm_sets([{"name": "DM-X-K01-v1", "department": "K01", "version_no": 1}])
-	a = chain.build_item("norm_set", ["K01"], with_data, {"K02"})
-	b = chain.build_item("norm_set", ["K01"], {}, {"K02"})
-	assert a == b
-	assert a["state"] == "no_permission" and a["links"] == [] and a["rows"] == []
-	# hai khoa: khoa ngoài phạm vi có hay không có bản ghi đều cho cùng một dòng
-	two_a = chain.build_item("norm_set", ["K01", "K02"], with_data, {"K02"})
-	two_b = chain.build_item("norm_set", ["K01", "K02"], {}, {"K02"})
-	assert two_a == two_b
-	row = two_a["rows"][0]
-	assert row["state"] == "no_permission"
-	assert not {"name", "route", "status", "date"} & {k for k, v in row.items() if v and k != "status"}
-	assert row["status"] == "Không có quyền xem"
+	a = chain.build_item("norm_set", ["K01"], with_data, {"K02"}, {"K01": "Khoa 1"})
+	b = chain.build_item("norm_set", ["K01"], {}, {"K02"}, {"K01": "Khoa 1"})
+	assert a == b  # có hay không có bản ghi đều cho cùng kết quả
+	assert a["state"] == "no_permission" and a["links"] == []
+	# thiết kế 5.3 điểm 4-5: giữ dòng khoa, chỉ có tên khoa và state
+	assert len(a["rows"]) == 1
+	row = a["rows"][0]
+	assert row["state"] == "no_permission" and row["department_name"] == "Khoa 1"
+	for key in ("name", "route", "status", "date", "doctype"):
+		assert not row[key], key
+	assert row["badges"] == []
+	# hai khoa: khoa trong phạm vi vẫn hiện bình thường
+	two = chain.build_item("norm_set", ["K01", "K02"], with_data, {"K02"})
+	assert [r["state"] for r in two["rows"]] == ["no_permission", "empty"]
+	assert two == chain.build_item("norm_set", ["K01", "K02"], {}, {"K02"})
 
 
 def test_FR_ACC_005_nguoi_bi_hep_chua_gan_khoa():
-	assert chain.build_item("norm_set", ["K01"], {}, set())["state"] == "no_permission"
+	item = chain.build_item("norm_set", ["K01"], {}, set())
+	assert item["state"] == "no_permission" and item["links"] == []
+	assert [r["state"] for r in item["rows"]] == ["no_permission"]
 	item = chain.build_item("norm_set", ["K01"], {}, {"K01"})
 	assert item["state"] == "empty" and item["message"] == "Chưa có trong phạm vi khoa của bạn"
+
+
+def test_FR_SVC_004_route_ma_hoa_ky_tu_dac_biet():
+	picked = chain.pick_norm_sets([{"name": "DM-A/B #1", "department": "K01", "version_no": 1}])
+	item = chain.build_item("norm_set", ["K01"], picked, None)
+	assert item["links"] == ["/app/nc-norm-set/DM-A%2FB%20%231"]
 
 
 def test_FR_SVC_004_muc_khong_quyen_va_muc_gia():

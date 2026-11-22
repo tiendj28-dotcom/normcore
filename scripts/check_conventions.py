@@ -52,7 +52,7 @@ DOCTYPE_ROW = {
 	"NC Department": "NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)",
 	"NC Cost Center": "NC Cost Center (G1: Admin, Finance ghi)",
 }
-# Q2 của NORM-12: duy nhất NC Admin được xóa, và chỉ trên bốn DocType danh mục
+# Q2 của NORM-12: duy nhất NC Admin được xóa, và chỉ trên các DocType danh mục (FEAT-005 thêm NC Specialty)
 DELETE_ALLOWED = {
 	"NC Admin": {
 		"NC Department",

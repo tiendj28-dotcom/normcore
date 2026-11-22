@@ -7,6 +7,7 @@ Dòng vào là dict theo tên trường của DocType nguồn; dòng ra thêm `s
 from __future__ import annotations
 
 from datetime import date, datetime
+from urllib.parse import quote
 
 KEYS = ("procedure", "norm_set", "cost", "price")
 LABELS = {
@@ -99,7 +100,7 @@ def pick_costs(rows):
 
 
 def _route(doctype, name):
-	return f"/app/{doctype.lower().replace(' ', '-')}/{name}"
+	return f"/app/{doctype.lower().replace(' ', '-')}/{quote(str(name), safe='')}"
 
 
 def _badge(label, indicator=None):
@@ -132,7 +133,7 @@ def _blank_row(dept, names, state, message):
 		"department": dept,
 		"department_name": (names or {}).get(dept, dept),
 		"state": state,
-		"status": message,
+		"status": "" if state == "no_permission" else message,
 		"indicator": "gray",
 		"date": None,
 		"doctype": None,
@@ -145,8 +146,6 @@ def _blank_row(dept, names, state, message):
 def build_item(key, departments, picked, allowed, names=None):
 	"""Một mục tình trạng chuỗi. `allowed`: None = mọi khoa; tập mã khoa = chỉ các khoa đó (ASM-047)."""
 	doctype = DOCTYPES[key]
-	if allowed is not None and not allowed:
-		return no_permission_item(key)
 	rows = []
 	for dept in departments:
 		if allowed is not None and dept not in allowed:
@@ -176,6 +175,8 @@ def build_item(key, departments, picked, allowed, names=None):
 	if ok:
 		badges = [ASSUMPTION] if key == "cost" else []
 		return _item(key, "ok", rows=rows, badges=badges, links=[r["route"] for r in ok])
-	if rows and all(r["state"] == "no_permission" for r in rows):
-		return no_permission_item(key)
+	# người bị hẹp theo khoa mà chưa được gán khoa nào, hoặc mọi khoa của dịch vụ ngoài phạm vi: giữ dòng
+	# (chỉ tên khoa và state) để kết quả như nhau dù có hay không có bản ghi (thiết kế 5.3 điểm 4-5)
+	if allowed is not None and (not allowed or (rows and all(r["state"] == "no_permission" for r in rows))):
+		return _item(key, "no_permission", NO_PERMISSION, rows=rows)
 	return _item(key, "empty", EMPTY if allowed is None else EMPTY_SCOPED, rows=rows)

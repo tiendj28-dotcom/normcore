@@ -86,12 +86,12 @@ Unit,Đơn vị
 Up,Lên
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 Could not complete the request. See the message from the server.,Không thực hiện được yêu cầu. Xem thông báo từ máy chủ.
-Active,Đang dùng
-Inactive,Ngừng dùng
 Performing department,Khoa thực hiện
-Download template,Tải tệp mẫu
 Import from Excel,Nhập từ Excel
 Loading chain status…,Đang tải tình trạng chuỗi…
 Could not load chain status.,Không tải được tình trạng chuỗi.
 Retry,Thử lại
 None yet,Chưa có
+Active,Đang dùng,NC Technical Service
+Inactive,Ngừng dùng,NC Technical Service
+No permission to view,Không có quyền xem

@@ -39,3 +39,14 @@ class TestServiceUI(unittest.TestCase):
 		text = _text(FILES[0])
 		self.assertIn('id="nc-chain-price"', text)
 		self.assertIn('tabindex="-1"', text)
+
+	def test_lien_ket_the_gia_chan_noi_bot_va_khong_goi_api_hai_lan(self):
+		text = _text(FILES[0])
+		self.assertIn("e.stopPropagation()", text)
+		self.assertIn("e.preventDefault()", text)
+		self.assertNotIn("after_save", text)  # sau khi lưu `refresh` đã chạy
+
+	def test_dich_chung_co_ngu_canh(self):
+		text = _text(FILES[1])
+		self.assertIn('__("Active", null, "NC Technical Service")', text)
+		self.assertIn('__("Inactive", null, "NC Technical Service")', text)
