@@ -98,8 +98,7 @@
    "fieldname": "norm_units_per_purchase_unit",
    "label": "Số đơn vị định mức trong một đơn vị mua",
    "fieldtype": "Float",
-   "default": "1",
-   "description": "Bắt buộc lớn hơn 0 với Hóa chất, Chất chuẩn, Vật liệu nội kiểm"
+   "description": "Bắt buộc lớn hơn 0 với Hóa chất, Chất chuẩn, Vật liệu nội kiểm; loại khác để trống thì tính là 1"
   },
   {
    "fieldname": "nominal_tests",

@@ -37,6 +37,7 @@ class TestMaterialGolden(unittest.TestCase):
 					qty,
 					line.wastage,
 					g.ITEM[line.res]["reuse"],
+					1,  # số đơn vị định mức: 1 ở golden_engine
 					[_price(line.res)],
 					g.COSTING_DATE,
 					billed_separately=line.excluded,
@@ -49,3 +50,19 @@ class TestMaterialGolden(unittest.TestCase):
 			with self.subTest(item=code):
 				self.assertEqual(unit_price_per_norm(item["price"], item["units"]), c.unit_price(code))
 		self.assertEqual(c.unit_price("HC_GLU"), D("30000.0000"))
+
+	def test_TC_CLS_47_dong_khong_nhan_k_khop_golden_cls(self):
+		for code, item in c.ITEM.items():
+			with self.subTest(item=code):
+				price = PriceRecord(
+					name=code,
+					unit_price=item["price"],
+					price_source="Giá công bố",
+					document_date=date(2026, 6, 1),
+					valid_from=date(2026, 1, 1),
+					valid_to=None,
+					verified=True,
+				)
+				res = material_line(D("1"), D("0"), 1, item["units"], [price], c.COSTING_DATE)
+				self.assertEqual(res.unit_price, c.unit_price(code))
+				self.assertEqual(res.amount, c.r2(D("1") * c.unit_price(code)))  # BR-CLS-002, không bật k

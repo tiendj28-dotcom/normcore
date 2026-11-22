@@ -47,12 +47,17 @@ def get_effective_price(item, as_of=None):
 	định mức. Không có đơn giá hiệu lực → `price` là None (không bịa số)."""
 	if not frappe.has_permission(ITEM, "read", item):
 		frappe.throw(_("Bạn không có quyền xem mặt hàng này"), frappe.PermissionError)
-	meta = frappe.db.get_value(ITEM, item, ["norm_units_per_purchase_unit", "norm_uom", "uom"], as_dict=True)
+	meta = frappe.db.get_value(
+		ITEM, item, ["item_type", "norm_units_per_purchase_unit", "norm_uom", "uom"], as_dict=True
+	)
 	as_of = getdate(as_of or nowdate())
 	picked = pricing.select_price(_records(item), as_of)
 	if picked is None:
 		return {"item": item, "as_of": str(as_of), "price": None, "warnings": [], "norm_unit_price": None}
-	units = meta.norm_units_per_purchase_unit or 1
+	units = meta.norm_units_per_purchase_unit
+	if not units and meta.item_type not in pricing.NORM_ITEM_TYPES:
+		units = 1  # loại khác lùi về 1; ba loại hóa chất thiếu số đơn vị thì không đoán (ASM-076)
+	norm_unit_price = pricing.unit_price_per_norm(picked.unit_price, Decimal(str(units))) if units else None
 	return {
 		"item": item,
 		"as_of": str(as_of),
@@ -65,7 +70,7 @@ def get_effective_price(item, as_of=None):
 			"verified": picked.verified,
 		},
 		"warnings": list(pricing.price_warnings(picked, as_of)),
-		"norm_unit_price": str(pricing.unit_price_per_norm(picked.unit_price, Decimal(str(units)))),
+		"norm_unit_price": str(norm_unit_price) if norm_unit_price is not None else None,
 		"norm_uom": meta.norm_uom or meta.uom,
 	}
 

@@ -38,3 +38,11 @@ class TestItemUI(unittest.TestCase):
 		text = FILES[1].read_text(encoding="utf-8")
 		self.assertIn("normcore.api.item.verify_price", text)
 		self.assertIn("can_write", text)
+
+	def test_chuoi_dich_co_ngu_canh_khong_ghi_de_ban_dich_chung(self):
+		for f in FILES:
+			for call in re.findall(r"__\([^)]*\)", f.read_text(encoding="utf-8")):
+				self.assertRegex(call, r'__\("[^"]+", null, "NC Item( Price)?"\)', f"{f.name}: {call}")
+
+	def test_bang_lich_su_cuon_ngang(self):
+		self.assertIn("overflow-x:auto", FILES[0].read_text(encoding="utf-8"))

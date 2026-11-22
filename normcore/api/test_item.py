@@ -20,6 +20,18 @@ def xlsx(rows):
 	return buf.getvalue()
 
 
+PHEAD = [
+	"Mã đơn giá *",
+	"Mặt hàng *",
+	"Đơn giá (đã gồm thuế GTGT) *",
+	"Nguồn giá *",
+	"Số chứng từ *",
+	"Ngày chứng từ *",
+	"Hiệu lực từ *",
+	"Hiệu lực đến",
+]
+
+
 def _item(code, **kw):
 	values = {"item_name": "Mặt hàng thử", "item_type": "Thuốc", "uom": "viên"}
 	values.update(kw)
@@ -156,3 +168,133 @@ class TestItemAPI(FrappeTestCase):
 		self.assertTrue(frappe.db.exists("NC Item", "VD-MH01"))
 		lai = importer.run_import("nc_item", content, "ghi")
 		self.assertEqual((lai["created"], lai["updated"], lai["unchanged"], lai["error_count"]), (0, 0, 1, 0))
+
+	# --- B2
+	def test_FR_RES_018_hoa_chat_thieu_so_don_vi_khong_doan_la_1(self):
+		_item("MH-B01", item_type="Hóa chất", uom="hộp", norm_units_per_purchase_unit=200)
+		_price("MH-B01", "Hóa đơn", "2026-01-01", unit_price=6000000)
+		frappe.db.set_value("NC Item", "MH-B01", "norm_units_per_purchase_unit", 0)  # dữ liệu cũ thiếu số
+		out = api.get_effective_price("MH-B01", "2026-06-01")
+		self.assertIsNone(out["norm_unit_price"])
+		self.assertIsNotNone(out["price"])
+
+	def test_FR_RES_018_loai_khac_thieu_so_don_vi_lui_ve_1(self):
+		_item("MH-B02")
+		_price("MH-B02", "Hóa đơn", "2026-01-01", unit_price=1234.5)
+		frappe.db.set_value("NC Item", "MH-B02", "norm_units_per_purchase_unit", 0)
+		self.assertEqual(api.get_effective_price("MH-B02", "2026-06-01")["norm_unit_price"], "1234.5000")
+
+	# --- bộ nhập đơn giá (AMD-005)
+	def _rm(self):
+		frappe.set_user(make_user("itemapi.rm2@normcore.test", "NC Resource Manager"))
+
+	def _row(self, code, item="MH-I01", price=1500, doc_no="HD-1", valid_to=None):
+		return [code, item, price, "Hóa đơn", doc_no, "2026-01-10", "2026-01-10", valid_to]
+
+	def test_FR_RES_012_don_gia_tao_cap_nhat_nhap_lai(self):
+		_item("MH-I01")
+		self._rm()
+		out = importer.run_import("nc_item_price", xlsx([PHEAD, self._row("IP-1")]), "ghi")
+		self.assertEqual((out["created"], out["error_count"]), (1, 0))
+		name = frappe.db.get_value("NC Item Price", {"price_code": "IP-1"}, "name")
+		self.assertEqual(frappe.db.get_value("NC Item Price", name, "unit_price"), 1500)
+		again = importer.run_import("nc_item_price", xlsx([PHEAD, self._row("IP-1")]), "ghi")
+		self.assertEqual((again["created"], again["updated"], again["unchanged"]), (0, 0, 1))
+		upd = importer.run_import("nc_item_price", xlsx([PHEAD, self._row("IP-1", price=1700)]), "ghi")
+		self.assertEqual((upd["created"], upd["updated"], upd["error_count"]), (0, 1, 0))
+		self.assertEqual(frappe.db.get_value("NC Item Price", name, "unit_price"), 1700)
+		self.assertEqual(frappe.db.count("NC Item Price", {"price_code": "IP-1"}), 1)
+
+	def test_FR_RES_012_don_gia_cap_nhat_rieng_valid_to_khong_loi_kieu(self):
+		_item("MH-I01")
+		self._rm()
+		importer.run_import("nc_item_price", xlsx([PHEAD, self._row("IP-2")]), "ghi")
+		ok = importer.run_import(
+			"nc_item_price", xlsx([PHEAD, self._row("IP-2", valid_to="2026-12-31")]), "ghi"
+		)
+		self.assertEqual((ok["updated"], ok["error_count"]), (1, 0))
+		bad = importer.run_import(
+			"nc_item_price", xlsx([PHEAD, self._row("IP-2", valid_to="2026-01-01")]), "ghi"
+		)
+		self.assertEqual(bad["error_count"], 1)
+		self.assertIn("hết hiệu lực", bad["errors"][0]["text"])
+
+	def test_FR_RES_012_don_gia_dong_loi_mat_hang_la_va_thieu_truong(self):
+		_item("MH-I01")
+		self._rm()
+		rows = [
+			PHEAD,
+			self._row("IP-3"),
+			self._row("IP-4", item="KHONG-CO"),
+			["IP-5", "MH-I01", None, "Hóa đơn", "HD-5", "2026-01-10", "2026-01-10", None],
+		]
+		out = importer.run_import("nc_item_price", xlsx(rows), "ghi")
+		self.assertEqual((out["created"], out["error_count"]), (1, 2))
+		self.assertEqual([e["row"] for e in out["errors"]], [3, 4])
+		self.assertIn("KHONG-CO", out["errors"][0]["text"])
+		self.assertFalse(frappe.db.exists("NC Item Price", {"price_code": "IP-4"}))
+
+	def test_FR_RES_012_hai_mat_hang_cung_so_chung_tu_khong_de_nhau(self):
+		_item("MH-I01")
+		_item("MH-I02")
+		self._rm()
+		rows = [
+			PHEAD,
+			self._row("IP-6", "MH-I01", 100, "HD-CHUNG"),
+			self._row("IP-7", "MH-I02", 200, "HD-CHUNG"),
+		]
+		out = importer.run_import("nc_item_price", xlsx(rows), "ghi")
+		self.assertEqual((out["created"], out["error_count"]), (2, 0))
+		got = {
+			r.price_code: (r.item, r.unit_price)
+			for r in frappe.get_all(
+				"NC Item Price", {"document_no": "HD-CHUNG"}, ["price_code", "item", "unit_price"]
+			)
+		}
+		self.assertEqual(got, {"IP-6": ("MH-I01", 100), "IP-7": ("MH-I02", 200)})
+
+	def test_FR_RES_012_don_gia_da_xac_minh_nhap_de_bi_tu_choi(self):
+		_item("MH-I01")
+		self._rm()
+		importer.run_import("nc_item_price", xlsx([PHEAD, self._row("IP-8")]), "ghi")
+		frappe.db.set_value(
+			"NC Item Price",
+			{"price_code": "IP-8"},
+			{
+				"attachment": "/files/a.pdf",
+				"verification_status": "Đã xác minh",
+				"verified_by": "Administrator",
+			},
+		)
+		out = importer.run_import("nc_item_price", xlsx([PHEAD, self._row("IP-8", price=9999)]), "ghi")
+		self.assertEqual((out["updated"], out["error_count"]), (0, 1))
+		self.assertEqual(frappe.db.get_value("NC Item Price", {"price_code": "IP-8"}, "unit_price"), 1500)
+
+	def test_FR_RES_012_don_gia_vai_tro_khong_quyen_va_auditor_bi_tu_choi(self):
+		_item("MH-I01")
+		content = xlsx([PHEAD, self._row("IP-9")])
+		for i, role in enumerate(("NC Auditor", "NC Clinician", "NC Council Member")):
+			frappe.set_user(make_user(f"itemapi.x{i}@normcore.test", role))
+			for mode in ("thu", "ghi"):
+				with self.assertRaises(frappe.PermissionError):
+					importer.run_import("nc_item_price", content, mode)
+			frappe.set_user("Administrator")
+		self.assertFalse(frappe.db.exists("NC Item Price", {"price_code": "IP-9"}))
+
+	def test_FR_RES_012_don_gia_tai_mau_roi_nhap_lai(self):
+		_item("VD-MH01")
+		frappe.set_user(make_user("itemapi.fin2@normcore.test", "NC Finance"))
+		_, content = importer.build_template_file("nc_item_price")
+		ghi = importer.run_import("nc_item_price", content, "ghi")
+		self.assertEqual((ghi["created"], ghi["error_count"]), (1, 0))
+		lai = importer.run_import("nc_item_price", content, "ghi")
+		self.assertEqual((lai["created"], lai["updated"], lai["unchanged"], lai["error_count"]), (0, 0, 1, 0))
+
+	# --- nhập mặt hàng: hóa chất thiếu số đơn vị định mức
+	def test_FR_RES_018_nhap_hoa_chat_thieu_so_don_vi_bao_loi_dong(self):
+		self._rm()
+		rows = [HEAD, ["HC-1", "Glucose", "Hóa chất", "hộp"], ["VT-1", "Gạc", "Vật tư tiêu hao", "cái"]]
+		out = importer.run_import("nc_item", xlsx(rows), "ghi")
+		self.assertEqual((out["created"], out["error_count"]), (1, 1))
+		self.assertFalse(frappe.db.exists("NC Item", "HC-1"))
+		self.assertEqual(frappe.db.get_value("NC Item", "VT-1", "norm_units_per_purchase_unit"), 1)

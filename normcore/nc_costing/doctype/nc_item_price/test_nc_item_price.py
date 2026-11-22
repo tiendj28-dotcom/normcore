@@ -118,3 +118,95 @@ class TestNCItemPrice(FrappeTestCase):
 		for role, email in users.items():
 			frappe.set_user(email)
 			self.assertFalse(frappe.has_permission("NC Item Price", "read"), role)
+
+	# --- ASM-069: khóa khi đã xác minh
+	def _verified(self, **kw):
+		return _price(attachment="/files/hd-01.pdf", verification_status="Đã xác minh", **kw).insert()
+
+	def test_FR_RES_016_da_xac_minh_khong_sua_noi_dung(self):
+		changes = {
+			"unit_price": 2000,
+			"price_source": "Báo giá",
+			"document_no": "HD-02",
+			"document_date": "2026-01-11",
+			"valid_from": "2026-01-11",
+			"valid_to": "2026-12-31",
+			"attachment": "/files/khac.pdf",
+		}
+		for field, value in changes.items():
+			doc = self._verified()
+			with self.subTest(field=field):
+				doc = frappe.get_doc("NC Item Price", doc.name)
+				doc.set(field, value)
+				with self.assertRaises(frappe.ValidationError) as ctx:
+					doc.save()
+				self.assertIn("bỏ xác minh", str(ctx.exception))
+			frappe.db.rollback()
+			_item()
+
+	def test_FR_RES_016_da_xac_minh_khong_doi_mat_hang(self):
+		_item("MH-P02")
+		doc = self._verified()
+		doc = frappe.get_doc("NC Item Price", doc.name)
+		doc.item = "MH-P02"
+		self.assertRaises(frappe.ValidationError, doc.save)
+
+	def test_FR_RES_016_luu_lai_khong_doi_gi_van_duoc(self):
+		doc = frappe.get_doc("NC Item Price", self._verified().name)
+		doc.valid_from = str(doc.valid_from)  # cùng giá trị, khác kiểu
+		doc.save()
+		self.assertEqual(frappe.db.get_value("NC Item Price", doc.name, "verification_status"), "Đã xác minh")
+
+	def test_FR_RES_016_bo_xac_minh_roi_sua_duoc_ca_cung_luot(self):
+		doc = frappe.get_doc("NC Item Price", self._verified().name)
+		doc.verification_status = "Chưa xác minh"
+		doc.unit_price = 2500
+		doc.save()
+		doc = frappe.get_doc("NC Item Price", doc.name)
+		self.assertEqual((doc.unit_price, doc.verification_status), (2500, "Chưa xác minh"))
+		self.assertIsNone(doc.verified_by)
+
+	# --- B3: ngày dạng chuỗi so với ngày từ CSDL
+	def test_FR_RES_002_doi_rieng_valid_to_sau_khi_nap_lai(self):
+		doc = frappe.get_doc("NC Item Price", _price().insert().name)
+		doc.valid_to = "2026-12-31"  # chuỗi, trong khi valid_from nạp từ CSDL là date
+		doc.save()
+		doc = frappe.get_doc("NC Item Price", doc.name)
+		doc.valid_to = "2026-01-01"
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			doc.save()
+		self.assertNotIsInstance(ctx.exception, TypeError)
+		self.assertIn("hết hiệu lực", str(ctx.exception))
+
+	# --- B4: nhân bản không chép xác minh
+	def test_FR_RES_016_nhan_ban_khong_chep_xac_minh_va_tep(self):
+		src = self._verified()
+		copy = frappe.copy_doc(
+			frappe.get_doc("NC Item Price", src.name), ignore_no_copy=False
+		)  # như nút Nhân bản
+		copy.unit_price = 1111
+		copy.insert()
+		copy = frappe.get_doc("NC Item Price", copy.name)
+		self.assertEqual(copy.verification_status, "Chưa xác minh")
+		self.assertFalse(copy.attachment)
+		self.assertFalse(copy.verified_by)
+		self.assertFalse(copy.verified_on)
+		self.assertNotEqual(copy.price_code, src.price_code)
+
+	# --- AMD-005: price_code
+	def test_FR_RES_012_price_code_de_trong_lay_bang_ten(self):
+		doc = _price().insert()
+		self.assertEqual(frappe.db.get_value("NC Item Price", doc.name, "price_code"), doc.name)
+
+	def test_FR_RES_012_price_code_tu_dat_duoc_giu(self):
+		doc = _price(price_code="GIA-A1").insert()
+		self.assertEqual(frappe.db.get_value("NC Item Price", doc.name, "price_code"), "GIA-A1")
+
+	def test_FR_RES_012_price_code_trung_bi_tu_choi(self):
+		_price(price_code="GIA-A2").insert()
+		self.assertRaises(frappe.ValidationError, _price(price_code="GIA-A2", document_no="X").insert)
+
+	def test_FR_RES_012_khong_tu_dat_ma_dang_dg_so(self):
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			_price(price_code="DG-99999").insert()
+		self.assertIn("DG-", str(ctx.exception))

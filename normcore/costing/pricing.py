@@ -14,6 +14,8 @@ STALE_MONTHS = 24
 STALE_WARNING = "Đơn giá quá hạn tham chiếu"
 UNVERIFIED_WARNING = "Đơn giá chưa xác minh"
 EXCLUDED_REASON = "Thanh toán riêng ngoài giá dịch vụ"
+# FR-RES-018: ba loại này bắt buộc khai số đơn vị định mức trong một đơn vị mua
+NORM_ITEM_TYPES = ("Hóa chất", "Chất chuẩn", "Vật liệu nội kiểm")
 
 _Q2 = Decimal("0.01")
 _Q4 = Decimal("0.0001")
@@ -37,7 +39,7 @@ class PriceRecord:
 @dataclass(frozen=True)
 class MaterialLineResult:
 	amount: Decimal  # thành tiền, làm tròn 2 số lẻ HALF_UP
-	unit_price: Decimal | None  # đơn giá của đơn vị mua; None khi dòng bị loại
+	unit_price: Decimal | None  # đơn giá một đơn vị định mức (4 số lẻ); None khi dòng bị loại
 	price_name: str | None
 	warnings: tuple
 	excluded_reason: str | None
@@ -105,26 +107,32 @@ def material_line(
 	applied_qty: Decimal,
 	wastage_rate: Decimal,
 	reuse_count: int,
+	norm_units: Decimal,
 	prices,
 	as_of: date,
 	billed_separately: bool = False,
 ) -> MaterialLineResult:
-	"""BR-COST-003: thành tiền = lượng áp dụng * (1 + hao hụt) * đơn giá ÷ số lần dùng, 2 số lẻ HALF_UP.
+	"""BR-COST-003 trên đơn giá một đơn vị định mức (BR-CLS-002), 2 số lẻ HALF_UP:
+	thành tiền = lượng áp dụng * (1 + hao hụt) * đơn giá một đơn vị định mức / số lần dùng,
+	đơn giá một đơn vị định mức = đơn giá đơn vị mua / `norm_units` (bắt buộc, > 0; ASM-075).
 	FR-RES-014: mặt hàng thanh toán riêng → thành tiền 0 kèm lý do, không cần đơn giá."""
 	applied_qty, wastage_rate = Decimal(applied_qty), Decimal(wastage_rate)
 	if applied_qty < 0 or wastage_rate < 0:
 		raise ValueError("Lượng áp dụng và tỷ lệ hao hụt không được âm")
 	if reuse_count < 1:
 		raise ValueError("Số lần dùng phải từ 1 trở lên")
+	if norm_units is None or Decimal(norm_units) <= 0:
+		raise ValueError("Số đơn vị định mức trong một đơn vị mua phải có và lớn hơn 0")
 	if billed_separately:
 		return MaterialLineResult(Decimal("0"), None, None, (), EXCLUDED_REASON)
 	price = select_price(prices, as_of)
 	if price is None:
 		raise NoEffectivePrice("Mặt hàng không có đơn giá còn hiệu lực tại ngày tính giá")
-	amount = applied_qty * (1 + wastage_rate) * price.unit_price / reuse_count
+	norm_price = unit_price_per_norm(price.unit_price, norm_units)
+	amount = applied_qty * (1 + wastage_rate) * norm_price / reuse_count
 	return MaterialLineResult(
 		amount.quantize(_Q2, rounding=ROUND_HALF_UP),
-		price.unit_price,
+		norm_price,
 		price.name,
 		price_warnings(price, as_of),
 		None,

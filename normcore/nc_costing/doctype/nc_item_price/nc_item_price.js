@@ -5,11 +5,11 @@ frappe.ui.form.on("NC Item Price", {
 		const verified = frm.doc.verification_status === "Đã xác minh";
 		frm.dashboard.clear_headline();
 		frm.dashboard.set_headline_alert(
-			verified ? __("Verified") : __("Unverified"),
+			verified ? __("Verified", null, "NC Item Price") : __("Unverified", null, "NC Item Price"),
 			verified ? "green" : "orange"
 		);
 		if (!verified && frappe.model.can_write("NC Item Price") && !frm.is_dirty()) {
-			frm.add_custom_button(__("Verify"), () => {
+			frm.add_custom_button(__("Verify", null, "NC Item Price"), () => {
 				frappe.call({
 					method: "normcore.api.item.verify_price",
 					args: { name: frm.doc.name },

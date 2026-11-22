@@ -33,7 +33,7 @@ NC_TECHNICAL_SERVICE = ImportSet(
 
 register(NC_TECHNICAL_SERVICE)
 
-# FEAT-009, FR-RES-012, FR-RES-018: mặt hàng. Đơn giá chưa có bộ nhập (ASM-071: không có mã tự nhiên).
+# FEAT-009, FR-RES-012, FR-RES-018: mặt hàng và đơn giá (khóa đơn giá là `price_code`, AMD-005).
 ITEM_TYPES = (
 	"Thuốc",
 	"Hóa chất",
@@ -69,3 +69,27 @@ NC_ITEM = ImportSet(
 )
 
 register(NC_ITEM)
+
+PRICE_SOURCES = ("Trúng thầu", "Hợp đồng", "Hóa đơn", "Giá công bố", "Báo giá")
+
+# Không có cột xác minh hay tệp chứng từ: xác minh chỉ qua nút trên form (FR-RES-016)
+NC_ITEM_PRICE = ImportSet(
+	key="nc_item_price",
+	label="Đơn giá",
+	doctype="NC Item Price",
+	key_field="price_code",
+	columns=(
+		Column("price_code", "Mã đơn giá", "Data", required=True, example="VD-DG01"),
+		Column("item", "Mặt hàng", "Link", required=True, link_doctype="NC Item", example="VD-MH01"),
+		Column("unit_price", "Đơn giá (đã gồm thuế GTGT)", "Float", required=True, example=1500),
+		Column(
+			"price_source", "Nguồn giá", "Select", required=True, options=PRICE_SOURCES, example="Hóa đơn"
+		),
+		Column("document_no", "Số chứng từ", "Data", required=True, example="HD-0001"),
+		Column("document_date", "Ngày chứng từ", "Date", required=True, example="2026-01-10"),
+		Column("valid_from", "Hiệu lực từ", "Date", required=True, example="2026-01-10"),
+		Column("valid_to", "Hiệu lực đến", "Date"),
+	),
+)
+
+register(NC_ITEM_PRICE)

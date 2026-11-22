@@ -4,6 +4,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "price_code",
   "item",
   "unit_price",
   "price_source",
@@ -19,6 +20,15 @@
   "verified_on"
  ],
  "fields": [
+  {
+   "fieldname": "price_code",
+   "label": "Mã đơn giá",
+   "fieldtype": "Data",
+   "unique": 1,
+   "no_copy": 1,
+   "in_list_view": 1,
+   "description": "Để trống thì lấy bằng tên bản ghi. Dùng làm khóa khi nhập Excel"
+  },
   {
    "fieldname": "item",
    "label": "Mặt hàng",
@@ -86,7 +96,8 @@
    "fieldname": "attachment",
    "label": "Tệp chứng từ",
    "fieldtype": "Attach",
-   "description": "Bắt buộc khi chuyển sang Đã xác minh"
+   "description": "Bắt buộc khi chuyển sang Đã xác minh",
+   "no_copy": 1
   },
   {
    "fieldname": "verification_status",
@@ -96,20 +107,23 @@
    "options": "Chưa xác minh\nĐã xác minh",
    "default": "Chưa xác minh",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "no_copy": 1
   },
   {
    "fieldname": "verified_by",
    "label": "Người xác minh",
    "fieldtype": "Link",
    "options": "User",
-   "read_only": 1
+   "read_only": 1,
+   "no_copy": 1
   },
   {
    "fieldname": "verified_on",
    "label": "Thời điểm xác minh",
    "fieldtype": "Datetime",
-   "read_only": 1
+   "read_only": 1,
+   "no_copy": 1
   }
  ],
  "index_web_pages_for_search": 0,

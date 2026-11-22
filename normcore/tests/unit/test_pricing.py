@@ -5,6 +5,7 @@ from datetime import date
 from decimal import Decimal as D
 
 from normcore.costing.pricing import (
+	NORM_ITEM_TYPES,
 	SOURCE_ORDER,
 	STALE_WARNING,
 	UNVERIFIED_WARNING,
@@ -124,42 +125,63 @@ class TestMaterialLine(unittest.TestCase):
 	DAY = date(2026, 12, 31)
 
 	def test_BR_COST_003_cong_thuc(self):
-		r = material_line(D("1"), D("0.05"), 1, [P("a", price="25000")], self.DAY)
+		r = material_line(D("1"), D("0.05"), 1, 1, [P("a", price="25000")], self.DAY)
 		self.assertEqual(r.amount, D("26250.00"))
 		self.assertEqual(r.unit_price, D("25000"))
 		self.assertEqual(r.price_name, "a")
 		self.assertIsNone(r.excluded_reason)
 
 	def test_BR_COST_003_chia_so_lan_dung(self):
-		r = material_line(D("1"), D("0"), 200, [P("a", price="2000000")], self.DAY)
+		r = material_line(D("1"), D("0"), 200, 1, [P("a", price="2000000")], self.DAY)
 		self.assertEqual(r.amount, D("10000.00"))
 
 	def test_TC_RES_07_thanh_toan_rieng_bang_0_co_ly_do(self):
-		r = material_line(D("1"), D("0"), 1, [P("a", price="80000")], self.DAY, billed_separately=True)
+		r = material_line(D("1"), D("0"), 1, 1, [P("a", price="80000")], self.DAY, billed_separately=True)
 		self.assertEqual(r.amount, D("0"))
 		self.assertEqual(r.excluded_reason, "Thanh toán riêng ngoài giá dịch vụ")
 		self.assertEqual(r.warnings, ())
 
 	def test_TC_RES_07_thanh_toan_rieng_khong_can_don_gia(self):
-		r = material_line(D("1"), D("0"), 1, [], self.DAY, billed_separately=True)
+		r = material_line(D("1"), D("0"), 1, 1, [], self.DAY, billed_separately=True)
 		self.assertEqual(r.amount, D("0"))
 
 	def test_TC_RES_02_qua_han_van_tinh(self):
 		p = P("a", price="3000", valid_from=date(2023, 12, 1), doc=date(2023, 11, 30))
-		r = material_line(D("2"), D("0"), 1, [p], date(2025, 12, 31))
+		r = material_line(D("2"), D("0"), 1, 1, [p], date(2025, 12, 31))
 		self.assertEqual(r.amount, D("6000.00"))
 		self.assertIn(STALE_WARNING, r.warnings)
 
 	def test_TC_CLS_46_chua_xac_minh_van_tinh_co_canh_bao(self):
-		r = material_line(D("2"), D("0"), 1, [P("a", price="3000", ok=False)], self.DAY)
+		r = material_line(D("2"), D("0"), 1, 1, [P("a", price="3000", ok=False)], self.DAY)
 		self.assertEqual(r.amount, D("6000.00"))
 		self.assertEqual(r.warnings, (UNVERIFIED_WARNING,))
 
 	def test_FR_RES_004_khong_co_don_gia_hieu_luc_bao_loi_khong_bia_so(self):
 		with self.assertRaises(NoEffectivePrice):
-			material_line(D("1"), D("0"), 1, [P("a", valid_from=date(2027, 1, 1))], self.DAY)
+			material_line(D("1"), D("0"), 1, 1, [P("a", valid_from=date(2027, 1, 1))], self.DAY)
 
 	def test_BR_COST_003_dau_vao_sai(self):
-		for args in ((D("-1"), D("0"), 1), (D("1"), D("-0.1"), 1), (D("1"), D("0"), 0)):
+		for args in ((D("-1"), D("0"), 1, 1), (D("1"), D("-0.1"), 1, 1), (D("1"), D("0"), 0, 1)):
 			with self.assertRaises(ValueError):
 				material_line(*args, [P("a")], self.DAY)
+
+	def test_TC_CLS_47_quy_doi_don_vi_dinh_muc_hc_glu(self):
+		r = material_line(D("1"), D("0"), 1, D("200"), [P("a", price="6000000")], self.DAY)
+		self.assertEqual(r.amount, D("30000.00"))
+		self.assertEqual(r.unit_price, D("30000.0000"))
+		self.assertEqual(r.price_name, "a")
+
+	def test_BR_CLS_002_don_gia_dinh_muc_lam_tron_truoc_khi_nhan(self):
+		r = material_line(D("3"), D("0"), 1, D("3"), [P("a", price="100")], self.DAY)
+		self.assertEqual(r.unit_price, D("33.3333"))
+		self.assertEqual(r.amount, D("99.9999").quantize(D("0.01")))
+
+	def test_FR_RES_018_thieu_hoac_khong_duong_so_don_vi_dinh_muc_bao_loi(self):
+		for bad in (None, D("0"), D("-1")):
+			with self.subTest(bad=bad), self.assertRaises(ValueError):
+				material_line(D("1"), D("0"), 1, bad, [P("a")], self.DAY)
+			with self.subTest(bad=bad, excluded=True), self.assertRaises(ValueError):
+				material_line(D("1"), D("0"), 1, bad, [P("a")], self.DAY, billed_separately=True)
+
+	def test_FR_RES_018_ba_loai_bat_buoc_dinh_muc(self):
+		self.assertEqual(NORM_ITEM_TYPES, ("Hóa chất", "Chất chuẩn", "Vật liệu nội kiểm"))

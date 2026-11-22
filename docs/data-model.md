@@ -388,7 +388,7 @@ erDiagram
 | billed_separately | Thanh toán riêng ngoài giá | Check | | [FR-RES-014] |
 | is_active | Đang dùng | Check | | |
 | norm_uom **[1.1]** | Đơn vị định mức | Data | | Ví dụ: test, mL. Trống = dùng `uom` |
-| norm_units_per_purchase_unit **[1.1]** | Số đơn vị định mức trong một đơn vị mua | Float | | Mặc định 1. BB với Hóa chất, Chất chuẩn, Vật liệu nội kiểm [BR-CLS-002] |
+| norm_units_per_purchase_unit **[1.1]** | Số đơn vị định mức trong một đơn vị mua | Float | | Không có mặc định **[AMD-005]**. BB (lớn hơn 0) với Hóa chất, Chất chuẩn, Vật liệu nội kiểm [BR-CLS-002]; loại khác để trống thì tính là 1 |
 | nominal_tests **[1.1]** | Số test danh nghĩa của một đơn vị mua | Int | | |
 | open_stability_days **[1.1]** | Hạn dùng sau mở (ngày) | Int | | [BR-CLS-016] |
 | is_main_reagent **[1.1]** | Là hóa chất chính | Check | | Mặc định bật cờ nhân k ở dòng định mức [FR-NORM-019] |
@@ -399,6 +399,7 @@ erDiagram
 
 | Trường | Nhãn | Kiểu | BB | Ghi chú |
 | :-- | :-- | :-- | :-- | :-- |
+| price_code **[AMD-005]** | Mã đơn giá | Data | | Duy nhất. Để trống thì lấy bằng tên bản ghi; không tự đặt dạng DG-<số>. Khóa khi nhập Excel [FR-RES-012] |
 | item | Mặt hàng | Link NC Item | Có | |
 | unit_price | Đơn giá (đã gồm thuế GTGT) | Float 4 | Có | |
 | price_source | Nguồn giá | Select | Có | Trúng thầu / Hợp đồng **[1.1]** / Hóa đơn / Giá công bố / Báo giá. Thứ tự này là thứ tự ưu tiên khi chọn giá [FR-RES-004] |

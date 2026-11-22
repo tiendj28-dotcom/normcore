@@ -101,3 +101,23 @@ class TestNCItem(FrappeTestCase):
 	def test_FR_ACC_002_vai_tro_ngoai_ma_tran_khong_doc(self):
 		frappe.set_user(make_user("item.noroles@normcore.test"))
 		self.assertFalse(frappe.has_permission("NC Item", "read"))
+
+	def test_FR_RES_018_khong_con_mac_dinh_1_o_truong_dinh_muc(self):
+		self.assertFalse(frappe.get_meta("NC Item").get_field("norm_units_per_purchase_unit").default)
+		doc = frappe.new_doc("NC Item")
+		self.assertFalse(doc.norm_units_per_purchase_unit)
+
+	def test_FR_RES_018_hoa_chat_de_trong_so_don_vi_bi_tu_choi(self):
+		for kind in ("Hóa chất", "Chất chuẩn", "Vật liệu nội kiểm"):
+			with self.subTest(kind=kind):
+				doc = _item("MH-T20", item_type=kind, uom="hộp")  # không đặt số đơn vị định mức
+				self.assertRaises(frappe.ValidationError, doc.insert)
+
+	def test_FR_RES_018_loai_khac_de_trong_thi_dat_1(self):
+		doc = _item("MH-T21", norm_units_per_purchase_unit=None).insert()
+		self.assertEqual(doc.norm_units_per_purchase_unit, 1)
+		doc = _item("MH-T22", norm_units_per_purchase_unit=0).insert()
+		self.assertEqual(doc.norm_units_per_purchase_unit, 1)
+
+	def test_FR_RES_018_so_don_vi_am_bi_tu_choi(self):
+		self.assertRaises(frappe.ValidationError, _item("MH-T23", norm_units_per_purchase_unit=-2).insert)
