@@ -14,7 +14,7 @@ Căn cứ: `ux-foundations.md` (SCR-DSK-007, SCR-DSK-009, bảng thành phần),
 2. Tiêu đề: tên, nhãn trạng thái, dải thông báo khi không sửa được ("Quy trình đã ban hành, chỉ đọc" / "Bạn chỉ có quyền xem").
 3. Cột trái: 8 phần cố định theo thứ tự FR-PROC-001. Bảy phần là ô văn bản + nút "Lưu phần"; phần "Các bước tiến hành" là danh sách thẻ bước.
 4. **Thẻ bước**: mã bước (chữ đậm), giai đoạn, tên, mô tả; nút "Lên", "Xuống", "Sửa", "Xóa"; chọn thẻ = chọn bước đang xét. Dưới thẻ: bảng nguồn lực của bước (loại, tên, số lượng, đơn vị, số người) với "Thêm nguồn lực", "Sửa", "Xóa"; ô tên có gợi ý chức danh (datalist) và cho để trống liên kết. Nhân lực: ô đơn vị chỉ đọc "phút", nhãn số lượng "Số phút / người", ô "Số người".
-5. Cột phải: **bảng trích dẫn** của phần hoặc bước đang chọn; mỗi dòng có nhãn quan hệ **chữ + màu** (Theo hướng dẫn = xanh, Khác biệt = cam, Chưa có căn cứ = đỏ), đoạn trích, lý do khác biệt; "Thêm trích dẫn", "Sửa", "Xóa". Chưa có mục văn bản (chờ FEAT-020).
+5. Cột phải: **bảng trích dẫn** của phần hoặc bước đang chọn; mỗi dòng có nhãn quan hệ **chữ + màu** (Theo hướng dẫn = xanh, Khác biệt = cam, Chưa có căn cứ = đỏ), đoạn trích, lý do khác biệt; "Thêm trích dẫn", "Sửa", "Xóa". Mỗi dòng hiện văn bản và mục (Data tạm, ASM-046; FEAT-020 đổi sang Link).
 
 **Trạng thái**: đang tải (chữ "Đang tải…"); rỗng (chưa chọn quy trình; chưa có bước; chưa có nguồn lực/trích dẫn); lỗi (dải đỏ có chữ, `role="alert"`); không quyền (nút ghi ẩn, dải thông báo); chỉ đọc (NC Auditor, Đã ban hành: toàn bộ điều khiển ghi ẩn, văn bản dùng `readonly`).
 

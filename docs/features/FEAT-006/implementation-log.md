@@ -20,3 +20,10 @@ Merge `origin/develop` vào nhánh (không rebase, không force). Ba tệp xung 
 - `normcore/translations/vi.csv`: lấy hợp hai bên (86 dòng), không có khóa trùng khác bản dịch, không bỏ dòng nào của develop.
 - `normcore/tests/test_permissions.py`: develop đã có 15 DocType (tên test còn ghi 14). Cộng đúng 1 DocType của FEAT-006 (NC Procedure Citation) → 16; đổi tên `test_co_14_...` thành `test_co_16_doctype_va_10_vai_tro`, số 15 → 16. Không đổi assertion nào khác. Đây là mở rộng ngoại lệ Q4 (đổi số DocType) do thêm bảng con mới.
 - Sau merge, 13 test của lớp `TestProcedureEditorAPI` (mới của FEAT-006) đỏ vì `PermissionError` khi Clinician tạo quy trình: FEAT-001 chỉ cho Clinician ghi ở khoa được gán. Sửa `setUp` của lớp này (thêm `access.assign_department`); không đổi test cũ hay assertion.
+
+## NORM-15 (sửa design-defect: trích dẫn lưu văn bản và mục)
+| Việc | Lệnh | Kết quả |
+| :-- | :-- | :-- |
+| Thêm `legal_document`, `legal_section`; API, Vue, vi.csv, ASM-046 | `bench --site normcore.test run-tests --app normcore` | Ran 148 tests, OK |
+| Sửa theo review: TC-PROC-09 kiểm đủ 4 thuộc tính cho cả trích dẫn bước và phần; kiểm sao chép mang theo hai trường (chỉ thêm kiểm) | `bench --site normcore.test run-tests --module normcore.api.test_procedure` | xem bình luận NORM-15 |
+| Định dạng | `ruff format --check normcore scripts` | xem bình luận NORM-15 |

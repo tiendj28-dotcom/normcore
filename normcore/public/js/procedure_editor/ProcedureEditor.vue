@@ -127,6 +127,7 @@
 					<div v-if="!citations.length" class="text-muted">{{ __("No citations for this selection.") }}</div>
 					<div v-for="c in citations" :key="c.name" class="nc-pe__cite">
 						<span class="nc-pe__rel" :class="relClass(c.relation)">{{ __(c.relation) }}</span>
+						<div v-if="c.legal_document || c.legal_section" class="nc-pe__legal">{{ [c.legal_document, c.legal_section].filter(Boolean).join(" — ") }}</div>
 						<blockquote v-if="c.quote" class="nc-pe__quote">{{ c.quote }}</blockquote>
 						<div v-if="c.deviation_reason" class="text-muted">{{ __("Reason") }}: {{ c.deviation_reason }}</div>
 						<span v-if="doc.can_edit">
@@ -168,6 +169,8 @@
 				<select v-model="form.relation" class="form-control" :aria-label="__('Relation')">
 					<option v-for="r in relations" :key="r" :value="r">{{ __(r) }}</option>
 				</select>
+				<input v-model="form.legal_document" class="form-control" :aria-label="__('Legal document')" :placeholder="__('Legal document')" />
+				<input v-model="form.legal_section" class="form-control" :aria-label="__('Legal section')" :placeholder="__('Legal section')" />
 				<input v-model="form.quote" class="form-control" :aria-label="__('Quote')" :placeholder="__('Quote')" />
 				<input v-model="form.deviation_reason" class="form-control" :aria-label="__('Reason')" :placeholder="__('Reason')" />
 				<button type="submit" class="btn btn-primary btn-sm" :disabled="busy">{{ __("Save") }}</button>
@@ -293,6 +296,8 @@ export default {
 					kind,
 					row,
 					relation: row ? row.relation : "Chưa có căn cứ",
+					legal_document: row ? row.legal_document : "",
+					legal_section: row ? row.legal_section : "",
 					quote: row ? row.quote : "",
 					deviation_reason: row ? row.deviation_reason : "",
 				};
@@ -386,7 +391,7 @@ export default {
 		submitCitation() {
 			const f = this.form;
 			const target = this.selection.type === "step" ? { target_step_id: this.selection.key } : { target_section: this.selection.key };
-			const body = { procedure: this.doc.name, relation: f.relation, quote: f.quote || "", deviation_reason: f.deviation_reason || "" };
+			const body = { procedure: this.doc.name, relation: f.relation, legal_document: f.legal_document || "", legal_section: f.legal_section || "", quote: f.quote || "", deviation_reason: f.deviation_reason || "" };
 			return this.run(() =>
 				(f.row ? this.call("update_citation", { ...body, citation: f.row.name }) : this.call("add_citation", { ...body, ...target })).then(() => this.reload())
 			);
@@ -500,6 +505,9 @@ export default {
 	margin: var(--margin-xs) 0;
 	padding-left: var(--padding-sm);
 	border-left: 2px solid var(--border-color);
+}
+.nc-pe__legal {
+	font-weight: 600;
 }
 .nc-pe__rel {
 	font-weight: 600;
