@@ -242,11 +242,21 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		name = self._draft()
 		self._steps(name, 2)
 		a = api.add_citation(
-			name, target_step_id="S001", relation="Theo hướng dẫn",
-			legal_document="Thông tư 43/2013/TT-BYT", legal_section="Điều 5", quote="đoạn trích",
+			name,
+			target_step_id="S001",
+			relation="Theo hướng dẫn",
+			legal_document="Thông tư 43/2013/TT-BYT",
+			legal_section="Điều 5",
+			quote="đoạn trích",
 		)
 		b = api.add_citation(
-			name, target_section="Chỉ định", relation="Khác biệt", quote="q", deviation_reason="Lý do"
+			name,
+			target_section="Chỉ định",
+			relation="Khác biệt",
+			legal_document="Luật Khám bệnh, chữa bệnh 15/2023/QH15",
+			legal_section="Điều 7",
+			quote="q",
+			deviation_reason="Lý do",
 		)
 		c = api.add_citation(name, target_step_id="S002")
 		cits = {x["name"]: x for x in api.get_procedure(name)["citations"]}
@@ -256,8 +266,15 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self.assertEqual(cits[a["name"]]["legal_section"], "Điều 5")
 		api.update_citation(name, a["name"], legal_section="Điều 6")
 		self.assertEqual(api.get_procedure(name, step_id="S001")["citations"][0]["legal_section"], "Điều 6")
-		self.assertEqual(api.get_procedure(name, step_id="S001")["citations"][0]["legal_document"], "Thông tư 43/2013/TT-BYT")
+		self.assertEqual(
+			api.get_procedure(name, step_id="S001")["citations"][0]["legal_document"],
+			"Thông tư 43/2013/TT-BYT",
+		)
 		self.assertEqual(cits[b["name"]]["deviation_reason"], "Lý do")
+		self.assertEqual(cits[b["name"]]["relation"], "Khác biệt")
+		self.assertEqual(cits[b["name"]]["legal_document"], "Luật Khám bệnh, chữa bệnh 15/2023/QH15")
+		self.assertEqual(cits[b["name"]]["legal_section"], "Điều 7")
+		self.assertEqual(cits[b["name"]]["quote"], "q")
 		self.assertEqual(cits[c["name"]]["relation"], "Chưa có căn cứ")
 		# lọc theo bước hoặc phần đang chọn
 		self.assertEqual(
@@ -281,7 +298,14 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self._steps(src, 3)
 		api.delete_step(src, "S002")
 		api.add_resource(src, "S003", "Nhân lực", "Điều dưỡng", 10, "phút", "NC Job Title", self.job, 1)
-		api.add_citation(src, target_step_id="S003", relation="Khác biệt", deviation_reason="x")
+		api.add_citation(
+			src,
+			target_step_id="S003",
+			relation="Khác biệt",
+			deviation_reason="x",
+			legal_document="Thông tư 43/2013/TT-BYT",
+			legal_section="Điều 5",
+		)
 		api.save_sections(src, {"overview": "<p>Đại cương</p>"})
 		frappe.set_user("Administrator")
 		ensure_service = make_base("DV-TEST-B", self.dept)[0]
@@ -292,6 +316,8 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self.assertEqual(new["resources"][0]["step_id"], "S002")  # S003 cũ
 		self.assertEqual(new["resources"][0]["resource_row_id"], "R001")
 		self.assertEqual(new["citations"][0]["target_step_id"], "S002")
+		self.assertEqual(new["citations"][0]["legal_document"], "Thông tư 43/2013/TT-BYT")
+		self.assertEqual(new["citations"][0]["legal_section"], "Điều 5")
 		self.assertEqual(new["copied_from"], src)
 		self.assertEqual(new["sections"][0]["value"], "<p>Đại cương</p>")
 		self.assertEqual(new["workflow_state"], "Nháp")

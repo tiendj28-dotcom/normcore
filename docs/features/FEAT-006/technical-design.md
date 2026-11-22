@@ -11,7 +11,7 @@ Issue NORM-11. Nhánh `ai/NORM-11-feat-006` từ `develop` @ `f82065b`. Tài li�
 | FR-PROC-003, 006 | Đủ | Thêm/sửa/xóa/sắp lại bước; mã `S###` từ `next_step_seq` |
 | FR-PROC-004 | Đủ | Nguồn lực có cấu trúc gắn `step_id`, mã dòng `R###` |
 | FR-PROC-005 | Một phần | Gợi ý chỉ cho Nhân lực (NC Job Title); loại khác để trống liên kết (G2, ASM-019) |
-| FR-PROC-007 | Một phần | Chưa có `legal_section` (Q1, ASM-017); lưu đích, đoạn trích, quan hệ, lý do |
+| FR-PROC-007 | Đủ (trường tạm) | Lưu đích, văn bản, mục, đoạn trích, quan hệ, lý do; `legal_document`/`legal_section` là Data tạm, FEAT-020 đổi sang Link (ASM-017, ASM-046) |
 | FR-PROC-009 | Đủ | `track_changes` (Version); API sửa dòng tại chỗ |
 | FR-PROC-013 | Đủ | Sao chép, đích qua cùng kiểm tra tạo |
 | FR-PROC-008, 012 | Không | FEAT-007 |
@@ -20,7 +20,7 @@ Issue NORM-11. Nhánh `ai/NORM-11-feat-006` từ `develop` @ `f82065b`. Tài li�
 
 **NC Clinical Procedure** thêm: `previous_version` (Link tự thân), `needs_review` (Check), `doctor_request` (Text), `overview`, `indications`, `contraindications`, `cautions`, `preparation_notes`, `monitoring`, `references` (Text Editor), `citations` (Table NC Procedure Citation), `copied_from` (Link tự thân), `ai_log` (Link NC AI Log). `next_resource_seq` giữ (G5 → AMD-001). Danh sách chuẩn lọc theo `workflow_state`, `department`, `needs_review` (`in_standard_filter`).
 
-**NC Procedure Citation** (bảng con, mới): `target_section` (Select, 8 phần — G1), `target_step_id` (Data), `relation` (Select BB, mặc định "Chưa có căn cứ"), `quote` (Small Text), `deviation_reason` (Small Text). Không có `legal_section` (Q1). Quyền theo cha.
+**NC Procedure Citation** (bảng con, mới): `target_section` (Select, 8 phần — G1), `target_step_id` (Data), `relation` (Select BB, mặc định "Chưa có căn cứ"), `legal_document` (Data tạm), `legal_section` (Data tạm), `quote` (Small Text), `deviation_reason` (Small Text). Hai trường Data dài tối đa 140 ký tự; FEAT-020 đổi sang Link (ASM-046). Quyền theo cha.
 
 **Quyền**: giữ nguyên ma trận đã cài ở FEAT-000 (Clinician, Dept Head: đọc/sửa/tạo; 8 vai trò còn lại chỉ đọc; không ai có xóa — ASM-015). Không đổi `permissions`.
 
@@ -85,6 +85,6 @@ Test: `test_FR_PROC_005_*` (gợi ý), `test_FR_PROC_013_*` (sao chép) đặt t
 
 ## 6. Giả định (ASM) và rủi ro
 
-ASM-017 (Q1 không `legal_section`; TC-PROC-09 chờ FEAT-020), ASM-018 (G1 phần + xóa bước còn nguồn lực bị từ chối), ASM-019 (G2 gợi ý chỉ NC Job Title), ASM-020 (Q3 từ chối khi đã ban hành), ASM-021 (G3 vai trò "không quyền" = NC Finance), ASM-022 (G4 sao chép), ASM-023 (G6 lịch sử = Version), ASM-024 (G7 tên nhánh). Q2 cập nhật cột trạng thái ASM-011. G5 → AMD-001.
+ASM-017 (Q1 Link mục văn bản chờ FEAT-020), ASM-046 (văn bản, mục là Data tạm; TC-PROC-09 kiểm đủ), ASM-018 (G1 phần + xóa bước còn nguồn lực bị từ chối), ASM-019 (G2 gợi ý chỉ NC Job Title), ASM-020 (Q3 từ chối khi đã ban hành), ASM-021 (G3 vai trò "không quyền" = NC Finance), ASM-022 (G4 sao chép), ASM-023 (G6 lịch sử = Version), ASM-024 (G7 tên nhánh). Q2 cập nhật cột trạng thái ASM-011. G5 → AMD-001.
 
 Rủi ro: (1) Version chỉ ghi khi dữ liệu đổi; sắp lại bước thuần túy được ghi ở `row_changed` theo `idx` — kiểm bằng test. (2) `frappe.response` trên đường lỗi — giao diện không phụ thuộc vào nó, dùng `find_existing`. (3) Bài toán đổi 14 → 15 DocType ở `test_permissions` (Q4).

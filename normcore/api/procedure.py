@@ -40,7 +40,16 @@ RESOURCE_FIELDS = (
 	"uom",
 	"headcount",
 )
-CITATION_FIELDS = ("name", "target_section", "target_step_id", "relation", "legal_document", "legal_section", "quote", "deviation_reason")
+CITATION_FIELDS = (
+	"name",
+	"target_section",
+	"target_step_id",
+	"relation",
+	"legal_document",
+	"legal_section",
+	"quote",
+	"deviation_reason",
+)
 RELATIONS = ("Theo hướng dẫn", "Khác biệt", "Chưa có căn cứ")
 
 
@@ -389,7 +398,14 @@ def suggest_catalog(resource_type, text):
 
 
 def _apply_citation(
-	row, target_section, target_step_id, relation, quote, deviation_reason, legal_document=None, legal_section=None
+	row,
+	target_section,
+	target_step_id,
+	relation,
+	quote,
+	deviation_reason,
+	legal_document=None,
+	legal_section=None,
 ):
 	if relation is not None and relation not in RELATIONS:
 		frappe.throw(_("Quan hệ không hợp lệ: {0}").format(relation))

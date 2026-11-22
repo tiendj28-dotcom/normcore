@@ -5,7 +5,7 @@
 Người soạn tạo quy trình cho (dịch vụ, khoa) → bản nháp v1 có 8 phần → nhập 7 phần văn bản, thêm/sửa/xóa/sắp lại bước, khai báo nguồn lực theo bước, gắn trích dẫn tay → lưu có lịch sử; hoặc sao chép từ quy trình khác. Trích dẫn lưu văn bản và mục dưới dạng Data tạm (ASM-017, ASM-046; FEAT-020 đổi sang Link); tạo vào (dịch vụ, khoa) đã có bản ban hành bị từ chối (Q3, ASM-020).
 
 ## 2. DocType tạo mới hoặc thay đổi
-NC Clinical Procedure thêm 13 trường (`previous_version`, `needs_review`, `doctor_request`, 7 phần văn bản, `citations`, `copied_from`, `ai_log`); NC Procedure Citation (bảng con mới). DI-02 ở controller. Không cần patch dữ liệu (chỉ thêm trường). AMD-001: `next_resource_seq`.
+NC Clinical Procedure thêm 13 trường (`previous_version`, `needs_review`, `doctor_request`, 7 phần văn bản, `citations`, `copied_from`, `ai_log`); NC Procedure Citation (bảng con mới; có `legal_document`, `legal_section` Data tạm, ASM-046). DI-02 ở controller. Không cần patch dữ liệu (chỉ thêm trường). AMD-001: `next_resource_seq`.
 
 ## 3. API, tác vụ nền, hook, fixtures
 `normcore/api/procedure.py`: `list_procedures`, `find_existing`, `create_procedure`, `get_procedure`, `save_sections`, `add_step`, `update_step`, `delete_step`, `reorder_steps`, `add_resource`, `update_resource`, `delete_resource`, `suggest_catalog`, `add_citation`, `update_citation`, `delete_citation`, `copy_procedure`. Logic thuần ở `normcore/procedure/` (`codes`, `steps`, `copying`). Trang Vue `procedure-editor` (SCR-DSK-009) và chỉ báo danh sách (SCR-DSK-007). Không hook, không tác vụ nền, không fixtures mới.
