@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "creation": "2026-11-22 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "unit_price",
+  "price_source",
+  "document_no",
+  "document_date",
+  "col_break",
+  "valid_from",
+  "valid_to",
+  "verify_section",
+  "attachment",
+  "verification_status",
+  "verified_by",
+  "verified_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "label": "Mặt hàng",
+   "fieldtype": "Link",
+   "options": "NC Item",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "unit_price",
+   "label": "Đơn giá (đã gồm thuế GTGT)",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "precision": "4",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "price_source",
+   "label": "Nguồn giá",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "\nTrúng thầu\nHợp đồng\nHóa đơn\nGiá công bố\nBáo giá",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Thứ tự này là thứ tự ưu tiên khi chọn giá"
+  },
+  {
+   "fieldname": "document_no",
+   "label": "Số chứng từ",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "document_date",
+   "label": "Ngày chứng từ",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "description": "Dùng cho cảnh báo quá 24 tháng"
+  },
+  {
+   "fieldname": "col_break",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valid_from",
+   "label": "Hiệu lực từ",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "valid_to",
+   "label": "Hiệu lực đến",
+   "fieldtype": "Date",
+   "description": "Tùy chọn"
+  },
+  {
+   "fieldname": "verify_section",
+   "label": "Xác minh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment",
+   "label": "Tệp chứng từ",
+   "fieldtype": "Attach",
+   "description": "Bắt buộc khi chuyển sang Đã xác minh"
+  },
+  {
+   "fieldname": "verification_status",
+   "label": "Trạng thái xác minh",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "Chưa xác minh\nĐã xác minh",
+   "default": "Chưa xác minh",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "verified_by",
+   "label": "Người xác minh",
+   "fieldtype": "Link",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "verified_on",
+   "label": "Thời điểm xác minh",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-22 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Item Price",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "format:DG-{#####}"
+}

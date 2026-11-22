@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "creation": "2026-11-22 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "item_type",
+  "uom",
+  "reuse_count",
+  "is_active",
+  "billed_separately",
+  "equivalent_group",
+  "norm_section",
+  "norm_uom",
+  "norm_units_per_purchase_unit",
+  "nominal_tests",
+  "open_stability_days",
+  "is_main_reagent"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "label": "Mã",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "item_name",
+   "label": "Tên",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "item_type",
+   "label": "Loại",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "\nThuốc\nHóa chất\nDịch truyền\nMáu và chế phẩm\nVật tư tiêu hao\nVật tư dùng nhiều lần\nKhí y tế\nTiện ích\nChất chuẩn\nVật liệu nội kiểm\nKhác",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "uom",
+   "label": "Đơn vị tính",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "Là đơn vị mua"
+  },
+  {
+   "fieldname": "reuse_count",
+   "label": "Số lần dùng",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "default": "1"
+  },
+  {
+   "fieldname": "is_active",
+   "label": "Đang dùng",
+   "fieldtype": "Check",
+   "default": "1",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "billed_separately",
+   "label": "Thanh toán riêng ngoài giá",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Mặt hàng bị loại khỏi giá thành ở mọi lần tính giá"
+  },
+  {
+   "fieldname": "equivalent_group",
+   "label": "Nhóm tương đương",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "description": "Các mặt hàng cùng nhóm dùng cho gợi ý thay thế"
+  },
+  {
+   "fieldname": "norm_section",
+   "label": "Đơn vị định mức",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "norm_uom",
+   "label": "Đơn vị định mức",
+   "fieldtype": "Data",
+   "description": "Ví dụ: test, mL. Trống = dùng đơn vị tính"
+  },
+  {
+   "fieldname": "norm_units_per_purchase_unit",
+   "label": "Số đơn vị định mức trong một đơn vị mua",
+   "fieldtype": "Float",
+   "default": "1",
+   "description": "Bắt buộc lớn hơn 0 với Hóa chất, Chất chuẩn, Vật liệu nội kiểm"
+  },
+  {
+   "fieldname": "nominal_tests",
+   "label": "Số test danh nghĩa của một đơn vị mua",
+   "fieldtype": "Int"
+  },
+  {
+   "fieldname": "open_stability_days",
+   "label": "Hạn dùng sau mở (ngày)",
+   "fieldtype": "Int"
+  },
+  {
+   "fieldname": "is_main_reagent",
+   "label": "Là hóa chất chính",
+   "fieldtype": "Check"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-22 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Item",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "field:item_code",
+ "title_field": "item_name",
+ "search_fields": "item_name,item_type"
+}
