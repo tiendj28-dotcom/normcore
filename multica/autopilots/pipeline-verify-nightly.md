@@ -20,5 +20,5 @@ Mục tiêu: kiểm sức khỏe truy vết của normcore trên origin/develop 
 Dùng skill normcore-pipeline-verify, làm đủ 6 mục kiểm của skill.
 Ràng buộc: chỉ ghi docs/pipeline-health.md; không sửa mã, test hay tài liệu nào khác.
 Kết thúc: một comment mở đầu bằng "ĐẠT" hoặc "CÓ VẤN ĐỀ", rồi bảng từng mục.
-Đạt hết thì chuyển issue sang done; có vấn đề thì để in_review.
+Đạt hết thì chuyển issue sang Done; có vấn đề thì chuyển Blocked và mention Lead.
 ```

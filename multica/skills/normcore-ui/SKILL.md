@@ -1,6 +1,6 @@
 ---
 name: normcore-ui
-description: Thiết kế giao diện (ui-design.md) cho một FEAT của normcore. Dùng sau normcore-design, thường trong cùng issue thiết kế do Lead giao.
+description: Thiết kế giao diện (ui-design.md) cho một FEAT của normcore. BA dùng ngay sau normcore-design, khi issue ở Todo.
 ---
 
 # Normcore — UI design một FEAT
@@ -28,7 +28,8 @@ Sau khi đã có `technical-design.md` của `FEAT-NNN`.
 
 ## Đầu ra
 - Comment liệt kê màn hình và task đã thêm.
-- Đặt issue `in_review` và @mention Lead. Không tự chuyển sang bước kế, không tự giao việc cho agent khác. Nếu cùng issue còn bước hiện thực thì làm tiếp normcore-implement thay vì dừng.
+- Chạy `python3 docs/tools/build_rtm.py docs`: 0 vấn đề.
+- Chuyển issue sang **Đang làm**, mention Lead. Không tự giao việc cho Dev.
 
 ## Không được
 Viết mã sản phẩm.

@@ -1,16 +1,16 @@
 ---
 name: normcore-implement
-description: Hiện thực một FEAT của normcore theo tasks.md, viết test trước, mỗi task một commit. Dùng khi Lead giao bước hiện thực của một FEAT, kể cả khi QA trả về (rework).
+description: Hiện thực một FEAT của normcore theo tasks.md, viết test trước, mỗi task một commit. Dùng khi issue FEAT ở trạng thái Đang làm, kể cả khi Reviewer hoặc QA trả về.
 ---
 
 # Normcore — Implement một FEAT
 
 ## Khi nào dùng
-Lead giao hiện thực `FEAT-NNN`: lần đầu, hoặc giao lại sau verdict `rework` của QA.
+Issue `FEAT-NNN ...` ở **Đang làm**, Lead mention bạn: lần đầu, hoặc bị Reviewer/QA trả về.
 
 ## Kiểm trước khi bắt đầu
 1. Đọc `CLAUDE.md`. Sinh tệp ngữ cảnh bằng skill `normcore-feat-context` (có sẵn TC, BR, dòng golden, DI cần test). Rồi đọc `docs/features/FEAT-NNN/technical-design.md`, `ui-design.md`, `tasks.md`, `implementation-log.md` (nếu có).
-2. Bị trả về: đọc `docs/features/FEAT-NNN/verdict.json` và `acceptance.md`. Mỗi lý do trong `reasons` là một việc phải sửa; thêm thành task mới trước task "Kiểm toàn bộ" và bỏ đánh dấu task đó.
+2. Bị trả về: đọc bình luận của Reviewer/QA mà Lead dẫn, và `docs/features/FEAT-NNN/verdict.json`, `acceptance.md` nếu có. Mỗi lý do trong `reasons` là một việc phải sửa; thêm thành task mới trước task "Kiểm toàn bộ" và bỏ đánh dấu task đó.
 3. Checkout nhánh `feat/FEAT-NNN-*`, rebase lên `origin/develop` mới nhất.
 4. Bench dev dùng chung với QA và có thể đang chạy mã của FEAT khác. **Mọi lệnh `bench` chạy qua khóa**, từ gốc checkout:
    ```
@@ -22,8 +22,8 @@ Lead giao hiện thực `FEAT-NNN`: lần đầu, hoặc giao lại sau verdict 
 1. Viết test trước. Tên test mang mã TC nếu task gắn TC: `test_TC_PROC_01_tao_ban_nhap`. Chạy để thấy đỏ.
 2. Viết mã cho đạt. Đổi DocType thì migrate và chạy test trong cùng một lần `scripts/with_bench.sh '...'`.
 3. Chạy đúng lệnh trong `done-when`. Đạt: đánh dấu `[x]`, thêm một dòng vào `implementation-log.md` (task, lệnh, kết quả, sha), commit `FEAT-NNN Txx: ...`.
-4. Đỏ: sửa, tối đa 3 lần cho một task. Lần 3 vẫn đỏ: đưa nhánh về commit xanh gần nhất, ghi lý do vào `implementation-log.md`, tạo `docs/features/FEAT-NNN/BLOCKED`, comment nguyên nhân, chuyển issue sang `blocked`, @mention Lead, dừng.
-5. Thực tế khác thiết kế: viết AMD (CLAUDE.md mục 7), sửa thiết kế, làm tiếp. Không âm thầm làm khác thiết kế.
+4. Đỏ: sửa, tối đa 3 lần cho một task. Lần 3 vẫn đỏ: đưa nhánh về commit xanh gần nhất, ghi lý do vào `implementation-log.md`, tạo `docs/features/FEAT-NNN/BLOCKED`, comment nguyên nhân, chuyển issue sang Blocked, mention Lead, dừng.
+5. Thực tế khác thiết kế, hoặc tài liệu chưa rõ: Thiếu thông tin hoặc tài liệu chưa rõ: tra `CLAUDE.md` mục 2 (thứ bậc nguồn) và mục 6 (mặc định). Có câu trả lời thì làm theo, ghi `ASM-NNN`/`CF-NNN`, làm tiếp. Không có: bình luận câu hỏi cụ thể (mã FR/BR/TC, trích hai bên, phương án đề xuất), chuyển issue sang Blocked, mention Lead, dừng. Lead quyết. Không âm thầm làm khác thiết kế.
 
 ## Kết thúc
 - Mọi task `[x]`, kể cả "Kiểm toàn bộ". Push nhánh.
@@ -32,11 +32,11 @@ Lead giao hiện thực `FEAT-NNN`: lần đầu, hoặc giao lại sau verdict 
 - **Không ngồi chờ CI.** Ngay sau lần push cuối, đặt wakeup rồi kết thúc run:
   ```
   multica issue wakeup create <MÃ-ISSUE> --until-pr checks --expires-in 6h --on-timeout wake \
-    --instruction "CI của PR đã chạy xong. Xanh: comment kết quả, đặt issue in_review, @mention Lead. Đỏ: gh run view <run-id> --log-failed, sửa, push, đặt lại wakeup này."
+    --instruction "CI của PR đã chạy xong. Xanh: bình luận kết quả, chuyển issue sang Code review, mention Lead. Đỏ: gh run view <run-id> --log-failed, sửa, push, đặt lại wakeup này."
   ```
   Wakeup chỉ tính các check kết thúc sau khi tạo rule, nên phải tạo sau khi push.
-- Comment: số task, lệnh kiểm cuối và kết quả, link PR, "đang chờ CI (wakeup)". Giữ issue `in_progress`; lượt được đánh thức mới đặt `in_review` và @mention Lead.
+- Comment: số task, lệnh kiểm cuối và kết quả, link PR, "đang chờ CI (wakeup)". Giữ issue ở Đang làm; lượt được đánh thức (CI xanh) mới chuyển sang **Code review** và mention Lead.
 
 ## Không được
-- Tự viết `verdict.json`, tự tạo `DONE`, tự merge, tự giao issue cho QA.
+- Tự viết `verdict.json`, tự tạo `DONE`, merge, tự giao việc cho thành viên khác.
 - Sửa, skip, nới test (kể cả test của FEAT khác); sửa tài liệu chỉ đọc.

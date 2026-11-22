@@ -26,4 +26,4 @@ Không sửa mã hay tài liệu nào, trừ tệp báo cáo `docs/pipeline-heal
 - Ghi `docs/pipeline-health.md` (thời điểm, kết quả từng mục, vấn đề). Commit lên nhánh `chore/pipeline-health-<ngày>`, mở PR vào `develop` nếu có thay đổi.
 - Comment trên issue của autopilot: một dòng kết luận, rồi bảng từng mục đạt/không.
 - Không có vấn đề: chuyển issue sang `done`.
-- Có vấn đề nghiêm trọng (tài liệu chỉ đọc bị đổi, FEAT DONE thiếu bằng chứng, golden lỗi): để issue ở `in_review`, nêu rõ ở dòng đầu comment.
+- Có vấn đề nghiêm trọng (tài liệu chỉ đọc bị đổi, FEAT DONE thiếu bằng chứng, golden lỗi): chuyển issue sang Blocked, nêu rõ ở dòng đầu bình luận, mention Lead.
