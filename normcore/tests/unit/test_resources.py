@@ -85,3 +85,30 @@ class TestResources(unittest.TestCase):
 
 	def test_don_gia_gio_chia_khong(self):
 		self.assertRaises(ValueError, r.machine_hourly_rate, 1, 0, 1)
+
+
+class TestResourcesReview(unittest.TestCase):
+	def test_TC_CLS_48_trong_la_khong_hop_le(self):
+		for empty in ("", None):
+			f = dict(acquisition_mode=r.BUY, allocation_basis=empty, original_cost=1, useful_life_years=1)
+			self.assertTrue(r.validate_equipment(f), empty)
+			f = dict(acquisition_mode=empty, allocation_basis=r.BASIS_RESULT)
+			self.assertTrue(r.validate_equipment(f), empty)
+
+	def test_het_han_ngay_29_02_nam_dich_khong_nhuan(self):
+		# ASM-068: 29/02/2024 + 5 năm → 28/02/2029; không ném ValueError
+		self.assertFalse(r.is_expired(date(2024, 2, 29), 5, date(2029, 2, 27)))
+		self.assertTrue(r.is_expired(date(2024, 2, 29), 5, date(2029, 2, 28)))
+		self.assertTrue(r.is_expired(date(2024, 2, 29), 4, date(2028, 2, 29)))  # năm đích nhuận: giữ 29/02
+		self.assertFalse(r.is_expired(date(2024, 2, 29), 4, date(2028, 2, 28)))
+		self.assertTrue(r.is_expired(date(2000, 2, 29), 100, date(2100, 2, 28)))  # 2100 không nhuận
+
+	def test_so_nam_le_cat_ve_so_nguyen(self):
+		self.assertFalse(r.is_expired(date(2020, 1, 1), 5.9, date(2024, 12, 31)))
+		self.assertTrue(r.is_expired(date(2020, 1, 1), 5.9, date(2025, 1, 1)))
+
+	def test_thong_bao_am_tieng_viet(self):
+		errs = r.validate_equipment(
+			dict(acquisition_mode=r.VENDOR, allocation_basis=r.BASIS_RESULT, power_kw=-1)
+		)
+		self.assertEqual(errs, ["Công suất khi chạy không được âm"])

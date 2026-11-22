@@ -22,6 +22,17 @@ CONTINUE = "CONTINUE"
 LIFE_MONTH = "Tháng"
 
 _Q4 = Decimal("0.0001")
+_NON_NEGATIVE = {
+	"original_cost": "Nguyên giá",
+	"annual_contract_cost": "Chi phí năm theo hợp đồng",
+	"contract_asset_value": "Giá trị ghi trên hợp đồng",
+	"annual_maintenance_cost": "Bảo trì năm",
+	"annual_calibration_cost": "Kiểm định, hiệu chuẩn năm",
+	"power_kw": "Công suất khi chạy",
+	"power_standby_kw": "Công suất khi chờ",
+	"run_hours_per_day": "Số giờ chạy mỗi ngày",
+	"standby_hours_per_day": "Số giờ chờ mỗi ngày",
+}
 
 
 def _d(x) -> Decimal:
@@ -33,8 +44,15 @@ def _r4(x: Decimal) -> Decimal:
 
 
 def is_expired(in_service: date, life_years, on: date) -> bool:
-	"""Hết thời gian sử dụng: ngày tính giá >= ngày đưa vào sử dụng + int(số năm) (golden)."""
-	return on >= date(in_service.year + int(_d(life_years)), in_service.month, in_service.day)
+	"""Hết thời gian sử dụng: ngày tính giá >= ngày đưa vào sử dụng + int(số năm) (golden).
+
+	Số năm lẻ cắt về số nguyên (như golden). Đưa vào sử dụng 29/02 mà năm đích không nhuận thì lấy 28/02 (ASM-068).
+	"""
+	year = in_service.year + int(_d(life_years))
+	day = in_service.day
+	if in_service.month == 2 and day == 29 and not (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)):
+		day = 28
+	return on >= date(year, in_service.month, day)
 
 
 def machine_annual(
@@ -129,12 +147,12 @@ def validate_allocations(rows) -> list[str]:
 def validate_equipment(f: dict) -> list[str]:
 	"""FR-RES-005, 019, 020, 021, 022: trường bắt buộc theo hình thức có máy và tiêu chí chia."""
 	errors = []
-	mode = f.get("acquisition_mode") or BUY
-	basis = f.get("allocation_basis") or BASIS_HOURS
+	mode = f.get("acquisition_mode")
+	basis = f.get("allocation_basis")
 	if mode not in ACQUISITION_MODES:
-		errors.append("Hình thức có máy không hợp lệ")
+		errors.append("Phải chọn hình thức có máy hợp lệ")
 	if basis not in ALLOCATION_BASES:
-		errors.append("Tiêu chí chia chi phí không hợp lệ")
+		errors.append("Phải chọn tiêu chí chia chi phí hợp lệ")
 	if mode == BUY:
 		if _d(f.get("original_cost")) <= 0:
 			errors.append("Thiết bị hình thức Mua phải có nguyên giá lớn hơn 0")
@@ -148,19 +166,9 @@ def validate_equipment(f: dict) -> list[str]:
 		u = _d(f.get("utilization_rate"))
 		if not (0 < u <= 1):
 			errors.append("Tiêu chí chia Giờ kế hoạch phải có hệ số sử dụng trong khoảng (0, 1]")
-	for key in (
-		"original_cost",
-		"annual_contract_cost",
-		"contract_asset_value",
-		"annual_maintenance_cost",
-		"annual_calibration_cost",
-		"power_kw",
-		"power_standby_kw",
-		"run_hours_per_day",
-		"standby_hours_per_day",
-	):
+	for key, label in _NON_NEGATIVE.items():
 		if _d(f.get(key)) < 0:
-			errors.append(f"Giá trị không được âm: {key}")
+			errors.append(f"{label} không được âm")
 	return errors
 
 

@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 
@@ -38,13 +39,15 @@ class NCEquipment(Document):
 			[(r.department, r.share_pct) for r in self.department_allocations]
 		)
 		if errors:
-			frappe.throw("<br>".join(errors), title="Thiết bị chưa hợp lệ")
+			frappe.throw("<br>".join(_(e) for e in errors), title=_("Thiết bị chưa hợp lệ"))
 
 	def validate_components(self):
 		errors = []
 		for r in self.components:
 			if _d(r.replacement_cost) < 0 or _d(r.life_value) <= 0:
-				errors.append(f"Linh kiện {r.component_name}: giá thay thế không âm, tuổi thọ lớn hơn 0")
+				errors.append(
+					_("Linh kiện {0}: giá thay thế không âm, tuổi thọ lớn hơn 0").format(r.component_name)
+				)
 		return errors
 
 	def indicative(self, on: date | None = None, expired_mode: str | None = resources.ZERO) -> dict:
@@ -64,7 +67,7 @@ class NCEquipment(Document):
 		share = Decimal(1)
 		if self.department_allocations:
 			by_dept = {r.department: _d(r.share_pct) for r in self.department_allocations}
-			share = by_dept.get(self.department, Decimal(100)) / 100
+			share = by_dept.get(self.department, Decimal(0)) / 100  # ASM-065: ngoài bảng = 0
 		annual = resources.equipment_annual(
 			machine,
 			self.annual_maintenance_cost,
@@ -75,7 +78,8 @@ class NCEquipment(Document):
 			share,
 		)
 		out = {
-			"annual_depreciation": float(machine),
+			"annual_depreciation": float(machine) if mode == resources.BUY else 0.0,
+			"annual_machine_cost": float(machine),
 			"annual_equipment_cost": float(annual),
 			"expired": bool(
 				mode == resources.BUY

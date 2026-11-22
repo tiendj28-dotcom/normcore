@@ -26,7 +26,8 @@ function render_indicative(frm) {
 					: `<div>${__("Machine hourly rate")}: <b>${frappe.format(v.hourly_rate, { fieldtype: "Float", precision: 4 })}</b></div>`;
 			wrapper.html(
 				`<div class="text-muted">${__("As of today")} ${frappe.utils.escape_html(v.on || "")}</div>` +
-					`<div>${__("Annual machine cost")}: <b>${money(v.annual_depreciation)}</b> ${pill}</div>` +
+					`<div>${__("Annual depreciation")}: <b>${money(v.annual_depreciation)}</b> ${pill}</div>` +
+					`<div>${__("Annual machine cost")}: <b>${money(v.annual_machine_cost)}</b></div>` +
 					`<div>${__("Annual equipment cost")}: <b>${money(v.annual_equipment_cost)}</b></div>${rate}`
 			);
 		},

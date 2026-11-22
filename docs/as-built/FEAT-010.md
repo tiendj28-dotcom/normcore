@@ -21,6 +21,6 @@ TC-RES-03, TC-RES-04, TC-RES-10, TC-CLS-48, TC-CLS-49 (test cùng mã, đơn v�
 
 ## 7. Giới hạn đã biết và nợ kỹ thuật
 - **Chưa kiểm trên trình duyệt:** preview không có site `normcore.test` (như FEAT-005); bố cục form, bảng con 1366 × 768 chưa xem thật.
-- Chưa liên kết hồ sơ tuân thủ (FEAT-031, ASM-064); kiểm định năm là số nhập tay. Chưa tính linh kiện theo kết quả, giờ chạy, điện và chia theo số kết quả, phút (FEAT-036; TC-CLS-07/09/11/12/13). Dữ liệu cho FEAT-036 đã đủ: linh kiện, điện, tiêu chí chia, tỷ lệ khoa.
-- Bộ nhập Excel thiết bị, phòng (FR-RES-012) thuộc FEAT-009; khóa duy nhất theo mã đã có.
+- Chưa liên kết hồ sơ tuân thủ (FEAT-033, ASM-064); kiểm định năm là số nhập tay. Chưa tính linh kiện theo kết quả, giờ chạy, điện và chia theo số kết quả, phút (FEAT-036; TC-CLS-07/09/11/12/13). Dữ liệu cho FEAT-036 đã đủ: linh kiện, điện, tiêu chí chia, tỷ lệ khoa.
+- Bộ nhập Excel thiết bị, phòng (FR-RES-012): `nc_equipment`, `nc_room` trong `core/import_sets.py` (ASM-069); chỉ trường phẳng, linh kiện và tỷ lệ khoa khai trên form.
 - CF-003: diện tích phòng không bắt buộc theo TC-RES-10.

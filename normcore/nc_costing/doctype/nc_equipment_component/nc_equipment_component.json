@@ -29,7 +29,7 @@
    "fieldname": "life_basis",
    "label": "Tuổi thọ tính theo",
    "fieldtype": "Select",
-   "options": "Tháng\nSố kết quả\nGiờ chạy",
+   "options": "\nTháng\nSố kết quả\nGiờ chạy",
    "reqd": 1,
    "in_list_view": 1
   },

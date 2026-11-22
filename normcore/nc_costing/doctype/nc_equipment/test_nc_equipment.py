@@ -59,7 +59,9 @@ class TestNCEquipment(FrappeTestCase):
 			useful_life_years=None,
 			annual_contract_cost=450000000,
 		)
-		self.assertEqual(ok.insert().indicative(on="2026-12-31")["annual_depreciation"], 450000000)
+		r = ok.insert().indicative(on="2026-12-31")
+		self.assertEqual(r["annual_depreciation"], 0)  # TC-CLS-12: thuê không có khấu hao
+		self.assertEqual(r["annual_machine_cost"], 450000000)
 
 	def test_TC_CLS_48_mua_thieu_nguyen_gia_bi_tu_choi(self):
 		self.assertRaises(frappe.ValidationError, _eq(original_cost=None).insert)
@@ -199,3 +201,56 @@ class TestNCEquipment(FrappeTestCase):
 		frappe.set_user(make_user("eq.admin@normcore.test", "NC Admin"))
 		with self.assertRaises(frappe.LinkExistsError):
 			frappe.delete_doc("NC Equipment", eq.name)
+
+	def test_TC_CLS_48_thieu_tieu_chi_chia_bi_tu_choi(self):
+		self.assertRaises(frappe.ValidationError, _eq(allocation_basis="").insert)
+
+	def test_FR_RES_005_thieu_nguon_hinh_thanh_bi_tu_choi(self):
+		self.assertRaises(frappe.ValidationError, _eq(funding_source="").insert)
+
+	def test_FR_RES_023_thieu_tuoi_tho_theo_bi_tu_choi(self):
+		comp = {"component_name": "Đèn", "replacement_cost": 1, "life_value": 12}
+		self.assertRaises(frappe.ValidationError, _eq(components=[comp]).insert)
+		self.assertRaises(
+			frappe.ValidationError, _eq(equipment_code="EQ4", components=[{**comp, "life_basis": ""}]).insert
+		)
+
+	def test_FR_RES_025_khoa_quan_ly_ngoai_bang_ty_le_bang_0(self):
+		from normcore.tests.utils import ensure
+
+		for c in ("KHOA-K2", "KHOA-K3"):
+			ensure("NC Cost Center", "cost_center_code", c, cost_center_name=c, center_type="Lâm sàng")
+			ensure(
+				"NC Department",
+				"department_code",
+				c,
+				department_name=c,
+				department_type="Lâm sàng",
+				cost_center=c,
+			)
+		eq = _eq(
+			department_allocations=[
+				{"department": "KHOA-K2", "share_pct": 60},
+				{"department": "KHOA-K3", "share_pct": 40},
+			]
+		).insert()
+		self.assertEqual(eq.indicative(on="2026-12-31")["annual_equipment_cost"], 0)
+		self.assertEqual(
+			_eq(equipment_code="EQ3").insert().indicative(on="2026-12-31")["annual_equipment_cost"], 186000000
+		)
+
+	def test_FR_RES_019_dat_theo_hoa_chat_luu_duoc_gia_tri_hop_dong(self):
+		eq = _eq(
+			acquisition_mode="Đặt theo hóa chất",
+			original_cost=None,
+			useful_life_years=None,
+			contract_asset_value=1200000000,
+		).insert()
+		eq.reload()
+		self.assertEqual(eq.contract_asset_value, 1200000000)
+
+	def test_FR_RES_005_thong_bao_tieng_viet_khong_lo_ten_truong(self):
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			_eq(power_kw=-1).insert()
+		self.assertIn("Công suất khi chạy", str(ctx.exception))
+		self.assertNotIn("power_kw", str(ctx.exception))
