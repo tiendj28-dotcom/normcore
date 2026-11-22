@@ -11,3 +11,8 @@ Site kiểm: `norm12.test` (site `normcore.test` dùng chung có DocType của N
 - Lệch quy trình: issue yêu cầu mỗi task một commit `FEAT-001 Tnn:`, nhưng lần đầu push chỉ có một commit WIP gộp T01–T08 (đã push nên không viết lại). Từ lần sửa này mỗi việc một commit.
 - Lint: B905 (`zip(..., strict=True)`, dòng ma trận sai số cột nay báo NC-08 thay vì cắt bớt) và `ruff format` (chỉ khoảng trắng, ngắt dòng). `ruff check normcore scripts && ruff format --check normcore scripts` → thoát 0.
 - R9: thêm `test_TC_ACC_01_auditor_doc_lan_tinh_gia_khong_ghi`. Toàn app trên `norm12.test`: `Ran 112 tests ... OK`.
+
+## Sửa theo review lần 3 (nút "Bỏ gán")
+- Lỗi: `frm.dashboard.wrapper` không tồn tại. Sửa: `frm.layout.show_message(html, "blue", true)` và gắn sự kiện ở `frm.layout.message` (ủy quyền `a[data-user]`); xóa thông báo cũ trước khi vẽ lại vì `show_message` nối thêm.
+- Chạy `nc_department.js` bằng Node với bản giả lập tối thiểu (`frm.layout.message` có `off/on`, `show_message` nối thêm như Frappe thật; không phải trình duyệt): vẽ 2 lần → 1 khối, có liên kết "Bỏ gán"; bấm → gọi `unassign_department {"user":"a@x.test","department":"K01"}` rồi `list_department_users` để vẽ lại; không lỗi.
+- Chưa có ảnh chụp giao diện: môi trường agent không có trình duyệt (không Chromium/Playwright).

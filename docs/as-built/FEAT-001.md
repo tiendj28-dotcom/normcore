@@ -17,7 +17,7 @@ Ma trận mục 4 + G1 cho NC Cost Center; quét tự động NC-07, NC-08.
 Sau migrate, NC Admin kiểm tra trung tâm chi phí do patch tạo (mã khoa) và sửa cho khớp tệp kế toán thật trước FEAT-016 (ASM-041); gán khoa cho người dùng hiện có, nếu không họ không sửa được gì (G5).
 
 ## 6. Test case đã chạy và kết quả
-TC-ACC-01..05, TC-ADM-04, TC-ADM-05, FR-ACC-006: xanh trên `norm12.test` (toàn app 110 test OK). Chờ log migrate staging.
+TC-ACC-01..05, TC-ADM-04, TC-ADM-05, FR-ACC-006: xanh trên `norm12.test` (toàn app 122 test OK). Chờ log migrate staging.
 
 ## 7. Giới hạn đã biết và nợ kỹ thuật
 ASM-037..ASM-045. Số liệu kế toán của NC Consultant "cấp riêng" để FEAT-016; ô "A (khoa)" để FEAT-007, FEAT-012; người có vai trò khác cấp quyền đọc thì thấy mọi khoa.
