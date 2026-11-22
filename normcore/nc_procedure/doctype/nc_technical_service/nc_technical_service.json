@@ -6,6 +6,7 @@
  "field_order": [
   "service_code",
   "service_name",
+  "col_right",
   "specialty",
   "is_active",
   "chain_section",
@@ -27,6 +28,10 @@
    "fieldtype": "Data",
    "reqd": 1,
    "in_list_view": 1
+  },
+  {
+   "fieldname": "col_right",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "specialty",

@@ -85,6 +85,28 @@ class TestNCTechnicalService(FrappeTestCase):
 		self.assertIn(f"/app/nc-service-cost/{data.cost}", res["items"][2]["links"])
 		self.assertEqual(res["items"][3]["links"], ["#nc-chain-price"])
 
+	def test_SCR_DSK_005_loc_danh_sach(self):
+		ensure("NC Specialty", "specialty_code", "CK-F1", specialty_name="CK lọc")
+		_service(
+			"DV-F1", specialty="CK-F1", departments=[{"department": "K01"}, {"department": "K02"}]
+		).insert()
+		_service("DV-F2", departments=[{"department": "K02"}]).insert()
+		got = frappe.get_list(
+			"NC Technical Service",
+			filters=[["NC Service Department", "department", "=", "K01"]],
+			pluck="name",
+		)
+		self.assertEqual(got, ["DV-F1"])
+		both = frappe.get_list(
+			"NC Technical Service",
+			filters=[["NC Service Department", "department", "=", "K02"]],
+			pluck="name",
+		)
+		self.assertEqual(sorted(both), ["DV-F1", "DV-F2"])
+		self.assertEqual(
+			frappe.get_list("NC Technical Service", filters={"specialty": "CK-F1"}, pluck="name"), ["DV-F1"]
+		)
+
 	def test_FR_SVC_001_gan_chuyen_khoa(self):
 		ensure("NC Specialty", "specialty_code", "CK-S05", specialty_name="CK thử")
 		svc = _service(specialty="CK-S05").insert()
