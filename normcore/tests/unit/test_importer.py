@@ -1,13 +1,15 @@
 """FEAT-004 — khung nhập Excel (FR-ADM-002, FR-RES-012, UC-008 luồng 2c). Không cần site."""
 
 import io
+import unittest
 from datetime import date, datetime
 
-import pytest
 from openpyxl import Workbook, load_workbook
 
 from normcore.core import import_sets  # đăng ký bộ nhập
 from normcore.core import importer as im
+
+_TC = unittest.TestCase()
 
 SET = im.ImportSet(
 	key="thu",
@@ -224,11 +226,11 @@ def test_FR_ADM_002_so_trong_o_data_thanh_chuoi_va_so_nghin():
 
 def test_FR_ADM_002_so_do_dang_ky():
 	assert im.get_import_set("nc_job_title").doctype == "NC Job Title"
-	with pytest.raises(KeyError):
+	with _TC.assertRaises(KeyError):
 		im.get_import_set("khong_co")
 	im.register(SET)
 	try:
-		with pytest.raises(ValueError):
+		with _TC.assertRaises(ValueError):
 			im.register(SET)
 	finally:
 		im.REGISTRY.pop("thu")
