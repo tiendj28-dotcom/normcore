@@ -10,3 +10,8 @@ Mỗi task một commit `FEAT-010 Tnn: …`, test viết trước mã. `bench` q
 - [x] T06 SCR-DSK-018: JS form, danh sách, `vi.csv`, Workspace — done-when: `pytest normcore/tests/unit/test_equipment_ui_conventions.py` xanh; `scripts/with_bench.sh 'bench --site normcore.test migrate && bench build --app normcore'` thoát 0
 - [x] T07 As-Built, ASM, CF, nhật ký — done-when: `python3 docs/tools/build_rtm.py docs` in `VAN DE: 0`
 - [x] T08 Kiểm toàn bộ — done-when: pytest, bench run-tests --app normcore, check_conventions.py, golden đều xanh
+
+## Sửa theo Reviewer (lượt trả về 1)
+- [x] T09 Mục 2–8 và sửa kèm của Reviewer (mã, test, ui-design, ASM-064/065/068) — done-when: pytest unit+golden xanh; `run-tests --module …test_nc_equipment` và `…test_equipment` OK
+- [x] T10 Mục 1: bộ nhập `nc_equipment`, `nc_room` (ASM-069) — done-when: `run-tests --module normcore.api.test_importer_equipment` OK. Hai test cũ ở `api/test_importer.py` đỏ, chờ người duyệt
+- [ ] T11 Kiểm toàn bộ lần 2 — done-when: sau khi người duyệt trả lời về hai test cũ
