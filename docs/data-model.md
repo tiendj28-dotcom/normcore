@@ -191,7 +191,7 @@ erDiagram
 
 ### 3.3 NC Procedure
 
-**NC Specialty** — Chuyên khoa. Trường: `specialty_code`, `specialty_name`.
+**NC Specialty** — Chuyên khoa. Naming: `specialty_code`. Trường: `specialty_code` (BB, duy nhất), `specialty_name` (BB). **[AMD-003]**
 
 **NC Technical Service** — Dịch vụ kỹ thuật. Naming: `service_code`.
 
@@ -213,7 +213,7 @@ erDiagram
 | is_send_out **[1.1]** | Gửi ngoài | Check | | Bật thì không yêu cầu bộ định mức [FR-SVC-011] |
 | send_out_price **[1.1]** | Giá hợp đồng gửi mẫu | Currency | | |
 
-**NC Service Department** — Bảng con: `department` (Link NC Department, BB).
+**NC Service Department** — Bảng con: `department` (Link NC Department, BB; mỗi khoa tối đa một dòng trong một dịch vụ **[AMD-003]**).
 
 **NC Service Price History** — Bảng con: `price_category`, `price`, `effective_date`, `price_proposal`, `authority_doc_no`.
 
