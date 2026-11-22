@@ -27,3 +27,8 @@ TC-SVC-01, TC-SVC-03, TC-SVC-04 và các test `test_FR_SVC_*`, `test_FR_ACC_005_
 - Mã dịch vụ nhập dạng số trong Excel có thể mất số 0 (ASM-060, chờ Quản lý văn bản).
 - `based_on_run` của NC Costing Run chưa có; `_cost_rows` chỉ chọn khi trường tồn tại (ASM-004).
 - QA chưa tạo được site sạch (thiếu DB_ROOT_PASSWORD) và chưa kiểm giao diện bằng trình duyệt (Playwright lỗi kết nối); người duyệt bấm thử SCR-DSK-005/006 trên staging.
+
+## 8. Quyết định và tài liệu liên quan
+- ASM-047..061 và ASM-062 (`docs/decisions/assumptions.md`); CF-002; AMD-003, AMD-004 (`docs/decisions/amendments/`).
+- DEF-002, DEF-003, DEF-004 (`docs/decisions/defects/`): lỗi tài liệu chỉ đọc đã ghi, không chặn FEAT.
+- Hồ sơ nghiệm thu: `docs/features/FEAT-005/acceptance.md`, `verdict.json`, `DONE` (bổ sung sau merge PR #21 qua PR chỉ tài liệu).
