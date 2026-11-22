@@ -1,5 +1,5 @@
 # As-Built: FEAT-004 Khung nhập Excel và tệp mẫu
-- Phiên bản app 0.0.1; chưa nghiệm thu (PR NORM-13 chờ Reviewer/QA); người nghiệm thu: chưa có
+- Phiên bản app 0.0.1; ngày nghiệm thu: 2026-11-22; người nghiệm thu: Kiểm định độc lập (NORM-14)
 
 ## 1. Luồng nghiệp vụ đã xây
 Chọn danh mục → tải tệp mẫu (tiêu đề + một dòng ví dụ) → tải tệp lên → "Kiểm tra" (không ghi; báo số tạo/cập nhật/không đổi và lỗi theo dòng/cột bằng tiếng Việt) → "Xác nhận ghi" (ghi dòng hợp lệ, bỏ dòng lỗi) → xem kết quả. Nhập lại cùng tệp không tạo trùng. Bộ nhập đã đăng ký: NC Job Title. Khác SRS/test: TC-ADM-02 chạy trên NC Job Title (ASM-026).

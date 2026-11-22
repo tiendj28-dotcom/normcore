@@ -1,6 +1,6 @@
 # Acceptance FEAT-004 — Kiểm định độc lập (NORM-14)
 
-Kết luận: **chưa nghiệm thu (ghi `rework` trong verdict.json vì không có giá trị "chờ")**. Mã và test đạt; không có lỗi mã. Chưa được `accepted` vì trang nhập Excel (Desk Page `import-excel`) chưa kiểm bằng trình duyệt.
+Kết luận: **accepted**. Mã và test đạt; giao diện kiểm bằng trình duyệt trên staging (xem mục "Bổ sung giao diện").
 
 ## Môi trường kiểm
 Nhánh `ai/NORM-14-verify-006-001-004` từ `develop` 98d21fe; site sạch `normcore-verify.test` (đã xóa sau khi kiểm).
@@ -17,7 +17,7 @@ Nhánh `ai/NORM-14-verify-006-001-004` từ `develop` 98d21fe; site sạch `norm
 | Tiêu chí | Bằng chứng | Đạt |
 | :-- | :-- | :-: |
 | TC-ADM-02 (tải mẫu có tiêu đề + 1 dòng ví dụ; nhập lại chính tệp tạo bản ghi ví dụ, không lỗi) | `test_TC_ADM_02_tai_mau_roi_nhap_lai_chinh_tep_do`: tiêu đề đúng, 2 dòng; chế độ thử không ghi; ghi tạo 1, nhập lại "không đổi" (0 tạo, 0 sửa, 1 không đổi), tổng số bản ghi +1. Làm trên NC Job Title vì NC Item thuộc FEAT-009 (ASM-026, người duyệt đã chốt) | Đạt (thay DocType) |
-| Test lỗi của `importer.py` | 22 test đơn vị `test_FR_ADM_002_*`: thiếu cột, ô bắt buộc trống, sai kiểu (số nguyên, số, ngày, danh sách, 1/0), khóa trùng trong tệp, tệp rỗng, không phải Excel, quá ngưỡng, link không tồn tại, thiếu quyền sửa, số dòng tính cả dòng trống; thông báo cụ thể "Dòng n, cột \"…\": …" | Đạt |
+| Test lỗi của `importer.py` | 17 test đơn vị `test_FR_ADM_002_*`: thiếu cột, ô bắt buộc trống, sai kiểu (số nguyên, số, ngày, danh sách, 1/0), khóa trùng trong tệp, tệp rỗng, không phải Excel, quá ngưỡng, link không tồn tại, thiếu quyền sửa, số dòng tính cả dòng trống; thông báo cụ thể "Dòng n, cột \"…\": …" | Đạt |
 | Vai trò không quyền + NC Auditor | `test_vai_tro_chi_doc_va_auditor_bi_tu_choi`: NC Resource Manager và NC Auditor bị `PermissionError` cả chế độ thử và ghi, danh sách bộ nhập rỗng, không ghi gì. FEAT-004 không thêm DocType | Đạt |
 | Trang nhập Excel ở 1366×768, `vi` (SCR-DSK-031) | Không có trình duyệt | **Chưa kiểm** |
 
@@ -34,3 +34,6 @@ Không dòng nào trái FR/TC. ASM-026 (TC-ADM-02 trên NC Job Title) chỉ thay
 
 ## Việc còn lại (người duyệt tự bấm, 1366×768, `vi`)
 Mở trang nhập Excel từ SCR-DSK-031 → chọn bộ nhập → tải mẫu → tải lên chính tệp, bấm kiểm tra → bật "Xác nhận ghi" → ghi; nhập lại → "không đổi"; tải tệp có dòng lỗi → danh sách lỗi theo dòng/cột bằng tiếng Việt, không vỡ bố cục; người dùng chỉ đọc → thông báo không có quyền.
+
+## Bổ sung giao diện (cập nhật sau kiểm tay)
+Người duyệt (tiendj28) bấm trên staging `http://112.213.88.40:8100/app/import-excel` và báo **đạt** cho: tệp lỗi (tải tệp mẫu của bộ nhập khác: báo bỏ qua 3 cột lạ, thiếu 2 cột bắt buộc theo dòng/cột bằng tiếng Việt, "Xác nhận ghi" bị khóa; có ảnh chụp trong issue NORM-14), nhập mẫu đúng, nhập lại, quyền chỉ đọc. Ảnh chụp chỉ có bước "tệp có lỗi"; các bước còn lại ghi theo xác nhận bằng lời. Chưa có ảnh ở khung 1366×768; QA không tự kiểm giao diện (không có trình duyệt).
