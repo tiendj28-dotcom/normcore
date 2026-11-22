@@ -31,7 +31,7 @@ Kiểm: mở execution log của một run → **Context received**, thấy tên
    - **Auto-link PRs**: bật. PR gắn vào issue khi mã issue (`NORM-12`) nằm trong tên nhánh hoặc tiêu đề. Nhánh `ai/NORM-N-*` hiện tại đã khớp; nhánh `feat/FEAT-NNN-*` thì tiêu đề PR phải bắt đầu bằng mã issue (skill implement đã dặn).
    - **PR card → CI & mergeability**: bật, để thấy CI xanh/đỏ và xung đột ngay trên issue.
    - **Co-authored-by**: bật.
-   - **After PRs merge, move the issue to: Don't change.** Bắt buộc. FEAT chỉ `done` sau staging, smoke test và PR `DONE`; nếu để mặc định `Done`, Multica đóng issue ngay khi PR mã merge.
+   - **After PRs merge, move the issue to: Done.** Người merge PR là bước cuối; QA đã đưa acceptance, verdict, As-Built, Test ref, DONE vào chính PR đó trước khi chuyển In Review.
 
 ## Bước 3 — Skills và đội agent đang có
 
@@ -41,17 +41,17 @@ Kiểm: mở execution log của một run → **Context received**, thấy tên
 
 Sửa skill sau này: sửa tệp ở đây qua PR, rồi import lại với `--on-conflict overwrite` (chỉ người tạo skill được overwrite).
 
-**Đội.** Dùng đội đang có (Lead, BA, Dev, Reviewer, QA, squad do Lead điều phối); **không** tạo agent mới, **không** tạo workflow theo cột. Theo `agents.md`:
-- thêm khối Instructions vào cuối instructions của từng agent;
+**Đội.** Dùng đội đang có (Lead, BA, Dev, Reviewer, QA, squad do Lead điều phối); **không** tạo agent mới, **không** tạo workflow theo cột. Lead duyệt mọi câu hỏi và Blocked; người chỉ merge. Theo `agents.md`:
+- thay instructions của từng agent bằng khối **Quy tắc chung** + khối của vai;
 - gắn skill theo bảng;
 - đặt `custom_env` (`BENCH_DIR`, `PREVIEW_BENCH_DIR`, `AUTOPILOT_STAGE` theo vai).
 ```
 multica skill list                                   # lấy id của skill
 multica agent skills add <agent-id> --skill-ids <skill-id>
 ```
-`AUTOPILOT_STAGE` quyết định hook `guard.py` cho làm gì: chỉ Lead (`integrate`) được `gh pr merge`; các vai khác không commit được lên `develop`/`main`.
+`AUTOPILOT_STAGE` quyết định hook `guard.py` cho làm gì: không vai nào (`design`, `implement`, `verify`) được `gh pr merge` hay commit lên `develop`/`main`; chỉ người merge.
 
-Kiểm: giao Dev một issue `FEAT-NNN`; execution log → Context received liệt kê skill `normcore-*` là delivered; đầu run có lệnh `scripts/feat_context.py`.
+Kiểm: giao Lead một FEAT; Lead mention BA ở Todo; execution log → Context received liệt kê skill `normcore-*` là delivered; đầu run có lệnh `scripts/feat_context.py`.
 
 ## Bước 4 — Autopilot
 

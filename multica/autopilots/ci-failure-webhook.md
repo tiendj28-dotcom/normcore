@@ -41,5 +41,5 @@ Bước:
 4. Lỗi hạ tầng: sửa .github/workflows trong phạm vi tối thiểu, không bỏ bước kiểm nào.
 Ràng buộc: CLAUDE.md mục 3. Không sửa, skip hay nới test để cho xanh. Không push thẳng develop.
 Bench dev: mọi lệnh bench qua scripts/with_bench.sh '<lệnh>'.
-Kết thúc: comment nguyên nhân, cách sửa, link PR; chuyển issue sang in_review, @mention Lead (Lead merge).
+Kết thúc: bình luận nguyên nhân, cách sửa, link PR; chuyển issue sang Code review, mention Lead (đi đủ Reviewer → QA; người merge).
 ```

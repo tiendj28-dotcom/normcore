@@ -1,6 +1,6 @@
 ---
 name: normcore-verify
-description: Kiểm định độc lập một FEAT của normcore và viết acceptance.md, verdict.json. Dùng khi Lead giao kiểm định một FEAT. Người kiểm không phải người viết.
+description: Kiểm định độc lập một FEAT của normcore và viết acceptance.md, verdict.json. Dùng khi issue FEAT ở trạng thái QA. Người kiểm không phải người viết.
 ---
 
 # Normcore — Verify một FEAT (kiểm định độc lập)
@@ -11,7 +11,7 @@ Bạn không viết tính năng này và không tin lời người viết. Chỉ
 - Tệp ngữ cảnh từ skill `normcore-feat-context`: danh sách FR, TC, DI, quyền để đối chiếu từng mục. Đây là bảng kiểm của bạn; mục nào trong đó không có test cùng mã là thiếu.
 - Yêu cầu gốc: FR, BR, NFR, UC, TC của FEAT trong `docs/srs.md`, `docs/use-cases.md`, `docs/test-cases.md`, `docs/implementation-plan.md`.
 - Thiết kế trong `docs/features/FEAT-NNN/`.
-- `git diff origin/develop...HEAD` của nhánh `feat/FEAT-NNN-*`.
+- `git diff origin/develop...HEAD` của nhánh `feat/FEAT-NNN-*` (nhánh của PR). Bạn làm việc trên chính nhánh này.
 
 ## Kiểm
 1. **Độ phủ tiêu chí:** mỗi FR và TC của FEAT có test cùng mã; assertion kiểm đúng điều yêu cầu nói, không kiểm thứ dễ hơn. Test yếu: bạn được viết lại hoặc thêm **test**, không sửa mã sản phẩm.
@@ -36,15 +36,15 @@ Thứ tự commit:
 2. Lấy `git rev-parse HEAD` lúc này làm `commit`.
 3. Commit riêng `acceptance.md` và `verdict.json`, push.
 
-Ý nghĩa verdict (Lead đọc để giao bước kế; bạn không tự giao):
-| Verdict | Khi nào | `reasons` phải có |
-| :-- | :-- | :-- |
-| `accepted` | Đủ CLAUDE.md mục 8, trừ CI/merge/staging/As-Built | Tóm tắt bằng chứng |
-| `rework` | Mã chưa đạt | Việc cụ thể phải sửa: tệp, hàm, TC |
-| `design-defect` | Thiết kế sai so với yêu cầu | Sai ở đâu, FR/TC nào |
-| `requirement-defect` | Tài liệu chỉ đọc mâu thuẫn | Mã `DEF-NNN` đã viết; tạo `BLOCKED` |
+Verdict và trạng thái chuyển tiếp:
+| Verdict | Khi nào | `reasons` phải có | Chuyển sang |
+| :-- | :-- | :-- | :-- |
+| `accepted` | Đủ CLAUDE.md mục 8, trừ CI/merge/staging/As-Built | Tóm tắt bằng chứng | Chạy tiếp `normcore-integrate`, rồi **In Review** |
+| `rework` | Mã chưa đạt | Việc cụ thể phải sửa: tệp, hàm, TC | **Đang làm** |
+| `design-defect` | Thiết kế sai so với yêu cầu | Sai ở đâu, FR/TC nào | **Blocked** (Lead quyết) |
+| `requirement-defect` | Tài liệu chỉ đọc mâu thuẫn | Mã `DEF-NNN` đã viết | **Blocked** (Lead chuyển lên người) |
 
-Comment trên issue: verdict, lý do chính, link `acceptance.md`. Đặt issue `in_review` và @mention Lead.
+Bình luận trên issue: verdict, lý do chính, link `acceptance.md`, mention Lead.
 
 ## Không được
-Sửa mã sản phẩm. Tạo `DONE`. Merge. Kiểm FEAT mà chính bạn đã viết.
+Sửa mã sản phẩm. Merge. Tạo `DONE` khi verdict chưa `accepted`. Kiểm FEAT mà chính bạn đã viết.
