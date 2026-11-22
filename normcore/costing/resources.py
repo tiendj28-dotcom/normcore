@@ -1,4 +1,4 @@
-"""Thiết bị và phòng — hàm thuần Python, không phụ thuộc frappe (ADR-003).
+"""Thiết bị và phòng — hàm thuần Python, không import framework (ADR-003).
 
 BR-COST-004, BR-COST-005, BR-CLS-009, BR-CLS-010 (phần linh kiện tính theo tháng).
 Đối chiếu: docs/golden/golden_engine.py `equip_rate`, `room_rate`; docs/golden/golden_cls.py
