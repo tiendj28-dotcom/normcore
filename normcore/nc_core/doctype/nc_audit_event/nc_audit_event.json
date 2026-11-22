@@ -1,0 +1,112 @@
+{
+ "actions": [],
+ "autoname": "AUD-.#####",
+ "naming_rule": "Expression (old style)",
+ "creation": "2026-11-22 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "in_create": 1,
+ "field_order": [
+  "event_time",
+  "user",
+  "event_type",
+  "ref_doctype",
+  "ref_name",
+  "from_state",
+  "to_state",
+  "detail"
+ ],
+ "fields": [
+  {
+   "fieldname": "event_time",
+   "label": "Thời điểm",
+   "fieldtype": "Datetime",
+   "read_only": 1,
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "user",
+   "label": "Người thực hiện",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "options": "User",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "event_type",
+   "label": "Loại sự kiện",
+   "fieldtype": "Select",
+   "read_only": 1,
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "options": "Chuyển trạng thái\nKhóa\nXuất tệp\nĐổi cấu hình\nGọi AI\nNhập tệp"
+  },
+  {
+   "fieldname": "ref_doctype",
+   "label": "Loại bản ghi",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "options": "DocType",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "ref_name",
+   "label": "Bản ghi",
+   "fieldtype": "Dynamic Link",
+   "read_only": 1,
+   "options": "ref_doctype",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "from_state",
+   "label": "Trạng thái trước",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "to_state",
+   "label": "Trạng thái sau",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "detail",
+   "label": "Chi tiết",
+   "fieldtype": "Small Text",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-22 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Core",
+ "name": "NC Audit Event",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "event_time",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

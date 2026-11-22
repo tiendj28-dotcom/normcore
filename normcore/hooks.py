@@ -180,6 +180,13 @@ doc_events = {
 	dt: {"on_trash": "normcore.core.references.check_not_referenced"}
 	for dt in ("NC Department", "NC Cost Center", "NC Job Title", "NC Technical Service", "NC Specialty")
 }
+# FR-AUD-001 (ADR-014): hook chung ghi sự kiện chuyển trạng thái, khóa; không sửa controller từng DocType
+doc_events["*"] = {
+	"after_insert": "normcore.core.audit.on_doc_insert",
+	"on_update": "normcore.core.audit.on_doc_update",
+}
+# Dynamic Link `ref_name` của sổ sự kiện không được chặn xóa bản ghi nguồn
+ignore_links_on_delete = ["NC Audit Event"]
 
 # Scheduled Tasks
 # ---------------
