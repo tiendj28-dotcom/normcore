@@ -1,11 +1,11 @@
 # Autopilot: CI đỏ trên develop
 
-Tự tạo issue cho Engineer khi workflow CI hoặc deploy-staging thất bại trên `develop`.
+Tự tạo issue cho Dev khi workflow CI hoặc deploy-staging thất bại trên `develop`.
 
 | Trường | Giá trị |
 | :-- | :-- |
 | Name | CI đỏ trên develop |
-| Assignee | Normcore Engineer |
+| Assignee | Dev |
 | Project | Normcore R1 |
 | Execution mode | Create issue (payload được nối vào mô tả issue) |
 | Trigger | Webhook |
@@ -40,5 +40,6 @@ Bước:
 3. Lỗi mã: tìm FEAT gây ra (git log), sửa trên nhánh fix/ci-<sha ngắn>, mở PR vào develop. Tiêu đề PR bắt đầu bằng mã issue này.
 4. Lỗi hạ tầng: sửa .github/workflows trong phạm vi tối thiểu, không bỏ bước kiểm nào.
 Ràng buộc: CLAUDE.md mục 3. Không sửa, skip hay nới test để cho xanh. Không push thẳng develop.
-Kết thúc: comment nguyên nhân, cách sửa, link PR; chuyển issue sang in_review.
+Bench dev: mọi lệnh bench qua scripts/with_bench.sh '<lệnh>'.
+Kết thúc: comment nguyên nhân, cách sửa, link PR; chuyển issue sang in_review, @mention Lead (Lead merge).
 ```

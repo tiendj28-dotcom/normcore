@@ -1,12 +1,12 @@
 ---
 name: normcore-design
-description: Thiết kế kỹ thuật cho một FEAT của normcore (technical-design.md và tasks.md). Dùng khi issue FEAT ở cột Design của workflow Normcore Delivery.
+description: Thiết kế kỹ thuật cho một FEAT của normcore (technical-design.md và tasks.md). Dùng khi Lead giao bước thiết kế của một FEAT.
 ---
 
 # Normcore — Design một FEAT
 
 ## Khi nào dùng
-Issue có tiêu đề `FEAT-NNN ...` đang ở cột **Design**. Lấy mã FEAT từ tiêu đề issue.
+Lead giao issue thiết kế của `FEAT-NNN` (mã FEAT có trong tiêu đề hoặc mô tả issue).
 
 ## Kiểm trước khi bắt đầu
 1. Đọc `CLAUDE.md`. Sinh ngữ cảnh FEAT bằng skill `normcore-feat-context` (`python3 scripts/feat_context.py FEAT-NNN -o "$TMPDIR/FEAT-NNN-context.md"`) và đọc tệp đó trước.
@@ -37,7 +37,7 @@ Issue có tiêu đề `FEAT-NNN ...` đang ở cột **Design**. Lấy mã FEAT 
 
 ## Đầu ra
 - Comment trên issue: phạm vi, số task, ASM mới, đường dẫn hai tệp.
-- Chuyển issue sang cột kế theo workflow.
+- Đặt issue `in_review` và @mention Lead. Không tự chuyển sang bước kế, không tự giao việc cho agent khác. Nếu cùng issue còn bước UI hoặc hiện thực thì làm tiếp skill đó thay vì dừng.
 
 ## Không được
 Viết mã sản phẩm ở giai đoạn này.

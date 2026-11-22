@@ -12,7 +12,14 @@ Không sửa mã hay tài liệu nào, trừ tệp báo cáo `docs/pipeline-heal
 2. Mọi mã FR, UC, SCR, FEAT, ADR, DEF, ASM, AMD được dẫn trong `docs/features/`, `docs/as-built/`, `docs/decisions/` đều tồn tại.
 3. FEAT có `DONE` thì có `docs/as-built/FEAT-NNN.md`, `acceptance.md`, `verdict.json` = `accepted`.
 4. Không FEAT `DONE` nào phụ thuộc FEAT chưa `DONE` (theo `.autopilot/build-order.txt`).
-5. Tài liệu chỉ đọc không đổi so với commit đầu tiên của kho: `git diff $(git rev-list --max-parents=0 HEAD) -- docs/srs.md docs/test-cases.md docs/use-cases.md docs/golden docs/implementation-plan.md` rỗng.
+5. Tài liệu chỉ đọc không đổi so với **mốc đã duyệt**:
+   ```
+   BASE=$(git rev-parse -q --verify 'refs/tags/docs-baseline^{commit}' || echo afcbd59)
+   git log --format='%h %an %ad %s' --date=short "$BASE"..origin/develop -- docs/srs.md docs/test-cases.md docs/use-cases.md docs/golden docs/implementation-plan.md
+   ```
+   Rỗng là đạt. `afcbd59` là commit nạp bộ tài liệu bản 1.1; không dùng commit đầu tiên của kho, vì lúc đó chưa có `docs/`. Khi người cập nhật tài liệu hợp lệ (bản mới), người đó dời tag `docs-baseline` tới commit đó; bạn không tự dời tag.
+   Có commit: liệt kê sha, tác giả, thông điệp. Tác giả là agent → nghiêm trọng. Tác giả là người → ghi "cần người xác nhận và dời tag docs-baseline".
+   Tài liệu sửa qua AMD (`data-model.md`, `architecture.md`, `ux-foundations.md`, `design.md`) không thuộc mục này; chỉ kiểm mỗi lần sửa có AMD tương ứng trong `docs/decisions/amendments/`.
 6. Test nhanh: `pytest normcore/tests/unit normcore/tests/golden -q`.
 
 ## Đầu ra

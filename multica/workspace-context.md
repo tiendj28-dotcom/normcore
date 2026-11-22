@@ -19,11 +19,12 @@ Quy ước Multica:
 - Mỗi issue FEAT có tiêu đề dạng `FEAT-NNN <tên>`. Nhánh: `feat/FEAT-NNN-<slug>`. **Tiêu đề PR bắt đầu bằng mã issue** (ví dụ `NORM-12 FEAT-006: ...`) để Multica tự gắn PR vào issue.
 - Trạng thái của FEAT nằm trong `docs/features/FEAT-NNN/` (technical-design, tasks, implementation-log, acceptance, verdict.json, DONE). Đọc chúng trước để biết FEAT đang ở đâu.
 - Giả định tự chọn ghi `ASM-NNN` vào `docs/decisions/assumptions.md`; mâu thuẫn ghi `CF-NNN`; sửa thiết kế ghi `AMD-NNN`; lỗi tài liệu chỉ đọc ghi `DEF-NNN`.
-- Kết thúc mỗi run bằng một comment: đã làm gì, lệnh kiểm nào đã chạy và kết quả, việc còn lại.
+- Kết thúc mỗi run bằng một comment: đã làm gì, lệnh kiểm nào đã chạy và kết quả, việc còn lại. Rồi đặt issue `in_review` và @mention Lead; chỉ Lead giao bước kế và merge.
+- Không ai commit thẳng `develop`; mọi thay đổi (kể cả `DONE`) đi qua PR.
 - Viết tiếng Việt trong comment, tài liệu, nhãn giao diện. Mã và fieldname tiếng Anh.
 
 Lệnh kiểm chuẩn:
 `python3 docs/golden/golden_engine.py && python3 docs/golden/golden_cls.py && python3 docs/tools/build_rtm.py docs`
 `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark`
-`cd $BENCH_DIR && bench --site normcore.test run-tests --app normcore`
+`scripts/with_bench.sh 'bench --site normcore.test run-tests --app normcore'` (bench dev dùng chung: luôn qua khóa này)
 `python3 scripts/check_conventions.py`

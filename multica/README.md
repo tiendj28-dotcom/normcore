@@ -7,9 +7,8 @@ Thư mục này chứa mọi thứ cần dán hoặc import vào Multica. Không
 | `workspace-context.md` | 1 |
 | `project-r1.md` | 1 |
 | `skills/*/SKILL.md` | 3 |
-| `../scripts/feat_context.py`, `../.multica/environments.toml`, `../scripts/preview_env.sh` | Thêm |
+| `../scripts/feat_context.py`, `../scripts/with_bench.sh`, `../.multica/environments.toml`, `../scripts/preview_env.sh` | Thêm |
 | `agents.md` | 3 |
-| `workflow.md` | 3 |
 | `autopilots/*` | 4 |
 
 ---
@@ -32,9 +31,9 @@ Kiểm: mở execution log của một run → **Context received**, thấy tên
    - **Auto-link PRs**: bật. PR gắn vào issue khi mã issue (`NORM-12`) nằm trong tên nhánh hoặc tiêu đề. Nhánh `ai/NORM-N-*` hiện tại đã khớp; nhánh `feat/FEAT-NNN-*` thì tiêu đề PR phải bắt đầu bằng mã issue (skill implement đã dặn).
    - **PR card → CI & mergeability**: bật, để thấy CI xanh/đỏ và xung đột ngay trên issue.
    - **Co-authored-by**: bật.
-   - **After PRs merge, move the issue to: Don't change.** Bắt buộc. FEAT chỉ `done` sau staging và smoke test; nếu để mặc định `Done`, Multica chuyển issue giữa lúc Integrator đang chạy, và run đó bị từ chối đổi trạng thái (`409 workflow_step_moved`).
+   - **After PRs merge, move the issue to: Don't change.** Bắt buộc. FEAT chỉ `done` sau staging, smoke test và PR `DONE`; nếu để mặc định `Done`, Multica đóng issue ngay khi PR mã merge.
 
-## Bước 3 — Skills, agents, workflow
+## Bước 3 — Skills và đội agent đang có
 
 **Skills.** Mỗi thư mục trong `skills/` là một skill (thư mục có `SKILL.md`). Import:
 - UI: **Skills → New skill → Import from local**, chọn từng thư mục; hoặc
@@ -42,22 +41,22 @@ Kiểm: mở execution log của một run → **Context received**, thấy tên
 
 Sửa skill sau này: sửa tệp ở đây qua PR, rồi import lại với `--on-conflict overwrite` (chỉ người tạo skill được overwrite).
 
-**Agents.** Tạo 4 agent theo `agents.md` (instructions, model, skill, concurrency, custom_env). Gắn skill:
+**Đội.** Dùng đội đang có (Lead, BA, Dev, Reviewer, QA, squad do Lead điều phối); **không** tạo agent mới, **không** tạo workflow theo cột. Theo `agents.md`:
+- thêm khối Instructions vào cuối instructions của từng agent;
+- gắn skill theo bảng;
+- đặt `custom_env` (`BENCH_DIR`, `PREVIEW_BENCH_DIR`, `AUTOPILOT_STAGE` theo vai).
 ```
 multica skill list                                   # lấy id của skill
 multica agent skills add <agent-id> --skill-ids <skill-id>
 ```
-(Agent có hai skill thì chạy hai lần, hoặc xem `multica agent skills add --help`.)
-Đặt **Access** cho agent là "Entire workspace" nếu người khác cũng cần giao việc.
+`AUTOPILOT_STAGE` quyết định hook `guard.py` cho làm gì: chỉ Lead (`integrate`) được `gh pr merge`; các vai khác không commit được lên `develop`/`main`.
 
-**Workflow.** Tạo "Normcore Delivery" theo `workflow.md`, rồi chọn nó cho project R1.
-
-Kiểm: tạo issue `FEAT-006 <tên>` ở trạng thái **Design** trong project R1. Architect phải tự nhận việc; execution log → Context received liệt kê skill `normcore-design` là delivered.
+Kiểm: giao Dev một issue `FEAT-NNN`; execution log → Context received liệt kê skill `normcore-*` là delivered; đầu run có lệnh `scripts/feat_context.py`.
 
 ## Bước 4 — Autopilot
 
-1. `autopilots/pipeline-verify-nightly.md`: kiểm truy vết lúc 2 giờ sáng mỗi đêm, giao Verifier.
-2. `autopilots/ci-failure-webhook.md`: GitHub báo workflow thất bại trên `develop`, tạo issue cho Engineer. Bộ lọc ở `ci-failure-filter.json`.
+1. `autopilots/pipeline-verify-nightly.md`: kiểm truy vết lúc 2 giờ sáng mỗi đêm, giao QA. Mốc tài liệu chỉ đọc là tag `docs-baseline` (không có thì commit `afcbd59`); khi cập nhật tài liệu hợp lệ, người vận hành dời tag: `git tag -f docs-baseline <sha> && git push -f origin refs/tags/docs-baseline`.
+2. `autopilots/ci-failure-webhook.md`: GitHub báo workflow thất bại trên `develop`, tạo issue cho Dev. Bộ lọc ở `ci-failure-filter.json`.
 
 Bấm **Run now** một lần cho mỗi autopilot để thử. Multica tự tạm dừng autopilot nếu 7 ngày qua có từ 50 run trở lên mà 90% thất bại; xem lý do ở run history.
 
@@ -86,19 +85,28 @@ Kiểm:
 multica daemon status --output json
 multica daemon logs --lines 100
 ```
-Trang **Runtimes** thấy máy online với Claude Code. Đổi runtime của cả 4 agent sang máy này.
+Trang **Runtimes** thấy máy online với Claude Code. Đổi runtime của cả 5 agent sang máy này.
 
 ---
 
 ## Thêm — ngữ cảnh FEAT, preview site, wakeup chờ CI
 
-**Ngữ cảnh FEAT.** `scripts/feat_context.py FEAT-NNN` gom FR, BR, TC, UC, màn hình, DocType, DI, ma trận quyền, dòng golden và phụ thuộc của một FEAT vào một tệp (FEAT-006: khoảng 15 KB, so với khoảng 330 KB tài liệu gốc). Skill `normcore-feat-context` dặn agent chạy nó ở đầu mọi giai đoạn. Import skill này như các skill khác và gắn cho cả 4 agent.
+**Ngữ cảnh FEAT.** `scripts/feat_context.py FEAT-NNN` gom FR, BR, TC, UC, màn hình, DocType, DI, ma trận quyền, dòng golden và phụ thuộc của một FEAT vào một tệp (FEAT-006: khoảng 15 KB, so với khoảng 330 KB tài liệu gốc). Skill `normcore-feat-context` dặn agent chạy nó ở đầu mọi giai đoạn. Import skill này như các skill khác và gắn cho cả 5 agent.
+
+**Bench dev dùng chung có khóa** (`scripts/with_bench.sh`). Dev và QA có thể chạy cùng lúc trên hai FEAT. Mỗi lệnh bench đi qua script này: giữ khóa `$BENCH_DIR/.normcore-bench.lock`, trỏ `apps/normcore` về checkout của run, chạy, nhả khóa. Run khác chờ (tối đa `BENCH_LOCK_WAIT`, mặc định 90 phút). Ai đang giữ khóa: `cat $BENCH_DIR/.normcore-bench.lock.owner`. Muốn song song thật thì cho Dev và QA mỗi người một `BENCH_DIR`.
 
 **Preview site** (`.multica/environments.toml` + `scripts/preview_env.sh`). Agent chạy `multica env start preview` để bật `normcore.test` với mã của checkout, rồi tự mở giao diện kiểm. Bạn mở cùng site đó từ mục **Environments** trong sidebar của issue. Điều kiện:
 - Daemon chạy trên Linux hoặc macOS (Multica chưa hỗ trợ Environments trên Windows).
-- `$BENCH_DIR/apps/normcore` là **liên kết** (symlink), không phải thư mục thật. Đổi một lần: `mv apps/normcore apps/normcore.bak && ln -s <đường dẫn repo> apps/normcore`.
-- Site `normcore.test` đã tạo sẵn.
-- Mỗi máy chỉ một preview tại một thời điểm (bench phục vụ một bản mã).
+- Preview chạy trên **bench riêng** `$PREVIEW_BENCH_DIR` (mặc định `~/preview-bench`), không phải bench dev, để không giữ liên kết của bench dev hàng giờ. Tạo một lần:
+  ```bash
+  bench init ~/preview-bench --frappe-branch version-15
+  cd ~/preview-bench
+  # đổi cổng Redis cho khỏi trùng bench dev: sửa port trong config/redis_cache.conf, config/redis_queue.conf
+  # và redis_cache, redis_queue trong sites/common_site_config.json (vd. 13100, 11100)
+  ln -s <checkout bất kỳ> apps/normcore && echo normcore >> sites/apps.txt
+  bench new-site normcore.test --install-app normcore
+  ```
+- Mỗi máy chỉ một preview tại một thời điểm (script giữ khóa; preview thứ hai bị từ chối). TTL 2 giờ.
 
 URL chỉ mở được trên máy chạy daemon. Truy cập từ xa thì forward cổng hoặc dùng Tailscale như staging.
 

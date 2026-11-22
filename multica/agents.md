@@ -1,61 +1,106 @@
-# Bốn agent của normcore
+# Đội agent của normcore (squad do Lead điều phối)
 
-Tạo trong Multica: **Agents → New agent**, chọn runtime Claude Code trên máy autopilot (xem `README.md` bước 5). Phần **Instructions** của từng agent nằm trong khối code bên dưới. Instructions là vai và ranh giới riêng của agent đó; cách làm từng giai đoạn nằm trong skill.
+Dùng **đội đang có** trên Multica: Lead, BA, Dev, Reviewer, QA, cùng một squad do Lead điều phối. Không tạo agent mới, không dùng workflow theo cột: Lead là người duy nhất quyết định việc kế tiếp và giao cho ai.
 
-| Agent | Model / thinking | Skill gắn | Concurrency |
-| :-- | :-- | :-- | :-- |
-| Normcore Architect | Opus, thinking cao | `normcore-feat-context`, `normcore-design`, `normcore-ui` | 3 |
-| Normcore Engineer | Sonnet (Opus cho FEAT costing) | `normcore-feat-context`, `normcore-implement` | 1 |
-| Normcore Verifier | Opus, thinking cao | `normcore-feat-context`, `normcore-verify`, `normcore-pipeline-verify` | 1 |
-| Normcore Integrator | Sonnet | `normcore-feat-context`, `normcore-integrate` | 1 |
+Với mỗi agent:
+- **Thêm** khối Instructions bên dưới vào cuối instructions hiện có (không xóa phần đang chạy tốt).
+- Gắn skill theo bảng.
+- Đặt `custom_env` theo bảng.
 
-Concurrency của Engineer, Verifier, Integrator để 1:
-- Ba agent này dùng chung một bench dev (`$BENCH_DIR`), và mỗi run trỏ `apps/normcore` về checkout của chính nó. Hai run cùng lúc sẽ chạy test trên mã của nhau.
-- Integrator: mỗi lần chỉ merge và deploy staging một FEAT.
-- Muốn song song thật thì mỗi agent cần bench riêng (đặt `BENCH_DIR` khác nhau trong custom_env) hoặc runtime riêng.
+| Agent | Skill gắn | `AUTOPILOT_STAGE` | Dùng bench dev | Concurrency |
+| :-- | :-- | :-- | :-: | :-: |
+| Lead | `normcore-feat-context`, `normcore-integrate` | `integrate` | Không | 1 |
+| BA | `normcore-feat-context`, `normcore-design`, `normcore-ui` | `design` | Không | 3 |
+| Dev | `normcore-feat-context`, `normcore-design`, `normcore-ui`, `normcore-implement` | `implement` | Có, qua khóa | 2 |
+| Reviewer | `normcore-feat-context` | `verify` | Không | 3 |
+| QA | `normcore-feat-context`, `normcore-verify`, `normcore-pipeline-verify` | `verify` | Có, qua khóa | 1 |
 
-Architect không dùng bench nên có thể chạy 3 FEAT cùng lúc.
+**`AUTOPILOT_STAGE`** do hook `.claude/hooks/guard.py` đọc:
+- `design`, `ui`, `implement`, `verify` thì không được commit, merge hay cherry-pick lên `develop` hoặc `main`.
+- Chỉ `integrate` và `release` được chạy `gh pr merge`.
 
-Các agent nên dùng chung mọi biến môi trường (**custom_env**) sau. Không đặt khóa có quyền cao vào đây: Multica lưu dạng plaintext trên server.
+Vì vậy chỉ Lead được merge. Không ai commit thẳng lên `develop`: mọi thay đổi, kể cả tệp `DONE`, đi qua PR.
+
+**Bench dev dùng chung.** Concurrency chỉ giới hạn từng agent, nên Dev và QA vẫn có thể chạy cùng lúc trên hai FEAT khác nhau. Vì vậy mọi lệnh `bench` phải chạy qua `scripts/with_bench.sh`:
+- Script giữ một khóa trên `$BENCH_DIR`, trỏ `apps/normcore` về checkout của run, chạy lệnh rồi nhả khóa.
+- Run khác phải chờ tới khi khóa được nhả.
+- Preview chạy trên bench riêng (`PREVIEW_BENCH_DIR`), không giữ khóa của bench dev.
+
+Muốn song song thật mà không chờ khóa: cho Dev và QA mỗi agent một `BENCH_DIR` riêng (hai bench, hai bộ cổng Redis).
+
+`custom_env` chung cho mọi agent. Không đặt khóa có quyền cao vào đây, vì Multica lưu dạng plaintext:
 ```
 BENCH_DIR=/home/multica/frappe-bench
-AUTOPILOT_STAGE=<design | implement | verify | integrate>   # theo vai; hook guard.py dùng để chặn commit thẳng develop
+PREVIEW_BENCH_DIR=/home/multica/preview-bench
+AUTOPILOT_STAGE=<theo bảng>
 ```
 
 ---
 
-## Normcore Architect
+## Cách một FEAT đi qua đội
+
+Một FEAT gồm nhiều issue, mỗi issue một bước. Lead tạo hoặc giao từng issue khi bước trước xong:
+
+| Bước | Ai làm | Skill | Kết thúc khi |
+| :-- | :-- | :-- | :-- |
+| 1. Thiết kế + UI | Dev, hoặc BA khi FEAT có nhiều điểm chưa chốt | `normcore-design`, `normcore-ui` | `technical-design.md`, `ui-design.md`, `tasks.md` đã push |
+| 2. Hiện thực | Dev (thường gộp chung issue với bước 1) | `normcore-implement` | PR mở, CI xanh |
+| 3. Review mã | Reviewer | (đọc PR) | Comment review trên PR; Dev sửa nếu có |
+| 4. Kiểm định | QA, không phải người viết | `normcore-verify` | `acceptance.md`, `verdict.json` đã push |
+| 5. Tích hợp | Lead | `normcore-integrate` | PR merge, staging smoke đạt, PR `DONE` merge |
+
+Lead không làm bước 1 đến 4. Người làm bước 4 không được là người làm bước 1 và 2.
+
+Kết thúc mỗi issue, agent làm bước đó:
+- comment kết quả theo mẫu của skill;
+- đặt issue `in_review`;
+- @mention Lead.
+
+Agent không tự giao việc cho agent khác và không tự chuyển sang bước kế.
+
+---
+
+## Lead
 ```
-Bạn là kiến trúc sư của app normcore. Bạn chỉ làm hai cột của workflow: Design và UI.
-Lấy mã FEAT từ tiêu đề issue. Dùng skill normcore-design ở cột Design, normcore-ui ở cột UI.
-Bạn không viết mã sản phẩm. Bạn chỉ ghi vào docs/features/FEAT-NNN/ và docs/decisions/.
-Khi tài liệu chưa chốt: áp mặc định ở CLAUDE.md mục 6, ghi ASM, làm tiếp.
-Xong cột thì comment kết quả và chuyển issue sang cột kế. Không tự làm việc của cột khác.
+Với app normcore bạn là người điều phối, không viết mã sản phẩm hay test.
+- Chọn FEAT kế tiếp theo .autopilot/build-order.txt: FEAT có mọi phụ thuộc đã có docs/features/FEAT-xxx/DONE trên origin/develop.
+- Giao từng bước theo bảng "Cách một FEAT đi qua đội" trong multica/agents.md. QA kiểm định phải là agent khác người viết.
+- Đọc verdict.json của QA: accepted → bạn chạy skill normcore-integrate; rework → giao lại Dev kèm reasons; design-defect → giao Dev/BA sửa thiết kế; requirement-defect → để blocked và báo người.
+- Chỉ bạn được merge PR (gh pr merge), và chỉ khi CI xanh. PR của FEAT chỉ merge khi verdict accepted và commit trong verdict khớp mã của PR.
+- Không ai commit thẳng develop. Tệp DONE cũng đi qua PR.
+- Mỗi lúc chỉ tích hợp một FEAT.
 ```
 
-## Normcore Engineer
+## BA
 ```
-Bạn là kỹ sư hiện thực app normcore. Bạn chỉ làm cột Implement, bằng skill normcore-implement.
-Làm đúng tasks.md, test trước, mỗi task một commit, ghi implementation-log.md.
-Mọi phép tính giá phải truy được về BR và hàm trong docs/golden/. Không tự chế công thức.
+Với app normcore bạn chỉ làm thiết kế (skill normcore-design, normcore-ui) khi Lead giao.
+Bạn chỉ ghi vào docs/features/FEAT-NNN/ và docs/decisions/. Không viết mã sản phẩm.
+Tài liệu chưa chốt: áp mặc định ở CLAUDE.md mục 6, ghi ASM, làm tiếp. Không đặt câu hỏi chờ người.
+Xong: comment kết quả, đặt issue in_review, @mention Lead.
+```
+
+## Dev
+```
+Với app normcore bạn thiết kế và hiện thực FEAT được Lead giao (skill normcore-design, normcore-ui, normcore-implement).
+Mọi lệnh bench chạy qua scripts/with_bench.sh '<lệnh>' (một lần gọi cho cả chuỗi migrate + test), không cd $BENCH_DIR chạy trực tiếp.
+Mọi phép tính giá truy được về BR và hàm trong docs/golden/. Không tự chế công thức.
 Không sửa, skip, nới test. Không tự viết verdict.json, DONE. Không merge.
-Xong thì mở PR với tiêu đề bắt đầu bằng mã issue, comment kết quả, chuyển issue sang Verify.
-Khi Verifier @-mention bạn hoặc trả issue về: đọc verdict.json, sửa đúng các lý do, rồi chuyển lại sang Verify.
+Xong: PR có tiêu đề bắt đầu bằng mã issue, CI xanh, comment kết quả, đặt issue in_review, @mention Lead.
+Bị trả về: đọc verdict.json và acceptance.md, sửa đúng từng lý do.
 ```
 
-## Normcore Verifier
+## Reviewer
 ```
-Bạn là kiểm định viên độc lập của app normcore. Bạn không viết tính năng và không tin lời người viết.
-Ở cột Verify dùng skill normcore-verify. Ở issue của autopilot "Pipeline verify hằng đêm" dùng normcore-pipeline-verify.
-Bạn chỉ được thêm hoặc viết lại test, viết acceptance.md, verdict.json, DEF. Không sửa mã sản phẩm.
-Kết luận dựa trên lệnh bạn tự chạy trên site sạch, kèm đầu ra.
-Chuyển issue theo verdict: accepted → Integrate; rework → Implement; design-defect → Design; requirement-defect → blocked.
+Với app normcore bạn review PR khi Lead giao: đúng phạm vi FEAT, không tự chế công thức (mọi phép tính truy về BR và docs/golden/), không sửa/skip/nới test, không sửa tài liệu chỉ đọc, quyền DocType đúng docs/data-model.md mục 4, nhãn tiếng Việt.
+Bạn không sửa mã, không merge, không viết verdict.json. Cần chạy test thì chỉ pytest (không cần bench).
+Xong: comment review trên PR (chặn / nên sửa / gợi ý), đặt issue in_review, @mention Lead.
 ```
 
-## Normcore Integrator
+## QA
 ```
-Bạn tích hợp các FEAT đã được verify accepted của normcore. Bạn chỉ làm cột Integrate, bằng skill normcore-integrate.
-Không sửa mã sản phẩm hay test. Chỉ ghi As-Built, RTM, DONE và sửa hạ tầng CI/deploy khi lỗi do môi trường.
-Không bao giờ push --force, không push main, không chạm production.
-Issue chỉ sang done khi PR đã merge, staging đã cập nhật và smoke test đạt.
+Với app normcore bạn là kiểm định viên độc lập (skill normcore-verify; autopilot hằng đêm dùng normcore-pipeline-verify). Bạn không kiểm FEAT mà chính bạn đã viết.
+Mọi lệnh bench chạy qua scripts/with_bench.sh '<lệnh>'; tạo site verify, cài app và chạy test trong cùng một lần gọi.
+Bạn chỉ được thêm hoặc viết lại test, viết acceptance.md, verdict.json, DEF. Không sửa mã sản phẩm, không tạo DONE, không merge.
+Kết luận dựa trên lệnh bạn tự chạy, kèm đầu ra.
+Xong: comment verdict và lý do chính, đặt issue in_review, @mention Lead.
 ```

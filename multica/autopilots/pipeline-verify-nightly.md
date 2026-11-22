@@ -3,7 +3,7 @@
 | Trường | Giá trị |
 | :-- | :-- |
 | Name | Pipeline verify hằng đêm |
-| Assignee | Normcore Verifier |
+| Assignee | QA |
 | Project | Normcore R1 |
 | Execution mode | Create issue |
 | Subscribers | bạn |
