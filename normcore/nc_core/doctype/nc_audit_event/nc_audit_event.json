@@ -14,7 +14,8 @@
   "ref_name",
   "from_state",
   "to_state",
-  "detail"
+  "detail",
+  "before_value"
  ],
  "fields": [
   {
@@ -43,7 +44,7 @@
    "reqd": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "options": "Chuyển trạng thái\nKhóa\nXuất tệp\nĐổi cấu hình\nGọi AI\nNhập tệp"
+   "options": "Chuyển trạng thái\nKhóa\nXuất tệp\nĐổi cấu hình\nGọi AI\nNhập tệp\nXóa"
   },
   {
    "fieldname": "ref_doctype",
@@ -81,6 +82,12 @@
    "fieldname": "detail",
    "label": "Chi tiết",
    "fieldtype": "Small Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "before_value",
+   "label": "Giá trị trước",
+   "fieldtype": "Long Text",
    "read_only": 1
   }
  ],

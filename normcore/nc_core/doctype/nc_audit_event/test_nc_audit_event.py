@@ -152,3 +152,100 @@ class TestNCAuditEvent(FrappeTestCase):
 		self.assertEqual((doc.ref_doctype, doc.ref_name), ("NC Department", self.dept))
 		self.assertIn("xlsx", doc.detail)
 		self.assertIn("gia-thanh.xlsx", doc.detail)
+
+	# --- Sửa theo Reviewer (NORM-21): NC Costing Run, xóa, to_time ---
+
+	def _run(self):
+		from normcore.tests.utils import make_param_set
+
+		params = make_param_set()
+		run = frappe.get_doc(
+			{
+				"doctype": "NC Costing Run",
+				"title": "Lần tính thử",
+				"fiscal_year": 2026,
+				"costing_date": "2026-12-31",
+				"parameter_set": params.name,
+			}
+		)
+		run.insert(ignore_permissions=True)
+		return run
+
+	def test_FR_AUD_001_lan_tinh_gia_thanh_cong_mot_su_kien_moi_lan_chuyen(self):
+		run = self._run()
+		run.run_costing()
+		events = self._events_of("NC Costing Run", run.name)
+		self.assertEqual([(e.from_state, e.to_state) for e in events], [("", "Nháp"), ("Nháp", "Đã tính")])
+
+	def test_FR_AUD_001_lan_tinh_gia_loi_roi_tinh_lai(self):
+		from unittest import mock
+
+		from normcore.nc_costing.doctype.nc_costing_run.nc_costing_run import NCCostingRun
+
+		run = self._run()
+		with mock.patch.object(NCCostingRun, "_run", side_effect=RuntimeError("boom")):
+			run.run_costing()
+		self.assertEqual(run.status, "Tính lỗi")
+		run.run_costing()  # cùng đối tượng, hai lần db_set liên tiếp
+		events = self._events_of("NC Costing Run", run.name)
+		self.assertEqual(
+			[(e.from_state, e.to_state) for e in events],
+			[("", "Nháp"), ("Nháp", "Tính lỗi"), ("Tính lỗi", "Đã tính")],
+		)
+
+	def test_FR_AUD_001_luu_nhieu_lan_khong_ghi_trung(self):
+		proc = make_procedure(self.service, self.dept)
+		for _i in range(3):
+			doc = frappe.get_doc("NC Clinical Procedure", proc.name)
+			doc.save(ignore_permissions=True)
+		self.assertEqual(len(self._events_of("NC Clinical Procedure", proc.name)), 1)
+
+	def test_FR_AUD_001_xoa_de_lai_su_kien_va_gia_tri_truoc(self):
+		jt = frappe.get_doc("NC Job Title", self.job)
+		jt.job_title_name = "Điều dưỡng chính"
+		jt.save(ignore_version=False)
+		frappe.set_user(self.admin)
+		frappe.delete_doc("NC Job Title", self.job)
+		frappe.set_user("Administrator")
+		self.assertFalse(frappe.db.exists("Version", {"ref_doctype": "NC Job Title", "docname": self.job}))
+		events = frappe.get_all(
+			"NC Audit Event",
+			{"ref_doctype": "NC Job Title", "ref_name": self.job, "event_type": "Xóa"},
+			["user", "event_time", "before_value"],
+		)
+		self.assertEqual(len(events), 1)
+		self.assertEqual(events[0].user, self.admin)
+		self.assertTrue(events[0].event_time)
+		before = frappe.parse_json(events[0].before_value)
+		self.assertEqual(before["doc"]["job_title_name"], "Điều dưỡng chính")
+		self.assertEqual(len(before["versions"]), 1)
+		self.assertIn("job_title_name", before["versions"][0]["data"])
+		self.assertTrue(before["owner"] and before["creation"])
+
+	def test_FR_AUD_001_xoa_bi_chan_thi_khong_co_su_kien(self):
+		spec = frappe.get_doc(
+			{"doctype": "NC Specialty", "specialty_code": "CK-X", "specialty_name": "CK"}
+		).insert()
+		svc = frappe.get_doc("NC Technical Service", self.service)
+		svc.specialty = spec.name
+		svc.save()
+		with self.assertRaises(frappe.LinkExistsError):
+			frappe.delete_doc("NC Specialty", spec.name)
+		self.assertFalse(frappe.db.exists("NC Audit Event", {"ref_name": spec.name, "event_type": "Xóa"}))
+
+	def test_FR_AUD_001_gia_tri_truoc_bo_truong_password(self):
+		user = frappe.get_doc("User", self.admin)
+		snap = frappe.parse_json(audit.snapshot(user))
+		self.assertNotIn("new_password", snap["doc"])
+
+	def test_FR_AUD_003_to_time_chi_co_ngay_lay_tron_ngay(self):
+		today = frappe.utils.today()
+		ev = audit.log_event("Xuất tệp", "NC Department", self.dept, detail="x")
+		for to_time in (today, frappe.utils.now_datetime() + frappe.utils.datetime.timedelta(minutes=1)):
+			rows = audit_api.get_events(ref_name=self.dept, to_time=str(to_time))
+			self.assertIn(ev.name, [r["name"] for r in rows], to_time)
+		yesterday = frappe.utils.add_days(today, -1)
+		rows = audit_api.get_events(ref_name=self.dept, to_time=yesterday)
+		self.assertNotIn(ev.name, [r["name"] for r in rows])
+		rows = audit_api.get_events(ref_name=self.dept, from_time=today, to_time=today)
+		self.assertIn(ev.name, [r["name"] for r in rows])
