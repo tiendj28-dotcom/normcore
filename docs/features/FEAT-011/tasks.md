@@ -2,8 +2,8 @@
 
 Mỗi task một commit `FEAT-011 Tnn: …`, test trước mã. `scripts/with_bench.sh` cho mọi lệnh bench.
 
-- [ ] T01 Thiết kế + ASM-063..068 — done-when: `python3 docs/tools/build_rtm.py docs` in `VAN DE: 0`
-- [ ] T02 `costing/parameters.py` + unit test — done-when: `pytest normcore/tests/unit/test_parameters.py` xanh; `grep -n frappe normcore/costing/parameters.py` không in gì
+- [x] T01 Thiết kế + ASM-063..068 — done-when: `python3 docs/tools/build_rtm.py docs` in `VAN DE: 0`
+- [x] T02 `costing/parameters.py` + unit test — done-when: `pytest normcore/tests/unit/test_parameters.py` xanh; `grep -n frappe normcore/costing/parameters.py` không in gì
 - [ ] T03 Sáu trường [1.1] và các trường còn thiếu của bộ tham số, mặc định; test TC-CLS-50 — done-when: `scripts/with_bench.sh 'bench --site normcore.test migrate && bench --site normcore.test run-tests --module normcore.nc_costing.doctype.nc_costing_parameter_set.test_nc_costing_parameter_set'` `OK`
 - [ ] T04 Khóa, từ chối sửa/xóa, nhân bản (TC-RES-06); TC-RES-05 mức DocType — done-when: cùng lệnh T03 `OK`
 - [ ] T05 NC Price Category, quyền, hooks, check_conventions, test 18→19; TC-RES-11 — done-when: `… run-tests --module normcore.nc_costing.doctype.nc_price_category.test_nc_price_category` và `--module normcore.tests.test_permissions` `OK`; `python3 scripts/check_conventions.py` thoát 0
