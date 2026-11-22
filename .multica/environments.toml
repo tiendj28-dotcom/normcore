@@ -1,0 +1,10 @@
+# Multica Environments: agent bật bằng `multica env start preview` trong checkout của run.
+# Mở từ sidebar của issue (Environments). Chỉ chạy trên daemon macOS/Linux.
+# Chi tiết và giới hạn: scripts/preview_env.sh, multica/README.md mục "Preview site".
+
+[environments.preview]
+label = "Normcore (site test, mã của issue)"
+start = "bash scripts/preview_env.sh"
+url = "http://localhost:$MULTICA_PORT/app"
+ready = "http://localhost:$MULTICA_PORT/api/method/ping"
+ttl = "4h"
