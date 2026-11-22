@@ -8,10 +8,10 @@
 					{{ p.name }} ({{ p.workflow_state }})
 				</option>
 			</select>
-			<button class="btn btn-default btn-sm" type="button" @click="openForm('create')">
+			<button v-if="canCreate" class="btn btn-default btn-sm" type="button" @click="openForm('create')">
 				{{ __("Create procedure") }}
 			</button>
-			<button v-if="doc" class="btn btn-default btn-sm" type="button" @click="openForm('copy')">
+			<button v-if="doc && canCreate" class="btn btn-default btn-sm" type="button" @click="openForm('copy')">
 				{{ __("Copy from this procedure") }}
 			</button>
 		</div>
@@ -207,6 +207,10 @@ export default {
 		};
 	},
 	computed: {
+		canCreate() {
+			// G1: NC Auditor không thấy nút tạo/sao chép (máy chủ vẫn từ chối)
+			return frappe.model.can_create("NC Clinical Procedure");
+		},
 		isLabor() {
 			return this.form.resource_type === "Nhân lực";
 		},
@@ -351,13 +355,12 @@ export default {
 			const order = this.doc.steps.map((s) => s.step_id);
 			[order[i], order[i + delta]] = [order[i + delta], order[i]];
 			const key = ev.currentTarget.dataset.move;
-			return this.run(() =>
-				this.call("reorder_steps", { procedure: this.doc.name, order }).then(() =>
-					this.reload().then(() => this.$nextTick(() => {
-						const btn = this.$el.querySelector(`[data-move="${key}"]:not([disabled])`);
-						if (btn) btn.focus();
-					}))
-				)
+			return this.run(() => this.call("reorder_steps", { procedure: this.doc.name, order }).then(() => this.reload())).then(() =>
+				// K3: chỉ đặt tiêu điểm sau khi busy về false (nút hết disabled)
+				this.$nextTick(() => {
+					const btn = this.$el.querySelector(`[data-move="${key}"]:not([disabled])`);
+					if (btn) btn.focus();
+				})
 			);
 		},
 		onType() {
@@ -533,6 +536,11 @@ export default {
 }
 .nc-pe__hint {
 	margin-top: var(--margin-md);
+}
+.nc-pe input::placeholder,
+.nc-pe textarea::placeholder {
+	color: var(--text-muted);
+	opacity: 1;
 }
 .nc-pe button:focus-visible,
 .nc-pe input:focus-visible,
