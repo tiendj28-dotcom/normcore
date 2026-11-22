@@ -6,7 +6,12 @@
  "field_order": [
   "service_code",
   "service_name",
-  "is_active"
+  "specialty",
+  "is_active",
+  "chain_section",
+  "chain_status_html",
+  "departments_section",
+  "departments"
  ],
  "fields": [
   {
@@ -24,10 +29,41 @@
    "in_list_view": 1
   },
   {
+   "fieldname": "specialty",
+   "label": "Chuyên khoa",
+   "fieldtype": "Link",
+   "options": "NC Specialty",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
    "fieldname": "is_active",
    "label": "Đang dùng",
    "fieldtype": "Check",
-   "default": "1"
+   "default": "1",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "chain_section",
+   "label": "Tình trạng chuỗi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "chain_status_html",
+   "label": "Tình trạng chuỗi",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "departments_section",
+   "label": "Khoa thực hiện",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "departments",
+   "label": "Khoa thực hiện",
+   "fieldtype": "Table",
+   "options": "NC Service Department"
   }
  ],
  "index_web_pages_for_search": 0,
@@ -89,5 +125,6 @@
  "states": [],
  "track_changes": 1,
  "autoname": "field:service_code",
- "title_field": "service_name"
+ "title_field": "service_name",
+ "search_fields": "service_name,specialty"
 }
