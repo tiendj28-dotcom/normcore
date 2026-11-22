@@ -17,4 +17,4 @@ Nguồn: `ux-foundations.md` SCR-DSK-030; `design.md` mục 3–7. Dùng danh s�
 | Rỗng, đang tải, lỗi | Chuẩn Desk |
 | Không có quyền (vai trò khác) | Trang "không đủ quyền" chuẩn Desk |
 
-Tệp: `nc_core/doctype/nc_audit_event/nc_audit_event_list.js`. Chuỗi `__()` tiếng Anh, bản dịch ở `translations/vi.csv`.
+Tệp: `nc_core/doctype/nc_audit_event/nc_audit_event_list.js`. Nhãn chỉ báo là giá trị tiếng Việt của `event_type`, không dùng `__()` nên không đụng `vi.csv`. Cột thêm `before_value` ở form (sự kiện "Xóa").
