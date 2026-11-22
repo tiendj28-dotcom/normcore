@@ -39,7 +39,7 @@ class TestEditorFeat006Fixes(unittest.TestCase):
 
 	def test_G1_nut_ghi_an_khi_khong_co_quyen_tao(self):
 		for label in ("Create procedure", "Copy from this procedure"):
-			m = re.search(r"<button[^>]*>\s*\{\{ __\(\"%s\"\) \}\}" % re.escape(label), self.vue)
+			m = re.search(r"<button[^>]*>\s*\{\{ __\(\"" + re.escape(label) + r"\"\) \}\}", self.vue)
 			self.assertIsNotNone(m, label)
 			self.assertIn("canCreate", m.group(0), label)
 		self.assertIn('can_create("NC Clinical Procedure")', self.vue)
