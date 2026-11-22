@@ -1,0 +1,10 @@
+[
+  {
+    "event": "workflow_run",
+    "actions": ["completed"],
+    "conditions": [
+      { "path": "workflow_run.conclusion", "op": "equals", "value": "failure" },
+      { "path": "workflow_run.head_branch", "op": "equals", "value": "develop" }
+    ]
+  }
+]
