@@ -1,8 +1,8 @@
 import io
 
 import frappe
-from openpyxl import Workbook, load_workbook
 from frappe.tests.utils import FrappeTestCase
+from openpyxl import Workbook, load_workbook
 
 from normcore.api import importer as api
 from normcore.tests.utils import ensure, make_user
