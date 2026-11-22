@@ -41,6 +41,7 @@ MATRIX = {
 }
 DOCTYPE_ROW = {
 	"NC Technical Service": "Dịch vụ kỹ thuật, chuyên khoa",
+	"NC Specialty": "Dịch vụ kỹ thuật, chuyên khoa",
 	"NC Clinical Procedure": "Quy trình",
 	"NC Costing Parameter Set": "Bộ tham số, chức danh, loại giá",
 	"NC Job Title": "Bộ tham số, chức danh, loại giá",
@@ -52,7 +53,15 @@ DOCTYPE_ROW = {
 	"NC Cost Center": "NC Cost Center (G1: Admin, Finance ghi)",
 }
 # Q2 của NORM-12: duy nhất NC Admin được xóa, và chỉ trên bốn DocType danh mục
-DELETE_ALLOWED = {"NC Admin": {"NC Department", "NC Cost Center", "NC Job Title", "NC Technical Service"}}
+DELETE_ALLOWED = {
+	"NC Admin": {
+		"NC Department",
+		"NC Cost Center",
+		"NC Job Title",
+		"NC Technical Service",
+		"NC Specialty",
+	}
+}
 PERM_TYPES = ("read", "write", "create", "delete", "submit", "cancel", "amend")
 SNAKE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
 
