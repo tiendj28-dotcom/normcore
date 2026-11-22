@@ -1,0 +1,32 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"nc-imp-h\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Normcore</span>\",\"col\":12}},{\"id\":\"nc-imp-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhập dữ liệu từ Excel\",\"col\":4}}]",
+ "creation": "2026-11-21 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Normcore",
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Core",
+ "name": "Normcore",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 1,
+ "shortcuts": [
+  {
+   "label": "Nhập dữ liệu từ Excel",
+   "link_to": "import-excel",
+   "type": "Page"
+  }
+ ],
+ "title": "Normcore"
+}
