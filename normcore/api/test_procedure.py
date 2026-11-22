@@ -214,6 +214,30 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		before, after, owner, when = seen[("resources", "quantity")]
 		self.assertEqual((float(before), float(after), owner), (2.0, 5.0, self.clin))
 
+	def test_TC_PROC_08_moc_thoi_gian_va_nguoi_cho_ca_hai_thay_doi(self):
+		"""QA bổ sung: TC-PROC-08 đòi người và thời điểm cho cả bước lẫn dòng nguồn lực."""
+		name = self._draft()
+		self._steps(name, 1)
+		api.add_resource(name, "S001", "Vật tư", "Bơm tiêm", 2, "cái")
+		api.update_step(name, "S001", "Thực hiện", "Bước 1", "Mô tả đã sửa")
+		api.update_resource(name, "R001", quantity=5)
+		found = {}
+		for data, row in self._version_data(name):
+			for table, _idx, _rname, changes in data.get("row_changed") or []:
+				for field, before, after in changes:
+					found[(table, field)] = (before, after, row.owner, row.creation)
+		expected = {
+			("steps", "description"): ("Mô tả 1", "Mô tả đã sửa"),
+			("resources", "quantity"): (2.0, 5.0),
+		}
+		for key, (before, after) in expected.items():
+			b, a, owner, when = found[key]
+			if key[0] == "resources":
+				b, a = float(b), float(a)
+			self.assertEqual((b, a), (before, after))
+			self.assertEqual(owner, self.clin)
+			self.assertIsNotNone(when)
+
 	def test_TC_PROC_09_trich_dan(self):
 		name = self._draft()
 		self._steps(name, 2)
