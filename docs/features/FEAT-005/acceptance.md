@@ -53,7 +53,18 @@ Chạy lại ở `3e94707` (mã giống `1cc3a15`). Dòng 1–15, 17: `with_benc
 | 19 | `test_service_ui_conventions.py` | 6 passed | Đạt |
 
 ## Thử bỏ lọc trạng thái ở `normcore/api/service.py` (dòng 11)
-Tạm xóa hai điều kiện lọc: `"workflow_state": "Đã ban hành"` ở `_procedure_rows` và `"status": "Đã khóa"` ở `_norm_rows` (chỉ trên bản làm việc, không commit, đã `git checkout` khôi phục). Chạy `--test test_FR_SVC_004_theo_khoa`: **FAIL** (`AssertionError: Lists differ: ['ok', 'ok'] != ['ok', 'empty']`, `FAILED (failures=1)`), tức quy trình Nháp bị chọn nhầm. Dòng 11 đủ nhạy để bắt lỗi bỏ lọc. Chưa thử bỏ riêng từng lọc.
+Tạm xóa hai điều kiện lọc: `"workflow_state": "Đã ban hành"` ở `_procedure_rows` và `"status": "Đã khóa"` ở `_norm_rows` (chỉ trên bản làm việc, không commit, đã `git checkout` khôi phục). Chạy `--test test_FR_SVC_004_theo_khoa`: **FAIL** (`AssertionError: Lists differ: ['ok', 'ok'] != ['ok', 'empty']`, `FAILED (failures=1)`), tức quy trình Nháp bị chọn nhầm. Dòng 11 đủ nhạy để bắt lỗi bỏ lọc.
+
+### Thử bỏ riêng lọc `"status": "Đã khóa"` (`_norm_rows`)
+Chỉ xóa điều kiện `, "status": "Đã khóa"` ở `_norm_rows` (giữ lọc quy trình), trên bản làm việc tại `ca04dbc`, không commit, đã `git checkout` khôi phục. Chạy `with_bench.sh 'bench --site normcore.test run-tests --module normcore.api.test_service --test test_FR_SVC_004_theo_khoa'`: **FAIL**, dừng đúng ở phép so bộ định mức:
+```
+File ".../normcore/api/test_service.py", line 67, in test_FR_SVC_004_theo_khoa
+    self.assertEqual(norm["rows"][0]["name"], data.norm_set)
+AssertionError: 'DM-DV-CH1-K-CH1-v8' != 'DM-DV-CH1-K-CH1-v1'
+Ran 1 test in 1.561s
+FAILED (failures=1)
+```
+Bản "Đã thay thế" v8 bị chọn thay cho bản "Đã khóa" v1. Test bắt được riêng lọc này; không phải test yếu.
 
 ## Preview (`multica env start preview`)
 Chạy ở bước bổ sung: thoát lỗi `[preview] chưa có site normcore.test trong /home/claudebot/preview-bench (tạo một lần theo multica/README.md mục Preview site)`. Không có site preview nên không kiểm được giao diện. Cần người dựng `preview-bench` (README) và cấp `DB_ROOT_PASSWORD` cho QA.
