@@ -7,3 +7,6 @@
 | T03 | `with_bench.sh 'migrate && run-tests --module …nc_costing_parameter_set.test_nc_costing_parameter_set && …nc_costing_run.test_nc_costing_run'` | Ran 3 OK; Ran 5 OK | b2ce2c2 |
 | T04 | `with_bench.sh 'migrate && run-tests --module …nc_equipment.test_nc_equipment && …tests.test_permissions'`; `check_conventions.py` | Ran 14 OK; Ran 3 OK (đếm DocType 20 → 23); thoát 0 | 128f002 |
 | T05 | `with_bench.sh 'run-tests --module normcore.api.test_equipment'` | Ran 5 OK | 8f949d7 |
+| T06 | `pytest normcore/tests/unit/test_equipment_ui_conventions.py`; `with_bench.sh 'migrate && bench build --app normcore'` | 103 passed (unit); build thoát 0. Chưa xem trên trình duyệt (ghi ở As-Built) | 21f28e2 |
+| T07 | `python3 docs/tools/build_rtm.py docs` | `VAN DE: 0`; thêm CF-003, ASM-063..067, `docs/as-built/FEAT-010.md`. `multica env start preview` thoát lỗi "chưa có site normcore.test" nên chưa xem được giao diện | (commit T07) |
+| T08 | golden_engine (cả `--no-depr`), golden_cls; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90`; `check_conventions.py`; `ruff check`, `ruff format --check`; `with_bench.sh 'migrate && run-tests --app normcore'` | golden OK; 110 passed, 37 subtests, độ phủ 97,99%; thoát 0; ruff sạch; Ran 234 tests OK | (commit T08) |
