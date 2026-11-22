@@ -4,7 +4,7 @@ Khoa được gán của người dùng lưu bằng User Permission trên NC Dep
 (`has_permission`, `permission_query_conditions`) áp phạm vi cho mọi DocType khai trong `SCOPE_RULES`;
 DocType về sau (phiếu bấm giờ, hệ thống xét nghiệm...) chỉ thêm một dòng vào `SCOPE_RULES` và `hooks.py`.
 
-Quy tắc (ASM-026..ASM-029):
+Quy tắc (ASM-039, ASM-042, ASM-043):
 - Chỉ áp cho quyền đến từ vai trò NC Clinician / NC Department Head. Vai trò khác của cùng người dùng
   cấp quyền thì quyền đó giữ nguyên (G4).
 - Ghi (sửa, tạo, xóa...): chỉ bản ghi thuộc khoa được gán; chưa gán khoa nào thì không ghi được gì (G5).

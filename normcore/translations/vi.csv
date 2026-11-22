@@ -27,3 +27,20 @@ Unassign,Bỏ gán
 User assigned to department.,Đã gán người dùng vào khoa.
 Assigned users,Người dùng được gán vào khoa
 No users assigned.,Chưa gán người dùng nào.
+Import data from Excel,Nhập dữ liệu từ Excel
+Catalog,Danh mục
+Download template,Tải tệp mẫu
+Upload file,Tải tệp lên
+Check,Kiểm tra
+Confirm import,Xác nhận ghi
+You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
+No file chosen,Chưa chọn tệp
+Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
+Import result,Kết quả nhập
+Row,Dòng,Import Excel
+Column,Cột,Import Excel
+Message,Thông báo,Import Excel
+Created,Tạo mới,Import Excel
+Updated,Cập nhật,Import Excel
+Unchanged,Không đổi,Import Excel
+Errors,Lỗi,Import Excel

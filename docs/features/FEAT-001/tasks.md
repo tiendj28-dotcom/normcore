@@ -7,4 +7,4 @@
 - [x] T06 Quét quyền NC-07/NC-08 (done-when: TC-ACC-04 ≥ 2 passed, `check_conventions.py` thoát 0)
 - [x] T07 TC-ACC-02, 03, 05 (done-when: xanh)
 - [x] T08 Giao diện SCR-DSK-031 + `vi.csv` (done-when: unit i18n xanh)
-- [x] T09 Cập nhật test cũ theo ASM-026 và tài liệu (done-when: toàn app 110 test OK)
+- [x] T09 Cập nhật test cũ theo ASM-037 và tài liệu (done-when: toàn app 110 test OK)
