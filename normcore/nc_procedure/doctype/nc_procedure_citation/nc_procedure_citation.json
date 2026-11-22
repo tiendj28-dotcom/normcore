@@ -7,6 +7,8 @@
   "target_section",
   "target_step_id",
   "relation",
+  "legal_document",
+  "legal_section",
   "quote",
   "deviation_reason"
  ],
@@ -33,6 +35,18 @@
    "options": "Theo hướng dẫn\nKhác biệt\nChưa có căn cứ",
    "default": "Chưa có căn cứ",
    "in_list_view": 1
+  },
+  {
+   "fieldname": "legal_document",
+   "label": "Văn bản",
+   "fieldtype": "Data",
+   "description": "Tạm là Data (ASM-046); FEAT-020 đổi sang Link NC Legal Document"
+  },
+  {
+   "fieldname": "legal_section",
+   "label": "Mục văn bản",
+   "fieldtype": "Data",
+   "description": "Tạm là Data (ASM-046); FEAT-020 đổi sang Link NC Legal Section"
   },
   {
    "fieldname": "quote",

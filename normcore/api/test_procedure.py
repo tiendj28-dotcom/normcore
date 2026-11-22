@@ -241,7 +241,10 @@ class TestProcedureEditorAPI(FrappeTestCase):
 	def test_TC_PROC_09_trich_dan(self):
 		name = self._draft()
 		self._steps(name, 2)
-		a = api.add_citation(name, target_step_id="S001", relation="Theo hướng dẫn", quote="đoạn trích")
+		a = api.add_citation(
+			name, target_step_id="S001", relation="Theo hướng dẫn",
+			legal_document="Thông tư 43/2013/TT-BYT", legal_section="Điều 5", quote="đoạn trích",
+		)
 		b = api.add_citation(
 			name, target_section="Chỉ định", relation="Khác biệt", quote="q", deviation_reason="Lý do"
 		)
@@ -249,6 +252,11 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		cits = {x["name"]: x for x in api.get_procedure(name)["citations"]}
 		self.assertEqual(cits[a["name"]]["relation"], "Theo hướng dẫn")
 		self.assertEqual(cits[a["name"]]["quote"], "đoạn trích")
+		self.assertEqual(cits[a["name"]]["legal_document"], "Thông tư 43/2013/TT-BYT")
+		self.assertEqual(cits[a["name"]]["legal_section"], "Điều 5")
+		api.update_citation(name, a["name"], legal_section="Điều 6")
+		self.assertEqual(api.get_procedure(name, step_id="S001")["citations"][0]["legal_section"], "Điều 6")
+		self.assertEqual(api.get_procedure(name, step_id="S001")["citations"][0]["legal_document"], "Thông tư 43/2013/TT-BYT")
 		self.assertEqual(cits[b["name"]]["deviation_reason"], "Lý do")
 		self.assertEqual(cits[c["name"]]["relation"], "Chưa có căn cứ")
 		# lọc theo bước hoặc phần đang chọn

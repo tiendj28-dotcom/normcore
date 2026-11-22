@@ -40,7 +40,7 @@ RESOURCE_FIELDS = (
 	"uom",
 	"headcount",
 )
-CITATION_FIELDS = ("name", "target_section", "target_step_id", "relation", "quote", "deviation_reason")
+CITATION_FIELDS = ("name", "target_section", "target_step_id", "relation", "legal_document", "legal_section", "quote", "deviation_reason")
 RELATIONS = ("Theo hướng dẫn", "Khác biệt", "Chưa có căn cứ")
 
 
@@ -388,12 +388,16 @@ def suggest_catalog(resource_type, text):
 	return [{"doctype": "NC Job Title", "name": r.name, "label": r.job_title_name} for r in rows]
 
 
-def _apply_citation(row, target_section, target_step_id, relation, quote, deviation_reason):
+def _apply_citation(
+	row, target_section, target_step_id, relation, quote, deviation_reason, legal_document=None, legal_section=None
+):
 	if relation is not None and relation not in RELATIONS:
 		frappe.throw(_("Quan hệ không hợp lệ: {0}").format(relation))
 	for key, value in (
 		("target_section", target_section),
 		("target_step_id", target_step_id),
+		("legal_document", legal_document),
+		("legal_section", legal_section),
 		("quote", quote),
 		("deviation_reason", deviation_reason),
 	):
@@ -410,11 +414,15 @@ def add_citation(
 	relation=None,
 	quote=None,
 	deviation_reason=None,
+	legal_document=None,
+	legal_section=None,
 ):
 	"""FR-PROC-007: trích dẫn cho một phần hoặc một bước; quan hệ mặc định "Chưa có căn cứ" (Q1)."""
 	doc = _editable(procedure)
 	row = doc.append("citations", {})
-	_apply_citation(row, target_section, target_step_id, relation, quote, deviation_reason)
+	_apply_citation(
+		row, target_section, target_step_id, relation, quote, deviation_reason, legal_document, legal_section
+	)
 	_save(doc)
 	return _dump(doc.citations[-1], CITATION_FIELDS)
 
@@ -428,11 +436,15 @@ def update_citation(
 	relation=None,
 	quote=None,
 	deviation_reason=None,
+	legal_document=None,
+	legal_section=None,
 ):
 	"""`citation` là `name` của dòng trích dẫn. Chuỗi rỗng xóa giá trị của trường."""
 	doc = _editable(procedure)
 	row = _row(doc, "citations", "name", citation, _("trích dẫn"))
-	_apply_citation(row, target_section, target_step_id, relation, quote, deviation_reason)
+	_apply_citation(
+		row, target_section, target_step_id, relation, quote, deviation_reason, legal_document, legal_section
+	)
 	_save(doc)
 	return _dump(row, CITATION_FIELDS)
 
