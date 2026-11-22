@@ -74,7 +74,9 @@ class TestImporterAPI(FrappeTestCase):
 			for mode in ("thu", "ghi"):
 				with self.assertRaises(frappe.PermissionError):
 					api.run_import(KEY, content, mode)
-			self.assertEqual(api.list_import_sets(), [])
+			# ASM-074: NC Resource Manager ghi được NC Item (FEAT-009) nên thấy bộ "nc_item", không thấy bộ chức danh
+			expected = ["nc_item"] if user == self.rm else []
+			self.assertEqual([s["key"] for s in api.list_import_sets()], expected)
 		frappe.set_user("Administrator")
 		self.assertFalse(frappe.db.exists("NC Job Title", "T-9"))
 
@@ -87,7 +89,9 @@ class TestImporterAPI(FrappeTestCase):
 
 	def test_finance_thay_bo_nhap_va_import_file_qua_file_rieng_tu(self):
 		frappe.set_user(self.finance)
-		self.assertEqual([s["key"] for s in api.list_import_sets()], [KEY])
+		self.assertEqual(
+			sorted(s["key"] for s in api.list_import_sets()), sorted([KEY, "nc_item"])
+		)  # ASM-074
 		f = frappe.get_doc(
 			{
 				"doctype": "File",

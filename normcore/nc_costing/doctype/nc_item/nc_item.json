@@ -17,7 +17,9 @@
   "norm_units_per_purchase_unit",
   "nominal_tests",
   "open_stability_days",
-  "is_main_reagent"
+  "is_main_reagent",
+  "price_section",
+  "price_history_html"
  ],
  "fields": [
   {
@@ -113,6 +115,16 @@
    "fieldname": "is_main_reagent",
    "label": "Là hóa chất chính",
    "fieldtype": "Check"
+  },
+  {
+   "fieldname": "price_section",
+   "label": "Đơn giá có chứng từ",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "price_history_html",
+   "label": "Lịch sử đơn giá",
+   "fieldtype": "HTML"
   }
  ],
  "index_web_pages_for_search": 0,
