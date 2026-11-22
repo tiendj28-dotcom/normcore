@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "target_section",
+  "target_step_id",
+  "relation",
+  "quote",
+  "deviation_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "target_section",
+   "label": "Phần",
+   "fieldtype": "Select",
+   "options": "\nĐại cương\nChỉ định\nChống chỉ định\nThận trọng\nChuẩn bị\nCác bước tiến hành\nTheo dõi và xử trí tai biến\nTài liệu tham khảo",
+   "in_list_view": 1,
+   "description": "Một trong hai: phần hoặc mã bước"
+  },
+  {
+   "fieldname": "target_step_id",
+   "label": "Mã bước",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "relation",
+   "label": "Quan hệ",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "Theo hướng dẫn\nKhác biệt\nChưa có căn cứ",
+   "default": "Chưa có căn cứ",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "quote",
+   "label": "Đoạn trích",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "deviation_reason",
+   "label": "Lý do khác biệt",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Procedure",
+ "name": "NC Procedure Citation",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "istable": 1,
+ "editable_grid": 1
+}

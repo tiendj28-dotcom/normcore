@@ -100,3 +100,43 @@ class TestNCClinicalProcedure(FrappeTestCase):
 	def test_khong_tu_dat_trang_thai_da_ban_hanh(self):
 		proc = self._new(workflow_state="Đã ban hành")
 		self.assertRaises(frappe.ValidationError, proc.insert)
+
+	def test_DI_02_chi_mot_ban_dang_soan_cho_moi_dich_vu_khoa(self):
+		self._new(steps=[_step("A")]).insert()
+		dup = self._new(version_no=2)
+		self.assertRaises(frappe.ValidationError, dup.insert)
+
+	def test_DI_02_cho_phep_ban_moi_khi_ban_cu_da_ban_hanh(self):
+		proc = make_procedure(self.service, self.dept)
+		proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
+		proc.publish()
+		self._new(version_no=2).insert()
+
+	def test_FR_PROC_007_trich_dan_dung_mot_dich(self):
+		name = make_procedure(self.service, self.dept).name
+
+		def attempt(**cit):
+			proc = frappe.get_doc("NC Clinical Procedure", name)
+			proc.append("citations", {"relation": "Chưa có căn cứ", **cit})
+			proc.save()
+
+		self.assertRaises(frappe.ValidationError, attempt)  # không có đích
+		self.assertRaises(
+			frappe.ValidationError, attempt, target_section="Chỉ định", target_step_id="S001"
+		)  # hai đích
+		self.assertRaises(frappe.ValidationError, attempt, target_step_id="S999")  # bước không tồn tại
+		attempt(target_section="Chỉ định")
+
+	def test_FR_PROC_007_quan_he_mac_dinh_chua_co_can_cu(self):
+		proc = make_procedure(self.service, self.dept)
+		proc.append("citations", {"target_step_id": "S001"})
+		proc.save()
+		self.assertEqual(proc.citations[0].relation, "Chưa có căn cứ")
+
+	def test_tam_phan_va_truong_moi(self):
+		meta = frappe.get_meta("NC Clinical Procedure")
+		for f in (
+			"previous_version needs_review doctor_request overview indications contraindications "
+			"cautions preparation_notes monitoring references citations copied_from ai_log"
+		).split():
+			self.assertTrue(meta.has_field(f), f)

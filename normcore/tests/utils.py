@@ -72,6 +72,8 @@ def make_procedure(service, department, minutes=10, job="DD", version=1):
 			"steps": [{"phase": "Thực hiện", "step_title": "Bước 1", "description": "Thực hiện"}],
 		}
 	)
+	# Fixture của test cũ tạo nhiều bản nháp cùng (dịch vụ, khoa); DI-02 có test riêng nên bỏ qua ở đây.
+	proc.flags.ignore_single_active = True
 	proc.insert(ignore_permissions=True)
 	proc.append(
 		"resources",

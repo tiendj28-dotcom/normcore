@@ -8,12 +8,25 @@
   "department",
   "version_no",
   "workflow_state",
+  "previous_version",
+  "needs_review",
+  "doctor_request",
+  "overview",
+  "indications",
+  "contraindications",
+  "cautions",
+  "preparation_notes",
+  "monitoring",
+  "references",
   "steps",
   "resources",
+  "citations",
   "next_step_seq",
   "next_resource_seq",
   "decision_no",
-  "effective_date"
+  "effective_date",
+  "copied_from",
+  "ai_log"
  ],
  "fields": [
   {
@@ -30,7 +43,8 @@
    "fieldtype": "Link",
    "reqd": 1,
    "options": "NC Department",
-   "in_list_view": 1
+   "in_list_view": 1,
+   "in_standard_filter": 1
   },
   {
    "fieldname": "version_no",
@@ -45,7 +59,8 @@
    "fieldtype": "Link",
    "options": "Workflow State",
    "read_only": 1,
-   "in_list_view": 1
+   "in_list_view": 1,
+   "in_standard_filter": 1
   },
   {
    "fieldname": "steps",
@@ -86,6 +101,82 @@
    "label": "Ngày hiệu lực",
    "fieldtype": "Date",
    "description": "Bắt buộc khi ban hành"
+  },
+  {
+   "fieldname": "previous_version",
+   "label": "Phiên bản trước",
+   "fieldtype": "Link",
+   "options": "NC Clinical Procedure",
+   "read_only": 1
+  },
+  {
+   "fieldname": "needs_review",
+   "label": "Cần rà soát",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "description": "Đặt bởi FR-LIB-009"
+  },
+  {
+   "fieldname": "doctor_request",
+   "label": "Yêu cầu của người soạn",
+   "fieldtype": "Text",
+   "description": "Đầu vào cho AI"
+  },
+  {
+   "fieldname": "overview",
+   "label": "Đại cương",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "indications",
+   "label": "Chỉ định",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "contraindications",
+   "label": "Chống chỉ định",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "cautions",
+   "label": "Thận trọng",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "preparation_notes",
+   "label": "Chuẩn bị (ghi chú chung)",
+   "fieldtype": "Text Editor",
+   "description": "Nguồn lực cụ thể nằm ở bảng con"
+  },
+  {
+   "fieldname": "monitoring",
+   "label": "Theo dõi và xử trí tai biến",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "references",
+   "label": "Tài liệu tham khảo",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "citations",
+   "label": "Trích dẫn",
+   "fieldtype": "Table",
+   "options": "NC Procedure Citation"
+  },
+  {
+   "fieldname": "copied_from",
+   "label": "Sao chép từ",
+   "fieldtype": "Link",
+   "options": "NC Clinical Procedure",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ai_log",
+   "label": "Nhật ký AI của dự thảo",
+   "fieldtype": "Link",
+   "options": "NC AI Log",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,
