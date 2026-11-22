@@ -143,12 +143,12 @@ class TestNCCostingParameterSet(FrappeTestCase):
 		frappe.db.set_value(
 			"NC Costing Parameter Set",
 			ps.name,
-			{"expired_depreciation_mode": None, "volume_recon_tolerance": None, "wastage_cap": 33},
+			{"expired_depreciation_mode": None, "eqa_cost_category": "", "wastage_cap": 33},
 		)
 		backfill_parameter_set_defaults.execute()
 		row = frappe.db.get_value(
 			"NC Costing Parameter Set",
 			ps.name,
-			["expired_depreciation_mode", "volume_recon_tolerance", "wastage_cap"],
+			["expired_depreciation_mode", "eqa_cost_category", "wastage_cap"],
 		)
-		self.assertEqual(row, ("ZERO", 2, 33))
+		self.assertEqual(row, ("ZERO", "DRUG_SUPPLY", 33))
