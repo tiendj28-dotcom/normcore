@@ -90,3 +90,42 @@ def make_procedure(service, department, minutes=10, job="DD", version=1):
 	)
 	proc.save(ignore_permissions=True)
 	return proc
+
+
+def make_chain_data(service, department, job="DD"):
+	"""Quy trình ban hành, bộ định mức khóa và lần tính "Đã tính" của một (dịch vụ, khoa) — cho test FEAT-005."""
+	from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
+
+	proc = make_procedure(service, department, job=job)
+	proc.workflow_state = "Đã ban hành"
+	proc.decision_no = "QĐ-CH"
+	proc.effective_date = "2026-01-01"
+	proc.flags.allow_publish = True
+	proc.save(ignore_permissions=True)
+	ns = frappe.get_doc("NC Norm Set", make_norm_set(proc.name))
+	ns.status = "Đã khóa"
+	ns.flags.allow_lock = True
+	ns.save(ignore_permissions=True)
+	run = frappe.get_doc(
+		{
+			"doctype": "NC Costing Run",
+			"title": "Lần tính chuỗi",
+			"fiscal_year": 2026,
+			"costing_date": "2026-10-01",
+			"parameter_set": make_param_set(job=job).name,
+			"status": "Đã tính",
+		}
+	)
+	run.insert(ignore_permissions=True)
+	cost = frappe.get_doc(
+		{
+			"doctype": "NC Service Cost",
+			"costing_run": run.name,
+			"technical_service": service,
+			"department": department,
+			"norm_set": ns.name,
+			"calc_status": "Thành công",
+		}
+	)
+	cost.insert(ignore_permissions=True)
+	return frappe._dict(procedure=proc.name, norm_set=ns.name, cost=cost.name, run=run.name)

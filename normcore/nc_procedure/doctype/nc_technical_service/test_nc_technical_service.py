@@ -5,7 +5,7 @@ from frappe.tests.utils import FrappeTestCase
 from openpyxl import Workbook, load_workbook
 
 from normcore.api import importer as api
-from normcore.tests.utils import ensure, make_user
+from normcore.tests.utils import ensure, make_base, make_chain_data, make_user
 
 
 def _dept(code):
@@ -64,11 +64,26 @@ class TestNCTechnicalService(FrappeTestCase):
 		users = {
 			r: make_user(f"svc.ro{i}@normcore.test", r) for i, r in enumerate(("NC Finance", "NC Auditor"))
 		}
-		for role, email in users.items():
+		for email in users.values():
 			frappe.set_user(email)
 			doc = frappe.get_doc("NC Technical Service", "DV-S05")
 			doc.append("departments", {"department": "K01"})
 			self.assertRaises(frappe.PermissionError, doc.save)
+
+	def test_TC_SVC_03_tinh_trang_chuoi(self):
+		from normcore.api.service import get_chain_status
+
+		service, dept, job = make_base(service="DV-S03", department="K-S03")
+		data = make_chain_data(service, dept, job)
+		frappe.set_user(make_user("fin.s03@normcore.test", "NC Finance"))
+		res = get_chain_status(service)
+		self.assertEqual([i["key"] for i in res["items"]], ["procedure", "norm_set", "cost", "price"])
+		for item in res["items"]:
+			self.assertTrue(item["links"], item["key"])
+		self.assertIn(f"/app/nc-clinical-procedure/{data.procedure}", res["items"][0]["links"])
+		self.assertIn(f"/app/nc-norm-set/{data.norm_set}", res["items"][1]["links"])
+		self.assertIn(f"/app/nc-service-cost/{data.cost}", res["items"][2]["links"])
+		self.assertEqual(res["items"][3]["links"], ["#nc-chain-price"])
 
 	def test_FR_SVC_001_gan_chuyen_khoa(self):
 		ensure("NC Specialty", "specialty_code", "CK-S05", specialty_name="CK thử")
