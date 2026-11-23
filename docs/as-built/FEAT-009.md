@@ -24,3 +24,4 @@ TC-RES-01, 02, 07, 08, 09, TC-CLS-45, 46, 47, TC-ADM-02 (mặt hàng): đều xa
 - Cảnh báo, lý do loại chưa hiện trên bảng giải trình: **FEAT-015** gọi `material_line` (ASM-087). Hàm chưa có hệ số k, cấp ống, mẻ, ngày, UTILITY (ASM-097).
 - Giao diện chưa kiểm bằng trình duyệt (Playwright MCP không kết nối khi QA kiểm); quyền và luồng được kiểm bằng test trên site sạch.
 - Test cũ: kỳ vọng danh sách bộ nhập ở `api/test_importer.py` thêm `nc_item`, `nc_item_price`; số DocType ở `test_permissions.py` thành 27 (ASM-096, Lead duyệt).
+- Đổi loại mặt hàng (ASM-094): mặt hàng loại khác để trống số đơn vị định mức được lưu là 1; đổi loại sang Hóa chất, Chất chuẩn, Vật liệu nội kiểm rồi lưu **vẫn được** (số đơn vị giữ 1), vì FR-RES-018 chỉ ràng buộc lúc tạo. QA đã thử trên site sạch. Người dùng cần tự sửa số đơn vị khi đổi loại.
