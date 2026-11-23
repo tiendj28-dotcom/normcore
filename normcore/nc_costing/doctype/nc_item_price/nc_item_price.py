@@ -8,7 +8,7 @@ from frappe.utils import flt, getdate, now_datetime
 VERIFIED = "Đã xác minh"
 UNVERIFIED = "Chưa xác minh"
 AUTO_CODE = re.compile(r"DG-\d+")
-# ASM-069: các trường này bị khóa khi đơn giá đang "Đã xác minh"
+# ASM-091: các trường này bị khóa khi đơn giá đang "Đã xác minh"
 LOCKED_WHEN_VERIFIED = (
 	"item",
 	"unit_price",
@@ -32,18 +32,18 @@ class NCItemPrice(Document):
 		self._check_verification()
 
 	def after_insert(self):
-		if not self.price_code:  # ASM-071: để trống thì lấy bằng tên bản ghi
+		if not self.price_code:  # ASM-093: để trống thì lấy bằng tên bản ghi
 			self.db_set("price_code", self.name, update_modified=False)
 
 	def _check_price_code(self):
-		# mã tự đặt không được có dạng DG-<số> để không đụng mã tự sinh (AMD-005)
+		# mã tự đặt không được có dạng DG-<số> để không đụng mã tự sinh (AMD-008)
 		if self.price_code and AUTO_CODE.fullmatch(self.price_code) and self.price_code != self.name:
 			frappe.throw(
 				_("Mã đơn giá {0} có dạng mã tự sinh DG-<số>, hãy đặt mã khác").format(self.price_code)
 			)
 
 	def _check_locked(self):
-		"""ASM-069: đơn giá đã xác minh không đổi nội dung; phải bỏ xác minh trước (có thể cùng lượt lưu)."""
+		"""ASM-091: đơn giá đã xác minh không đổi nội dung; phải bỏ xác minh trước (có thể cùng lượt lưu)."""
 		was = self.get_doc_before_save()
 		if not was or was.verification_status != VERIFIED or self.verification_status != VERIFIED:
 			return

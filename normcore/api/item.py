@@ -56,7 +56,7 @@ def get_effective_price(item, as_of=None):
 		return {"item": item, "as_of": str(as_of), "price": None, "warnings": [], "norm_unit_price": None}
 	units = meta.norm_units_per_purchase_unit
 	if not units and meta.item_type not in pricing.NORM_ITEM_TYPES:
-		units = 1  # loại khác lùi về 1; ba loại hóa chất thiếu số đơn vị thì không đoán (ASM-076)
+		units = 1  # loại khác lùi về 1; ba loại hóa chất thiếu số đơn vị thì không đoán (ASM-098)
 	norm_unit_price = pricing.unit_price_per_norm(picked.unit_price, Decimal(str(units))) if units else None
 	return {
 		"item": item,

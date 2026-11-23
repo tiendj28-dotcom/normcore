@@ -73,7 +73,7 @@ class TestSelectPrice(unittest.TestCase):
 	def test_FR_RES_004_trung_het_thi_ngay_chung_tu_roi_ten(self):
 		a = P("a", valid_from=date(2026, 1, 1), doc=date(2025, 12, 1))
 		b = P("b", valid_from=date(2026, 1, 1), doc=date(2025, 12, 20))
-		self.assertEqual(select_price([a, b], date(2026, 2, 1)).name, "b")  # ASM-063
+		self.assertEqual(select_price([a, b], date(2026, 2, 1)).name, "b")  # ASM-085
 		c = P("c", valid_from=date(2026, 1, 1), doc=date(2025, 12, 20))
 		self.assertEqual(select_price([b, c], date(2026, 2, 1)).name, "c")
 

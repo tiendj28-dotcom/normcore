@@ -119,7 +119,7 @@ class TestNCItemPrice(FrappeTestCase):
 			frappe.set_user(email)
 			self.assertFalse(frappe.has_permission("NC Item Price", "read"), role)
 
-	# --- ASM-069: khóa khi đã xác minh
+	# --- ASM-091: khóa khi đã xác minh
 	def _verified(self, **kw):
 		return _price(attachment="/files/hd-01.pdf", verification_status="Đã xác minh", **kw).insert()
 
@@ -193,7 +193,7 @@ class TestNCItemPrice(FrappeTestCase):
 		self.assertFalse(copy.verified_on)
 		self.assertNotEqual(copy.price_code, src.price_code)
 
-	# --- AMD-005: price_code
+	# --- AMD-008: price_code
 	def test_FR_RES_012_price_code_de_trong_lay_bang_ten(self):
 		doc = _price().insert()
 		self.assertEqual(frappe.db.get_value("NC Item Price", doc.name, "price_code"), doc.name)

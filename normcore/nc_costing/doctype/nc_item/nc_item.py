@@ -18,7 +18,7 @@ class NCItem(Document):
 				frappe.throw(_("{0} không được âm").format(label))
 
 	def _check_norm_units(self):
-		"""FR-RES-018, ASM-072: ba loại hóa chất phải khai số đơn vị định mức > 0 (không có mặc định);
+		"""FR-RES-018, ASM-094: ba loại hóa chất phải khai số đơn vị định mức > 0 (không có mặc định);
 		loại khác để trống thì tính là 1."""
 		units = self.norm_units_per_purchase_unit
 		if self.item_type in NORM_ITEM_TYPES:

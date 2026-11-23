@@ -33,12 +33,13 @@ MATRIX = {
 	"Quy trình": "W W R R R R R R R R",
 	"Bộ tham số, chức danh, loại giá": "- - - W R - R R W R",
 	"Bộ định mức": "W W - R R - R R R R",
+	"Mặt hàng, đơn giá, thiết bị, phòng": "R R - W W - R R W R",
+	"Loại thiết bị, hồ sơ tuân thủ": "R R - R W - R R W R",
 	"Lần tính giá, kết quả, đối soát": "- - - W - - R - R R",
 	"Nhật ký AI, sổ sự kiện": "- - - - - - R - R R",
 	# Ma trận không có dòng riêng: căn cứ ghi ở đây (ASM-008, G1 của NORM-12)
 	"NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)": "R R R R R W R R W R",
 	"NC Cost Center (G1: Admin, Finance ghi)": "R R R W R R R R W R",
-	"Mặt hàng, đơn giá": "R R - W W - R R W R",
 }
 DOCTYPE_ROW = {
 	"NC Technical Service": "Dịch vụ kỹ thuật, chuyên khoa",
@@ -46,12 +47,17 @@ DOCTYPE_ROW = {
 	"NC Clinical Procedure": "Quy trình",
 	"NC Costing Parameter Set": "Bộ tham số, chức danh, loại giá",
 	"NC Job Title": "Bộ tham số, chức danh, loại giá",
-	"NC Item": "Mặt hàng, đơn giá",
-	"NC Item Price": "Mặt hàng, đơn giá",
+	"NC Item": "Mặt hàng, đơn giá, thiết bị, phòng",
+	"NC Item Price": "Mặt hàng, đơn giá, thiết bị, phòng",
+	"NC Price Category": "Bộ tham số, chức danh, loại giá",
 	"NC Norm Set": "Bộ định mức",
+	"NC Equipment": "Mặt hàng, đơn giá, thiết bị, phòng",
+	"NC Room": "Mặt hàng, đơn giá, thiết bị, phòng",
+	"NC Equipment Type": "Loại thiết bị, hồ sơ tuân thủ",
 	"NC Costing Run": "Lần tính giá, kết quả, đối soát",
 	"NC Service Cost": "Lần tính giá, kết quả, đối soát",
 	"NC AI Log": "Nhật ký AI, sổ sự kiện",
+	"NC Audit Event": "Nhật ký AI, sổ sự kiện",
 	"NC Department": "NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)",
 	"NC Cost Center": "NC Cost Center (G1: Admin, Finance ghi)",
 }
@@ -63,6 +69,10 @@ DELETE_ALLOWED = {
 		"NC Job Title",
 		"NC Technical Service",
 		"NC Specialty",
+		"NC Equipment",
+		"NC Room",
+		"NC Equipment Type",
+		"NC Price Category",
 	}
 }
 PERM_TYPES = ("read", "write", "create", "delete", "submit", "cancel", "amend")

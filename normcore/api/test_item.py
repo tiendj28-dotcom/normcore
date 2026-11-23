@@ -184,7 +184,7 @@ class TestItemAPI(FrappeTestCase):
 		frappe.db.set_value("NC Item", "MH-B02", "norm_units_per_purchase_unit", 0)
 		self.assertEqual(api.get_effective_price("MH-B02", "2026-06-01")["norm_unit_price"], "1234.5000")
 
-	# --- bộ nhập đơn giá (AMD-005)
+	# --- bộ nhập đơn giá (AMD-008)
 	def _rm(self):
 		frappe.set_user(make_user("itemapi.rm2@normcore.test", "NC Resource Manager"))
 

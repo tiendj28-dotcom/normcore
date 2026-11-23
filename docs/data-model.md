@@ -120,10 +120,11 @@ erDiagram
 | :-- | :-- | :-- | :-- |
 | event_time | Thời điểm | Datetime | |
 | user | Người thực hiện | Link User | |
-| event_type | Loại sự kiện | Select | Chuyển trạng thái / Khóa / Xuất tệp / Đổi cấu hình / Gọi AI / Nhập tệp |
+| event_type | Loại sự kiện | Select | Chuyển trạng thái / Khóa / Xuất tệp / Đổi cấu hình / Gọi AI / Nhập tệp / Xóa **[AMD-006]** |
 | ref_doctype, ref_name | Bản ghi | Link DocType, Dynamic Link | |
 | from_state, to_state | Trạng thái trước, sau | Data | |
 | detail | Chi tiết | Small Text | Lý do từ chối, tên tệp xuất |
+| before_value **[AMD-006]** | Giá trị trước | Long Text | JSON, chỉ đọc; chỉ sự kiện "Xóa": bản ghi, bảng con, owner, creation, các Version |
 
 **NC Review Comment** — Ý kiến thẩm định [FR-WF-003]. Naming: tự động.
 
@@ -345,13 +346,13 @@ erDiagram
 | working_hours_per_day | Số giờ làm việc ngày | Float | Có | |
 | wastage_cap | Trần hao hụt (%) | Percent | Có | |
 | accumulation_mode | Cách tính tích lũy | Select | Có | ON_COST / ON_PRICE / NONE |
-| accumulation_rate | Tỷ lệ tích lũy (%) | Percent | | |
-| obligation_rate | Tỷ lệ nghĩa vụ tài chính (%) | Percent | | |
+| accumulation_rate | Tỷ lệ tích lũy (%) | Percent | Có | |
+| obligation_rate | Tỷ lệ nghĩa vụ tài chính (%) | Percent | Có | |
 | rounding_unit | Đơn vị làm tròn | Int | Có | Mặc định 100 |
 | reconciliation_tolerance | Ngưỡng đối soát (%) | Percent | Có | Mặc định 10 |
 | comparison_tolerance | Ngưỡng lệch so sánh (%) | Percent | Có | Mặc định 10 |
-| electricity_price | Giá điện (đ/kWh) | Currency | | |
-| water_price | Giá nước (đ/m³) | Currency | | |
+| electricity_price | Giá điện (đ/kWh) | Currency | Có | |
+| water_price | Giá nước (đ/m³) | Currency | Có | |
 | expired_depreciation_mode **[1.1]** | Khấu hao thiết bị hết thời gian sử dụng | Select | Có | ZERO / CONTINUE; mặc định ZERO [FR-RES-007] |
 | material_recon_tolerance **[1.1]** | Ngưỡng đối soát vật chất (%) | Percent | Có | Mặc định 5 [FR-COST-027] |
 | volume_recon_tolerance **[1.1]** | Ngưỡng đối soát sản lượng (%) | Percent | Có | Mặc định 2 [FR-COST-028] |
@@ -388,7 +389,7 @@ erDiagram
 | billed_separately | Thanh toán riêng ngoài giá | Check | | [FR-RES-014] |
 | is_active | Đang dùng | Check | | |
 | norm_uom **[1.1]** | Đơn vị định mức | Data | | Ví dụ: test, mL. Trống = dùng `uom` |
-| norm_units_per_purchase_unit **[1.1]** | Số đơn vị định mức trong một đơn vị mua | Float | | Không có mặc định **[AMD-005]**. BB (lớn hơn 0) với Hóa chất, Chất chuẩn, Vật liệu nội kiểm [BR-CLS-002]; loại khác để trống thì tính là 1 |
+| norm_units_per_purchase_unit **[1.1]** | Số đơn vị định mức trong một đơn vị mua | Float | | Không có mặc định **[AMD-008]**. BB (lớn hơn 0) với Hóa chất, Chất chuẩn, Vật liệu nội kiểm [BR-CLS-002]; loại khác để trống thì tính là 1 |
 | nominal_tests **[1.1]** | Số test danh nghĩa của một đơn vị mua | Int | | |
 | open_stability_days **[1.1]** | Hạn dùng sau mở (ngày) | Int | | [BR-CLS-016] |
 | is_main_reagent **[1.1]** | Là hóa chất chính | Check | | Mặc định bật cờ nhân k ở dòng định mức [FR-NORM-019] |
@@ -399,7 +400,7 @@ erDiagram
 
 | Trường | Nhãn | Kiểu | BB | Ghi chú |
 | :-- | :-- | :-- | :-- | :-- |
-| price_code **[AMD-005]** | Mã đơn giá | Data | | Duy nhất. Để trống thì lấy bằng tên bản ghi; không tự đặt dạng DG-<số>. Khóa khi nhập Excel [FR-RES-012] |
+| price_code **[AMD-008]** | Mã đơn giá | Data | | Duy nhất. Để trống thì lấy bằng tên bản ghi; không tự đặt dạng DG-<số>. Khóa khi nhập Excel [FR-RES-012] |
 | item | Mặt hàng | Link NC Item | Có | |
 | unit_price | Đơn giá (đã gồm thuế GTGT) | Float 4 | Có | |
 | price_source | Nguồn giá | Select | Có | Trúng thầu / Hợp đồng **[1.1]** / Hóa đơn / Giá công bố / Báo giá. Thứ tự này là thứ tự ưu tiên khi chọn giá [FR-RES-004] |

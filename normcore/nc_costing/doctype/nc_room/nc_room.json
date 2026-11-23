@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "creation": "2026-11-22 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "room_code",
+  "room_name",
+  "department",
+  "area_m2",
+  "annual_infrastructure_cost",
+  "available_hours_per_year"
+ ],
+ "fields": [
+  {
+   "fieldname": "room_code",
+   "label": "Mã phòng",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "room_name",
+   "label": "Tên phòng",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "area_m2",
+   "label": "Diện tích (m²)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "annual_infrastructure_cost",
+   "label": "Chi phí hạ tầng năm",
+   "fieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "available_hours_per_year",
+   "label": "Số giờ khai thác năm",
+   "fieldtype": "Float",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-22 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Room",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "quick_entry": 0,
+ "autoname": "field:room_code",
+ "title_field": "room_name"
+}

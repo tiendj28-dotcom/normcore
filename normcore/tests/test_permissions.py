@@ -1,4 +1,4 @@
-"""Quyền theo data-model mục 4 cho 18 DocType: vai trò ngoài ma trận bị từ chối; NC Auditor chỉ đọc (FR-ACC-007, TC-ACC-04)."""
+"""Quyền theo data-model mục 4 cho 27 DocType: vai trò ngoài ma trận bị từ chối; NC Auditor chỉ đọc (FR-ACC-007, TC-ACC-04)."""
 
 import json
 from pathlib import Path
@@ -22,8 +22,8 @@ class TestPermissions(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	def test_co_20_doctype_va_10_vai_tro(self):
-		self.assertEqual(len(DOCTYPES), 20)
+	def test_co_27_doctype_va_10_vai_tro(self):
+		self.assertEqual(len(DOCTYPES), 27)
 		for r in ROLES:
 			self.assertTrue(frappe.db.exists("Role", r), r)
 

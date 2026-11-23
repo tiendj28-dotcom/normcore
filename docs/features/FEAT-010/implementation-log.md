@@ -1,0 +1,15 @@
+# FEAT-010 — Nhật ký hiện thực
+
+| Task | Lệnh | Kết quả | sha |
+| :-- | :-- | :-- | :-- |
+| T01 | `pytest normcore/tests/unit/test_resources.py normcore/tests/golden/test_resources_golden.py`; `grep frappe normcore/costing/resources.py` | 14 passed, 24 subtests; grep không in gì | c71cadb |
+| T02 | `check_conventions.py`; `with_bench.sh 'migrate && run-tests --module …nc_room.test_nc_room'` và `…nc_equipment_type`; `…tests.test_permissions` | thoát 0; Ran 7 OK; Ran 4 OK; Ran 3 OK (đếm DocType 18 → 20) | 15d7560 |
+| T03 | `with_bench.sh 'migrate && run-tests --module …nc_costing_parameter_set.test_nc_costing_parameter_set && …nc_costing_run.test_nc_costing_run'` | Ran 3 OK; Ran 5 OK | b2ce2c2 |
+| T04 | `with_bench.sh 'migrate && run-tests --module …nc_equipment.test_nc_equipment && …tests.test_permissions'`; `check_conventions.py` | Ran 14 OK; Ran 3 OK (đếm DocType 20 → 23); thoát 0 | 128f002 |
+| T05 | `with_bench.sh 'run-tests --module normcore.api.test_equipment'` | Ran 5 OK | 8f949d7 |
+| T06 | `pytest normcore/tests/unit/test_equipment_ui_conventions.py`; `with_bench.sh 'migrate && bench build --app normcore'` | 103 passed (unit); build thoát 0. Chưa xem trên trình duyệt (ghi ở As-Built) | 21f28e2 |
+| T07 | `python3 docs/tools/build_rtm.py docs` | `VAN DE: 0`; thêm CF-003, ASM-078..067, `docs/as-built/FEAT-010.md`. `multica env start preview` thoát lỗi "chưa có site normcore.test" nên chưa xem được giao diện | (commit T07) |
+| T08 | golden_engine (cả `--no-depr`), golden_cls; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90`; `check_conventions.py`; `ruff check`, `ruff format --check`; `with_bench.sh 'migrate && run-tests --app normcore'` | golden OK; 110 passed, 37 subtests, độ phủ 97,99%; thoát 0; ruff sạch; Ran 234 tests OK | (commit T08) |
+| T09 | `pytest normcore/tests/unit normcore/tests/golden`; `with_bench.sh 'migrate && run-tests --module …test_nc_equipment'`, `…api.test_equipment` | 114 passed; Ran 20 OK; Ran 5 OK | 02fa0ef |
+| T10 | `with_bench.sh 'run-tests --module normcore.api.test_importer_equipment'`; `run-tests --app normcore` | Ran 6 OK; toàn bộ Ran 250, FAILED (failures=2): `test_finance_thay_bo_nhap_va_import_file_qua_file_rieng_tu`, `test_vai_tro_chi_doc_va_auditor_bi_tu_choi` ở `api/test_importer.py` (danh sách bộ nhập thêm hai khóa; chưa sửa, chờ người duyệt, ASM-084) | (commit T10) |
+| T11 | `git merge origin/develop` (gộp PR 22, 23, 24; giải xung đột hooks, check_conventions, workspace, vi.csv, test_permissions, bộ tham số, assumptions, conflicts; ASM của FEAT-010 đánh lại 063..069 → 078..084); `pytest normcore/tests/unit normcore/tests/golden --cov=… --cov-fail-under=90`; `check_conventions.py`; `build_rtm.py`; `with_bench.sh 'migrate && run-tests --app normcore'` | 133 passed, độ phủ 98,31%; thoát 0; VAN DE: 0; Ran 315 tests OK. Hai test cũ ở `api/test_importer.py` chỉ thêm khóa `nc_equipment`, `nc_room`; `test_permissions.py` 25 DocType, có sửa docstring (người duyệt, ASM-082) | (commit gộp) |

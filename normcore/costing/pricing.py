@@ -22,7 +22,7 @@ _Q4 = Decimal("0.0001")
 
 
 class NoEffectivePrice(ValueError):
-	"""Mặt hàng không có đơn giá còn hiệu lực tại ngày tính giá (ASM-066)."""
+	"""Mặt hàng không có đơn giá còn hiệu lực tại ngày tính giá (ASM-088)."""
 
 
 @dataclass(frozen=True)
@@ -58,7 +58,7 @@ def _rank(source: str) -> int:
 
 def select_price(prices, as_of: date) -> PriceRecord | None:
 	"""FR-RES-004: trong các đơn giá còn hiệu lực tại `as_of`, lấy loại nguồn ưu tiên cao nhất, rồi
-	ngày bắt đầu hiệu lực gần nhất. Còn bằng nhau: ngày chứng từ mới hơn, rồi tên lớn hơn (ASM-063)."""
+	ngày bắt đầu hiệu lực gần nhất. Còn bằng nhau: ngày chứng từ mới hơn, rồi tên lớn hơn (ASM-085)."""
 	best = None
 	best_key = None
 	for p in prices:
@@ -85,7 +85,7 @@ def _months_before(d: date, months: int) -> date:
 
 
 def price_warnings(price: PriceRecord, as_of: date) -> tuple:
-	"""FR-RES-003 (chứng từ cũ hơn 24 tháng so với ngày tính giá; đúng 24 tháng thì chưa, ASM-064) và
+	"""FR-RES-003 (chứng từ cũ hơn 24 tháng so với ngày tính giá; đúng 24 tháng thì chưa, ASM-086) và
 	FR-RES-017 (chưa xác minh). Chỉ cảnh báo, không chặn tính giá."""
 	out = []
 	if price.document_date < _months_before(as_of, STALE_MONTHS):
@@ -114,7 +114,7 @@ def material_line(
 ) -> MaterialLineResult:
 	"""BR-COST-003 trên đơn giá một đơn vị định mức (BR-CLS-002), 2 số lẻ HALF_UP:
 	thành tiền = lượng áp dụng * (1 + hao hụt) * đơn giá một đơn vị định mức / số lần dùng,
-	đơn giá một đơn vị định mức = đơn giá đơn vị mua / `norm_units` (bắt buộc, > 0; ASM-075).
+	đơn giá một đơn vị định mức = đơn giá đơn vị mua / `norm_units` (bắt buộc, > 0; ASM-097).
 	FR-RES-014: mặt hàng thanh toán riêng → thành tiền 0 kèm lý do, không cần đơn giá."""
 	applied_qty, wastage_rate = Decimal(applied_qty), Decimal(wastage_rate)
 	if applied_qty < 0 or wastage_rate < 0:
