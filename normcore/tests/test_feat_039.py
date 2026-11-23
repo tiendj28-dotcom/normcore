@@ -17,6 +17,13 @@ class TestQuetQuyen(FrappeTestCase):
 			"Custom DocPerm", {"parent": "NC Norm Set", "role": "NC Auditor"}, pluck="name"
 		):
 			frappe.delete_doc("Custom DocPerm", name, force=True, ignore_permissions=True)
+		# Frappe tự tạo Custom Field cho trường trạng thái của Workflow (ALTER TABLE, commit ngầm)
+		for name in frappe.get_all("Custom Field", {"name": ["like", "NC Norm Set-feat39%"]}, pluck="name"):
+			frappe.delete_doc("Custom Field", name, force=True, ignore_permissions=True)
+		for name in frappe.get_all("Workflow State", {"name": ["like", "FEAT39%"]}, pluck="name"):
+			frappe.delete_doc("Workflow State", name, force=True, ignore_permissions=True)
+		for name in frappe.get_all("Workflow Action Master", {"name": ["like", "FEAT39%"]}, pluck="name"):
+			frappe.delete_doc("Workflow Action Master", name, force=True, ignore_permissions=True)
 		frappe.clear_cache(doctype="NC Norm Set")
 		frappe.db.commit()
 
@@ -88,9 +95,10 @@ from normcore.core import audit
 from normcore.core import import_sets as _import_sets
 from normcore.core import importer as importer_core
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import make_base, make_chain_data, make_param_set, make_user
+from normcore.tests.utils import ensure, make_base, make_chain_data, make_param_set, make_user
 
 AUDITOR = "NC Auditor"
+PRICE_SOURCE = "Hóa đơn"
 
 
 def _snapshot(doctypes):
@@ -179,7 +187,18 @@ class TestTCCLS44(FrappeTestCase):
 				"parameter_set": param.name,
 			}
 		).insert(ignore_permissions=True)
-		price = frappe.get_all("NC Item Price", pluck="name", limit=1)
+		ensure("NC Item", "item_code", "F39-ITEM", item_name="Mặt hàng f39", item_type="Thuốc", uom="viên")
+		price = frappe.get_doc(
+			{
+				"doctype": "NC Item Price",
+				"item": "F39-ITEM",
+				"unit_price": 1000,
+				"price_source": PRICE_SOURCE,
+				"document_no": "CT-F39",
+				"document_date": "2026-01-01",
+				"valid_from": "2026-01-01",
+			}
+		).insert(ignore_permissions=True)
 		set_key = next(iter(importer_core.REGISTRY))
 		events_before = frappe.db.count("NC Audit Event")
 		before = _snapshot(WATCH)
@@ -208,8 +227,7 @@ class TestTCCLS44(FrappeTestCase):
 				"NC Audit Event", frappe.get_all("NC Audit Event", pluck="name", limit=1)[0]
 			),
 		}
-		if price:
-			ops["verify_price"] = lambda: item_api.verify_price(price[0])
+		ops["verify_price"] = lambda: item_api.verify_price(price.name)
 		for label, op in ops.items():
 			with self.subTest(op=label):
 				with self.assertRaises(frappe.PermissionError):
