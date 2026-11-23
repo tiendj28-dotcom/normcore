@@ -17,3 +17,6 @@ Giới hạn: giao diện chưa xem bằng trình duyệt (chỉ kiểm tệp JS
 - FR-CMP-006 phần cảnh báo trên lần tính, FR-CMP-002..004 (quy chi phí về năm): FEAT-036.
 - Không viết patch (ASM-106). ASM-099..106, AMD-009 (đã duyệt, áp vào `docs/data-model.md`). ASM-105: sửa hai test cũ theo Quyết định Lead (`test_permissions.py` 27 → 29 DocType; `api/test_importer.py` thêm `nc_equipment_compliance` cho NC Resource Manager).
 - FEAT-031 chạy song song: khi gộp `develop` giữ dòng của cả hai bên ở `assumptions.md`, `vi.csv`, `check_conventions.py`, đếm DocType; đánh lại số ASM.
+
+## Nghiệm thu
+Người nghiệm thu: QA (Multica). Verify accepted ở commit `d9be0cb`. Giới hạn QA: không tạo được site sạch `normcore-verify.test` (thiếu `DB_ROOT_PASSWORD`), bộ test chạy trên site dev `normcore.test` (465 test OK); chưa kiểm giao diện bằng Playwright.
