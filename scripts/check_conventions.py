@@ -45,6 +45,7 @@ DOCTYPE_ROW = {
 	"NC Clinical Procedure": "Quy trình",
 	"NC Costing Parameter Set": "Bộ tham số, chức danh, loại giá",
 	"NC Job Title": "Bộ tham số, chức danh, loại giá",
+	"NC Price Category": "Bộ tham số, chức danh, loại giá",
 	"NC Norm Set": "Bộ định mức",
 	"NC Costing Run": "Lần tính giá, kết quả, đối soát",
 	"NC Service Cost": "Lần tính giá, kết quả, đối soát",
@@ -61,6 +62,7 @@ DELETE_ALLOWED = {
 		"NC Job Title",
 		"NC Technical Service",
 		"NC Specialty",
+		"NC Price Category",
 	}
 }
 PERM_TYPES = ("read", "write", "create", "delete", "submit", "cancel", "amend")

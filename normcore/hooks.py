@@ -178,7 +178,14 @@ has_permission = {
 # FR-ADM-005: từ chối xóa danh mục đang được tham chiếu, nêu bản ghi tham chiếu
 doc_events = {
 	dt: {"on_trash": "normcore.core.references.check_not_referenced"}
-	for dt in ("NC Department", "NC Cost Center", "NC Job Title", "NC Technical Service", "NC Specialty")
+	for dt in (
+		"NC Department",
+		"NC Cost Center",
+		"NC Job Title",
+		"NC Technical Service",
+		"NC Specialty",
+		"NC Price Category",
+	)
 }
 # FR-AUD-001 (ADR-014): hook chung ghi sự kiện chuyển trạng thái, khóa, xóa; không sửa controller từng DocType
 doc_events["*"] = {
