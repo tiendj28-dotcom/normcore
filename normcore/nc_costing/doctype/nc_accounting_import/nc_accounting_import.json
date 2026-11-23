@@ -11,6 +11,7 @@
   "line_count",
   "total_amount",
   "error_count",
+  "summary_html",
   "import_errors",
   "lines",
   "totals"
@@ -71,6 +72,11 @@
    "label": "Số dòng lỗi",
    "fieldtype": "Int",
    "read_only": 1
+  },
+  {
+   "fieldname": "summary_html",
+   "label": "Tóm tắt",
+   "fieldtype": "HTML"
   },
   {
    "fieldname": "import_errors",
