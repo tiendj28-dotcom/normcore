@@ -184,6 +184,9 @@ doc_events = {
 		"NC Job Title",
 		"NC Technical Service",
 		"NC Specialty",
+		"NC Equipment",
+		"NC Room",
+		"NC Equipment Type",
 		"NC Price Category",
 	)
 }

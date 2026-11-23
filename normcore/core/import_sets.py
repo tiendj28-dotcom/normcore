@@ -32,3 +32,79 @@ NC_TECHNICAL_SERVICE = ImportSet(
 )
 
 register(NC_TECHNICAL_SERVICE)
+
+# FEAT-010, FR-RES-012 (phần thiết bị, phòng): chỉ trường phẳng ở data-model 3.5 (ASM-084).
+# Ô trống: tạo mới lấy mặc định DocType, cập nhật giữ nguyên. Linh kiện, tỷ lệ theo khoa khai trên form.
+EQUIPMENT_MODES = ("Mua", "Thuê", "Đặt theo hóa chất", "Liên doanh, liên kết")
+ALLOCATION_BASES = ("Giờ kế hoạch", "Số kết quả", "Phút chiếm máy")
+FUNDING_SOURCES = ("Ngân sách", "Quỹ phát triển", "Vay", "Liên doanh, liên kết", "Viện trợ", "Khác")
+
+NC_EQUIPMENT = ImportSet(
+	key="nc_equipment",
+	label="Thiết bị",
+	doctype="NC Equipment",
+	key_field="equipment_code",
+	columns=(
+		Column("equipment_code", "Mã thiết bị", "Data", required=True, example="VD-TB01"),
+		Column("equipment_name", "Tên thiết bị", "Data", required=True, example="Thiết bị (ví dụ)"),
+		Column(
+			"department",
+			"Khoa quản lý",
+			"Link",
+			required=True,
+			link_doctype="NC Department",
+			example="VD-K01",
+		),
+		Column("equipment_type", "Loại thiết bị", "Link", link_doctype="NC Equipment Type"),
+		Column("acquisition_mode", "Hình thức có máy", "Select", options=EQUIPMENT_MODES, example="Mua"),
+		Column(
+			"allocation_basis",
+			"Tiêu chí chia chi phí",
+			"Select",
+			options=ALLOCATION_BASES,
+			example="Giờ kế hoạch",
+		),
+		Column("in_service_date", "Ngày đưa vào sử dụng", "Date", required=True, example="2022-01-01"),
+		Column(
+			"funding_source",
+			"Nguồn hình thành",
+			"Select",
+			required=True,
+			options=FUNDING_SOURCES,
+			example="Ngân sách",
+		),
+		Column("original_cost", "Nguyên giá", "Float", example=1200000000),
+		Column("useful_life_years", "Thời gian sử dụng (năm)", "Float", example=8),
+		Column("annual_contract_cost", "Chi phí năm theo hợp đồng", "Float"),
+		Column("contract_asset_value", "Giá trị ghi trên hợp đồng", "Float"),
+		Column("annual_maintenance_cost", "Bảo trì năm", "Float", example=30000000),
+		Column("maintenance_vendor_paid", "Bảo trì do nhà cung cấp chịu", "Check"),
+		Column("annual_calibration_cost", "Kiểm định, hiệu chuẩn năm", "Float", example=6000000),
+		Column("planned_hours_per_year", "Giờ khai thác kế hoạch năm", "Float", example=2112),
+		Column("utilization_rate", "Hệ số sử dụng", "Float", example=0.5),
+		Column("power_kw", "Công suất khi chạy (kW)", "Float"),
+		Column("power_standby_kw", "Công suất khi chờ (kW)", "Float"),
+		Column("run_hours_per_day", "Số giờ chạy mỗi ngày", "Float"),
+		Column("standby_hours_per_day", "Số giờ chờ mỗi ngày", "Float"),
+		Column("continuous_power", "Cấp điện liên tục", "Check"),
+	),
+)
+
+register(NC_EQUIPMENT)
+
+NC_ROOM = ImportSet(
+	key="nc_room",
+	label="Phòng",
+	doctype="NC Room",
+	key_field="room_code",
+	columns=(
+		Column("room_code", "Mã phòng", "Data", required=True, example="VD-P01"),
+		Column("room_name", "Tên phòng", "Data", required=True, example="Phòng (ví dụ)"),
+		Column("department", "Khoa", "Link", required=True, link_doctype="NC Department", example="VD-K01"),
+		Column("area_m2", "Diện tích (m²)", "Float", example=40),
+		Column("annual_infrastructure_cost", "Chi phí hạ tầng năm", "Float", required=True, example=52800000),
+		Column("available_hours_per_year", "Số giờ khai thác năm", "Float", required=True, example=2112),
+	),
+)
+
+register(NC_ROOM)

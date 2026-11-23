@@ -28,3 +28,21 @@
 | FR-RES-010 | `test_TC_RES_05_bac_si`, `test_TC_RES_05_dieu_duong`, `test_TC_RES_05_golden_don_gia_gio_cong`, `test_TC_RES_05_don_gia_gio_cong_tren_doc` |
 | FR-RES-011 | `test_TC_RES_06_bo_da_khoa_khong_sua_duoc`, `test_TC_RES_06_bo_co_is_locked_khong_sua_duoc`, `test_TC_RES_06_nhan_ban_thanh_bo_moi_sua_duoc` |
 | FR-RES-015 | `test_TC_RES_11_thieu_cap_phe_duyet_bi_tu_choi_roi_luu_duoc`, `test_TC_RES_11_cap_phe_duyet_ngoai_danh_sach_bi_tu_choi` |
+
+## FEAT-010 (kiểm định độc lập NORM-19)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-RES-005 | `test_FR_RES_005_thieu_nguon_hinh_thanh_bi_tu_choi`, `test_FR_RES_005_trung_ma_bi_tu_choi`, `test_FR_RES_005_thong_bao_tieng_viet_khong_lo_ten_truong` |
+| FR-RES-006 | `test_TC_RES_03_eq1_khau_hao_va_don_gia_gio`, `test_TC_RES_03_api_eq1`, `test_FR_RES_006_thieu_ban_ghi` |
+| FR-RES-007 | `test_TC_RES_04_v2_zero`, `test_TC_RES_04_v2_continue`, `test_TC_RES_04_v2_het_thoi_gian_su_dung_theo_bo_tham_so` |
+| FR-RES-008 | `test_TC_RES_10_thieu_gio_khai_thac_bi_tu_choi_roi_r1_luu_duoc`, `test_FR_RES_008_gio_khong_hop_le_bi_tu_choi`, `test_FR_RES_008_trung_ma_bi_tu_choi` |
+| FR-RES-012 | `test_FR_RES_012_nhap_phong`, `test_FR_RES_012_tai_mau_roi_nhap_lai_khong_trung` (api/test_importer_equipment.py) |
+| FR-RES-019 | `test_TC_CLS_48_thue_thieu_chi_phi_hop_dong_bi_tu_choi`, `test_TC_CLS_48_mua_thieu_nguyen_gia_bi_tu_choi`, `test_FR_RES_019_dat_theo_hoa_chat_luu_duoc_gia_tri_hop_dong` |
+| FR-RES-020 | `test_TC_CLS_48_thue_thieu_chi_phi_hop_dong_bi_tu_choi` (phần còn lại thuộc TC-CLS-12, FEAT-036) |
+| FR-RES-021 | `test_FR_RES_021_dat_theo_hoa_chat_khong_khau_hao` (TC-CLS-07 thuộc FEAT-036) |
+| FR-RES-022 | `test_TC_CLS_48_thieu_tieu_chi_chia_bi_tu_choi`, `test_TC_CLS_48_chia_theo_so_ket_qua_khong_can_gio_ke_hoach` |
+| FR-RES-023 | `test_FR_RES_023_linh_kien_theo_thang_va_khong_hop_le`, `test_FR_RES_023_thieu_tuoi_tho_theo_bi_tu_choi` |
+| FR-RES-024 | `test_TC_CLS_49_ty_le_theo_khoa`, `test_TC_CLS_49_ty_le_khoa` |
+| FR-RES-025 | `test_TC_CLS_49_ty_le_theo_khoa`, `test_FR_RES_025_khoa_quan_ly_ngoai_bang_ty_le_bang_0` |
+| FR-RES-026 | `test_FR_RES_026_luu_truong_dien` |

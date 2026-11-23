@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "creation": "2026-11-22 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "component_name",
+  "replacement_cost",
+  "life_basis",
+  "life_value",
+  "vendor_paid"
+ ],
+ "fields": [
+  {
+   "fieldname": "component_name",
+   "label": "Tên linh kiện",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "replacement_cost",
+   "label": "Giá thay thế",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "life_basis",
+   "label": "Tuổi thọ tính theo",
+   "fieldtype": "Select",
+   "options": "\nTháng\nSố kết quả\nGiờ chạy",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "life_value",
+   "label": "Tuổi thọ",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "vendor_paid",
+   "label": "Nhà cung cấp chịu",
+   "fieldtype": "Check",
+   "in_list_view": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-22 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Equipment Component",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0,
+ "istable": 1,
+ "editable_grid": 1
+}

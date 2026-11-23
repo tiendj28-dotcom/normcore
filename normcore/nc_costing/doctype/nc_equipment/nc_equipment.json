@@ -1,0 +1,346 @@
+{
+ "actions": [],
+ "creation": "2026-11-22 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_id",
+  "equipment_code",
+  "equipment_name",
+  "department",
+  "cb_id",
+  "equipment_type",
+  "funding_source",
+  "in_service_date",
+  "sec_mode",
+  "acquisition_mode",
+  "cb_mode",
+  "allocation_basis",
+  "sec_value",
+  "original_cost",
+  "useful_life_years",
+  "cb_value",
+  "annual_contract_cost",
+  "contract_asset_value",
+  "sec_maint",
+  "annual_maintenance_cost",
+  "maintenance_vendor_paid",
+  "cb_maint",
+  "annual_calibration_cost",
+  "sec_hours",
+  "planned_hours_per_year",
+  "cb_hours",
+  "utilization_rate",
+  "sec_power",
+  "power_kw",
+  "power_standby_kw",
+  "cb_power",
+  "run_hours_per_day",
+  "standby_hours_per_day",
+  "continuous_power",
+  "sec_components",
+  "components",
+  "sec_alloc",
+  "department_allocations",
+  "sec_rate",
+  "indicative_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_id",
+   "label": "Nhận diện",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "equipment_code",
+   "label": "Mã thiết bị",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "equipment_name",
+   "label": "Tên thiết bị",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa quản lý",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cb_id",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "equipment_type",
+   "label": "Loại thiết bị",
+   "fieldtype": "Link",
+   "options": "NC Equipment Type"
+  },
+  {
+   "fieldname": "funding_source",
+   "label": "Nguồn hình thành",
+   "fieldtype": "Select",
+   "options": "\nNgân sách\nQuỹ phát triển\nVay\nLiên doanh, liên kết\nViện trợ\nKhác",
+   "reqd": 1
+  },
+  {
+   "fieldname": "in_service_date",
+   "label": "Ngày đưa vào sử dụng",
+   "fieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_mode",
+   "label": "Hình thức có máy và tiêu chí chia",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "acquisition_mode",
+   "label": "Hình thức có máy",
+   "fieldtype": "Select",
+   "options": "Mua\nThuê\nĐặt theo hóa chất\nLiên doanh, liên kết",
+   "default": "Mua",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cb_mode",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "allocation_basis",
+   "label": "Tiêu chí chia chi phí",
+   "fieldtype": "Select",
+   "options": "Giờ kế hoạch\nSố kết quả\nPhút chiếm máy",
+   "default": "Giờ kế hoạch",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "sec_value",
+   "label": "Giá trị",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "original_cost",
+   "label": "Nguyên giá",
+   "fieldtype": "Currency",
+   "depends_on": "eval:doc.acquisition_mode=='Mua'",
+   "mandatory_depends_on": "eval:doc.acquisition_mode=='Mua'"
+  },
+  {
+   "fieldname": "useful_life_years",
+   "label": "Thời gian sử dụng (năm)",
+   "fieldtype": "Float",
+   "depends_on": "eval:doc.acquisition_mode=='Mua'",
+   "mandatory_depends_on": "eval:doc.acquisition_mode=='Mua'"
+  },
+  {
+   "fieldname": "cb_value",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "annual_contract_cost",
+   "label": "Chi phí năm theo hợp đồng",
+   "fieldtype": "Currency",
+   "depends_on": "eval:['Thuê','Liên doanh, liên kết'].includes(doc.acquisition_mode)",
+   "mandatory_depends_on": "eval:['Thuê','Liên doanh, liên kết'].includes(doc.acquisition_mode)"
+  },
+  {
+   "fieldname": "contract_asset_value",
+   "label": "Giá trị ghi trên hợp đồng",
+   "fieldtype": "Currency",
+   "depends_on": "eval:doc.acquisition_mode!='Mua'",
+   "description": "Dùng cho phân bổ theo giá trị tài sản khi không có nguyên giá (BR-CLS-011)."
+  },
+  {
+   "fieldname": "sec_maint",
+   "label": "Bảo trì, kiểm định",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "annual_maintenance_cost",
+   "label": "Bảo trì năm",
+   "fieldtype": "Currency"
+  },
+  {
+   "fieldname": "maintenance_vendor_paid",
+   "label": "Bảo trì do nhà cung cấp chịu",
+   "fieldtype": "Check",
+   "depends_on": "eval:doc.acquisition_mode=='Đặt theo hóa chất'"
+  },
+  {
+   "fieldname": "cb_maint",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "annual_calibration_cost",
+   "label": "Kiểm định, hiệu chuẩn năm",
+   "fieldtype": "Currency",
+   "description": "Chỉ dùng khi thiết bị không có hồ sơ tuân thủ còn hạn (FR-CMP-002)."
+  },
+  {
+   "fieldname": "sec_hours",
+   "label": "Giờ khai thác kế hoạch",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.allocation_basis=='Giờ kế hoạch'"
+  },
+  {
+   "fieldname": "planned_hours_per_year",
+   "label": "Giờ khai thác kế hoạch năm",
+   "fieldtype": "Float",
+   "mandatory_depends_on": "eval:doc.allocation_basis=='Giờ kế hoạch'"
+  },
+  {
+   "fieldname": "cb_hours",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "utilization_rate",
+   "label": "Hệ số sử dụng",
+   "fieldtype": "Float",
+   "description": "Từ 0 đến 1.",
+   "mandatory_depends_on": "eval:doc.allocation_basis=='Giờ kế hoạch'"
+  },
+  {
+   "fieldname": "sec_power",
+   "label": "Điện",
+   "fieldtype": "Section Break",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "power_kw",
+   "label": "Công suất khi chạy (kW)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "power_standby_kw",
+   "label": "Công suất khi chờ (kW)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "cb_power",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "run_hours_per_day",
+   "label": "Số giờ chạy mỗi ngày",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "standby_hours_per_day",
+   "label": "Số giờ chờ mỗi ngày",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "continuous_power",
+   "label": "Cấp điện liên tục",
+   "fieldtype": "Check",
+   "description": "Bật thì số ngày tính điện là 365."
+  },
+  {
+   "fieldname": "sec_components",
+   "label": "Linh kiện lớn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "components",
+   "label": "Linh kiện lớn",
+   "fieldtype": "Table",
+   "options": "NC Equipment Component"
+  },
+  {
+   "fieldname": "sec_alloc",
+   "label": "Tỷ lệ phân bổ theo khoa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "department_allocations",
+   "label": "Tỷ lệ phân bổ theo khoa",
+   "fieldtype": "Table",
+   "options": "NC Equipment Allocation",
+   "description": "Để trống = 100% cho khoa quản lý."
+  },
+  {
+   "fieldname": "sec_rate",
+   "label": "Giá trị tạm tính",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "indicative_html",
+   "label": "Giá trị tạm tính",
+   "fieldtype": "HTML"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-22 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Equipment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "quick_entry": 0,
+ "autoname": "field:equipment_code",
+ "title_field": "equipment_name"
+}
