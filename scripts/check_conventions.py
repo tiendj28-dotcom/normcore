@@ -5,6 +5,7 @@ Dùng: python3 scripts/check_conventions.py [thư_mục_gốc]
 In mỗi lỗi một dòng `đường_dẫn: [mã luật] mô tả`; thoát 1 nếu có lỗi, 0 nếu sạch.
 """
 
+import csv
 import json
 import re
 import sys
@@ -180,8 +181,39 @@ def check_permissions(data: dict, path: str) -> list:
 	return errors
 
 
-def run(root: Path) -> list:
+VI_CSV = "normcore/translations/vi.csv"
+
+
+def _csv_key(row):
+	return (row[0], row[2] if len(row) > 2 else "")
+
+
+def check_vi_csv(root: Path) -> list:
+	"""NORM-24: vi.csv xếp theo cột đầu (rồi cột ngữ cảnh) và không trùng khóa (cột 1 + ngữ cảnh)."""
+	path = root / VI_CSV
+	if not path.exists():
+		return []
+	with open(path, encoding="utf-8", newline="") as fh:
+		rows = [r for r in csv.reader(fh) if r]
 	errors = []
+	seen = set()
+	for n, row in enumerate(rows, 1):
+		key = _csv_key(row)
+		if key in seen:
+			errors.append(f"{VI_CSV}: [NC-09] khóa trùng '{key[0]}' (ngữ cảnh '{key[1]}') ở dòng {n}")
+		seen.add(key)
+	keys = [_csv_key(r) for r in rows]
+	for n in range(1, len(keys)):
+		if keys[n] < keys[n - 1]:
+			errors.append(
+				f"{VI_CSV}: [NC-10] chưa sắp xếp theo cột đầu: dòng {n + 1} '{keys[n][0]}' đứng sau '{keys[n - 1][0]}'"
+			)
+			break
+	return errors
+
+
+def run(root: Path) -> list:
+	errors = check_vi_csv(root)
 	for path in find_doctype_files(root):
 		rel = str(path.relative_to(root))
 		try:
