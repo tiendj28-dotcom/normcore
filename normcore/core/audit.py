@@ -1,7 +1,7 @@
 """Sổ sự kiện nghiệp vụ (ADR-014, FR-AUD-001..004).
 
 Lớp thứ nhất là `track_changes` (Version, theo trường). Lớp thứ hai là NC Audit Event: chỉ ghi qua hàm
-ở đây, không ai sửa hay xóa được, kể cả Administrator (ASM-064).
+ở đây, không ai sửa hay xóa được, kể cả Administrator (ASM-066).
 """
 
 import json
@@ -13,7 +13,7 @@ from frappe.utils import now_datetime
 EVENT = "NC Audit Event"
 SKIP = {"NC Audit Event", "NC AI Log"}
 STATE_FIELDS = {"NC Norm Set": "status", "NC Costing Run": "status"}  # mặc định: workflow_state
-# DocType không lưu giá trị trước khi xóa (ASM-067): nhóm "Cấu hình AI, mẫu lệnh"
+# DocType không lưu giá trị trước khi xóa (ASM-069): nhóm "Cấu hình AI, mẫu lệnh"
 NO_BEFORE_VALUE = set()
 LOCKED_STATES = {"Đã khóa"}
 

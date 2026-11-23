@@ -1,4 +1,4 @@
-// SCR-DSK-030: sổ sự kiện, danh sách chuẩn của Desk, chỉ đọc (FEAT-003, ASM-065).
+// SCR-DSK-030: sổ sự kiện, danh sách chuẩn của Desk, chỉ đọc (FEAT-003, ASM-067).
 frappe.listview_settings["NC Audit Event"] = {
 	add_fields: ["event_type"],
 	get_indicator(doc) {

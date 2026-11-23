@@ -6,8 +6,8 @@ Issue NORM-21. Nhánh `ai/NORM-21-feat-003` từ `develop` @ `539ae89`. Nguồn:
 
 | FR | Làm | Ghi chú |
 | :-- | :-- | :-- |
-| FR-AUD-001 | Một phần có chủ đích | Lịch sử theo trường: `track_changes` (đã bật ở mọi DocType). Sổ sự kiện: chuyển trạng thái, khóa, **xóa** (AMD-006, ASM-063) qua hook `doc_events["*"]`; tạo, sửa dựa vào `owner`, `creation`, Version |
-| FR-AUD-002 | Đủ | NC Audit Event, NC AI Log: không vai trò nào có quyền sửa, xóa, và bộ điều khiển từ chối cả Administrator (ASM-064) |
+| FR-AUD-001 | Một phần có chủ đích | Lịch sử theo trường: `track_changes` (đã bật ở mọi DocType). Sổ sự kiện: chuyển trạng thái, khóa, **xóa** (AMD-006, ASM-065) qua hook `doc_events["*"]`; tạo, sửa dựa vào `owner`, `creation`, Version |
+| FR-AUD-002 | Đủ | NC Audit Event, NC AI Log: không vai trò nào có quyền sửa, xóa, và bộ điều khiển từ chối cả Administrator (ASM-066) |
 | FR-AUD-003 | Đủ | `api/audit.py::get_events` và danh sách chuẩn SCR-DSK-030; NC Admin, NC Director, NC Auditor |
 | FR-AUD-004 | Chỉ điểm ghi | `core/audit.py::log_export`; luồng xuất tệp thuộc FEAT-019 |
 
@@ -29,7 +29,7 @@ Quyền (dòng "Nhật ký AI, sổ sự kiện"): NC Director, NC Admin, NC Aud
 | :-- | :-- |
 | `log_event(event_type, ref_doctype, ref_name, from_state, to_state, detail, user)` | Tạo NC Audit Event (đặt `flags.from_audit` để vượt chốt `before_insert`, `ignore_permissions`); `event_time = now_datetime()` |
 | `log_export(file_type, ref_doctype, ref_name, file_name)` | FR-AUD-004: `event_type` = "Xuất tệp", `detail` = `"{file_type}: {file_name}"` |
-| `on_doc_validate`, `on_doc_change`, `on_doc_delete` | Hook `doc_events["*"]`. Chỉ DocType `NC *` (không phải NC Audit Event, NC AI Log) có trường trạng thái (`workflow_state`, hoặc `status` ở NC Norm Set, NC Costing Run: `STATE_FIELDS`). `on_change` (chạy cả `save()` lẫn `db_set()`) so với mốc `flags.audit_state` nên không ghi trùng; bỏ qua `flags.in_delete`; `validate` xóa mốc. `after_delete` ghi sự kiện "Xóa" kèm `before_value` (`snapshot`: bản ghi, bảng con, owner, creation, Version; bỏ Password; `NO_BEFORE_VALUE`, ASM-067) |
+| `on_doc_validate`, `on_doc_change`, `on_doc_delete` | Hook `doc_events["*"]`. Chỉ DocType `NC *` (không phải NC Audit Event, NC AI Log) có trường trạng thái (`workflow_state`, hoặc `status` ở NC Norm Set, NC Costing Run: `STATE_FIELDS`). `on_change` (chạy cả `save()` lẫn `db_set()`) so với mốc `flags.audit_state` nên không ghi trùng; bỏ qua `flags.in_delete`; `validate` xóa mốc. `after_delete` ghi sự kiện "Xóa" kèm `before_value` (`snapshot`: bản ghi, bảng con, owner, creation, Version; bỏ Password; `NO_BEFORE_VALUE`, ASM-069) |
 | `guard_immutable(doc)` | `frappe.throw` PermissionError; gắn vào `validate` (khi không mới) và `on_trash` của hai DocType |
 | `STATE_EVENTS` | Trạng thái đích `Đã khóa` → loại "Khóa", còn lại "Chuyển trạng thái" |
 
@@ -57,4 +57,4 @@ Quyền (dòng "Nhật ký AI, sổ sự kiện"): NC Director, NC Admin, NC Aud
 
 ## 6. Giả định và rủi ro
 
-ASM-063..ASM-067; AMD-006 (`docs/decisions/assumptions.md`). Rủi ro: quản trị CSDL vẫn sửa được ở mức thấp (ADR-014, ngoài phạm vi v1); `frappe.db.set_value` không đi qua bộ điều khiển, nên mã của FEAT sau không được dùng nó trên hai DocType này.
+ASM-065..ASM-069; AMD-006 (`docs/decisions/assumptions.md`). Rủi ro: quản trị CSDL vẫn sửa được ở mức thấp (ADR-014, ngoài phạm vi v1); `frappe.db.set_value` không đi qua bộ điều khiển, nên mã của FEAT sau không được dùng nó trên hai DocType này.

@@ -11,7 +11,7 @@ Mới: NC Audit Event. NC AI Log: thêm bộ lọc chuẩn, chốt bất biến.
 `normcore/core/audit.py`, `normcore/api/audit.py::get_events`; `hooks.py`: `doc_events["*"]`, `ignore_links_on_delete`. Workspace thêm lối tắt "Nhật ký", "Nhật ký AI".
 
 ## 4. Quyền
-NC Director, NC Admin, NC Auditor chỉ đọc; không ai có ghi/xóa. Bộ điều khiển từ chối sửa, xóa kể cả Administrator; tạo chỉ qua `log_event` (ASM-064).
+NC Director, NC Admin, NC Auditor chỉ đọc; không ai có ghi/xóa. Bộ điều khiển từ chối sửa, xóa kể cả Administrator; tạo chỉ qua `log_event` (ASM-066).
 
 ## 5. Cấu hình khi triển khai
 `bench migrate`, `bench build`. Không cần patch (DocType mới).
@@ -21,8 +21,8 @@ TC-AUD-01, 02, 03, `test_FR_AUD_*`; `run-tests --app normcore`: 199 tests OK (no
 
 ## 7. Giới hạn và nợ
 - Chưa kiểm UI bằng trình duyệt (SCR-DSK-030 kiểm ở smoke staging); chưa tạo site sạch cục bộ (thiếu DB_ROOT_PASSWORD), dùng CI run 45070989693.
-- Tạo, sửa, xóa bản ghi không thành sự kiện riêng; dựa vào Version (ASM-063). FR-AUD-001 "xóa" chưa có dấu vết ngoài Deleted Document của Frappe.
+- Tạo, sửa, xóa bản ghi không thành sự kiện riêng; dựa vào Version (ASM-065). FR-AUD-001 "xóa" chưa có dấu vết ngoài Deleted Document của Frappe.
 - "Gọi AI", "Nhập tệp", "Đổi cấu hình": chỉ có loại trong danh sách; FEAT-023/019/… gọi `log_event`.
-- TC-AUD-01 phần đơn giá làm trên NC Job Title; FEAT-009 thêm ca NC Item Price (ASM-066).
+- TC-AUD-01 phần đơn giá làm trên NC Job Title; FEAT-009 thêm ca NC Item Price (ASM-068).
 - DocType nào dùng trường trạng thái khác `workflow_state` phải thêm vào `audit.STATE_FIELDS`.
 - `frappe.db.set_value` không đi qua bộ điều khiển (ADR-014).

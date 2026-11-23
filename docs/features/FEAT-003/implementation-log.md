@@ -2,7 +2,7 @@
 
 | Task | Lệnh | Kết quả |
 | :-- | :-- | :-- |
-| T01 | `python3 docs/tools/build_rtm.py docs` | `VAN DE: 0`; ASM-063..066 |
+| T01 | `python3 docs/tools/build_rtm.py docs` | `VAN DE: 0`; ASM-065..069 |
 | T02 | `with_bench.sh 'migrate; run-tests --module normcore.nc_core.doctype.nc_audit_event.test_nc_audit_event'`; `check_conventions.py` | 8 tests OK; rc=0. Test và mã viết cùng lượt, không quan sát riêng bước đỏ |
 | T03 | cùng lệnh (test_TC_AUD_01_*, test_FR_AUD_001_*) | OK. Bổ sung so với thiết kế: NC Norm Set dùng trường `status` (map `STATE_FIELDS`), khóa ghi loại "Khóa" |
 | T04 | cùng lệnh (test_TC_AUD_03_*, test_FR_AUD_003_*) | OK |
@@ -18,4 +18,4 @@
 | 2 AMD-006: sự kiện "Xóa", `before_value` | cùng lệnh | OK: Version bị Frappe xóa vẫn còn đúng một sự kiện "Xóa"; xóa bị chặn không có sự kiện; không Password |
 | 3 `to_time` chỉ có ngày lấy trọn ngày | cùng lệnh | OK |
 | 4 Test dịch rỗng: bỏ; sửa ui-design, T06 | `python3 -m pytest normcore/tests/unit/test_audit_ui_conventions.py` | 2 passed |
-| 5 ASM-066 ghi "chờ người duyệt" | — | giữ 18 → 19, chưa được duyệt |
+| 5 ASM-068 ghi "chờ người duyệt" | — | giữ 18 → 19, chưa được duyệt |

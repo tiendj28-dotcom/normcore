@@ -38,7 +38,7 @@ class TestNCAuditEvent(FrappeTestCase):
 		)
 
 	def test_TC_AUD_01_lich_su_va_su_kien(self):
-		# lịch sử theo trường: sửa một danh mục (NC Item Price chưa có, ASM-066)
+		# lịch sử theo trường: sửa một danh mục (NC Item Price chưa có, ASM-068)
 		jt = frappe.get_doc("NC Job Title", self.job)
 		old = jt.job_title_name
 		jt.job_title_name = "Điều dưỡng chính"

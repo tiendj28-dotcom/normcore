@@ -1,6 +1,6 @@
 # FEAT-003 — Thiết kế giao diện
 
-Nguồn: `ux-foundations.md` SCR-DSK-030; `design.md` mục 3–7. Dùng danh sách chuẩn của Desk, không trang tùy biến (ASM-065).
+Nguồn: `ux-foundations.md` SCR-DSK-030; `design.md` mục 3–7. Dùng danh sách chuẩn của Desk, không trang tùy biến (ASM-067).
 
 ## SCR-DSK-030 Nhật ký — List chuẩn, chỉ đọc
 
