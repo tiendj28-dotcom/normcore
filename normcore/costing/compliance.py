@@ -1,7 +1,7 @@
 """Hồ sơ tuân thủ thiết bị — hàm thuần Python, không import framework (ADR-003).
 
 FR-CMP-001, FR-CMP-005, FR-CMP-006 (phần dữ liệu), FR-CMP-007, FR-ADM-006. Không có phép tính tiền.
-Quy tắc biên: ASM-101 (d = hạn − hôm nay; d < 0 Hết hạn; 0 ≤ d ≤ N Sắp hết hạn; d > N Còn hạn).
+Quy tắc biên: ASM-101 (d = hạn trừ hôm nay; d < 0 Hết hạn; 0 ≤ d ≤ N Sắp hết hạn; d > N Còn hạn).
 """
 
 from datetime import date, datetime

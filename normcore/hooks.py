@@ -206,6 +206,8 @@ ignore_links_on_delete = ["NC Audit Event"]
 # Scheduled Tasks
 # ---------------
 
+scheduler_events = {"daily": ["normcore.api.compliance.daily_job"]}  # FR-CMP-005
+
 # scheduler_events = {
 # 	"all": [
 # 		"normcore.tasks.all"
