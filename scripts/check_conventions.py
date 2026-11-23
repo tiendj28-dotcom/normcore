@@ -138,6 +138,16 @@ def check_doctype(data: dict, path: str) -> list:
 			if bad:
 				err("NC-06", f"{AUDITOR} có quyền không được phép: {', '.join(bad)}")
 	if not is_table:
+		aud_read = any(
+			isinstance(p, dict)
+			and p.get("role") == AUDITOR
+			and p.get("read") in (1, True, "1")
+			and not (p.get("permlevel") or 0)
+			for p in data.get("permissions") or []
+		)
+		if not aud_read:
+			err("NC-06", f"{AUDITOR} thiếu quyền đọc")
+	if not is_table:
 		errors.extend(check_permissions(data, path))
 	return errors
 
