@@ -259,7 +259,7 @@ Kiểu: **L** danh sách chuẩn, **F** form chuẩn, **P** trang tùy biến, *
 | :-- | :-- | :-- |
 | Thẻ tình trạng chuỗi | SCR-DSK-001, 005, 006 | Bốn chấm nối: quy trình, định mức, giá thành, giá duyệt; mỗi chấm có màu trạng thái |
 | Bảng trích dẫn | SCR-DSK-009, 010 | Cột phải, hiển thị trích dẫn của phần hoặc bước đang chọn, mở được mục nguồn |
-| Thẻ bước | SCR-DSK-009, 010, 014 | Mã bước, giai đoạn, tên, mô tả; kéo để sắp lại ở chế độ soạn |
+| Thẻ bước | SCR-DSK-009, 010, 014 | Mã bước, giai đoạn, tên, mô tả; nút Lên/Xuống để sắp lại ở chế độ soạn (dùng được bằng bàn phím); kéo chuột là tùy chọn sau **[AMD-005]** |
 | Nhãn quan hệ | SCR-DSK-009, 010 | "Theo hướng dẫn", "Khác biệt", "Chưa có căn cứ" |
 | Nhãn "Đề xuất" | SCR-DSK-009, 014, 025, **[1.1]** 033 | Nền nhạt, hai nút "Chấp nhận", "Bỏ" |
 | Lưới định mức | SCR-DSK-014 | Lưới sửa trực tiếp, nhóm theo bước, hàng tổng theo bước và cấu phần |
