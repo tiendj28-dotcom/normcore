@@ -113,3 +113,19 @@ NC Clinical Procedure,Quy trình kỹ thuật
 NC Procedure Step,Bước quy trình
 NC Procedure Resource,Nguồn lực của bước
 NC Procedure Citation,Trích dẫn quy trình
+Verified,Đã xác minh,NC Item
+Verified,Đã xác minh,NC Item Price
+Unverified,Chưa xác minh,NC Item
+Unverified,Chưa xác minh,NC Item Price
+Verify,Xác minh,NC Item Price
+Add price,Thêm đơn giá,NC Item
+No price yet,Chưa có đơn giá,NC Item
+Price in use today,Đơn giá đang dùng hôm nay,NC Item
+Price per norm unit,Đơn giá một đơn vị định mức,NC Item
+Price code,Mã đơn giá,NC Item
+Source,Nguồn giá,NC Item
+Unit price,Đơn giá,NC Item
+Document no.,Số chứng từ,NC Item
+Valid from,Hiệu lực từ,NC Item
+Valid to,Hiệu lực đến,NC Item
+Verification,Xác minh,NC Item

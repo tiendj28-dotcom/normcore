@@ -47,6 +47,8 @@ DOCTYPE_ROW = {
 	"NC Clinical Procedure": "Quy trình",
 	"NC Costing Parameter Set": "Bộ tham số, chức danh, loại giá",
 	"NC Job Title": "Bộ tham số, chức danh, loại giá",
+	"NC Item": "Mặt hàng, đơn giá, thiết bị, phòng",
+	"NC Item Price": "Mặt hàng, đơn giá, thiết bị, phòng",
 	"NC Price Category": "Bộ tham số, chức danh, loại giá",
 	"NC Norm Set": "Bộ định mức",
 	"NC Equipment": "Mặt hàng, đơn giá, thiết bị, phòng",

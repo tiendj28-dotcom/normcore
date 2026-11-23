@@ -46,3 +46,18 @@
 | FR-RES-024 | `test_TC_CLS_49_ty_le_theo_khoa`, `test_TC_CLS_49_ty_le_khoa` |
 | FR-RES-025 | `test_TC_CLS_49_ty_le_theo_khoa`, `test_FR_RES_025_khoa_quan_ly_ngoai_bang_ty_le_bang_0` |
 | FR-RES-026 | `test_FR_RES_026_luu_truong_dien` |
+
+# Test ref — FEAT-009 (ghi bởi kiểm định độc lập NORM-18)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-RES-001 | `test_TC_RES_09_thieu_don_vi_tinh_bi_tu_choi_roi_luu_duoc`, `test_FR_RES_001_thieu_ma_ten_loai_bi_tu_choi`, `test_FR_RES_001_so_lan_dung_phai_tu_1` |
+| FR-RES-002 | `test_TC_CLS_46_nguon_hop_dong_co_ngay_het_hieu_luc_luu_duoc`, `test_FR_RES_002_thieu_truong_bat_buoc_bi_tu_choi`, `test_FR_RES_002_nam_nguon_gia` |
+| FR-RES-003 | `test_TC_RES_02_chung_tu_cu_25_thang_canh_bao_van_tinh`, `test_TC_RES_02_chung_tu_cu_25_thang`, `test_FR_RES_003_dung_24_thang_khong_canh_bao` |
+| FR-RES-004 | `test_TC_RES_01_ba_gia_cung_nguon`, `test_TC_CLS_45_chon_gia_theo_nguon_roi_ngay`, `test_TC_CLS_45_nguon_truoc_ngay_hieu_luc_sau`, `test_FR_RES_004_thu_tu_nguon` |
+| FR-RES-012 | `test_FR_RES_012_don_gia_tao_cap_nhat_nhap_lai`, `test_TC_RES_08_nhap_tep_hai_dong_thieu_don_vi_tinh` (phần mặt hàng, đơn giá) |
+| FR-RES-013 | `test_FR_RES_013_nhom_tuong_duong` |
+| FR-RES-014 | `test_TC_RES_07_thanh_toan_rieng_bang_0_co_ly_do`, `test_TC_RES_07_dong_vat_chat_khop_golden_engine` |
+| FR-RES-016 | `test_TC_CLS_46_xac_minh_khi_chua_co_tep_bi_tu_choi`, `test_FR_RES_016_xac_minh_co_tep_ghi_nguoi_va_thoi_diem` |
+| FR-RES-017 | `test_TC_CLS_46_chua_xac_minh_van_tinh_co_canh_bao`, `test_FR_RES_017_chua_xac_minh` |
+| FR-RES-018 | `test_TC_CLS_47_quy_doi_don_vi_dinh_muc_hc_glu`, `test_TC_CLS_47_don_gia_dinh_muc_khop_golden_cls`, `test_FR_RES_018_hoa_chat_can_so_don_vi_dinh_muc_duong` |
