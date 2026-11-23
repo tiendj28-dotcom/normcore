@@ -1,6 +1,6 @@
 # As-Built: FEAT-016 Số liệu kế toán, sản lượng, quy tắc phân bổ
 
-Issue NORM-28. FR-ACCT-001..011, UC-011, SCR-DSK-020, SCR-DSK-021. TC-ACCT-01..09. Ngày nghiệm thu, người nghiệm thu: do QA điền.
+Issue NORM-28. FR-ACCT-001..011, UC-011, SCR-DSK-020, SCR-DSK-021. TC-ACCT-01..09. Người nghiệm thu: QA (Multica). Ngày nghiệm thu: 2026-11-23.
 
 ## 1. Luồng nghiệp vụ đã xây
 1. NC Finance tạo NC Accounting Import (năm, chế độ kế toán, tệp .xlsx theo mẫu: mã TK, tên TK, mã trung tâm chi phí, số tiền). Lưu → máy chủ đọc tệp, tạo dòng, gán loại chi phí theo NC Account Mapping (tiền tố dài nhất), trạng thái "Nháp".
@@ -33,5 +33,5 @@ TC-ACCT-01..09 có test cùng mã (`test_TC_ACCT_NN_*`) ở `test_nc_accounting_
 
 ## 7. Giới hạn đã biết
 - Phân bổ cấp 1, cấp 2, đối soát: FEAT-015, FEAT-017. Sản lượng cận lâm sàng: FEAT-035. Chưa nối `NC Costing Run.accounting_import` (ASM-004).
-- Giao diện chưa kiểm bằng trình duyệt (chỉ kiểm quy ước và build). Trang `import-excel` chưa đọc tham số `import_set` nên nút "Nhập từ Excel" chỉ mở trang.
+- Giao diện chưa kiểm bằng trình duyệt (chỉ kiểm quy ước, build và API); QA không có tài khoản test theo vai trò. Trang `import-excel` chưa đọc tham số `import_set` nên nút "Nhập từ Excel" chỉ mở trang.
 - Gộp với FEAT-033: giữ dòng cả hai bên ở `hooks.py`, `check_conventions.py`, `vi.csv`, `assumptions.md`; đếm lại DocType theo thực tế.
