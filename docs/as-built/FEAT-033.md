@@ -19,4 +19,4 @@ Giới hạn: giao diện chưa xem bằng trình duyệt (chỉ kiểm tệp JS
 - FEAT-031 chạy song song: khi gộp `develop` giữ dòng của cả hai bên ở `assumptions.md`, `vi.csv`, `check_conventions.py`, đếm DocType; đánh lại số ASM.
 
 ## Nghiệm thu
-Người nghiệm thu: QA (Multica). Verify accepted ở commit `d9be0cb`. Giới hạn QA: không tạo được site sạch `normcore-verify.test` (thiếu `DB_ROOT_PASSWORD`), bộ test chạy trên site dev `normcore.test` (465 test OK); chưa kiểm giao diện bằng Playwright.
+Người nghiệm thu: QA (Multica). Verify accepted ở commit `ce04c2a` (sau gộp develop). Giới hạn QA: không tạo được site sạch `normcore-verify.test` (thiếu `DB_ROOT_PASSWORD`), bộ test chạy trên site dev `normcore.test` (533 test OK); chưa kiểm giao diện bằng Playwright.

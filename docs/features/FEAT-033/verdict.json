@@ -1,1 +1,1 @@
-{"verdict":"accepted","reasons":["TC-CLS-27, TC-CLS-28 có test cùng mã, xanh","465 test bench OK, 199 pytest OK, costing 98%","CI PR #32 xanh","Giới hạn: không có site sạch/UI Playwright, xem acceptance.md"],"commit":"d9be0cb853e61d0a9654332a1b729136014c4a18"}
+{"verdict":"accepted","reasons":["TC-CLS-27, TC-CLS-28 có test cùng mã, xanh","Sau gộp develop: bench run-tests 533 OK, pytest 235 passed, costing 99%","CI PR #32 xanh trên ce04c2a","Giới hạn site sạch và UI đã được Lead chấp nhận, xem acceptance.md"],"commit":"ce04c2a65669a3303d659ebe6baa6ae526a0f247"}
