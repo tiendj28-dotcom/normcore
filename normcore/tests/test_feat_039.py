@@ -219,3 +219,32 @@ class TestTCCLS44(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("NC Costing Parameter Set", param.name, "title"), "Đổi tên f39")
 		frappe.set_user(self.finance)  # Finance không có NC Auditor: ghi được như trước
 		self.assertTrue(frappe.has_permission("NC Costing Parameter Set", "write"))
+
+
+class TestTCAUD03Auditor(FrappeTestCase):
+	def setUp(self):
+		frappe.set_user("Administrator")
+		self.service, self.dept, self.job = make_base()
+		self.auditor = make_user("auditor.f39b@normcore.test", AUDITOR)
+		self.director = make_user("dir.f39b@normcore.test", "NC Director")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_TC_AUD_03_auditor_loc_theo_quy_trinh(self):
+		from normcore.tests.utils import make_procedure
+
+		p1 = make_procedure(self.service, self.dept)
+		p2 = make_procedure(self.service, self.dept, version=2)
+		p1.decision_no, p1.effective_date = "QĐ-39", "2026-12-01"
+		frappe.set_user(self.director)
+		p1.publish()
+		frappe.set_user(self.auditor)
+		rows = audit_api.get_events(ref_doctype="NC Clinical Procedure", ref_name=p1.name)
+		self.assertEqual([r["to_state"] for r in rows], ["Nháp", "Đã ban hành"])
+		self.assertEqual({r["ref_name"] for r in rows}, {p1.name})
+		times = [r["event_time"] for r in rows]
+		self.assertEqual(times, sorted(times))
+		other = audit_api.get_events(ref_doctype="NC Clinical Procedure", ref_name=p2.name)
+		self.assertEqual({r["ref_name"] for r in other}, {p2.name})
