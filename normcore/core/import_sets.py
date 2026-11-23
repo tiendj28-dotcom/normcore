@@ -1,6 +1,7 @@
 """Sổ đăng ký các bộ nhập Excel (FEAT-004). FEAT sau thêm một khai báo + một dòng `register`."""
 
 from normcore.core.importer import Column, ImportSet, register
+from normcore.costing.accounting import COST_CATEGORIES, REGIMES
 
 JOB_GROUPS = ("Bác sĩ", "Điều dưỡng", "Kỹ thuật viên", "Dược sĩ", "Hộ lý", "Khác")
 
@@ -205,3 +206,27 @@ NC_TEST_SYSTEM = ImportSet(
 )
 
 register(NC_TEST_SYSTEM)
+
+# FEAT-016, FR-ACCT-009: bảng ánh xạ tài khoản; khóa ghép (chế độ, tiền tố) (ASM-124).
+NC_ACCOUNT_MAPPING = ImportSet(
+	key="nc_account_mapping",
+	label="Bảng ánh xạ tài khoản",
+	doctype="NC Account Mapping",
+	key_field="accounting_regime",
+	key_fields=("accounting_regime", "account_prefix"),
+	columns=(
+		Column(
+			"accounting_regime",
+			"Chế độ kế toán",
+			"Select",
+			required=True,
+			options=REGIMES,
+			example="Hành chính sự nghiệp",
+		),
+		Column("account_prefix", "Tiền tố tài khoản", "Data", required=True, example="61111"),
+		Column("cost_category", "Loại chi phí", "Select", required=True, options=COST_CATEGORIES, example="LABOR"),
+		Column("note", "Ghi chú", "Data"),
+	),
+)
+
+register(NC_ACCOUNT_MAPPING)
