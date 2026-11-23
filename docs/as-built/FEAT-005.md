@@ -1,5 +1,5 @@
 # As-Built: FEAT-005 Danh mục kỹ thuật và tình trạng chuỗi
-- Phiên bản app 0.0.1; Dev: NORM-17; chưa qua kiểm định độc lập (QA điền ngày và người nghiệm thu)
+- Phiên bản app 0.0.1; Dev: NORM-17; nghiệm thu: QA (Multica), 2026-11-22
 
 ## 1. Luồng nghiệp vụ đã xây
 NC Document Controller tải tệp mẫu "Dịch vụ kỹ thuật" ở danh sách, nhập tệp Excel (mã, tên, mã chuyên khoa): tạo hoặc cập nhật theo mã, dòng thiếu mã, thiếu tên, trùng mã trong tệp bị bỏ và liệt kê trong báo cáo lỗi (FR-SVC-001, 002). Gán nhiều khoa thực hiện trên form (FR-SVC-003). Mở dịch vụ thấy thẻ "Tình trạng chuỗi" có bốn mục: quy trình, định mức, giá thành, giá đã duyệt, theo quyền của người xem (FR-SVC-004).
@@ -17,7 +17,7 @@ Theo dòng "Dịch vụ kỹ thuật, chuyên khoa": NC Document Controller, NC 
 `bench migrate` (DocType, Workspace), `bench build` (bản dịch). Không cần patch.
 
 ## 6. Test case đã chạy và kết quả
-TC-SVC-01, TC-SVC-03, TC-SVC-04 và các test `test_FR_SVC_*`, `test_FR_ACC_005_*`, `test_SCR_DSK_005_*`; `bench run-tests --app normcore`: 180 tests OK; pytest unit + golden 88 passed, độ phủ costing/benchmark 98,9%; `check_conventions.py`, `build_rtm.py` (VAN DE: 0), ruff sạch. Chi tiết: `docs/features/FEAT-005/implementation-log.md`.
+TC-SVC-01, TC-SVC-03, TC-SVC-04 và các test `test_FR_SVC_*`, `test_FR_ACC_005_*`, `test_SCR_DSK_005_*`; `bench run-tests --app normcore`: 180 tests OK (QA chạy lại: 182 OK trên normcore.test); pytest unit + golden 88 passed (QA: 91 passed), độ phủ costing/benchmark 98,9%; `check_conventions.py`, `build_rtm.py` (VAN DE: 0), ruff sạch. Chi tiết: `docs/features/FEAT-005/implementation-log.md`.
 
 ## 7. Giới hạn đã biết và nợ kỹ thuật
 - **Chưa kiểm trên trình duyệt:** preview chưa có site (`multica env start preview` thoát lỗi "chưa có site normcore.test"); bộ lọc khoa `page.add_field` ở danh sách và bố cục bốn thẻ (1366 × 768, 768 px) chưa xem thật. Test chỉ kiểm lọc `frappe.get_list` qua bảng con và quy ước JS tĩnh.
@@ -26,3 +26,9 @@ TC-SVC-01, TC-SVC-03, TC-SVC-04 và các test `test_FR_SVC_*`, `test_FR_ACC_005_
 - FEAT-015 thêm quyền bảng giải trình cho Dept Head thì cập nhật bảng quyền; FEAT-032 trở đi `pick_norm_sets` phải nhóm thêm theo `test_system` (DI-03).
 - Mã dịch vụ nhập dạng số trong Excel có thể mất số 0 (ASM-060, chờ Quản lý văn bản).
 - `based_on_run` của NC Costing Run chưa có; `_cost_rows` chỉ chọn khi trường tồn tại (ASM-004).
+- QA chưa tạo được site sạch (thiếu DB_ROOT_PASSWORD) và chưa kiểm giao diện bằng trình duyệt (Playwright lỗi kết nối); người duyệt bấm thử SCR-DSK-005/006 trên staging.
+
+## 8. Quyết định và tài liệu liên quan
+- ASM-047..061 và ASM-062 (`docs/decisions/assumptions.md`); CF-002; AMD-003, AMD-004 (`docs/decisions/amendments/`).
+- DEF-002, DEF-003, DEF-004 (`docs/decisions/defects/`): lỗi tài liệu chỉ đọc đã ghi, không chặn FEAT.
+- Hồ sơ nghiệm thu: `docs/features/FEAT-005/acceptance.md`, `verdict.json`, `DONE` (bổ sung sau merge PR #21 qua PR chỉ tài liệu).

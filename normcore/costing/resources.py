@@ -46,7 +46,7 @@ def _r4(x: Decimal) -> Decimal:
 def is_expired(in_service: date, life_years, on: date) -> bool:
 	"""Hết thời gian sử dụng: ngày tính giá >= ngày đưa vào sử dụng + int(số năm) (golden).
 
-	Số năm lẻ cắt về số nguyên (như golden). Đưa vào sử dụng 29/02 mà năm đích không nhuận thì lấy 28/02 (ASM-068).
+	Số năm lẻ cắt về số nguyên (như golden). Đưa vào sử dụng 29/02 mà năm đích không nhuận thì lấy 28/02 (ASM-083).
 	"""
 	year = in_service.year + int(_d(life_years))
 	day = in_service.day

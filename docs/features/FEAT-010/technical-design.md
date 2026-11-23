@@ -9,12 +9,12 @@ Nguồn: `srs.md` FR-RES-005..008, FR-RES-019..026 (FR-RES-012 chỉ phần dữ
 | FR-RES-005, 019, 020, 021, 022 | Form NC Equipment, trường bắt buộc theo hình thức có máy và tiêu chí chia |
 | FR-RES-006, 007 | Hàm thuần khấu hao năm và đơn giá giờ máy tại một ngày tính giá; form hiển thị giá trị tạm tính theo ngày hiện tại (không lưu) |
 | FR-RES-008 | NC Room, đơn giá giờ phòng |
-| FR-RES-012 | **Phần thiết bị, phòng**: hai bộ nhập `nc_equipment`, `nc_room` trong `core/import_sets.py` (khung của FEAT-004). Mặt hàng, đơn giá, chức danh thuộc FEAT khác. Lead quyết ở lượt trả về 1 (ASM-069) |
+| FR-RES-012 | **Phần thiết bị, phòng**: hai bộ nhập `nc_equipment`, `nc_room` trong `core/import_sets.py` (khung của FEAT-004). Mặt hàng, đơn giá, chức danh thuộc FEAT khác. Lead quyết ở lượt trả về 1 (ASM-084) |
 | FR-RES-023 | Bảng con NC Equipment Component |
 | FR-RES-024, 025 | Bảng con NC Equipment Allocation, DI-10 |
 | FR-RES-026 | Chỉ lưu các trường điện, cờ cấp điện liên tục. Tính điện (BR-CLS-012) là FEAT-036 |
 
-Không làm: TC-CLS-07/09/11/12/13 (FEAT-036); liên kết NC Equipment Compliance (DocType của FEAT-033; xem ASM-064); các trường còn lại của NC Costing Parameter Set (FEAT-011).
+Không làm: TC-CLS-07/09/11/12/13 (FEAT-036); liên kết NC Equipment Compliance (DocType của FEAT-033; xem ASM-079); các trường còn lại của NC Costing Parameter Set (FEAT-011).
 
 ## 2. DocType
 
@@ -79,8 +79,8 @@ Không thêm API ghi. Một hàm đọc cho form: `normcore.api.equipment.get_in
 
 ## 6. Giả định và rủi ro
 - **CF-003**: FR-RES-008 "yêu cầu diện tích" mâu thuẫn TC-RES-10 và data-model (R1 lưu được không có diện tích; `area_m2` không BB). Theo bậc 2 (TC) thắng: diện tích không bắt buộc.
-- **ASM-063**: `expired_depreciation_mode` thêm vào NC Costing Parameter Set ở FEAT này; FEAT-011 làm phần còn lại.
-- **ASM-064**: Liên kết hồ sơ tuân thủ (SCR-DSK-018) chưa làm vì NC Equipment Compliance thuộc FEAT-033; `annual_calibration_cost` dùng như số nhập tay.
-- **ASM-065**: Giờ máy tạm tính dùng `machine_annual` + bảo trì + linh kiện theo tháng + kiểm định nhập tay, nhân tỷ lệ khoa, chia (giờ × hệ số); với EQ1 trùng BR-COST-004. Linh kiện tính theo số kết quả, giờ chạy và điện thuộc FEAT-036.
-- **ASM-066**: Không viết patch (trường mới cho phép trống hoặc có mặc định, DocType mới; cùng tiền lệ ASM-062). Bản ghi bộ tham số cũ không có `expired_depreciation_mode` được hiểu là ZERO.
+- **ASM-078**: `expired_depreciation_mode` thêm vào NC Costing Parameter Set ở FEAT này; FEAT-011 làm phần còn lại.
+- **ASM-079**: Liên kết hồ sơ tuân thủ (SCR-DSK-018) chưa làm vì NC Equipment Compliance thuộc FEAT-033; `annual_calibration_cost` dùng như số nhập tay.
+- **ASM-080**: Giờ máy tạm tính dùng `machine_annual` + bảo trì + linh kiện theo tháng + kiểm định nhập tay, nhân tỷ lệ khoa, chia (giờ × hệ số); với EQ1 trùng BR-COST-004. Linh kiện tính theo số kết quả, giờ chạy và điện thuộc FEAT-036.
+- **ASM-081**: Không viết patch (trường mới cho phép trống hoặc có mặc định, DocType mới; cùng tiền lệ ASM-062). Bản ghi bộ tham số cũ không có `expired_depreciation_mode` được hiểu là ZERO.
 - Rủi ro: FEAT-009, FEAT-011 chạy song song cũng sửa `assumptions.md`, `vi.csv`; khi gộp giữ dòng cả hai bên.

@@ -67,7 +67,7 @@ class NCEquipment(Document):
 		share = Decimal(1)
 		if self.department_allocations:
 			by_dept = {r.department: _d(r.share_pct) for r in self.department_allocations}
-			share = by_dept.get(self.department, Decimal(0)) / 100  # ASM-065: ngoài bảng = 0
+			share = by_dept.get(self.department, Decimal(0)) / 100  # ASM-080: ngoài bảng = 0
 		annual = resources.equipment_annual(
 			machine,
 			self.annual_maintenance_cost,

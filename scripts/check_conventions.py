@@ -47,6 +47,7 @@ DOCTYPE_ROW = {
 	"NC Clinical Procedure": "Quy trình",
 	"NC Costing Parameter Set": "Bộ tham số, chức danh, loại giá",
 	"NC Job Title": "Bộ tham số, chức danh, loại giá",
+	"NC Price Category": "Bộ tham số, chức danh, loại giá",
 	"NC Norm Set": "Bộ định mức",
 	"NC Equipment": "Mặt hàng, đơn giá, thiết bị, phòng",
 	"NC Room": "Mặt hàng, đơn giá, thiết bị, phòng",
@@ -54,6 +55,7 @@ DOCTYPE_ROW = {
 	"NC Costing Run": "Lần tính giá, kết quả, đối soát",
 	"NC Service Cost": "Lần tính giá, kết quả, đối soát",
 	"NC AI Log": "Nhật ký AI, sổ sự kiện",
+	"NC Audit Event": "Nhật ký AI, sổ sự kiện",
 	"NC Department": "NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)",
 	"NC Cost Center": "NC Cost Center (G1: Admin, Finance ghi)",
 }
@@ -68,6 +70,7 @@ DELETE_ALLOWED = {
 		"NC Equipment",
 		"NC Room",
 		"NC Equipment Type",
+		"NC Price Category",
 	}
 }
 PERM_TYPES = ("read", "write", "create", "delete", "submit", "cancel", "amend")

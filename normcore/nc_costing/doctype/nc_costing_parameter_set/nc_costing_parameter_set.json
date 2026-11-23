@@ -6,12 +6,34 @@
  "field_order": [
   "title",
   "effective_from",
+  "sb_labor",
   "base_salary",
   "employer_contribution_rate",
   "working_days_per_year",
   "working_hours_per_day",
+  "sb_accumulation",
+  "accumulation_mode",
+  "accumulation_rate",
+  "obligation_rate",
+  "sb_rounding",
+  "wastage_cap",
+  "rounding_unit",
+  "reconciliation_tolerance",
+  "comparison_tolerance",
+  "sb_utility",
+  "electricity_price",
+  "water_price",
+  "sb_expired",
   "expired_depreciation_mode",
+  "material_recon_tolerance",
+  "volume_recon_tolerance",
+  "sb_tbd14",
+  "eqa_cost_category",
+  "rental_cost_category",
+  "jv_cost_category",
+  "sb_rates",
   "job_title_rates",
+  "sb_state",
   "is_locked"
  ],
  "fields": [
@@ -26,6 +48,11 @@
    "label": "Hiệu lực từ",
    "fieldtype": "Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "sb_labor",
+   "label": "Tham số nhân công",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "base_salary",
@@ -52,13 +79,148 @@
    "reqd": 1
   },
   {
+   "fieldname": "sb_accumulation",
+   "label": "Tích lũy và nghĩa vụ tài chính",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "accumulation_mode",
+   "label": "Cách tính tích lũy",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "default": "ON_COST",
+   "options": "NONE\nON_COST\nON_PRICE",
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-070)"
+  },
+  {
+   "fieldname": "accumulation_rate",
+   "label": "Tỷ lệ tích lũy (%)",
+   "fieldtype": "Percent",
+   "default": "5",
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-070)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "obligation_rate",
+   "label": "Tỷ lệ nghĩa vụ tài chính (%)",
+   "fieldtype": "Percent",
+   "default": "0",
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-070)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_rounding",
+   "label": "Làm tròn và ngưỡng",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "wastage_cap",
+   "label": "Trần hao hụt (%)",
+   "fieldtype": "Percent",
+   "reqd": 1,
+   "default": "10",
+   "description": "Giả định — chờ xác nhận (ASM-071)"
+  },
+  {
+   "fieldname": "rounding_unit",
+   "label": "Đơn vị làm tròn",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "default": "100"
+  },
+  {
+   "fieldname": "reconciliation_tolerance",
+   "label": "Ngưỡng đối soát (%)",
+   "fieldtype": "Percent",
+   "reqd": 1,
+   "default": "10"
+  },
+  {
+   "fieldname": "comparison_tolerance",
+   "label": "Ngưỡng lệch so sánh (%)",
+   "fieldtype": "Percent",
+   "reqd": 1,
+   "default": "10"
+  },
+  {
+   "fieldname": "sb_utility",
+   "label": "Điện, nước",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "electricity_price",
+   "label": "Giá điện (đ/kWh)",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "default": "0"
+  },
+  {
+   "fieldname": "water_price",
+   "label": "Giá nước (đ/m³)",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "default": "0"
+  },
+  {
+   "fieldname": "sb_expired",
+   "label": "Thiết bị hết thời gian sử dụng và đối soát",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "expired_depreciation_mode",
    "label": "Khấu hao thiết bị hết thời gian sử dụng",
    "fieldtype": "Select",
-   "options": "ZERO\nCONTINUE",
-   "default": "ZERO",
    "reqd": 1,
-   "description": "ZERO: khấu hao bằng 0; CONTINUE: tiếp tục bằng nguyên giá chia thời gian sử dụng (FR-RES-007). Giả định — chờ xác nhận (TBD-07)."
+   "default": "ZERO",
+   "options": "ZERO\nCONTINUE"
+  },
+  {
+   "fieldname": "material_recon_tolerance",
+   "label": "Ngưỡng đối soát vật chất (%)",
+   "fieldtype": "Percent",
+   "reqd": 1,
+   "default": "5"
+  },
+  {
+   "fieldname": "volume_recon_tolerance",
+   "label": "Ngưỡng đối soát sản lượng (%)",
+   "fieldtype": "Percent",
+   "reqd": 1,
+   "default": "2"
+  },
+  {
+   "fieldname": "sb_tbd14",
+   "label": "Loại chi phí tạm (TBD-14)",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "eqa_cost_category",
+   "label": "Loại chi phí của phí ngoại kiểm",
+   "fieldtype": "Select",
+   "default": "DRUG_SUPPLY",
+   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-074)"
+  },
+  {
+   "fieldname": "rental_cost_category",
+   "label": "Loại chi phí của tiền thuê máy",
+   "fieldtype": "Select",
+   "default": "DEPRECIATION",
+   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-074)"
+  },
+  {
+   "fieldname": "jv_cost_category",
+   "label": "Loại chi phí của hợp đồng liên doanh, liên kết",
+   "fieldtype": "Select",
+   "default": "DEPRECIATION",
+   "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-074)"
+  },
+  {
+   "fieldname": "sb_rates",
+   "label": "Chi phí theo chức danh",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "job_title_rates",
@@ -67,15 +229,21 @@
    "options": "NC Job Title Rate"
   },
   {
+   "fieldname": "sb_state",
+   "label": "Trạng thái",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "is_locked",
    "label": "Đã được dùng trong lần tính giá khóa",
    "fieldtype": "Check",
-   "read_only": 1
+   "read_only": 1,
+   "no_copy": 1
   }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-22 12:00:00.000000",
+ "modified": "2026-11-22 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "NC Costing",
  "name": "NC Costing Parameter Set",

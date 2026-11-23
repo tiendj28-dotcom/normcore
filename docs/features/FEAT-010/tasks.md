@@ -12,6 +12,6 @@ Mỗi task một commit `FEAT-010 Tnn: …`, test viết trước mã. `bench` q
 - [x] T08 Kiểm toàn bộ — done-when: pytest, bench run-tests --app normcore, check_conventions.py, golden đều xanh
 
 ## Sửa theo Reviewer (lượt trả về 1)
-- [x] T09 Mục 2–8 và sửa kèm của Reviewer (mã, test, ui-design, ASM-064/065/068) — done-when: pytest unit+golden xanh; `run-tests --module …test_nc_equipment` và `…test_equipment` OK
-- [x] T10 Mục 1: bộ nhập `nc_equipment`, `nc_room` (ASM-069) — done-when: `run-tests --module normcore.api.test_importer_equipment` OK. Hai test cũ ở `api/test_importer.py` đỏ, chờ người duyệt
-- [ ] T11 Kiểm toàn bộ lần 2 — done-when: sau khi người duyệt trả lời về hai test cũ
+- [x] T09 Mục 2–8 và sửa kèm của Reviewer (mã, test, ui-design, ASM-079/065/068) — done-when: pytest unit+golden xanh; `run-tests --module …test_nc_equipment` và `…test_equipment` OK
+- [x] T10 Mục 1: bộ nhập `nc_equipment`, `nc_room` (ASM-084) — done-when: `run-tests --module normcore.api.test_importer_equipment` OK. Hai test cũ ở `api/test_importer.py` đỏ, chờ người duyệt
+- [x] T11 Gộp develop (PR 22, 23, 24), sửa hai test cũ và số DocType theo người duyệt, kiểm toàn bộ lần 2 — done-when: `run-tests --app normcore` OK

@@ -8,7 +8,7 @@ from normcore.costing import resources
 
 
 def expired_mode_on(on) -> str:
-	"""Lựa chọn khấu hao hết thời gian sử dụng của bộ tham số mới nhất có hiệu lực tại `on` (mặc định ZERO, ASM-063)."""
+	"""Lựa chọn khấu hao hết thời gian sử dụng của bộ tham số mới nhất có hiệu lực tại `on` (mặc định ZERO, ASM-078)."""
 	value = frappe.db.get_value(
 		"NC Costing Parameter Set",
 		{"effective_from": ("<=", on)},

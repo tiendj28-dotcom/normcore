@@ -96,7 +96,7 @@ class TestResourcesReview(unittest.TestCase):
 			self.assertTrue(r.validate_equipment(f), empty)
 
 	def test_het_han_ngay_29_02_nam_dich_khong_nhuan(self):
-		# ASM-068: 29/02/2024 + 5 năm → 28/02/2029; không ném ValueError
+		# ASM-083: 29/02/2024 + 5 năm → 28/02/2029; không ném ValueError
 		self.assertFalse(r.is_expired(date(2024, 2, 29), 5, date(2029, 2, 27)))
 		self.assertTrue(r.is_expired(date(2024, 2, 29), 5, date(2029, 2, 28)))
 		self.assertTrue(r.is_expired(date(2024, 2, 29), 4, date(2028, 2, 29)))  # năm đích nhuận: giữ 29/02

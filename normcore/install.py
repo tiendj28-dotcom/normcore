@@ -34,6 +34,31 @@ def ensure_workflow_states():
 			)
 
 
+# TBD-05, ASM-074: hai loại giá mẫu, là dữ liệu cấu hình; ghi rõ là giả định
+SAMPLE_PRICE_CATEGORIES = [
+	{
+		"category_code": "GIA-BV",
+		"category_name": "Giá do bệnh viện quyết định (Giả định — chờ xác nhận)",
+		"approval_authority": "Bệnh viện",
+		"include_depreciation": 0,
+		"include_accumulation": 1,
+	},
+	{
+		"category_code": "GIA-NN",
+		"category_name": "Giá theo cơ quan có thẩm quyền (Giả định — chờ xác nhận)",
+		"approval_authority": "Cơ quan có thẩm quyền",
+		"include_depreciation": 1,
+		"include_accumulation": 0,
+	},
+]
+
+
+def ensure_sample_price_categories():
+	for row in SAMPLE_PRICE_CATEGORIES:
+		if not frappe.db.exists("NC Price Category", row["category_code"]):
+			frappe.get_doc({"doctype": "NC Price Category", **row}).insert(ignore_permissions=True)
+
+
 def before_install():
 	ensure_roles()
 
@@ -41,3 +66,4 @@ def before_install():
 def after_install():
 	ensure_roles()
 	ensure_workflow_states()
+	ensure_sample_price_categories()

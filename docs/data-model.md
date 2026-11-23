@@ -120,10 +120,11 @@ erDiagram
 | :-- | :-- | :-- | :-- |
 | event_time | Thời điểm | Datetime | |
 | user | Người thực hiện | Link User | |
-| event_type | Loại sự kiện | Select | Chuyển trạng thái / Khóa / Xuất tệp / Đổi cấu hình / Gọi AI / Nhập tệp |
+| event_type | Loại sự kiện | Select | Chuyển trạng thái / Khóa / Xuất tệp / Đổi cấu hình / Gọi AI / Nhập tệp / Xóa **[AMD-006]** |
 | ref_doctype, ref_name | Bản ghi | Link DocType, Dynamic Link | |
 | from_state, to_state | Trạng thái trước, sau | Data | |
 | detail | Chi tiết | Small Text | Lý do từ chối, tên tệp xuất |
+| before_value **[AMD-006]** | Giá trị trước | Long Text | JSON, chỉ đọc; chỉ sự kiện "Xóa": bản ghi, bảng con, owner, creation, các Version |
 
 **NC Review Comment** — Ý kiến thẩm định [FR-WF-003]. Naming: tự động.
 
@@ -345,13 +346,13 @@ erDiagram
 | working_hours_per_day | Số giờ làm việc ngày | Float | Có | |
 | wastage_cap | Trần hao hụt (%) | Percent | Có | |
 | accumulation_mode | Cách tính tích lũy | Select | Có | ON_COST / ON_PRICE / NONE |
-| accumulation_rate | Tỷ lệ tích lũy (%) | Percent | | |
-| obligation_rate | Tỷ lệ nghĩa vụ tài chính (%) | Percent | | |
+| accumulation_rate | Tỷ lệ tích lũy (%) | Percent | Có | |
+| obligation_rate | Tỷ lệ nghĩa vụ tài chính (%) | Percent | Có | |
 | rounding_unit | Đơn vị làm tròn | Int | Có | Mặc định 100 |
 | reconciliation_tolerance | Ngưỡng đối soát (%) | Percent | Có | Mặc định 10 |
 | comparison_tolerance | Ngưỡng lệch so sánh (%) | Percent | Có | Mặc định 10 |
-| electricity_price | Giá điện (đ/kWh) | Currency | | |
-| water_price | Giá nước (đ/m³) | Currency | | |
+| electricity_price | Giá điện (đ/kWh) | Currency | Có | |
+| water_price | Giá nước (đ/m³) | Currency | Có | |
 | expired_depreciation_mode **[1.1]** | Khấu hao thiết bị hết thời gian sử dụng | Select | Có | ZERO / CONTINUE; mặc định ZERO [FR-RES-007] |
 | material_recon_tolerance **[1.1]** | Ngưỡng đối soát vật chất (%) | Percent | Có | Mặc định 5 [FR-COST-027] |
 | volume_recon_tolerance **[1.1]** | Ngưỡng đối soát sản lượng (%) | Percent | Có | Mặc định 2 [FR-COST-028] |

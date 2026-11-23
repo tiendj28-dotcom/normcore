@@ -33,7 +33,7 @@ NC_TECHNICAL_SERVICE = ImportSet(
 
 register(NC_TECHNICAL_SERVICE)
 
-# FEAT-010, FR-RES-012 (phần thiết bị, phòng): chỉ trường phẳng ở data-model 3.5 (ASM-069).
+# FEAT-010, FR-RES-012 (phần thiết bị, phòng): chỉ trường phẳng ở data-model 3.5 (ASM-084).
 # Ô trống: tạo mới lấy mặc định DocType, cập nhật giữ nguyên. Linh kiện, tỷ lệ theo khoa khai trên form.
 EQUIPMENT_MODES = ("Mua", "Thuê", "Đặt theo hóa chất", "Liên doanh, liên kết")
 ALLOCATION_BASES = ("Giờ kế hoạch", "Số kết quả", "Phút chiếm máy")

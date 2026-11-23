@@ -28,3 +28,39 @@ class TestUIConventions(unittest.TestCase):
 		used |= set(re.findall(r"__\(\s*[\"']([^\"']+)[\"']", page_js))
 		self.assertTrue(used)
 		self.assertEqual(sorted(used - set(vi)), [])
+
+
+class TestEditorFeat006Fixes(unittest.TestCase):
+	"""NORM-22: G1, K3, C4 (NFR-USE-004, ui-design.md FEAT-006). Kiểm tĩnh trên mã nguồn Vue."""
+
+	@classmethod
+	def setUpClass(cls):
+		cls.vue = (UI_DIR / "ProcedureEditor.vue").read_text(encoding="utf-8")
+
+	def test_G1_nut_ghi_an_khi_khong_co_quyen_tao(self):
+		for label in ("Create procedure", "Copy from this procedure"):
+			m = re.search(r"<button[^>]*>\s*\{\{ __\(\"" + re.escape(label) + r"\"\) \}\}", self.vue)
+			self.assertIsNotNone(m, label)
+			self.assertIn("canCreate", m.group(0), label)
+		self.assertIn('can_create("NC Clinical Procedure")', self.vue)
+
+	def test_K3_tieu_diem_sau_khi_busy_ve_false(self):
+		body = self.vue.split("move(i, delta, ev) {", 1)[1].split("onType()", 1)[0]
+		# focus nằm sau khi run(...) hoàn tất (busy đã false), không nằm trong chuỗi bên trong run
+		self.assertRegex(body, r"\)\)\.then\(\(\) =>\s*(//[^\n]*\n\s*)?this\.\$nextTick\(")
+		inner = body.split("this.run(", 1)[1].split(".then(() => this.reload())", 1)[0]
+		self.assertNotIn("focus()", inner)
+		self.assertLess(body.index(".then(() => this.reload())"), body.index("btn.focus()"))
+
+	def test_K3_du_phong_khi_nut_bien_bi_khoa(self):
+		# Bước chuyển tới đầu/cuối: nút vừa bấm bị disabled, tiêu điểm sang nút còn lại của cùng bước (ASM-064)
+		body = self.vue.split("move(i, delta, ev) {", 1)[1].split("onType()", 1)[0]
+		self.assertIn("stepId", body)
+		self.assertRegex(body, r"\|\|\s*this\.\$el\.querySelector\(`\[data-move\^=")
+
+	def test_C4_placeholder_dung_mau_text_muted(self):
+		css = self.vue.split("<style", 1)[1]
+		m = re.search(r"::placeholder\s*\{([^}]*)\}", css)
+		self.assertIsNotNone(m)
+		self.assertIn("var(--text-muted)", m.group(1))
+		self.assertIn("opacity: 1", m.group(1))

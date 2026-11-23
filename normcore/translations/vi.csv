@@ -106,3 +106,6 @@ Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Room hourly rate,Đơn giá giờ phòng,NC Room
 Annual depreciation,Khấu hao năm,NC Equipment
+This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
+Duplicate,Nhân bản,NC Costing Parameter Set
+Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
