@@ -205,7 +205,9 @@ def check_vi_csv(root: Path) -> list:
 	keys = [_csv_key(r) for r in rows]
 	for n in range(1, len(keys)):
 		if keys[n] < keys[n - 1]:
-			errors.append(f"{VI_CSV}: [NC-10] chưa sắp xếp theo cột đầu: dòng {n + 1} '{keys[n][0]}' đứng sau '{keys[n - 1][0]}'")
+			errors.append(
+				f"{VI_CSV}: [NC-10] chưa sắp xếp theo cột đầu: dòng {n + 1} '{keys[n][0]}' đứng sau '{keys[n - 1][0]}'"
+			)
 			break
 	return errors
 
