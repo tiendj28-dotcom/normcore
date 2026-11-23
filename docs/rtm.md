@@ -1,6 +1,6 @@
 # Requirements Traceability Matrix: Normcore
 
-> Source: docs/srs.md v1.1, docs/use-cases.md v1.1 · Last updated: 2026-11-23
+> Source: docs/srs.md v1.1, docs/use-cases.md v1.1 · Last updated: 2026-11-13
 > Cột Design ref do kiến trúc ghi (ADR có trường "Requirements addressed" dẫn yêu cầu đó); thiết kế chi tiết từng tính năng sẽ ghi nối thêm.
 > Cột Plan ref do kế hoạch triển khai ghi (mã tính năng hoặc Foundations). Cột Test ref do giai đoạn kiểm thử ghi khi nghiệm thu; test case dự kiến xem Phụ lục A.
 > Tệp này được sinh bằng `docs/tools/build_rtm.py`; chạy lại sau mỗi lần sửa tài liệu nguồn. Không sửa tay.

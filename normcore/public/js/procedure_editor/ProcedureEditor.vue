@@ -182,6 +182,20 @@
 
 <script>
 const API = "normcore.api.procedure.";
+
+// Lấy nội dung lỗi của máy chủ (frappe.throw → _server_messages) thành chữ thuần để hiện ở dải lỗi.
+function messageFromError(r) {
+	if (!r || !r._server_messages) return "";
+	try {
+		return JSON.parse(r._server_messages)
+			.map((m) => (typeof m === "string" && m.startsWith("{") ? JSON.parse(m).message : m))
+			.map((m) => String(m).replace(/<[^>]*>/g, "").trim())
+			.filter(Boolean)
+			.join(" ");
+	} catch (e) {
+		return "";
+	}
+}
 export default {
 	name: "ProcedureEditor",
 	props: { initialName: { type: String, default: "" } },
@@ -223,11 +237,21 @@ export default {
 		call(method, args) {
 			this.error = "";
 			this.existing = "";
+			// silent: không để Desk mở hộp thoại "Tin nhắn"; lỗi hiện ở dải role="alert" (ui-design.md, E15)
+			let serverMessage = "";
 			return frappe
-				.call({ method: API + method, args, freeze: false, error() {} })
+				.call({
+					method: API + method,
+					args,
+					freeze: false,
+					silent: true,
+					error(r) {
+						serverMessage = messageFromError(r);
+					},
+				})
 				.then((r) => r.message)
 				.catch((e) => {
-					this.error = __("Could not complete the request. See the message from the server.");
+					this.error = serverMessage || messageFromError(e) || __("Could not complete the request. See the message from the server.");
 					throw e;
 				});
 		},
@@ -323,17 +347,24 @@ export default {
 			return this.run(() =>
 				this.call(create ? "create_procedure" : "copy_procedure", args)
 					.then((r) => this.refreshList().then(() => this.load(r.name)))
-					.catch((e) =>
+					.catch((e) => {
+						const message = this.error;
 						// FR-PROC-002 / Q3: dẫn tới bản đã có
-						this.call("find_existing", { technical_service: f.service, department: f.department })
+						return this.call("find_existing", { technical_service: f.service, department: f.department })
 							.then((x) => {
 								const existing = x.draft || x.published || "";
-								if (!existing) return; // lỗi khác (mã dịch vụ sai, thiếu quyền...): giữ thông báo chung
+								if (!existing) {
+									// lỗi khác (mã dịch vụ sai, thiếu quyền...): giữ thông báo của máy chủ trong dải lỗi
+									this.error = message;
+									return;
+								}
 								this.error = __("This service already has a procedure for the department:");
 								this.existing = existing;
 							})
-							.catch(() => {})
-					)
+							.catch(() => {
+								this.error = message;
+							});
+					})
 			);
 		},
 		saveSection(key) {
