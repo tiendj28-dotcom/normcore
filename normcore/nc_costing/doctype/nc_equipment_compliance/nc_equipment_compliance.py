@@ -27,6 +27,10 @@ class NCEquipmentCompliance(Document):
 		errors = compliance.validate_record({k: self.get(k) for k in _FIELDS})
 		if errors:
 			frappe.throw("<br>".join(_(e) for e in errors), frappe.ValidationError)
+		if not frappe.db.exists("File", {"file_url": self.attachment, "is_private": 1}):
+			frappe.throw(
+				_("Tệp chứng từ {0} chưa được tải lên hoặc không phải tệp riêng tư").format(self.attachment)
+			)
 		self._check_record_code()
 		# ASM-101: trạng thái do hệ thống tính, người dùng không sửa
 		self.status = compliance.compute_status(self.expiry_date, getdate(nowdate()), get_reminder_days())

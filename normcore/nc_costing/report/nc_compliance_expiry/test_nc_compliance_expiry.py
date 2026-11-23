@@ -87,7 +87,7 @@ class TestNCComplianceExpiry(FrappeTestCase):
 	def test_FR_CMP_007_tom_tat_va_cot(self):
 		eq = make_equipment(department=self.dept).name
 		_hs(eq, 5)
-		cols, rows, _m, _c, summary = execute({"as_of": nowdate()})
+		cols, _rows, _m, _c, summary = execute({"as_of": nowdate()})
 		self.assertEqual(len(cols), 10)
 		labels = {s["label"]: s["value"] for s in summary}
 		self.assertEqual(labels["Số ngày nhắc hạn"], 30)
