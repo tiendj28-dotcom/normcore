@@ -355,10 +355,14 @@ export default {
 			const order = this.doc.steps.map((s) => s.step_id);
 			[order[i], order[i + delta]] = [order[i + delta], order[i]];
 			const key = ev.currentTarget.dataset.move;
+			const stepId = key.split(":")[0];
 			return this.run(() => this.call("reorder_steps", { procedure: this.doc.name, order }).then(() => this.reload())).then(() =>
 				// K3: chỉ đặt tiêu điểm sau khi busy về false (nút hết disabled)
 				this.$nextTick(() => {
-					const btn = this.$el.querySelector(`[data-move="${key}"]:not([disabled])`);
+					// ASM-064: ở biên nút vừa bấm bị khóa, chuyển sang nút còn lại của cùng bước
+					const btn =
+						this.$el.querySelector(`[data-move="${key}"]:not([disabled])`) ||
+						this.$el.querySelector(`[data-move^="${stepId}:"]:not([disabled])`);
 					if (btn) btn.focus();
 				})
 			);

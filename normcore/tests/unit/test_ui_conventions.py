@@ -52,6 +52,12 @@ class TestEditorFeat006Fixes(unittest.TestCase):
 		self.assertNotIn("focus()", inner)
 		self.assertLess(body.index(".then(() => this.reload())"), body.index("btn.focus()"))
 
+	def test_K3_du_phong_khi_nut_bien_bi_khoa(self):
+		# Bước chuyển tới đầu/cuối: nút vừa bấm bị disabled, tiêu điểm sang nút còn lại của cùng bước (ASM-064)
+		body = self.vue.split("move(i, delta, ev) {", 1)[1].split("onType()", 1)[0]
+		self.assertIn("stepId", body)
+		self.assertRegex(body, r"\|\|\s*this\.\$el\.querySelector\(`\[data-move\^=")
+
 	def test_C4_placeholder_dung_mau_text_muted(self):
 		css = self.vue.split("<style", 1)[1]
 		m = re.search(r"::placeholder\s*\{([^}]*)\}", css)
