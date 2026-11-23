@@ -22,3 +22,6 @@ Kết luận: **accepted** (commit `b383b1fdcb7c25d4d9d05aa5ba0dc6b9240d33c0`, P
 ## Giới hạn
 - **Chưa kiểm UI bằng trình duyệt** (Playwright MCP không kết nối). SCR-DSK-030 kiểm ở smoke staging sau merge.
 - Chưa tạo site cục bộ sạch (xem trên).
+
+## Kiểm lại sau gộp develop (commit `b6486171b8446ab68ca5683ed55afad9590a9483`)
+Dev gộp develop (#27, #22) và đánh lại ASM-063..067 thành ASM-065..069. Mã FEAT-003 không đổi. QA chạy lại: `run-tests --app normcore` trên `normcore.test` 203 OK; pytest 97 passed, độ phủ 99%; golden, `check_conventions.py`, `build_rtm.py` (VAN DE: 0) đạt; ASM 69 dòng, không trùng số; CI run 45114219200 pass. ASM-068 (đổi 18 → 19, số thực 19) đã duyệt chung. Kết luận vẫn **accepted**; commit kiểm trong `verdict.json` cập nhật thành `b6486171b8446ab68ca5683ed55afad9590a9483`.
