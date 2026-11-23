@@ -71,7 +71,7 @@ def validate_test_system(values: dict, allocation_basis, service_is_paraclinical
 			errors.append(
 				f"{LABELS['machine_minutes_per_case']} là bắt buộc và phải lớn hơn 0 khi thiết bị chia theo Phút chiếm máy"
 			)
-	elif minutes is not None and minutes != 0 and minutes < 0:
+	elif minutes is not None and minutes < 0:
 		errors.append(f"{LABELS['machine_minutes_per_case']} phải lớn hơn 0")
 	status = values.get("status")
 	if not _blank(status) and status not in STATUSES:

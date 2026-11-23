@@ -43,7 +43,9 @@ class NCCostingRun(Document):
 		if frappe.get_meta("NC Norm Set").has_field("test_system"):  # trường do FEAT-034 thêm
 			fields.append("test_system")
 		norm_sets = frappe.get_all("NC Norm Set", {"status": LOCKED_NORM}, fields, order_by="name")
-		send_out = frappe.get_all("NC Technical Service", {"is_send_out": 1}, pluck="name")
+		send_out = frappe.get_all(
+			"NC Technical Service", {"is_send_out": 1, "is_paraclinical": 1}, pluck="name"
+		)
 		for ns in test_systems.norm_sets_to_cost(norm_sets, self.test_systems_in_scope(), send_out):
 			self._cost_norm_set(frappe.get_doc("NC Norm Set", ns["name"]), params, rates)
 

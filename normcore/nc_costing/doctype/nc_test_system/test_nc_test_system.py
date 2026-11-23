@@ -208,17 +208,12 @@ class TestNCTestSystem(FrappeTestCase):
 		run.run_costing()
 		return run
 
-	def test_TC_CLS_23_ngung_dung_khong_vao_lan_tinh_moi_lan_da_tinh_giu_nguyen(self):
+	def test_TC_CLS_23_ngung_dung_khong_vao_lan_tinh_moi_lan_da_khoa_giu_nguyen(self):
 		self._two()
 		old = self._locked_run()
-		before = frappe.db.get_value("NC Costing Run", old.name, ["modified", "status"])
-		costs = frappe.get_all(
-			"NC Service Cost",
-			{"costing_run": old.name},
-			["name", "modified", "direct_labor"],
-			order_by="name",
-		)
-		self.assertEqual(len(costs), 1)
+		old.db_set("status", "Đã khóa")
+		snapshot = _snapshot(old.name)
+		self.assertEqual(len(snapshot["costs"]), 1)
 		frappe.db.set_value("NC Test System", "GLU-B", "status", "Ngừng dùng")
 		new = frappe.get_doc(
 			{
@@ -230,14 +225,12 @@ class TestNCTestSystem(FrappeTestCase):
 			}
 		).insert(ignore_permissions=True)
 		self.assertEqual(new.test_systems_in_scope(), ["GLU-A"])
-		self.assertEqual(frappe.db.get_value("NC Costing Run", old.name, ["modified", "status"]), before)
-		after = frappe.get_all(
-			"NC Service Cost",
-			{"costing_run": old.name},
-			["name", "modified", "direct_labor"],
-			order_by="name",
-		)
-		self.assertEqual(after, costs)
+		new.run_costing()
+		new.reload()
+		self.assertEqual(new.status, "Đã tính")
+		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": new.name}), 1)
+		self.assertEqual(_snapshot(old.name), snapshot)
+		self.assertEqual(snapshot["run"][1], "Đã khóa")
 		# Dùng lại: hệ thống trở lại phạm vi
 		frappe.db.set_value("NC Test System", "GLU-B", "status", "Đang dùng")
 		self.assertEqual(new.test_systems_in_scope(), ["GLU-A", "GLU-B"])
@@ -257,3 +250,35 @@ class TestNCTestSystem(FrappeTestCase):
 		run2 = _run(params)
 		run2.run_costing()
 		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run2.name}), 1)
+
+	def test_FR_SVC_011_co_gui_ngoai_cu_khi_da_bo_can_lam_sang_van_tinh(self):
+		"""ASM-109: bỏ cờ cận lâm sàng giữ giá trị cũ; `is_send_out` bị ẩn không được loại dịch vụ khỏi lần tính."""
+		from normcore.nc_costing.doctype.nc_costing_run.test_nc_costing_run import _published_norm_set, _run
+		from normcore.tests.utils import make_param_set
+
+		params = make_param_set()
+		ns = _published_norm_set(self.service, self.dept)
+		ns.lock()
+		frappe.db.set_value(
+			"NC Technical Service",
+			self.service,
+			{"is_send_out": 1, "send_out_price": 90000, "is_paraclinical": 0},
+		)
+		run = _run(params)
+		run.run_costing()
+		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 1)
+
+
+def _snapshot(run):
+	return {
+		"run": tuple(frappe.db.get_value("NC Costing Run", run, ["modified", "status"])),
+		"costs": [
+			tuple(d.values())
+			for d in frappe.get_all(
+				"NC Service Cost",
+				{"costing_run": run},
+				["name", "modified", "direct_labor"],
+				order_by="name",
+			)
+		],
+	}

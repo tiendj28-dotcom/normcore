@@ -38,7 +38,7 @@ class NCTechnicalService(Document):
 		values["panel_components"] = [c.as_dict() for c in self.panel_components or []]
 		errors = service_rules.cls_errors(values)
 		if errors:
-			frappe.throw("<br>".join(errors))
+			frappe.throw("<br>".join(_(e) for e in errors))
 		if not self.is_paraclinical and not self.is_new() and self.get_doc_before_save():
 			if self.get_doc_before_save().is_paraclinical:
 				systems = frappe.get_all("NC Test System", {"technical_service": self.name}, pluck="name")
