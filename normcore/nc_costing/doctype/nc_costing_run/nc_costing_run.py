@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from normcore.costing import engine
+from normcore.costing import engine, test_systems
 
 DRAFT, CALCULATED, FAILED = "Nháp", "Đã tính", "Tính lỗi"
 LOCKED_NORM = "Đã khóa"
@@ -39,8 +39,18 @@ class NCCostingRun(Document):
 			frappe.delete_doc("NC Service Cost", name, force=True, ignore_permissions=True)
 		params = frappe.get_doc("NC Costing Parameter Set", self.parameter_set)
 		rates = {r.job_title: r for r in params.job_title_rates}
-		for ns_name in frappe.get_all("NC Norm Set", {"status": LOCKED_NORM}, pluck="name", order_by="name"):
-			self._cost_norm_set(frappe.get_doc("NC Norm Set", ns_name), params, rates)
+		fields = ["name", "technical_service"]
+		if frappe.get_meta("NC Norm Set").has_field("test_system"):  # trường do FEAT-034 thêm
+			fields.append("test_system")
+		norm_sets = frappe.get_all("NC Norm Set", {"status": LOCKED_NORM}, fields, order_by="name")
+		send_out = frappe.get_all("NC Technical Service", {"is_send_out": 1}, pluck="name")
+		for ns in test_systems.norm_sets_to_cost(norm_sets, self.test_systems_in_scope(), send_out):
+			self._cost_norm_set(frappe.get_doc("NC Norm Set", ns["name"]), params, rates)
+
+	def test_systems_in_scope(self):
+		"""FR-CLS-006, DI-06 [1.1]: mã các hệ thống xét nghiệm "Đang dùng" cho lần tính mới."""
+		systems = frappe.get_all("NC Test System", fields=["name", "status"])
+		return test_systems.in_costing_scope(systems)
 
 	def _cost_norm_set(self, ns, params, rates):
 		priced, missing = [], []

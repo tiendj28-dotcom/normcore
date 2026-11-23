@@ -195,3 +195,65 @@ class TestNCTestSystem(FrappeTestCase):
 		with self.assertRaises(frappe.LinkExistsError) as ctx:
 			frappe.delete_doc("NC Equipment", "EQ_A")
 		self.assertIn("GLU-A", str(ctx.exception))
+
+	def _locked_run(self):
+		"""Một lần tính "Đã tính" có NC Service Cost, dùng để kiểm lần đã có không bị đụng tới."""
+		from normcore.nc_costing.doctype.nc_costing_run.test_nc_costing_run import _published_norm_set, _run
+		from normcore.tests.utils import make_param_set
+
+		make_param_set()
+		ns = _published_norm_set(self.service, self.dept)
+		ns.lock()
+		run = _run(frappe.get_doc("NC Costing Parameter Set", {"title": "Bộ tham số vàng"}))
+		run.run_costing()
+		return run
+
+	def test_TC_CLS_23_ngung_dung_khong_vao_lan_tinh_moi_lan_da_tinh_giu_nguyen(self):
+		self._two()
+		old = self._locked_run()
+		before = frappe.db.get_value("NC Costing Run", old.name, ["modified", "status"])
+		costs = frappe.get_all(
+			"NC Service Cost",
+			{"costing_run": old.name},
+			["name", "modified", "direct_labor"],
+			order_by="name",
+		)
+		self.assertEqual(len(costs), 1)
+		frappe.db.set_value("NC Test System", "GLU-B", "status", "Ngừng dùng")
+		new = frappe.get_doc(
+			{
+				"doctype": "NC Costing Run",
+				"title": "Lần tính mới",
+				"fiscal_year": 2026,
+				"costing_date": "2026-12-31",
+				"parameter_set": old.parameter_set,
+			}
+		).insert(ignore_permissions=True)
+		self.assertEqual(new.test_systems_in_scope(), ["GLU-A"])
+		self.assertEqual(frappe.db.get_value("NC Costing Run", old.name, ["modified", "status"]), before)
+		after = frappe.get_all(
+			"NC Service Cost",
+			{"costing_run": old.name},
+			["name", "modified", "direct_labor"],
+			order_by="name",
+		)
+		self.assertEqual(after, costs)
+		# Dùng lại: hệ thống trở lại phạm vi
+		frappe.db.set_value("NC Test System", "GLU-B", "status", "Đang dùng")
+		self.assertEqual(new.test_systems_in_scope(), ["GLU-A", "GLU-B"])
+
+	def test_FR_SVC_011_dich_vu_gui_ngoai_khong_tinh_tu_dinh_muc(self):
+		from normcore.nc_costing.doctype.nc_costing_run.test_nc_costing_run import _published_norm_set, _run
+		from normcore.tests.utils import make_param_set
+
+		params = make_param_set()
+		ns = _published_norm_set(self.service, self.dept)
+		ns.lock()
+		frappe.db.set_value("NC Technical Service", self.service, {"is_send_out": 1, "send_out_price": 90000})
+		run = _run(params)
+		run.run_costing()
+		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 0)
+		frappe.db.set_value("NC Technical Service", self.service, "is_send_out", 0)
+		run2 = _run(params)
+		run2.run_costing()
+		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run2.name}), 1)
