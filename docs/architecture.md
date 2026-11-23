@@ -564,7 +564,7 @@ Nội dung bảng mặc định cần chuyên gia kế toán xây (TBD-03). Bệ
 Cần biết ai đổi gì ở mức trường, và cần một sổ sự kiện nghiệp vụ không ai sửa được.
 
 **Decision**
-Bật `track_changes` trên mọi DocType nghiệp vụ để có lịch sử theo trường. Thêm `NC Audit Event` cho chuyển trạng thái, khóa, mở khóa, xuất tệp, đổi cấu hình AI; DocType này không cấp quyền sửa, xóa cho vai trò nào và chỉ ghi qua mã máy chủ.
+Bật `track_changes` trên mọi DocType nghiệp vụ để có lịch sử theo trường. Thêm `NC Audit Event` cho chuyển trạng thái, khóa, mở khóa, xuất tệp, đổi cấu hình AI, xóa bản ghi **[AMD-006]**; DocType này không cấp quyền sửa, xóa cho vai trò nào và chỉ ghi qua mã máy chủ.
 
 **Options considered**
 - **Hai lớp (chọn)** — chi tiết theo trường cộng sổ sự kiện gọn để tra cứu.
