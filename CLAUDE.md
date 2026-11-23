@@ -35,7 +35,7 @@ Hook `.claude/hooks/guard.py` chặn ghi vào các tệp "chỉ đọc". Đừng
 
 ## 3. Luật cứng — vi phạm là sai, không có ngoại lệ
 
-1. **Không sửa, bỏ qua, nới lỏng hay xóa test để cho qua.** Không đổi giá trị mong đợi. Không thêm `skip`, `xfail`, `try/except: pass` quanh assertion. Test sai thật thì ghi `DEF-NNN` (mục 7) chứ không sửa.
+1. **Không sửa, bỏ qua, nới lỏng hay xóa test để cho qua.** Không đổi giá trị mong đợi. Không thêm `skip`, `xfail`, `try/except: pass` quanh assertion. Test sai thật thì ghi `DEF-NNN` (mục 7) chứ không sửa. Ngoại lệ duy nhất: cập nhật danh sách hoặc số đếm trong test cũ khi FEAT mới thêm DocType, bộ nhập, vai trò đúng FR hoặc ma trận `docs/data-model.md` mục 4; assertion giữ nguyên độ chặt (vẫn so khớp đủ); có "Quyết định Lead" trên issue và ASM dẫn chứng. Ngoại lệ này không áp dụng cho số liệu tiền, công thức, `docs/golden/`, `docs/test-cases.md`.
 2. **Không tự chế công thức.** Mọi phép tính giá phải truy được về một `BR-COST-*`, `BR-ADJ-*` hoặc `BR-CLS-*` và về hàm tương ứng trong `docs/golden/`. Cài đặt phải cho cùng kết quả với golden trên mọi bộ dữ liệu vàng: tiền khớp đến đơn vị nhỏ nhất mà golden dùng, hệ số k khớp 6 chữ số thập phân.
 3. **Làm tròn và kiểu số theo golden.** Đọc golden để biết làm tròn ở bước nào, bao nhiêu chữ số. Tiền dùng `Decimal` hoặc đúng kiểu golden dùng; không tự đổi thứ tự làm tròn.
 4. **Không phụ thuộc ERPNext** hay app nào ngoài `frappe`. `required_apps = []`.
