@@ -34,7 +34,7 @@ def ensure_workflow_states():
 			)
 
 
-# TBD-05, ASM-067: hai loại giá mẫu, là dữ liệu cấu hình; ghi rõ là giả định
+# TBD-05, ASM-074: hai loại giá mẫu, là dữ liệu cấu hình; ghi rõ là giả định
 SAMPLE_PRICE_CATEGORIES = [
 	{
 		"category_code": "GIA-BV",

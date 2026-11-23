@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"nc-imp-h\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Normcore</span>\",\"col\":12}},{\"id\":\"nc-imp-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhập dữ liệu từ Excel\",\"col\":4}},{\"id\":\"nc-svc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dịch vụ kỹ thuật\",\"col\":4}},{\"id\":\"nc-spc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chuyên khoa\",\"col\":4}}]",
+ "content": "[{\"id\":\"nc-imp-h\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Normcore</span>\",\"col\":12}},{\"id\":\"nc-imp-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhập dữ liệu từ Excel\",\"col\":4}},{\"id\":\"nc-svc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dịch vụ kỹ thuật\",\"col\":4}},{\"id\":\"nc-spc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chuyên khoa\",\"col\":4}},{\"id\":\"nc-aud-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhật ký\",\"col\":4}},{\"id\":\"nc-ail-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhật ký AI\",\"col\":4}}]",
  "creation": "2026-11-21 00:00:00.000000",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -36,6 +36,18 @@
   {
    "label": "Chuyên khoa",
    "link_to": "NC Specialty",
+   "type": "DocType",
+   "doc_view": "List"
+  },
+  {
+   "label": "Nhật ký",
+   "link_to": "NC Audit Event",
+   "type": "DocType",
+   "doc_view": "List"
+  },
+  {
+   "label": "Nhật ký AI",
+   "link_to": "NC AI Log",
    "type": "DocType",
    "doc_view": "List"
   }

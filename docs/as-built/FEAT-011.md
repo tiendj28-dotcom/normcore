@@ -10,9 +10,9 @@ Issue NORM-20. FR: FR-RES-009, 010, 011, 012 (chức danh, không đổi), 015. 
 - TC-RES-05: không đổi công thức; test unit/golden có sẵn + test mức DocType.
 
 ## Nợ kỹ thuật, ghi chú
-- Chưa mã nào bật `is_locked`; FEAT-015 bật khi khóa lần tính (ASM-068).
+- Chưa mã nào bật `is_locked`; FEAT-015 bật khi khóa lần tính (ASM-075).
 - Chưa DocType R1 nào liên kết tới NC Price Category; chặn xóa mới kiểm được bằng móc đã gắn (FEAT-012/030 thêm liên kết).
 - Form SCR-DSK-019 chưa được kiểm bằng mắt: xem implementation-log về preview.
 
 ## ASM
-ASM-063..070 (`docs/decisions/assumptions.md`). CF-004, AMD-007 (bốn trường bắt buộc theo srs, sửa `data-model.md` 3.5). ASM-069 chờ người duyệt (tiendj28, NORM-21); ASM-066, ASM-068 đã duyệt.
+ASM-070..077 (`docs/decisions/assumptions.md`). CF-004, AMD-007 (bốn trường bắt buộc theo srs, sửa `data-model.md` 3.5). ASM-076 (đổi số DocType trong test) đã duyệt chung; ASM-073, ASM-075 đã duyệt.

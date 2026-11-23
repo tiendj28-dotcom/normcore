@@ -12,7 +12,7 @@ def _d(x):
 
 
 def locked_runs(name):
-	"""Các lần tính giá "Đã khóa" đang dùng bộ tham số (ASM-068)."""
+	"""Các lần tính giá "Đã khóa" đang dùng bộ tham số (ASM-075)."""
 	return frappe.get_all(
 		"NC Costing Run", filters={"parameter_set": name, "status": "Đã khóa"}, pluck="name"
 	)

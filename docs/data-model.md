@@ -120,10 +120,11 @@ erDiagram
 | :-- | :-- | :-- | :-- |
 | event_time | Thời điểm | Datetime | |
 | user | Người thực hiện | Link User | |
-| event_type | Loại sự kiện | Select | Chuyển trạng thái / Khóa / Xuất tệp / Đổi cấu hình / Gọi AI / Nhập tệp |
+| event_type | Loại sự kiện | Select | Chuyển trạng thái / Khóa / Xuất tệp / Đổi cấu hình / Gọi AI / Nhập tệp / Xóa **[AMD-006]** |
 | ref_doctype, ref_name | Bản ghi | Link DocType, Dynamic Link | |
 | from_state, to_state | Trạng thái trước, sau | Data | |
 | detail | Chi tiết | Small Text | Lý do từ chối, tên tệp xuất |
+| before_value **[AMD-006]** | Giá trị trước | Long Text | JSON, chỉ đọc; chỉ sự kiện "Xóa": bản ghi, bảng con, owner, creation, các Version |
 
 **NC Review Comment** — Ý kiến thẩm định [FR-WF-003]. Naming: tự động.
 

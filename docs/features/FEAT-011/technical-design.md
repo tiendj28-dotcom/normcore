@@ -18,18 +18,18 @@ Không có BR mới; BR-COST-001 đã cài, không đổi công thức, không t
 ## 2. DocType
 
 ### 2.1 NC Costing Parameter Set (mở rộng)
-Thêm đúng các trường của `data-model.md` 3.5 (đã sửa theo AMD-007/CF-004: `accumulation_rate`, `obligation_rate`, `electricity_price`, `water_price` bắt buộc): `wastage_cap`, `accumulation_mode`, `accumulation_rate`, `obligation_rate`, `rounding_unit`, `reconciliation_tolerance`, `comparison_tolerance`, `electricity_price`, `water_price`, `expired_depreciation_mode`, `material_recon_tolerance`, `volume_recon_tolerance`, `eqa_cost_category`, `rental_cost_category`, `jv_cost_category`. Mặc định: ZERO, 5, 2; `rounding_unit` 100; hai ngưỡng 10; chế độ tích lũy ON_COST, tích lũy 5, nghĩa vụ 0 (khớp golden `PARAM`, ASM-063); `wastage_cap` 10 (ASM-064); giá điện, giá nước mặc định 0 (ASM-070); ba loại chi phí tạm DRUG_SUPPLY / DEPRECIATION / DEPRECIATION. Quyền giữ nguyên (đúng dòng "Bộ tham số, chức danh, loại giá").
-Bản ghi cũ: patch `backfill_parameter_set_defaults` điền mặc định (ASM-065).
+Thêm đúng các trường của `data-model.md` 3.5 (đã sửa theo AMD-007/CF-004: `accumulation_rate`, `obligation_rate`, `electricity_price`, `water_price` bắt buộc): `wastage_cap`, `accumulation_mode`, `accumulation_rate`, `obligation_rate`, `rounding_unit`, `reconciliation_tolerance`, `comparison_tolerance`, `electricity_price`, `water_price`, `expired_depreciation_mode`, `material_recon_tolerance`, `volume_recon_tolerance`, `eqa_cost_category`, `rental_cost_category`, `jv_cost_category`. Mặc định: ZERO, 5, 2; `rounding_unit` 100; hai ngưỡng 10; chế độ tích lũy ON_COST, tích lũy 5, nghĩa vụ 0 (khớp golden `PARAM`, ASM-070); `wastage_cap` 10 (ASM-071); giá điện, giá nước mặc định 0 (ASM-077); ba loại chi phí tạm DRUG_SUPPLY / DEPRECIATION / DEPRECIATION. Quyền giữ nguyên (đúng dòng "Bộ tham số, chức danh, loại giá").
+Bản ghi cũ: patch `backfill_parameter_set_defaults` điền mặc định (ASM-072).
 
 `validate` (thứ tự): (1) nếu bộ đang bị khóa (xem 2.3) → `frappe.throw`; (2) kiểm khoảng giá trị bằng `costing/parameters.py`; (3) `compute_job_rates`.
 `on_trash`: bộ bị khóa không xóa được. Không cho Frappe `is_locked` chỉnh tay (chỉ đọc).
 
 ### 2.2 NC Price Category (mới), module NC Costing
-`autoname: field:category_code`; `category_code` (BB, duy nhất), `category_name` (BB, `title_field`), `approval_authority` (Select Bệnh viện / Cơ quan có thẩm quyền, BB, không mặc định), `include_depreciation`, `include_accumulation` (Check). `track_changes` 1. Quyền như dòng "Bộ tham số, chức danh, loại giá"; NC Admin thêm `delete` (ASM-066); chặn xóa khi đang được tham chiếu (hooks `check_not_referenced`). Khai `DOCTYPE_ROW`, `DELETE_ALLOWED` ở `check_conventions.py`; test đếm DocType 18 → 19.
-Hai bản ghi mẫu (TBD-05, ASM-067) nạp bằng patch `normcore.patches.add_sample_price_categories` và `install.after_install`: `GIA-BV` "Giá do bệnh viện quyết định (Giả định — chờ xác nhận)" / Bệnh viện / không khấu hao / có tích lũy; `GIA-NN` "Giá theo cơ quan có thẩm quyền (Giả định — chờ xác nhận)" / Cơ quan có thẩm quyền / có khấu hao / không tích lũy.
+`autoname: field:category_code`; `category_code` (BB, duy nhất), `category_name` (BB, `title_field`), `approval_authority` (Select Bệnh viện / Cơ quan có thẩm quyền, BB, không mặc định), `include_depreciation`, `include_accumulation` (Check). `track_changes` 1. Quyền như dòng "Bộ tham số, chức danh, loại giá"; NC Admin thêm `delete` (ASM-073); chặn xóa khi đang được tham chiếu (hooks `check_not_referenced`). Khai `DOCTYPE_ROW`, `DELETE_ALLOWED` ở `check_conventions.py`; test đếm DocType 19 → 20.
+Hai bản ghi mẫu (TBD-05, ASM-074) nạp bằng patch `normcore.patches.add_sample_price_categories` và `install.after_install`: `GIA-BV` "Giá do bệnh viện quyết định (Giả định — chờ xác nhận)" / Bệnh viện / không khấu hao / có tích lũy; `GIA-NN` "Giá theo cơ quan có thẩm quyền (Giả định — chờ xác nhận)" / Cơ quan có thẩm quyền / có khấu hao / không tích lũy.
 
 ### 2.3 Khóa bộ tham số (FR-RES-011, DI-xx "đã dùng")
-Bộ "đang được dùng" khi `is_locked` = 1 trong CSDL **hoặc** có NC Costing Run `status = "Đã khóa"` trỏ tới bộ (ASM-068: skeleton chưa có ai bật `is_locked`; FEAT-015 sẽ bật khi khóa lần tính). Hàm `is_in_use(name)`. Thông báo tiếng Việt nêu mã lần tính. Nhân bản: whitelisted method `duplicate()` trên doc (cần quyền `create`): sao chép mọi trường và dòng chức danh, `is_locked` = 0, `title` thêm " (bản sao)", trả tên bộ mới.
+Bộ "đang được dùng" khi `is_locked` = 1 trong CSDL **hoặc** có NC Costing Run `status = "Đã khóa"` trỏ tới bộ (ASM-075: skeleton chưa có ai bật `is_locked`; FEAT-015 sẽ bật khi khóa lần tính). Hàm `is_in_use(name)`. Thông báo tiếng Việt nêu mã lần tính. Nhân bản: whitelisted method `duplicate()` trên doc (cần quyền `create`): sao chép mọi trường và dòng chức danh, `is_locked` = 0, `title` thêm " (bản sao)", trả tên bộ mới.
 
 ## 3. Logic thuần — `normcore/costing/parameters.py` (không import `frappe`)
 - `DEFAULTS`: các mặc định mục 2.1.
@@ -51,4 +51,4 @@ Phép tính tiền: không thêm; chức danh dùng `engine.job_rate` ↔ `golde
 | 7 | FEAT-004 không đỏ | — | — |
 
 ## 6. Giả định và rủi ro
-ASM-063..070 như trên (chốt trong `docs/decisions/assumptions.md`). Rủi ro: nhánh khác (NORM-19: FEAT-009/010) cùng thêm ASM — gộp khi merge, giữ cả hai bên.
+ASM-070..070 như trên (chốt trong `docs/decisions/assumptions.md`). Rủi ro: nhánh khác (NORM-19: FEAT-009/010) cùng thêm ASM — gộp khi merge, giữ cả hai bên.

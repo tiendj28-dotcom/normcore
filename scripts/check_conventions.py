@@ -50,6 +50,7 @@ DOCTYPE_ROW = {
 	"NC Costing Run": "Lần tính giá, kết quả, đối soát",
 	"NC Service Cost": "Lần tính giá, kết quả, đối soát",
 	"NC AI Log": "Nhật ký AI, sổ sự kiện",
+	"NC Audit Event": "Nhật ký AI, sổ sự kiện",
 	"NC Department": "NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)",
 	"NC Cost Center": "NC Cost Center (G1: Admin, Finance ghi)",
 }

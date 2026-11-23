@@ -1,6 +1,6 @@
 """Kiểm giá trị bộ tham số tính giá (FR-RES-009). Hàm thuần Python (ADR-003).
 
-Mặc định: ASM-063, ASM-064; ba tham số [1.1] theo FR-RES-009 (ZERO, 5%, 2%).
+Mặc định: ASM-070, ASM-071; ba tham số [1.1] theo FR-RES-009 (ZERO, 5%, 2%).
 """
 
 ACCUMULATION_MODES = ("NONE", "ON_COST", "ON_PRICE")

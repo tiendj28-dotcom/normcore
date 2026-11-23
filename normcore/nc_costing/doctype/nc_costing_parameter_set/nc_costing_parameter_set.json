@@ -90,14 +90,14 @@
    "reqd": 1,
    "default": "ON_COST",
    "options": "NONE\nON_COST\nON_PRICE",
-   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)"
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-070)"
   },
   {
    "fieldname": "accumulation_rate",
    "label": "Tỷ lệ tích lũy (%)",
    "fieldtype": "Percent",
    "default": "5",
-   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)",
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-070)",
    "reqd": 1
   },
   {
@@ -105,7 +105,7 @@
    "label": "Tỷ lệ nghĩa vụ tài chính (%)",
    "fieldtype": "Percent",
    "default": "0",
-   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)",
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-070)",
    "reqd": 1
   },
   {
@@ -119,7 +119,7 @@
    "fieldtype": "Percent",
    "reqd": 1,
    "default": "10",
-   "description": "Giả định — chờ xác nhận (ASM-064)"
+   "description": "Giả định — chờ xác nhận (ASM-071)"
   },
   {
    "fieldname": "rounding_unit",
@@ -199,7 +199,7 @@
    "fieldtype": "Select",
    "default": "DRUG_SUPPLY",
    "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
-   "description": "Giả định — chờ xác nhận (TBD-14, ASM-067)"
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-074)"
   },
   {
    "fieldname": "rental_cost_category",
@@ -207,7 +207,7 @@
    "fieldtype": "Select",
    "default": "DEPRECIATION",
    "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
-   "description": "Giả định — chờ xác nhận (TBD-14, ASM-067)"
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-074)"
   },
   {
    "fieldname": "jv_cost_category",
@@ -215,7 +215,7 @@
    "fieldtype": "Select",
    "default": "DEPRECIATION",
    "options": "DRUG_SUPPLY\nDEPRECIATION\nUTILITY\nLABOR\nMANAGEMENT\nEXCLUDED",
-   "description": "Giả định — chờ xác nhận (TBD-14, ASM-067)"
+   "description": "Giả định — chờ xác nhận (TBD-14, ASM-074)"
   },
   {
    "fieldname": "sb_rates",
