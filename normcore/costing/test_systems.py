@@ -68,7 +68,9 @@ def validate_test_system(values: dict, allocation_basis, service_is_paraclinical
 	minutes = get("machine_minutes_per_case")
 	if allocation_basis == BASIS_MINUTE:
 		if minutes is None or minutes <= 0:
-			errors.append(f"{LABELS['machine_minutes_per_case']} là bắt buộc và phải lớn hơn 0 khi thiết bị chia theo Phút chiếm máy")
+			errors.append(
+				f"{LABELS['machine_minutes_per_case']} là bắt buộc và phải lớn hơn 0 khi thiết bị chia theo Phút chiếm máy"
+			)
 	elif minutes is not None and minutes != 0 and minutes < 0:
 		errors.append(f"{LABELS['machine_minutes_per_case']} phải lớn hơn 0")
 	status = values.get("status")
@@ -119,4 +121,6 @@ def status_items() -> list:
 		("volume", "Sản lượng kịch bản mặc định", "FEAT-035"),
 		("latest_cost", "Hệ số k và giá thành lần tính gần nhất", "FEAT-036"),
 	)
-	return [{"key": k, "label": lb, "state": "empty", "message": "Chưa có", "source": src} for k, lb, src in spec]
+	return [
+		{"key": k, "label": lb, "state": "empty", "message": "Chưa có", "source": src} for k, lb, src in spec
+	]

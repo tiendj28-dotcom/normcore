@@ -6,8 +6,14 @@ from decimal import Decimal as D
 from normcore.costing import test_systems as ts
 
 OK = dict(
-	test_system_code="GLU-A", technical_service="GLU", department="HS", main_equipment="EQ_A",
-	volume_share_pct=75, machine_minutes_per_case=None, est_rerun_rate=2, est_wastage_rate=3,
+	test_system_code="GLU-A",
+	technical_service="GLU",
+	department="HS",
+	main_equipment="EQ_A",
+	volume_share_pct=75,
+	machine_minutes_per_case=None,
+	est_rerun_rate=2,
+	est_wastage_rate=3,
 	status="Đang dùng",
 )
 
@@ -21,7 +27,13 @@ class TestValidate(unittest.TestCase):
 		self.assertEqual(errs(), [])
 
 	def test_thieu_truong_bat_buoc(self):
-		for f in ("test_system_code", "technical_service", "department", "main_equipment", "volume_share_pct"):
+		for f in (
+			"test_system_code",
+			"technical_service",
+			"department",
+			"main_equipment",
+			"volume_share_pct",
+		):
 			for empty in (None, "", "  "):
 				self.assertTrue(any(f in e or ts.LABELS[f] in e for e in errs(**{f: empty})), f)
 

@@ -26,8 +26,16 @@ class TestCodes(unittest.TestCase):
 
 
 def base(**kw):
-	v = dict(service_code="GLU", is_paraclinical=1, cls_group="Hóa sinh", result_unit="Kết quả xét nghiệm",
-		is_panel=0, panel_components=[], is_send_out=0, send_out_price=0)
+	v = dict(
+		service_code="GLU",
+		is_paraclinical=1,
+		cls_group="Hóa sinh",
+		result_unit="Kết quả xét nghiệm",
+		is_panel=0,
+		panel_components=[],
+		is_send_out=0,
+		send_out_price=0,
+	)
 	v.update(kw)
 	return v
 

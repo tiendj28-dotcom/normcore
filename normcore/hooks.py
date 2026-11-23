@@ -152,11 +152,13 @@ after_migrate = ["normcore.setup.fix_home_page", "normcore.setup.ensure_list_vie
 permission_query_conditions = {
 	"NC Clinical Procedure": "normcore.core.permissions.permission_query_conditions",
 	"NC Norm Set": "normcore.core.permissions.permission_query_conditions",
+	"NC Test System": "normcore.core.permissions.permission_query_conditions",
 }
 
 has_permission = {
 	"NC Clinical Procedure": "normcore.core.permissions.has_permission",
 	"NC Norm Set": "normcore.core.permissions.has_permission",
+	"NC Test System": "normcore.core.permissions.has_permission",
 }
 
 # DocType Class
