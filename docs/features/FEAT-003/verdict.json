@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["199 test bench OK trên normcore.test; CI site sạch run 45070989693 pass trên b383b1fdcb7c25d4d9d05aa5ba0dc6b9240d33c0; pytest 93 passed, độ phủ 99%; TC-AUD-01..03 có test cùng mã; diff test không nới; chưa kiểm UI trình duyệt"], "commit": "b383b1fdcb7c25d4d9d05aa5ba0dc6b9240d33c0"}
