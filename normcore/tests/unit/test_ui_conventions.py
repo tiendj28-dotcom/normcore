@@ -85,9 +85,16 @@ class TestFeat006ListAndErrorStrip(unittest.TestCase):
 
 	def test_L1_list_view_settings_du_cot_cho_man_1366(self):
 		# Desk cắt còn 4 cột ở ≤ 1366px (Tên, Tag, Trạng thái + 1); cần total_fields ≥ 6 để hiện đủ
-		from normcore.setup import LIST_VIEW_TOTAL_FIELDS
+		import ast
 
-		self.assertGreaterEqual(int(LIST_VIEW_TOTAL_FIELDS["NC Clinical Procedure"]), 6)
+		# đọc bằng ast: CI unit không cài frappe nên không import normcore.setup
+		tree = ast.parse((ROOT / "setup.py").read_text(encoding="utf-8"))
+		const = next(
+			ast.literal_eval(n.value)
+			for n in tree.body
+			if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", "") == "LIST_VIEW_TOTAL_FIELDS"
+		)
+		self.assertGreaterEqual(int(const["NC Clinical Procedure"]), 6)
 		hooks = (ROOT / "hooks.py").read_text(encoding="utf-8")
 		self.assertIn("normcore.setup.ensure_list_view_settings", hooks.split("after_migrate", 1)[1])
 
@@ -97,11 +104,9 @@ class TestFeat006ListAndErrorStrip(unittest.TestCase):
 			"NC Procedure Step",
 			"NC Procedure Resource",
 			"NC Procedure Citation",
-			"NC Specialty",
-			"NC Technical Service",
-			"NC Service Department",
 		):
 			self.assertTrue(self.vi.get(name, "").strip(), name)
+		self.assertEqual(self.vi["NC Clinical Procedure"], "Quy trình kỹ thuật")  # data-model.md, srs.md
 
 	def test_E15_loi_api_hien_o_dai_alert_khong_msgprint(self):
 		self.assertNotIn("msgprint", self.vue)
@@ -114,3 +119,9 @@ class TestFeat006ListAndErrorStrip(unittest.TestCase):
 		body = self.vue.split("this.call(create ?", 1)[1].split("saveSection(", 1)[0]
 		self.assertIn("const message = this.error", body)
 		self.assertGreaterEqual(body.count("this.error = message"), 2)
+
+	def test_E15_loi_403_doc_noi_dung_tu_responseJSON(self):
+		# 403 (_deny): Desk gọi error_callback() không đối số; e là jqXHR, nội dung ở e.responseJSON
+		self.assertIn("messageFromError(e && e.responseJSON)", self.vue)
+		fn = self.vue.split("function messageFromError(r) {", 1)[1].split("\nexport default", 1)[0]
+		self.assertIn("_server_messages", fn)

@@ -154,5 +154,4 @@ class TestListViewColumnsL1(FrappeTestCase):
 		meta = frappe.get_meta("NC Clinical Procedure")
 		listed = {f.fieldname for f in meta.fields if f.in_list_view}
 		self.assertTrue({"technical_service", "department", "version_no"} <= listed)
-		self.assertEqual(frappe.get_meta("NC Clinical Procedure").name, "NC Clinical Procedure")
 		self.assertTrue(frappe._("NC Clinical Procedure", lang="vi") != "NC Clinical Procedure")

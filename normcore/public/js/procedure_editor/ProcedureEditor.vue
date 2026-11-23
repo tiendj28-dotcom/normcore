@@ -251,7 +251,7 @@ export default {
 				})
 				.then((r) => r.message)
 				.catch((e) => {
-					this.error = serverMessage || messageFromError(e) || __("Could not complete the request. See the message from the server.");
+					this.error = serverMessage || messageFromError(e && e.responseJSON) || __("Could not complete the request. See the message from the server.");
 					throw e;
 				});
 		},

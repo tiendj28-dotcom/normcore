@@ -109,10 +109,7 @@ Annual depreciation,Khấu hao năm,NC Equipment
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 Duplicate,Nhân bản,NC Costing Parameter Set
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
-NC Clinical Procedure,Quy trình lâm sàng
+NC Clinical Procedure,Quy trình kỹ thuật
 NC Procedure Step,Bước quy trình
 NC Procedure Resource,Nguồn lực của bước
 NC Procedure Citation,Trích dẫn quy trình
-NC Specialty,Chuyên ngành
-NC Technical Service,Dịch vụ kỹ thuật
-NC Service Department,Khoa thực hiện dịch vụ
