@@ -24,4 +24,4 @@ TC-CLS-44 (`tests/test_feat_039.py`, `tests/unit/test_readonly.py`, `test_permis
 ## 7. Giới hạn và nợ
 - ASM-131: NC Accounting Import, NC Service Volume, NC Reconciliation Line chưa có; test dùng NC Costing Run, NC Service Cost. Kiểm lại khi FEAT-016 và FEAT đối soát xong.
 - Quét lúc chạy chỉ bắt quyền khai báo, không bắt API tự `ignore_permissions` (rủi ro ghi ở thiết kế); mỗi FEAT sau phải test với NC Auditor.
-- T06 kiểm giao diện bằng đối chiếu mã `*.js` với bảng điều kiện nút ở `ui-design.md`, chưa mở trình duyệt (xem implementation-log).
+- Giao diện đã được QA kiểm bằng Playwright trên staging với NC Auditor (xem acceptance.md). Chưa tạo được site sạch cục bộ (thiếu DB_ROOT_PASSWORD); CI của PR cài mới và xanh.
