@@ -3,6 +3,7 @@ Add citation,Thêm trích dẫn
 Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
 Add step,Thêm bước
+Add test system,Thêm hệ thống xét nghiệm
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 Annual depreciation,Khấu hao năm,NC Equipment
@@ -21,6 +22,7 @@ Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
+Code,Mã
 Column,Cột,Import Excel
 Confirm import,Xác nhận ghi
 Copy,Sao chép
@@ -30,10 +32,14 @@ Costing failed.,Tính giá lỗi.
 Could not complete the request. Check your permissions.,Không thực hiện được yêu cầu. Kiểm tra quyền của bạn.
 Could not complete the request. See the message from the server.,Không thực hiện được yêu cầu. Xem thông báo từ máy chủ.
 Could not load chain status.,Không tải được tình trạng chuỗi.
+Could not load test systems.,Không tải được hệ thống xét nghiệm.
+Could not load the status.,Không tải được tình trạng.
 Create,Tạo
 Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
 Created,Tạo mới,Import Excel
+Deactivate,Ngừng dùng
+Deactivate test system {0}? It will not enter new costing runs; existing runs stay unchanged.,Ngừng dùng hệ thống {0}? Hệ thống sẽ không vào các lần tính giá mới; các lần tính đã có giữ nguyên.
 Delete,Xóa
 Delete this citation?,Xóa trích dẫn này?
 Delete this resource?,Xóa nguồn lực này?
@@ -45,6 +51,7 @@ Down,Xuống
 Download template,Tải tệp mẫu
 Duplicate,Nhân bản,NC Costing Parameter Set
 Edit,Sửa
+Equipment is allocated by machine minutes,Thiết bị chia theo phút chiếm máy
 Errors,Lỗi,Import Excel
 Expired {0} days ago,Đã hết hạn {0} ngày trước
 Expires in {0} days,Còn {0} ngày đến hạn
@@ -57,10 +64,13 @@ Legal document,Văn bản
 Legal section,Mục văn bản
 Legal text links are provided by the document library.,Liên kết tới mục văn bản do thư viện văn bản cung cấp.
 Loading chain status…,Đang tải tình trạng chuỗi…
+Loading status…,Đang tải tình trạng…
+Loading test systems…,Đang tải hệ thống xét nghiệm…
 Loading...,Đang tải...
 Loading…,Đang tải…,NC Equipment
 Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
+Main equipment,Thiết bị chính
 Message,Thông báo,Import Excel
 Minutes per person,Số phút / người
 Move step down,Chuyển bước xuống
@@ -76,6 +86,7 @@ No file chosen,Chưa chọn tệp
 No permission to view,Không có quyền xem
 No price yet,Chưa có đơn giá,NC Item
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
+No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None yet,Chưa có
 Open editor,Mở trình soạn
@@ -91,6 +102,7 @@ Publish,Ban hành
 Quantity,Số lượng
 Quote,Đoạn trích
 Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
+Reactivate,Dùng lại
 Reason,Lý do
 Relation,Quan hệ
 Retry,Thử lại
@@ -101,9 +113,13 @@ Run costing,Chạy tính giá
 Save,Lưu
 Save section,Lưu phần
 Save the form first.,Lưu biểu mẫu trước.
+Save to add test systems,Lưu để thêm hệ thống xét nghiệm
 Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
+Save to see the status,Lưu để xem tình trạng
+Save your changes first,Lưu thay đổi trước
 Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
+Share (%),Tỷ trọng (%)
 Source,Nguồn giá,NC Item
 Status,Trạng thái
 Step ID,Mã bước
@@ -113,6 +129,7 @@ This parameter set is used by a locked costing run and is read-only. Use Duplica
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
+Total share differs from 100%,Tổng tỷ trọng khác 100%
 Type,Loại
 Unassign,Bỏ gán
 Unchanged,Không đổi,Import Excel
@@ -135,3 +152,4 @@ Verify,Xác minh,NC Item Price
 View costing results,Xem kết quả tính giá
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
+total share,tổng tỷ trọng

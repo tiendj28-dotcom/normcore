@@ -79,8 +79,75 @@ function load_chain(frm) {
 	});
 }
 
+// FEAT-031: khối "Cận lâm sàng" — danh sách hệ thống xét nghiệm của dịch vụ (FR-CLS-002).
+const SYSTEMS_API = "normcore.api.test_system.get_service_systems";
+
+function systems_html(data) {
+	const esc = frappe.utils.escape_html;
+	const pill = (label, indicator) =>
+		`<span class="indicator-pill ${esc(indicator)}"><span>${esc(label)}</span></span>`;
+	let html = "";
+	(data.departments || []).forEach((d) => {
+		const warn = d.warning ? " " + pill(__("Total share differs from 100%"), "orange") : "";
+		const rows = d.systems
+			.map(
+				(s) =>
+					`<tr><td><a href="${esc(frappe.utils.get_form_link("NC Test System", s.name))}">${esc(s.name)}</a></td>` +
+					`<td>${esc(s.equipment_name || s.main_equipment)}</td>` +
+					`<td>${frappe.format(s.volume_share_pct, { fieldtype: "Float", precision: 2 })}</td>` +
+					`<td>${pill(s.status, s.status === "Đang dùng" ? "green" : "gray")}</td></tr>`
+			)
+			.join("");
+		html +=
+			`<div class="nc-cls-dept"><b>${__("Department")} ${esc(d.department_name || d.department)}` +
+			` — ${__("total share")} ${frappe.format(d.total_share, { fieldtype: "Float", precision: 2 })}%</b>${warn}` +
+			`<div class="table-responsive"><table class="table table-bordered"><thead><tr>` +
+			`<th>${__("Code")}</th><th>${__("Main equipment")}</th><th>${__("Share (%)")}</th><th>${__("Status")}</th>` +
+			`</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+	});
+	if (!html) html = `<div class="text-muted">${__("No test system yet")}</div>`;
+	return html;
+}
+
+function load_systems(frm) {
+	// Phần hiện/ẩn theo is_paraclinical do depends_on của trường quyết định
+	const wrapper = frm.fields_dict.cls_systems_html.$wrapper;
+	if (frm.is_new()) {
+		wrapper.html(`<div class="text-muted">${__("Save to add test systems")}</div>`);
+		return;
+	}
+	if (!frm.doc.is_paraclinical) return;
+	const service = frm.doc.name;
+	wrapper.html(`<div class="text-muted">${__("Loading test systems…")}</div>`);
+	frappe.call({
+		method: SYSTEMS_API,
+		args: { service },
+		callback(r) {
+			if (frm.doc.name !== service || !r.message) return;
+			wrapper.html(systems_html(r.message));
+			if (r.message.can_create) {
+				const btn = $(`<button class="btn btn-xs btn-default">${__("Add test system")}</button>`);
+				btn.on("click", () => frappe.new_doc("NC Test System", { technical_service: service }));
+				wrapper.append(btn);
+			}
+		},
+		error() {
+			if (frm.doc.name !== service) return;
+			wrapper.html(
+				`<div class="text-muted">${__("Could not load test systems.")} ` +
+					`<button class="btn btn-xs btn-default nc-cls-retry">${__("Retry")}</button></div>`
+			);
+			wrapper.find(".nc-cls-retry").on("click", () => load_systems(frm));
+		},
+	});
+}
+
 frappe.ui.form.on("NC Technical Service", {
 	refresh(frm) {
 		load_chain(frm);
+		load_systems(frm);
+	},
+	is_paraclinical(frm) {
+		load_systems(frm);
 	},
 });

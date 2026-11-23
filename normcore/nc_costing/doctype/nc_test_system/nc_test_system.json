@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "autoname": "field:test_system_code",
+ "creation": "2026-11-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_system_code",
+  "technical_service",
+  "department",
+  "col_right",
+  "main_equipment",
+  "status",
+  "volume_section",
+  "volume_share_pct",
+  "est_rerun_rate",
+  "est_wastage_rate",
+  "volume_col_right",
+  "machine_minutes_per_case",
+  "status_section",
+  "status_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_system_code",
+   "label": "Mã hệ thống",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "options": "NC Technical Service",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_right",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "main_equipment",
+   "label": "Thiết bị chính",
+   "fieldtype": "Link",
+   "options": "NC Equipment",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "options": "Đang dùng\nNgừng dùng",
+   "default": "Đang dùng",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "volume_section",
+   "label": "Sản lượng và ước tính",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "volume_share_pct",
+   "label": "Tỷ trọng sản lượng (%)",
+   "fieldtype": "Percent",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "est_rerun_rate",
+   "label": "Tỷ lệ chạy lại ước tính (%)",
+   "fieldtype": "Percent",
+   "default": "0"
+  },
+  {
+   "fieldname": "est_wastage_rate",
+   "label": "Tỷ lệ hao hụt ước tính (%)",
+   "fieldtype": "Percent",
+   "default": "0"
+  },
+  {
+   "fieldname": "volume_col_right",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "machine_minutes_per_case",
+   "label": "Phút chiếm máy một ca",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "status_section",
+   "label": "Tình trạng",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status_html",
+   "label": "Tình trạng",
+   "fieldtype": "HTML"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Test System",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "search_fields": "technical_service,department",
+ "sort_field": "test_system_code",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "test_system_code",
+ "track_changes": 1
+}

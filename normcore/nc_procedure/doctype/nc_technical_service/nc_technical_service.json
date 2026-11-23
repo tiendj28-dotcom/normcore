@@ -12,7 +12,22 @@
   "chain_section",
   "chain_status_html",
   "departments_section",
-  "departments"
+  "departments",
+  "cls_section",
+  "is_paraclinical",
+  "cls_group",
+  "result_unit",
+  "cls_col_right",
+  "is_send_out",
+  "send_out_price",
+  "codes_section",
+  "external_codes",
+  "panel_section",
+  "is_panel",
+  "panel_costing_mode",
+  "panel_components",
+  "systems_section",
+  "cls_systems_html"
  ],
  "fields": [
   {
@@ -69,11 +84,116 @@
    "label": "Khoa thực hiện",
    "fieldtype": "Table",
    "options": "NC Service Department"
+  },
+  {
+   "fieldname": "cls_section",
+   "label": "Cận lâm sàng",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.is_paraclinical"
+  },
+  {
+   "fieldname": "is_paraclinical",
+   "label": "Thuộc khối cận lâm sàng",
+   "fieldtype": "Check",
+   "default": "0",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cls_group",
+   "label": "Nhóm chuyên ngành",
+   "fieldtype": "Select",
+   "options": "\nHóa sinh\nMiễn dịch\nHuyết học\nVi sinh\nGiải phẫu bệnh\nChẩn đoán hình ảnh\nThăm dò chức năng\nKhác",
+   "depends_on": "eval:doc.is_paraclinical",
+   "mandatory_depends_on": "eval:doc.is_paraclinical"
+  },
+  {
+   "fieldname": "result_unit",
+   "label": "Đơn vị kết quả",
+   "fieldtype": "Select",
+   "options": "\nKết quả xét nghiệm\nCa chụp",
+   "depends_on": "eval:doc.is_paraclinical",
+   "mandatory_depends_on": "eval:doc.is_paraclinical"
+  },
+  {
+   "fieldname": "cls_col_right",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_send_out",
+   "label": "Gửi ngoài",
+   "fieldtype": "Check",
+   "default": "0",
+   "depends_on": "eval:doc.is_paraclinical"
+  },
+  {
+   "fieldname": "send_out_price",
+   "label": "Giá hợp đồng gửi mẫu",
+   "fieldtype": "Currency",
+   "depends_on": "eval:doc.is_paraclinical && doc.is_send_out",
+   "mandatory_depends_on": "eval:doc.is_paraclinical && doc.is_send_out"
+  },
+  {
+   "fieldname": "codes_section",
+   "label": "Mã trên hệ thống ngoài",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "external_codes",
+   "label": "Mã trên hệ thống ngoài",
+   "fieldtype": "Table",
+   "options": "NC Service Code Map"
+  },
+  {
+   "fieldname": "panel_section",
+   "label": "Dịch vụ bộ",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.is_paraclinical"
+  },
+  {
+   "fieldname": "is_panel",
+   "label": "Là dịch vụ bộ",
+   "fieldtype": "Check",
+   "default": "0",
+   "depends_on": "eval:doc.is_paraclinical"
+  },
+  {
+   "fieldname": "panel_costing_mode",
+   "label": "Cách tính dịch vụ bộ",
+   "fieldtype": "Select",
+   "options": "Theo cả bộ\nTheo từng thông số",
+   "default": "Theo từng thông số",
+   "depends_on": "eval:doc.is_paraclinical && doc.is_panel",
+   "description": "Giả định — chờ xác nhận (TBD-17)"
+  },
+  {
+   "fieldname": "panel_components",
+   "label": "Thông số thành phần",
+   "fieldtype": "Table",
+   "options": "NC Panel Component",
+   "depends_on": "eval:doc.is_paraclinical && doc.is_panel"
+  },
+  {
+   "fieldname": "systems_section",
+   "label": "Hệ thống xét nghiệm",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.is_paraclinical"
+  },
+  {
+   "fieldname": "cls_systems_html",
+   "label": "Hệ thống xét nghiệm",
+   "fieldtype": "HTML"
   }
  ],
  "index_web_pages_for_search": 0,
- "links": [],
- "modified": "2026-11-21 00:00:00.000000",
+ "links": [
+  {
+   "link_doctype": "NC Test System",
+   "link_fieldname": "technical_service",
+   "group": "Cận lâm sàng"
+  }
+ ],
+ "modified": "2026-11-23 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "NC Procedure",
  "name": "NC Technical Service",
