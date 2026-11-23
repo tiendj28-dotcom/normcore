@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["TC-RES-03/04/10, TC-CLS-48/49 có test và đạt; bench 315 test OK; pytest 133 passed, phủ 98%; diff test chỉ đổi theo duyệt (ASM-084)", "Hạn chế: không có site sạch (thiếu DB_ROOT_PASSWORD), Playwright không kết nối, CI Frappe còn pending lúc kiểm"], "commit": "8c0ab4f93a914fde01cb4bdac7684236a1a4c957"}
