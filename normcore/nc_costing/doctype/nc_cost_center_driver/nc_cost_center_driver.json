@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "creation": "2026-11-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fiscal_year",
+  "cost_center",
+  "headcount",
+  "area_m2",
+  "revenue"
+ ],
+ "fields": [
+  {
+   "fieldname": "fiscal_year",
+   "label": "Năm tài chính",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "label": "Trung tâm chi phí",
+   "fieldtype": "Link",
+   "options": "NC Cost Center",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "headcount",
+   "label": "Số nhân lực",
+   "fieldtype": "Float",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "area_m2",
+   "label": "Diện tích (m²)",
+   "fieldtype": "Float",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "revenue",
+   "label": "Doanh thu",
+   "fieldtype": "Currency",
+   "in_list_view": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Cost Center Driver",
+ "owner": "Administrator",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "hash",
+ "title_field": "cost_center",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ]
+}
