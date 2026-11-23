@@ -25,6 +25,10 @@ TRUE_VALUES = {"1", "có", "co", "true", "x", "yes"}
 FALSE_VALUES = {"0", "không", "khong", "false", "no"}
 
 
+class ImportFileError(ValueError):
+	"""Lỗi mức tệp (không phải .xlsx, thiếu cột, tệp rỗng, quá lớn): không tạo bản ghi nào."""
+
+
 @dataclass(frozen=True)
 class Column:
 	fieldname: str
@@ -43,6 +47,21 @@ class ImportSet:
 	doctype: str
 	columns: tuple
 	key_field: str
+	key_fields: tuple = ()  # khóa ghép (ASM-124); rỗng = chỉ dùng key_field
+
+	@property
+	def keys(self) -> tuple:
+		return tuple(self.key_fields) or (self.key_field,)
+
+	@property
+	def composite(self) -> bool:
+		return bool(self.key_fields)
+
+	def key_of(self, values: dict):
+		"""Khóa của một dòng: chuỗi/giá trị khi một khóa, tuple khi khóa ghép."""
+		if self.composite:
+			return tuple(values[k] for k in self.keys)
+		return values[self.key_field]
 
 	def column(self, fieldname):
 		return next(c for c in self.columns if c.fieldname == fieldname)
@@ -243,11 +262,12 @@ def _read_rows(content: bytes, filename):
 	return rows, []
 
 
-def parse(import_set: ImportSet, content: bytes, filename=None):
+def parse(import_set: ImportSet, content: bytes, filename=None, unique=True):
 	"""Đọc và kiểm kiểu từng dòng. Trả (dòng hợp lệ, lỗi, cảnh báo).
 
 	Dòng hợp lệ: list[(số_dòng, values)] với values chỉ gồm các ô không trống (đã chuẩn hóa).
 	Chưa kiểm Link, quyền và trùng với dữ liệu đang có — xem `process`.
+	`unique=False` bỏ kiểm trùng khóa trong tệp (dòng kế toán trùng tài khoản là hợp lệ, ASM-124).
 	"""
 	rows, errors = _read_rows(content, filename)
 	if errors:
@@ -290,9 +310,9 @@ def parse(import_set: ImportSet, content: bytes, filename=None):
 				values[col.fieldname] = normalize(col, raw)
 			except ValueError as e:
 				row_errors.append(RowError(line, col.label, str(e)))
-		if not row_errors:
-			key = values[import_set.key_field]
-			norm_key = str(key).casefold()
+		if unique and not row_errors:
+			key = " / ".join(str(values[k]) for k in import_set.keys)
+			norm_key = key.casefold()
 			if norm_key in seen:
 				label = import_set.column(import_set.key_field).label
 				row_errors.append(
@@ -345,7 +365,7 @@ def process(
 					bad = True
 		if bad:
 			continue
-		key = values[import_set.key_field]
+		key = import_set.key_of(values)
 		existing = lookup(key)
 		if existing is None:
 			action = "tao"
@@ -353,14 +373,15 @@ def process(
 			changed = {
 				k: v
 				for k, v in values.items()
-				if k != import_set.key_field
+				if k not in import_set.keys
 				and normalize_existing(import_set.column(k), existing.get(k)) != v
 			}
 			if not changed:
 				result.unchanged += 1
 				continue
 			if can_update and not can_update(key):
-				result.errors.append(RowError(line, key_col.label, f'bạn không có quyền sửa bản ghi "{key}"'))
+				shown = " / ".join(map(str, key)) if import_set.composite else key
+				result.errors.append(RowError(line, key_col.label, f'bạn không có quyền sửa bản ghi "{shown}"'))
 				continue
 			action, values = "sua", changed
 		if mode == MODE_WRITE:

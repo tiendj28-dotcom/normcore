@@ -56,16 +56,19 @@ def run_import(import_set_key, content, mode, filename=None):
 	if mode not in (core.MODE_DRY, core.MODE_WRITE):
 		frappe.throw(_("Chế độ không hợp lệ"))
 	_require(s.doctype, "create")
-	dt, key_field = s.doctype, s.key_field
+	dt = s.doctype
+
+	def filters(key):
+		return dict(zip(s.keys, key, strict=True)) if s.composite else {s.key_field: key}
 
 	def lookup(key):
-		name = frappe.db.get_value(dt, {key_field: key}, "name")
+		name = frappe.db.get_value(dt, filters(key), "name")
 		if not name:
 			return None
 		return frappe.db.get_value(dt, name, [c.fieldname for c in s.columns], as_dict=True)
 
 	def can_update(key):
-		return bool(frappe.has_permission(dt, "write", doc=frappe.db.get_value(dt, {key_field: key}, "name")))
+		return bool(frappe.has_permission(dt, "write", doc=frappe.db.get_value(dt, filters(key), "name")))
 
 	def write(action, key, values):
 		frappe.db.savepoint(SAVEPOINT)
@@ -75,7 +78,7 @@ def run_import(import_set_key, content, mode, filename=None):
 				doc = frappe.get_doc({"doctype": dt, **values})
 				doc.insert()
 			else:
-				doc = frappe.get_doc(dt, frappe.db.get_value(dt, {key_field: key}, "name"))
+				doc = frappe.get_doc(dt, frappe.db.get_value(dt, filters(key), "name"))
 				doc.update(values)
 				doc.save()
 		except Exception as e:

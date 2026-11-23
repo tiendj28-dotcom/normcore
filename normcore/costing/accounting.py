@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from normcore.core.importer import Column, ImportFileError, ImportSet, RowError, parse
+
 COST_CATEGORIES = ("LABOR", "DRUG_SUPPLY", "DEPRECIATION", "UTILITY", "MANAGEMENT", "EXCLUDED")
 ALLOCATABLE = COST_CATEGORIES[:-1]
 EXCLUDED = "EXCLUDED"
@@ -35,6 +37,48 @@ DEFAULT_ACCOUNT_MAPPING = (
 	("811", "EXCLUDED"),
 	("821", "EXCLUDED"),
 )
+
+
+# ImportSet không đăng ký: tệp chi phí tạo một bản ghi cha nhiều dòng, không phải upsert danh mục.
+ACCOUNTING_LINES = ImportSet(
+	key="nc_accounting_import_line",
+	label="Dòng số liệu kế toán",
+	doctype="NC Accounting Import",
+	key_field="account_code",
+	columns=(
+		Column("account_code", "Mã tài khoản", "Data", required=True, example="61111"),
+		Column("account_name", "Tên tài khoản", "Data", example="Tiền lương"),
+		Column(
+			"cost_center",
+			"Mã trung tâm chi phí",
+			"Link",
+			required=True,
+			link_doctype="NC Cost Center",
+			example="K01",
+		),
+		Column("amount", "Số tiền", "Float", required=True, example=700000000),
+	),
+)
+
+
+def parse_lines(content: bytes, filename, cost_center_exists):
+	"""Đọc tệp chi phí → (dòng, lỗi dòng). Lỗi mức tệp → ImportFileError.
+
+	Dòng: dict có `source_row` (dòng Excel, chỉ để báo lỗi). Lỗi: list RowError.
+	"""
+	valid, errors, _ = parse(ACCOUNTING_LINES, content, filename, unique=False)
+	file_errors = [e for e in errors if e.row is None or e.row == 1]
+	if file_errors:
+		raise ImportFileError("; ".join(e.text for e in file_errors))
+	lines, errors = [], list(errors)
+	label = ACCOUNTING_LINES.column("cost_center").label
+	for row, v in valid:
+		if not cost_center_exists(v["cost_center"]):
+			errors.append(RowError(row, label, f'"{v["cost_center"]}" không tồn tại trong NC Cost Center'))
+			continue
+		lines.append({**v, "account_code": normalize_account(v["account_code"]), "source_row": row})
+	errors.sort(key=lambda e: e.row or 0)
+	return lines, errors
 
 
 def normalize_account(code) -> str:
