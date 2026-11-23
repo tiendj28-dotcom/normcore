@@ -91,8 +91,17 @@ class TestImporterAPI(FrappeTestCase):
 		frappe.set_user(self.finance)
 		self.assertEqual(
 			[s["key"] for s in api.list_import_sets()],
-			[KEY, "nc_equipment", "nc_room", "nc_item", "nc_item_price"],
-		)  # FEAT-010 (ASM-084) và FEAT-009 (ASM-096)
+			[
+				KEY,
+				"nc_equipment",
+				"nc_room",
+				"nc_item",
+				"nc_item_price",
+				"nc_account_mapping",
+				"nc_service_volume",
+				"nc_cost_center_driver",
+			],
+		)  # FEAT-010 (ASM-084), FEAT-009 (ASM-096), FEAT-016 (ASM-128, Lead duyệt trên NORM-28)
 		f = frappe.get_doc(
 			{
 				"doctype": "File",
