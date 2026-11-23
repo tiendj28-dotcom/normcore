@@ -73,3 +73,149 @@ class TestQuetQuyen(FrappeTestCase):
 		out = perms.read_only_violations()
 		self.assertTrue(any("FEAT39 Thử" in v and "chuyển" in v for v in out), out)
 		self.assertTrue(any("FEAT39 Thử" in v and "allow_edit" in v for v in out), out)
+
+
+# --- TC-CLS-44, kịch bản UC-026 -----------------------------------------------------------
+
+from normcore.api import access as access_api
+from normcore.api import audit as audit_api
+from normcore.api import importer as importer_api
+from normcore.api import item as item_api
+from normcore.api import procedure as procedure_api
+from normcore.core import audit
+from normcore.core import import_sets as _import_sets  # noqa: F401
+from normcore.core import importer as importer_core
+from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
+from normcore.tests.utils import make_base, make_chain_data, make_param_set, make_user
+
+AUDITOR = "NC Auditor"
+
+
+def _snapshot(doctypes):
+	"""Số bản ghi và `modified` lớn nhất của từng DocType: thao tác bị từ chối không được đổi."""
+	return {
+		dt: (
+			frappe.db.count(dt),
+			frappe.db.get_value(dt, {}, "max(modified)") if dt != "NC Audit Event" else None,
+		)
+		for dt in doctypes
+	}
+
+
+WATCH = (
+	"NC Norm Set",
+	"NC Clinical Procedure",
+	"NC Costing Run",
+	"NC Service Cost",
+	"NC Costing Parameter Set",
+	"NC Item Price",
+)
+
+
+class TestTCCLS44(FrappeTestCase):
+	def setUp(self):
+		frappe.set_user("Administrator")
+		self.service, self.dept, self.job = make_base()
+		self.chain = make_chain_data(self.service, self.dept)
+		self.service2, self.dept2, _ = make_base(service="DV-TEST-B", department="KHOA-TEST-2")
+		self.chain2 = make_chain_data(self.service2, self.dept2)
+		self.auditor = make_user("auditor.f39@normcore.test", AUDITOR)
+		self.finance = make_user("fin.f39@normcore.test", "NC Finance")
+		audit.log_event("Xuất tệp", "NC Department", self.dept, detail="f39")
+		frappe.get_doc(
+			{"doctype": "NC AI Log", "purpose": "DRAFT_PROCEDURE", "status": "Thành công", "user": "Administrator"}
+		).insert(ignore_permissions=True)
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_TC_CLS_44_doc_so_lieu_nhat_ky(self):
+		frappe.set_user(self.auditor)
+		for dt in ("NC Costing Run", "NC Service Cost", "NC Audit Event", "NC AI Log", "NC Norm Set"):
+			self.assertTrue(frappe.has_permission(dt, "read"), dt)
+			self.assertTrue(frappe.get_list(dt, limit_page_length=1), dt)
+		frappe.get_doc("NC Costing Run", self.chain.run)
+		frappe.get_doc("NC Service Cost", self.chain.cost)
+		self.assertTrue(audit_api.get_events(ref_name=self.dept))
+		# bộ định mức của hai khoa khác nhau: Auditor không bị hẹp theo khoa
+		names = {r.name for r in frappe.get_list("NC Norm Set", fields=["name"])}
+		self.assertTrue({self.chain.norm_set, self.chain2.norm_set} <= names)
+
+	def test_TC_CLS_44_sua_bo_dinh_muc_bi_tu_choi(self):
+		before = frappe.db.get_value("NC Norm Set", self.chain.norm_set, ["modified", "status"])
+		count = frappe.db.count("NC Norm Set")
+		frappe.set_user(self.auditor)
+		ns = frappe.get_doc("NC Norm Set", self.chain.norm_set)
+		ns.lines[0].hospital_qty = 999
+		with self.assertRaises(frappe.PermissionError):
+			ns.save()
+		with self.assertRaises(frappe.PermissionError):
+			frappe.delete_doc("NC Norm Set", self.chain.norm_set)
+		frappe.set_user("Administrator")
+		self.assertEqual(frappe.db.get_value("NC Norm Set", self.chain.norm_set, ["modified", "status"]), before)
+		self.assertEqual(frappe.db.count("NC Norm Set"), count)
+		self.assertNotEqual(frappe.get_doc("NC Norm Set", self.chain.norm_set).lines[0].hospital_qty, 999)
+
+	def test_TC_CLS_44_ghi_xoa_duyet_bi_tu_choi(self):
+		ns = frappe.get_doc("NC Norm Set", self.chain.norm_set)
+		proc = frappe.get_doc("NC Clinical Procedure", self.chain.procedure)
+		param = make_param_set()
+		run = frappe.get_doc(
+			{
+				"doctype": "NC Costing Run",
+				"title": "Lần tính f39",
+				"fiscal_year": 2026,
+				"costing_date": "2026-10-02",
+				"parameter_set": param.name,
+			}
+		).insert(ignore_permissions=True)
+		price = frappe.get_all("NC Item Price", pluck="name", limit=1)
+		set_key = next(iter(importer_core.REGISTRY))
+		events_before = frappe.db.count("NC Audit Event")
+		before = _snapshot(WATCH)
+		frappe.set_user(self.auditor)
+		new_ns = frappe.get_doc("NC Norm Set", self.chain.norm_set)
+
+		ops = {
+			"make_norm_set": lambda: make_norm_set(self.chain.procedure),
+			"lock": new_ns.lock,
+			"publish": proc.publish,
+			"create_procedure": lambda: procedure_api.create_procedure(self.service2, self.dept2),
+			"save_sections": lambda: procedure_api.save_sections(self.chain.procedure, "{}"),
+			"add_step": lambda: procedure_api.add_step(self.chain.procedure, "Thực hiện", "B", "d"),
+			"run_costing": run.run_costing,
+			"duplicate": param.duplicate,
+			"import_file": lambda: importer_api.import_file(set_key, "/private/files/none.xlsx", "ghi"),
+			"assign_department": lambda: access_api.assign_department(self.auditor, self.dept),
+			"client.set_value": lambda: frappe.client.set_value("NC Norm Set", self.chain.norm_set, "status", "Nháp"),
+			"client.insert": lambda: frappe.client.insert(
+				{"doctype": "NC Costing Run", "title": "x", "fiscal_year": 2026, "parameter_set": param.name}
+			),
+			"client.delete": lambda: frappe.client.delete("NC Costing Run", run.name),
+			"client.delete_event": lambda: frappe.client.delete(
+				"NC Audit Event", frappe.get_all("NC Audit Event", pluck="name", limit=1)[0]
+			),
+		}
+		if price:
+			ops["verify_price"] = lambda: item_api.verify_price(price[0])
+		for label, op in ops.items():
+			with self.subTest(op=label):
+				with self.assertRaises(frappe.PermissionError):
+					op()
+		frappe.set_user("Administrator")
+		self.assertEqual(_snapshot(WATCH), before)
+		self.assertEqual(frappe.db.count("NC Audit Event"), events_before)
+		self.assertEqual(frappe.db.get_value("NC Norm Set", ns.name, "status"), "Đã khóa")
+
+	def test_TC_CLS_44_vai_tro_khac_khong_bi_hep(self):
+		both = make_user("both.f39@normcore.test", AUDITOR, "NC Finance")
+		param = make_param_set()
+		frappe.set_user(both)
+		self.assertTrue(frappe.has_permission("NC Costing Parameter Set", "write"))
+		doc = frappe.get_doc("NC Costing Parameter Set", param.name)
+		doc.title = "Đổi tên f39"
+		doc.save()
+		self.assertEqual(frappe.db.get_value("NC Costing Parameter Set", param.name, "title"), "Đổi tên f39")
+		frappe.set_user(self.finance)  # Finance không có NC Auditor: ghi được như trước
+		self.assertTrue(frappe.has_permission("NC Costing Parameter Set", "write"))
