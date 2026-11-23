@@ -169,3 +169,39 @@ NC_ITEM_PRICE = ImportSet(
 )
 
 register(NC_ITEM_PRICE)
+
+# FEAT-031, FR-CLS-008 (phần hệ thống xét nghiệm, ASM-116): kế hoạch chất lượng và hồ sơ tuân thủ đăng ký ở FEAT của chúng.
+# Tỷ lệ nhập theo phần trăm (2 nghĩa là 2%). Ô trống: tạo mới lấy mặc định DocType, cập nhật giữ nguyên.
+NC_TEST_SYSTEM = ImportSet(
+	key="nc_test_system",
+	label="Hệ thống xét nghiệm",
+	doctype="NC Test System",
+	key_field="test_system_code",
+	columns=(
+		Column("test_system_code", "Mã hệ thống", "Data", required=True, example="GLU-A"),
+		Column(
+			"technical_service",
+			"Mã dịch vụ",
+			"Link",
+			required=True,
+			link_doctype="NC Technical Service",
+			example="GLU",
+		),
+		Column("department", "Mã khoa", "Link", required=True, link_doctype="NC Department", example="HS"),
+		Column(
+			"main_equipment",
+			"Mã thiết bị chính",
+			"Link",
+			required=True,
+			link_doctype="NC Equipment",
+			example="EQ_A",
+		),
+		Column("volume_share_pct", "Tỷ trọng sản lượng (%)", "Float", required=True, example=75),
+		Column("machine_minutes_per_case", "Phút chiếm máy một ca", "Float"),
+		Column("est_rerun_rate", "Tỷ lệ chạy lại ước tính (%)", "Float", example=2),
+		Column("est_wastage_rate", "Tỷ lệ hao hụt ước tính (%)", "Float", example=3),
+		Column("status", "Trạng thái", "Select", options=("Đang dùng", "Ngừng dùng")),
+	),
+)
+
+register(NC_TEST_SYSTEM)

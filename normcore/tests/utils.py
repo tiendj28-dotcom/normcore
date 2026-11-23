@@ -129,3 +129,53 @@ def make_chain_data(service, department, job="DD"):
 	)
 	cost.insert(ignore_permissions=True)
 	return frappe._dict(procedure=proc.name, norm_set=ns.name, cost=cost.name, run=run.name)
+
+
+def make_cls_data(department="HS-CLS", service="GLU"):
+	"""FEAT-031: khoa Hóa sinh, dịch vụ cận lâm sàng GLU, thiết bị EQ_A (Mua) và EQ_B (Đặt theo hóa chất), cùng tiêu chí Số kết quả."""
+	_, dept, _ = make_base(department=department)
+	frappe.db.set_value(
+		"NC Technical Service",
+		ensure_service(service),
+		{"is_paraclinical": 1, "cls_group": "Hóa sinh", "result_unit": "Kết quả xét nghiệm"},
+	)
+	eqs = []
+	for code, mode in (("EQ_A", "Mua"), ("EQ_B", "Đặt theo hóa chất")):
+		ensure(
+			"NC Equipment",
+			"equipment_code",
+			code,
+			equipment_name=f"Máy {code}",
+			department=dept,
+			acquisition_mode=mode,
+			allocation_basis="Số kết quả",
+			original_cost=1200000000,
+			useful_life_years=8,
+			in_service_date="2022-01-01",
+			funding_source="Ngân sách",
+			planned_hours_per_year=2112,
+			utilization_rate=0.5,
+		)
+		eqs.append(code)
+	return service, dept, eqs
+
+
+def ensure_service(code):
+	ensure("NC Technical Service", "service_code", code, service_name=f"Dịch vụ {code}")
+	return code
+
+
+def make_test_system(code, service, department, equipment, share, **kw):
+	doc = frappe.get_doc(
+		{
+			"doctype": "NC Test System",
+			"test_system_code": code,
+			"technical_service": service,
+			"department": department,
+			"main_equipment": equipment,
+			"volume_share_pct": share,
+			**kw,
+		}
+	)
+	doc.insert(ignore_permissions=True)
+	return doc

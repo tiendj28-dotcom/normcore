@@ -239,8 +239,9 @@ export default {
 			this.existing = "";
 			// silent: không để Desk mở hộp thoại "Tin nhắn"; lỗi hiện ở dải role="alert" (ui-design.md, E15)
 			let serverMessage = "";
-			return frappe
-				.call({
+			// frappe.call trả về jQuery Deferred (không có .finally): bọc thành Promise chuẩn để mọi chỗ gọi dùng được .finally
+			return Promise.resolve(
+				frappe.call({
 					method: API + method,
 					args,
 					freeze: false,
@@ -249,6 +250,7 @@ export default {
 						serverMessage = messageFromError(r);
 					},
 				})
+			)
 				.then((r) => r.message)
 				.catch((e) => {
 					this.error = serverMessage || messageFromError(e && e.responseJSON) || __("Could not complete the request. See the message from the server.");
@@ -336,7 +338,7 @@ export default {
 		},
 		run(fn) {
 			this.busy = true;
-			return fn()
+			return Promise.resolve(fn())
 				.catch(() => {})
 				.finally(() => (this.busy = false));
 		},
