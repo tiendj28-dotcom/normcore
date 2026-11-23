@@ -41,18 +41,30 @@ MATRIX = {
 }
 DOCTYPE_ROW = {
 	"NC Technical Service": "Dịch vụ kỹ thuật, chuyên khoa",
+	"NC Specialty": "Dịch vụ kỹ thuật, chuyên khoa",
 	"NC Clinical Procedure": "Quy trình",
 	"NC Costing Parameter Set": "Bộ tham số, chức danh, loại giá",
 	"NC Job Title": "Bộ tham số, chức danh, loại giá",
+	"NC Price Category": "Bộ tham số, chức danh, loại giá",
 	"NC Norm Set": "Bộ định mức",
 	"NC Costing Run": "Lần tính giá, kết quả, đối soát",
 	"NC Service Cost": "Lần tính giá, kết quả, đối soát",
 	"NC AI Log": "Nhật ký AI, sổ sự kiện",
+	"NC Audit Event": "Nhật ký AI, sổ sự kiện",
 	"NC Department": "NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)",
 	"NC Cost Center": "NC Cost Center (G1: Admin, Finance ghi)",
 }
-# Q2 của NORM-12: duy nhất NC Admin được xóa, và chỉ trên bốn DocType danh mục
-DELETE_ALLOWED = {"NC Admin": {"NC Department", "NC Cost Center", "NC Job Title", "NC Technical Service"}}
+# Q2 của NORM-12: duy nhất NC Admin được xóa, và chỉ trên các DocType danh mục (FEAT-005 thêm NC Specialty)
+DELETE_ALLOWED = {
+	"NC Admin": {
+		"NC Department",
+		"NC Cost Center",
+		"NC Job Title",
+		"NC Technical Service",
+		"NC Specialty",
+		"NC Price Category",
+	}
+}
 PERM_TYPES = ("read", "write", "create", "delete", "submit", "cancel", "amend")
 SNAKE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
 

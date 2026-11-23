@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["TC-RES-05/06/11, TC-CLS-50 có test và đạt; bench 247 test OK; pytest 110 passed, phủ 99%; CI xanh", "Hạn chế: không có site sạch (thiếu DB_ROOT_PASSWORD) và Playwright không kết nối"], "commit": "abc67e02cfe866e03d29b104161203e92ddce330"}

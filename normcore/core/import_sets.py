@@ -17,3 +17,18 @@ NC_JOB_TITLE = ImportSet(
 )
 
 register(NC_JOB_TITLE)
+
+# FEAT-005, FR-SVC-001: danh mục kỹ thuật. Chuyên khoa ghi mã; mã chưa có thì dòng lỗi (ASM-051).
+NC_TECHNICAL_SERVICE = ImportSet(
+	key="nc_technical_service",
+	label="Dịch vụ kỹ thuật",
+	doctype="NC Technical Service",
+	key_field="service_code",
+	columns=(
+		Column("service_code", "Mã dịch vụ", "Data", required=True, example="VD-DV01"),
+		Column("service_name", "Tên dịch vụ", "Data", required=True, example="Dịch vụ kỹ thuật (ví dụ)"),
+		Column("specialty", "Chuyên khoa", "Link", link_doctype="NC Specialty"),
+	),
+)
+
+register(NC_TECHNICAL_SERVICE)

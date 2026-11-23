@@ -215,8 +215,8 @@ Kiểu: **L** danh sách chuẩn, **F** form chuẩn, **P** trang tùy biến, *
 | SCR-DSK-002 | Danh sách văn bản | L | Tìm, lọc văn bản theo loại, hiệu lực, lập chỉ mục | Nhãn màu hiệu lực; ô tìm toàn văn trả về mục |
 | SCR-DSK-003 | Văn bản và mục | F | Thông tin văn bản, tệp, danh sách mục, khai báo thay thế | Đang lập chỉ mục; lỗi lập chỉ mục; xem mục cạnh trang gốc. **[1.1]** Loại "Tài liệu của hãng" có bảng mặt hàng, thiết bị liên quan |
 | SCR-DSK-004 | Ánh xạ hướng dẫn | P nhẹ (bảng trong form) | Xác nhận ánh xạ mục quy trình với dịch vụ | Đề xuất kèm độ tin cậy; lọc "chưa xác nhận"; xác nhận hàng loạt các dòng 100% |
-| SCR-DSK-005 | Danh sách dịch vụ | L | Tìm dịch vụ theo mã, tên, chuyên khoa, khoa, tình trạng chuỗi | Cột tình trạng chuỗi |
-| SCR-DSK-006 | Dịch vụ kỹ thuật | F | Điểm trung tâm của một dịch vụ: quy trình, định mức, giá thành, giá đã duyệt | Nút hành động theo tình trạng: "Soạn quy trình", "Khởi tạo bộ định mức". **[1.1]** Khối "Cận lâm sàng": nhóm chuyên ngành, đơn vị kết quả, mã ngoài, dịch vụ bộ, gửi ngoài; danh sách hệ thống xét nghiệm của dịch vụ |
+| SCR-DSK-005 | Danh sách dịch vụ | L | Tìm dịch vụ theo mã, tên, chuyên khoa, khoa, tình trạng chuỗi | Cột và bộ lọc tình trạng chuỗi **[AMD-004]** (làm ở FEAT-002 cùng FR-OUT-010; FEAT-005 có mã, tên, chuyên khoa, khoa) |
+| SCR-DSK-006 | Dịch vụ kỹ thuật | F | Điểm trung tâm của một dịch vụ: quy trình, định mức, giá thành, giá đã duyệt | Nút hành động theo tình trạng: "Soạn quy trình", "Khởi tạo bộ định mức" **[AMD-004]** (nút làm ở FEAT-024 và FEAT-012). **[1.1]** Khối "Cận lâm sàng": nhóm chuyên ngành, đơn vị kết quả, mã ngoài, dịch vụ bộ, gửi ngoài; danh sách hệ thống xét nghiệm của dịch vụ |
 | SCR-DSK-007 | Danh sách quy trình | L | Lọc theo trạng thái, khoa, cờ "Cần rà soát" | |
 | SCR-DSK-008 | Yêu cầu soạn dự thảo | Hộp thoại nhiều bước | Xem nguồn sẽ dùng; nhập yêu cầu; chọn mục bổ sung | Không có nguồn (cảnh báo); đang soạn (tiến độ); lỗi AI (cho soạn tay) |
 | SCR-DSK-009 | Trình soạn quy trình | P | Sửa phần, bước, nguồn lực; bảng trích dẫn bên phải; kiểm tra nhất quán | Đề xuất AI chưa xử lý; chỗ "Khác biệt", "Chưa có căn cứ"; chỉ đọc khi đã ban hành |
@@ -259,7 +259,7 @@ Kiểu: **L** danh sách chuẩn, **F** form chuẩn, **P** trang tùy biến, *
 | :-- | :-- | :-- |
 | Thẻ tình trạng chuỗi | SCR-DSK-001, 005, 006 | Bốn chấm nối: quy trình, định mức, giá thành, giá duyệt; mỗi chấm có màu trạng thái |
 | Bảng trích dẫn | SCR-DSK-009, 010 | Cột phải, hiển thị trích dẫn của phần hoặc bước đang chọn, mở được mục nguồn |
-| Thẻ bước | SCR-DSK-009, 010, 014 | Mã bước, giai đoạn, tên, mô tả; kéo để sắp lại ở chế độ soạn |
+| Thẻ bước | SCR-DSK-009, 010, 014 | Mã bước, giai đoạn, tên, mô tả; nút Lên/Xuống để sắp lại ở chế độ soạn (dùng được bằng bàn phím); kéo chuột là tùy chọn sau **[AMD-005]** |
 | Nhãn quan hệ | SCR-DSK-009, 010 | "Theo hướng dẫn", "Khác biệt", "Chưa có căn cứ" |
 | Nhãn "Đề xuất" | SCR-DSK-009, 014, 025, **[1.1]** 033 | Nền nhạt, hai nút "Chấp nhận", "Bỏ" |
 | Lưới định mức | SCR-DSK-014 | Lưới sửa trực tiếp, nhóm theo bước, hàng tổng theo bước và cấu phần |

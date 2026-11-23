@@ -178,8 +178,23 @@ has_permission = {
 # FR-ADM-005: từ chối xóa danh mục đang được tham chiếu, nêu bản ghi tham chiếu
 doc_events = {
 	dt: {"on_trash": "normcore.core.references.check_not_referenced"}
-	for dt in ("NC Department", "NC Cost Center", "NC Job Title", "NC Technical Service")
+	for dt in (
+		"NC Department",
+		"NC Cost Center",
+		"NC Job Title",
+		"NC Technical Service",
+		"NC Specialty",
+		"NC Price Category",
+	)
 }
+# FR-AUD-001 (ADR-014): hook chung ghi sự kiện chuyển trạng thái, khóa, xóa; không sửa controller từng DocType
+doc_events["*"] = {
+	"validate": "normcore.core.audit.on_doc_validate",
+	"on_change": "normcore.core.audit.on_doc_change",
+	"after_delete": "normcore.core.audit.on_doc_delete",
+}
+# Dynamic Link `ref_name` của sổ sự kiện không được chặn xóa bản ghi nguồn
+ignore_links_on_delete = ["NC Audit Event"]
 
 # Scheduled Tasks
 # ---------------

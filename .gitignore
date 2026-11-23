@@ -16,3 +16,6 @@ htmlcov/
 node_modules/
 normcore/public/dist/
 .autopilot/PAUSE
+
+# Multica ghi vào thư mục làm việc của run
+.multica/project/

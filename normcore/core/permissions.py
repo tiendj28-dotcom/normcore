@@ -131,3 +131,11 @@ def unassign_department(user, department):
 	for name in names:
 		frappe.delete_doc("User Permission", name, ignore_permissions=True)
 	return bool(names)
+
+
+def readable_departments(doctype, user=None):
+	"""Tập khoa người dùng đọc được trên DocType; None nếu quyền đọc không bị hẹp theo khoa (FEAT-005)."""
+	user = user or frappe.session.user
+	if doctype not in SCOPE_RULES or not _is_scoped(doctype, "read", user):
+		return None
+	return get_user_departments(user)
