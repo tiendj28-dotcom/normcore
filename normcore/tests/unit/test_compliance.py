@@ -144,5 +144,7 @@ def test_build_expiry_report_thu_tu_va_loc():
 	assert rows[2]["equipment"] == "TB09"
 	only = c.build_expiry_report(rs, missing, TODAY, 30, department="K02")
 	assert [r["record"] for r in only] == ["A"]
-	assert c.build_expiry_report(rs, missing, TODAY, 30, status="Thiếu hồ sơ còn hạn")[0]["equipment"] == "TB09"
+	assert (
+		c.build_expiry_report(rs, missing, TODAY, 30, status="Thiếu hồ sơ còn hạn")[0]["equipment"] == "TB09"
+	)
 	assert c.build_expiry_report(rs, missing, TODAY, 10, status="Sắp hết hạn")[0]["record"] == "B"

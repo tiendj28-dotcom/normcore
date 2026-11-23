@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "creation": "2026-11-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "compliance_reminder_days"
+ ],
+ "fields": [
+  {
+   "fieldname": "compliance_reminder_days",
+   "label": "Số ngày nhắc hạn hồ sơ tuân thủ",
+   "fieldtype": "Int",
+   "default": "30",
+   "description": "Hồ sơ còn không quá số ngày này đến hạn thì ở trạng thái Sắp hết hạn [FR-CMP-005]"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Core",
+ "name": "NC Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

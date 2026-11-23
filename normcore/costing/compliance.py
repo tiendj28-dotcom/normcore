@@ -152,5 +152,12 @@ def build_expiry_report(records, missing, on, reminder, department=None, status=
 		rows = [r for r in rows if r["department"] == department]
 	if status:
 		rows = [r for r in rows if r["status"] == status]
-	rows.sort(key=lambda r: (r["department"] or "", _ORDER[r["status"]], r["expiry_date"] or date.max, r["equipment"]))
+	rows.sort(
+		key=lambda r: (
+			r["department"] or "",
+			_ORDER[r["status"]],
+			r["expiry_date"] or date.max,
+			r["equipment"],
+		)
+	)
 	return rows
