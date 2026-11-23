@@ -61,3 +61,17 @@
 | FR-RES-016 | `test_TC_CLS_46_xac_minh_khi_chua_co_tep_bi_tu_choi`, `test_FR_RES_016_xac_minh_co_tep_ghi_nguoi_va_thoi_diem` |
 | FR-RES-017 | `test_TC_CLS_46_chua_xac_minh_van_tinh_co_canh_bao`, `test_FR_RES_017_chua_xac_minh` |
 | FR-RES-018 | `test_TC_CLS_47_quy_doi_don_vi_dinh_muc_hc_glu`, `test_TC_CLS_47_don_gia_dinh_muc_khop_golden_cls`, `test_FR_RES_018_hoa_chat_can_so_don_vi_dinh_muc_duong` |
+
+# Test ref — FEAT-006 (ghi bởi kiểm định độc lập NORM-16)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-PROC-001 | `test_TC_PROC_01_tao_ban_nhap`, `test_luu_phan` (api/test_procedure.py) |
+| FR-PROC-002 | `test_TC_PROC_02_tao_lan_hai_bi_tu_choi_va_dan_toi_ban_co`, `test_DI_02_chi_mot_ban_dang_soan_cho_moi_dich_vu_khoa`, `test_Q3_tu_choi_tao_va_sao_chep_khi_da_ban_hanh` |
+| FR-PROC-003 | `test_TC_PROC_03_tich_hop_sap_lai_xoa_them`, `test_TC_PROC_03_ma_buoc_bat_bien`, `test_TC_PROC_03_ma_buoc_bat_bien_khi_sap_lai_va_xoa` (unit/test_procedure_logic.py), `test_yeu_cau_giai_doan_ten_mo_ta` |
+| FR-PROC-004 | `test_TC_PROC_04_nguon_luc_nhan_luc`, `test_TC_PROC_04_nguon_luc_nhan_luc_co_ma_dong_bat_bien`, `test_nhan_luc_phai_tinh_bang_phut` |
+| FR-PROC-005 | `test_FR_PROC_005_goi_y_va_de_trong_lien_ket` |
+| FR-PROC-006 | `test_TC_PROC_03_tich_hop_sap_lai_xoa_them`, `test_reorder_chi_nhan_hoan_vi_day_du`, `test_move_len_xuong_va_chan_bien`, `test_K3_*` (unit/test_procedure_editor_behavior.py) |
+| FR-PROC-007 | `test_TC_PROC_09_trich_dan` (văn bản, mục, đoạn trích, quan hệ), `test_FR_PROC_007_trich_dan_dung_mot_dich`, `test_FR_PROC_007_quan_he_mac_dinh_chua_co_can_cu` |
+| FR-PROC-009 | `test_TC_PROC_08_lich_su_truoc_sau_nguoi_thoi_diem`, `test_TC_PROC_08_moc_thoi_gian_va_nguoi_cho_ca_hai_thay_doi` |
+| FR-PROC-013 | `test_FR_PROC_013_sao_chep`, `test_FR_PROC_013_sao_chep_cap_ma_moi_va_anh_xa`, `test_E12_sao_chep_thanh_cong_khong_hien_dai_loi` |
