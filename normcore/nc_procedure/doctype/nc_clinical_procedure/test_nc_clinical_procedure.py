@@ -140,3 +140,18 @@ class TestNCClinicalProcedure(FrappeTestCase):
 			"cautions preparation_notes monitoring references citations copied_from ai_log"
 		).split():
 			self.assertTrue(meta.has_field(f), f)
+
+
+class TestListViewColumnsL1(FrappeTestCase):
+	"""NORM-23 L1 (SCR-DSK-007): danh sách hiện đủ cột Khoa chủ trì, Phiên bản ở màn 1366px."""
+
+	def test_L1_list_view_settings_total_fields_sau_migrate(self):
+		from normcore.setup import ensure_list_view_settings
+
+		ensure_list_view_settings()
+		total = frappe.db.get_value("List View Settings", "NC Clinical Procedure", "total_fields")
+		self.assertGreaterEqual(int(total), 6)
+		meta = frappe.get_meta("NC Clinical Procedure")
+		listed = {f.fieldname for f in meta.fields if f.in_list_view}
+		self.assertTrue({"technical_service", "department", "version_no"} <= listed)
+		self.assertTrue(frappe._("NC Clinical Procedure", lang="vi") != "NC Clinical Procedure")
