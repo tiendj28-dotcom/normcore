@@ -1,6 +1,7 @@
 # As-Built FEAT-011 — Bộ tham số, chức danh, loại giá
 
 Issue NORM-20. FR: FR-RES-009, 010, 011, 012 (chức danh, không đổi), 015. UC-008, SCR-DSK-019.
+Người nghiệm thu: QA (Multica). Giới hạn: giao diện chưa kiểm bằng trình duyệt (Playwright không kết nối); chưa tạo được site sạch ở QA (thiếu DB_ROOT_PASSWORD), CI của PR chạy trên site mới và xanh.
 
 ## Đã làm
 - **NC Costing Parameter Set** mở rộng đủ trường `data-model.md` 3.5 (gồm sáu trường [1.1]), mặc định ZERO / 5 / 2 (TC-CLS-50). Kiểm khoảng giá trị ở `normcore/costing/parameters.py` (thuần Python, phủ 100%). Bản ghi cũ: patch `backfill_parameter_set_defaults`.
