@@ -4,15 +4,21 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "compliance_section",
   "compliance_reminder_days"
  ],
  "fields": [
+  {
+   "fieldname": "compliance_section",
+   "label": "Hồ sơ tuân thủ",
+   "fieldtype": "Section Break"
+  },
   {
    "fieldname": "compliance_reminder_days",
    "label": "Số ngày nhắc hạn hồ sơ tuân thủ",
    "fieldtype": "Int",
    "default": "30",
-   "description": "Hồ sơ còn không quá số ngày này đến hạn thì ở trạng thái Sắp hết hạn [FR-CMP-005]"
+   "description": "Số ngày trước ngày hết hạn bắt đầu nhắc. Đổi giá trị thì trạng thái hồ sơ được tính lại ngay."
   }
  ],
  "index_web_pages_for_search": 0,

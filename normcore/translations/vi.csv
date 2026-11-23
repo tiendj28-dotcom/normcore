@@ -8,6 +8,7 @@ Add step,Thêm bước
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
+As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
 Assign,Gán
 Assign user,Gán người dùng
@@ -16,6 +17,7 @@ Cancel,Hủy
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Catalog,Danh mục
 Check,Kiểm tra
+Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
@@ -44,6 +46,8 @@ Download template,Tải tệp mẫu
 Duplicate,Nhân bản,NC Costing Parameter Set
 Edit,Sửa
 Errors,Lỗi,Import Excel
+Expired {0} days ago,Đã hết hạn {0} ngày trước
+Expires in {0} days,Còn {0} ngày đến hạn
 Headcount,Số người
 Import data from Excel,Nhập dữ liệu từ Excel
 Import from Excel,Nhập từ Excel
@@ -101,6 +105,7 @@ Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equ
 Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Source,Nguồn giá,NC Item
+Status,Trạng thái
 Step ID,Mã bước
 Step title,Tên bước
 Technical service,Dịch vụ kỹ thuật
@@ -117,6 +122,7 @@ Unverified,Chưa xác minh,NC Item
 Unverified,Chưa xác minh,NC Item Price
 Up,Lên
 Updated,Cập nhật,Import Excel
+"Updated {0} records, sent {1} notifications","Đã cập nhật {0} hồ sơ, gửi {1} thông báo"
 Upload file,Tải tệp lên
 User,Người dùng
 User assigned to department.,Đã gán người dùng vào khoa.
