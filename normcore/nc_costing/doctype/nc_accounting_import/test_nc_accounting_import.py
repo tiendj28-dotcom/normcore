@@ -13,6 +13,7 @@ from normcore.tests.accounting_fixtures import (
 )
 from normcore.tests.utils import make_user
 
+DT = "NC Accounting Import"
 FIN = "finance-acct@test.local"
 AUD = "auditor-acct@test.local"
 CLIN = "clinician-acct@test.local"
@@ -146,3 +147,153 @@ class TestNCAccountingImport(FrappeTestCase):
 		frappe.set_user(FIN)
 		doc = make_import()
 		self.assertFalse(frappe.has_permission("NC Accounting Import", "delete", doc=doc.name))
+
+
+class TestAccountingImportApi(FrappeTestCase):
+	def setUp(self):
+		frappe.set_user("Administrator")
+		make_centers()
+		ensure_default_mapping()
+		make_user(FIN, "NC Finance")
+		make_user(AUD, "NC Auditor")
+		make_user(CLIN, "NC Clinician")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_TC_ACCT_02_khong_chot_khi_con_dong_loi(self):
+		from normcore.api import accounting as api
+
+		frappe.set_user(FIN)
+		doc = make_import([["61111", "", "K01", 1], ["61111", "", "K01", "abc"], ["61112", "", "K99", 5]])
+		s = api.get_import_summary(doc.name)
+		self.assertEqual((s["error_count"], len(s["errors"]), s["can_finalize"]), (2, 2, False))
+		self.assertIn("Dòng 3", s["errors"][0]["text"])
+		with self.assertRaisesRegex(frappe.ValidationError, "2 dòng lỗi"):
+			api.finalize(doc.name)
+		self.assertEqual(frappe.db.get_value(DT, doc.name, "status"), "Nháp")
+
+	def test_TC_ACCT_03_dong_chua_gan_chan_chot(self):
+		from normcore.api import accounting as api
+
+		frappe.set_user(FIN)
+		doc = make_import([*GOLDEN_ROWS, ["99999", "Lạ", "K01", 7]])
+		s = api.get_import_summary(doc.name)
+		self.assertEqual([(u["idx"], u["account_code"], u["cost_center"]) for u in s["unassigned"]], [(11, "99999", "K01")])
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			api.finalize(doc.name)
+		msg = str(ctx.exception)
+		self.assertIn("dòng 11", msg)
+		self.assertIn("99999", msg)
+		self.assertIn("K01", msg)
+		row = next(r for r in doc.lines if r.account_code == "99999").name
+		api.update_line(doc.name, row, "MANAGEMENT", 0, "Chi phí quản lý chung")
+		self.assertEqual(api.finalize(doc.name)["status"], "Đã chốt")
+
+	def test_TC_ACCT_04_update_line_can_ly_do_va_luu_nguoi_sua(self):
+		from normcore.api import accounting as api
+
+		frappe.set_user(FIN)
+		doc = make_import()
+		row = doc.lines[0].name
+		for reason in (None, "", "   "):
+			with self.assertRaisesRegex(frappe.ValidationError, "lý do"):
+				api.update_line(doc.name, row, "MANAGEMENT", 0, reason)
+		s = api.update_line(doc.name, row, "MANAGEMENT", 0, "Sai tài khoản")
+		d = frappe.get_doc(DT, doc.name)
+		self.assertEqual((d.lines[0].cost_category, d.lines[0].changed_by, d.lines[0].change_reason), ("MANAGEMENT", FIN, "Sai tài khoản"))
+		self.assertEqual(s["status"], "Nháp")
+		s = api.update_line(doc.name, d.lines[1].name, "", 1, "Không tính vào giá")
+		d.reload()
+		self.assertEqual(d.lines[1].is_excluded, 1)
+		self.assertEqual(s["excluded_count"], 2)
+		with self.assertRaises(frappe.ValidationError):
+			api.update_line(doc.name, "khong-co", "LABOR", 0, "x")
+		with self.assertRaises(frappe.ValidationError):
+			api.update_line(doc.name, row, "SAI", 0, "x")
+
+	def test_TC_ACCT_06_chot_ghi_tong_khop_golden_va_khoa(self):
+		import sys
+		from pathlib import Path
+
+		sys.path.insert(0, str(Path(frappe.get_app_path("normcore")).parent / "docs" / "golden"))
+		import golden_engine as g
+
+		from normcore.api import accounting as api
+
+		frappe.set_user(FIN)
+		doc = make_import()
+		preview = api.get_import_summary(doc.name)
+		self.assertTrue(preview["can_finalize"])
+		self.assertEqual(len(preview["totals"]), 7)
+		s = api.finalize(doc.name)
+		self.assertEqual(s["status"], "Đã chốt")
+		got = {}
+		for t in s["totals"]:
+			got.setdefault(t["cost_center"], {})[t["cost_category"]] = D(str(t["amount"]))
+		self.assertEqual(got, g.ACCOUNTING)
+		self.assertEqual(len(s["totals"]), 7)
+		ev = frappe.get_all("NC Audit Event", {"ref_doctype": DT, "ref_name": doc.name, "event_type": "Khóa"})
+		self.assertEqual(len(ev), 1)
+		# sau chốt: mọi sửa bị từ chối
+		d = frappe.get_doc(DT, doc.name)
+		d.lines[0].amount = 1
+		with self.assertRaisesRegex(frappe.ValidationError, "đã chốt"):
+			d.save()
+		for fn, args in (
+			(api.update_line, (doc.name, d.lines[0].name, "LABOR", 0, "x")),
+			(api.reapply_mapping, (doc.name,)),
+			(api.reload_file, (doc.name,)),
+			(api.finalize, (doc.name,)),
+		):
+			with self.assertRaises(frappe.ValidationError):
+				fn(*args)
+		frappe.set_user("Administrator")
+		with self.assertRaises(frappe.PermissionError):
+			frappe.delete_doc(DT, doc.name)
+
+	def test_gan_lai_giu_dong_sua_tay_va_doc_lai_tep(self):
+		from normcore.api import accounting as api
+
+		frappe.set_user(FIN)
+		doc = make_import()
+		api.update_line(doc.name, doc.lines[0].name, "MANAGEMENT", 0, "Sửa tay")
+		frappe.db.set_value("NC Account Mapping", {"account_prefix": "61112"}, "cost_category", "UTILITY")
+		r = api.reapply_mapping(doc.name)
+		self.assertEqual(r["changed"], 1)
+		d = frappe.get_doc(DT, doc.name)
+		self.assertEqual([x.cost_category for x in d.lines][:3], ["MANAGEMENT", "LABOR", "UTILITY"])
+		self.assertEqual(d.lines[0].changed_by, FIN)
+		s = api.reload_file(doc.name)
+		d.reload()
+		self.assertEqual((s["line_count"], d.lines[0].cost_category, d.lines[0].changed_by), (10, "LABOR", None))
+
+	def test_quyen_api(self):
+		from normcore.api import accounting as api
+
+		frappe.set_user(FIN)
+		doc = make_import()
+		frappe.set_user(AUD)
+		self.assertEqual(api.get_import_summary(doc.name)["name"], doc.name)
+		with self.assertRaises(frappe.PermissionError):
+			api.finalize(doc.name)
+		with self.assertRaises(frappe.PermissionError):
+			api.update_line(doc.name, doc.lines[0].name, "LABOR", 0, "x")
+		with self.assertRaises(frappe.PermissionError):
+			api.reapply_mapping(doc.name)
+		with self.assertRaises(frappe.PermissionError):
+			api.reload_file(doc.name)
+		frappe.set_user(CLIN)
+		with self.assertRaises(frappe.PermissionError):
+			api.get_import_summary(doc.name)
+		with self.assertRaises(frappe.PermissionError):
+			api.download_template()
+
+	def test_tai_tep_mau(self):
+		from normcore.api import accounting as api
+
+		frappe.set_user(AUD)
+		api.download_template()
+		self.assertEqual(frappe.response["filename"], "mau-nhap-so-lieu-ke-toan.xlsx")
+		self.assertEqual(frappe.response["filecontent"][:2], b"PK")
