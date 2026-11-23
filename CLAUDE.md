@@ -182,3 +182,12 @@ cd $BENCH_DIR && bench --site normcore.test migrate && bench build --app normcor
 ```
 
 `$BENCH_DIR` là bench dev (mặc định `~/frappe-bench`); app được liên kết vào `$BENCH_DIR/apps/normcore`.
+
+
+## 11. Xung đột khi merge (Dev, Reviewer)
+
+- Khi PR của mình báo "This branch has conflicts", hoặc khi có PR khác vừa merge vào `develop`: tự `git fetch` rồi `git merge origin/develop` vào nhánh. Không rebase, không force-push.
+- `normcore/translations/vi.csv`: giữ cả hai bên, bỏ dòng trùng khóa nếu có; giữ thứ tự chữ cái theo cột đầu. `.gitattributes` đặt `merge=union` cho tệp này; `scripts/check_conventions.py` báo lỗi khi tệp chưa sắp xếp hoặc có khóa trùng.
+- `docs/rtm.md`, `docs/verification-report.md`: không sửa tay; chạy lại `python3 docs/tools/build_rtm.py docs` rồi commit kết quả.
+- Tệp khác: tự gỡ nếu chỉ là hai bên cùng thêm; nếu hai bên sửa cùng logic thì dừng và báo Lead.
+- Sau khi gỡ, chạy lại toàn bộ test. PR chỉ được coi là xong khi hết conflict và CI xanh.
