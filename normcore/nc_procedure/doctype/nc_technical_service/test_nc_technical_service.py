@@ -208,3 +208,88 @@ class TestServiceImport(FrappeTestCase):
 			self.assertRaises(
 				frappe.PermissionError, api.run_import, KEY, _xlsx([HEAD, ["X1", "X", None]]), "ghi"
 			)
+
+	# --- FEAT-031: khối cận lâm sàng ---
+
+	def test_TC_CLS_20_danh_dau_can_lam_sang_yeu_cau_nhom_va_don_vi(self):
+		svc = _service("GLU", is_paraclinical=1)
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			svc.insert()
+		self.assertIn("Nhóm chuyên ngành", str(ctx.exception))
+		svc.cls_group = "Hóa sinh"
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			svc.insert()
+		self.assertIn("Đơn vị kết quả", str(ctx.exception))
+		svc.result_unit = "Kết quả xét nghiệm"
+		svc.insert()
+		self.assertEqual(frappe.db.get_value("NC Technical Service", "GLU", "cls_group"), "Hóa sinh")
+
+	def test_TC_CLS_20_khong_can_lam_sang_khong_bat_buoc(self):
+		svc = _service("DV-KCLS").insert()
+		self.assertEqual(svc.is_paraclinical, 0)
+		self.assertFalse(svc.cls_group)
+
+	def test_TC_CLS_21_ma_ngoai_gan_hai_dich_vu_bi_tu_choi(self):
+		glu = _service("GLU", external_codes=[{"source_system": "LIS", "external_code": "L100"}]).insert()
+		self.assertEqual(len(glu.external_codes), 1)
+		other = _service("DV-OTHER", external_codes=[{"source_system": "LIS", "external_code": "L100"}])
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			other.insert()
+		self.assertIn("GLU", str(ctx.exception))
+		self.assertIn("L100", str(ctx.exception))
+		spaced = _service("DV-OTHER2", external_codes=[{"source_system": "LIS", "external_code": " l100 "}])
+		with self.assertRaises(frappe.ValidationError):
+			spaced.insert()
+		_service("DV-OTHER3", external_codes=[{"source_system": "HIS", "external_code": "L100"}]).insert()
+
+	def test_TC_CLS_21_lap_trong_cung_dich_vu(self):
+		svc = _service(
+			"DV-DUP",
+			external_codes=[
+				{"source_system": "LIS", "external_code": "L7"},
+				{"source_system": "LIS", "external_code": "L7"},
+			],
+		)
+		self.assertRaises(frappe.ValidationError, svc.insert)
+
+	def test_TC_CLS_21_chi_muc_duy_nhat_o_co_so_du_lieu(self):
+		_service("GLU", external_codes=[{"source_system": "LIS", "external_code": "L100"}]).insert()
+		other = _service("DV-OTHER").insert()
+		row = frappe.get_doc(
+			{
+				"doctype": "NC Service Code Map",
+				"parent": other.name,
+				"parenttype": "NC Technical Service",
+				"parentfield": "external_codes",
+				"source_system": "LIS",
+				"external_code": "L100",
+			}
+		)
+		with self.assertRaises(frappe.UniqueValidationError):
+			row.insert(ignore_permissions=True)
+
+	def test_FR_SVC_010_dich_vu_bo(self):
+		svc = _service(
+			"DV-BO", is_paraclinical=1, cls_group="Hóa sinh", result_unit="Kết quả xét nghiệm", is_panel=1
+		)
+		with self.assertRaises(frappe.ValidationError):
+			svc.insert()
+		svc.append("panel_components", {"parameter_code": "NA", "parameter_name": "Natri"})
+		svc.append("panel_components", {"parameter_code": "K", "parameter_name": "Kali"})
+		svc.insert()
+		self.assertEqual(svc.panel_costing_mode, "Theo từng thông số")
+		svc.append("panel_components", {"parameter_code": "na", "parameter_name": "Natri 2"})
+		self.assertRaises(frappe.ValidationError, svc.save)
+
+	def test_FR_SVC_011_gui_ngoai_can_gia(self):
+		svc = _service(
+			"DV-NGOAI",
+			is_paraclinical=1,
+			cls_group="Vi sinh",
+			result_unit="Kết quả xét nghiệm",
+			is_send_out=1,
+		)
+		self.assertRaises(frappe.ValidationError, svc.insert)
+		svc.send_out_price = 150000
+		svc.insert()
+		self.assertEqual(svc.send_out_price, 150000)

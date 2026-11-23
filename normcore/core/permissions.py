@@ -34,6 +34,7 @@ class ScopeRule:
 SCOPE_RULES = {
 	"NC Clinical Procedure": ScopeRule(public_read={"workflow_state": "Đã ban hành"}),
 	"NC Norm Set": ScopeRule(),
+	"NC Test System": ScopeRule(),  # FR-ACC-008, ASM-113
 }
 
 
