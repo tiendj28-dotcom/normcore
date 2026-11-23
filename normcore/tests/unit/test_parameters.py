@@ -41,8 +41,5 @@ class TestParameters(unittest.TestCase):
 		self.assertEqual(P.check_ranges({}), [])
 		self.assertEqual(P.check_ranges({"wastage_cap": None, "accumulation_mode": ""}), [])
 
-	def test_che_do_tich_luy_cho_engine(self):
-		self.assertIsNone(P.accumulation_engine_mode("NONE"))
-		self.assertIsNone(P.accumulation_engine_mode(None))
-		self.assertEqual(P.accumulation_engine_mode("ON_COST"), "ON_COST")
-		self.assertEqual(P.accumulation_engine_mode("ON_PRICE"), "ON_PRICE")
+	def test_gia_dien_nuoc_mac_dinh_bang_khong(self):
+		self.assertEqual((P.DEFAULTS["electricity_price"], P.DEFAULTS["water_price"]), (0, 0))

@@ -12,8 +12,7 @@ Issue NORM-20. FR: FR-RES-009, 010, 011, 012 (chức danh, không đổi), 015. 
 ## Nợ kỹ thuật, ghi chú
 - Chưa mã nào bật `is_locked`; FEAT-015 bật khi khóa lần tính (ASM-068).
 - Chưa DocType R1 nào liên kết tới NC Price Category; chặn xóa mới kiểm được bằng móc đã gắn (FEAT-012/030 thêm liên kết).
-- `normcore/costing/parameters.py::accumulation_engine_mode` chưa có nơi gọi tới khi FEAT-012/015 dùng tham số.
-- Đã chạy `bench run-tests` trên site test; chưa mở preview giao diện (không có môi trường preview trong run này).
+- Form SCR-DSK-019 chưa được kiểm bằng mắt: xem implementation-log về preview.
 
 ## ASM
-ASM-063..069 (`docs/decisions/assumptions.md`). Không có AMD, CF.
+ASM-063..070 (`docs/decisions/assumptions.md`). CF-004, AMD-007 (bốn trường bắt buộc theo srs, sửa `data-model.md` 3.5). ASM-069 chờ người duyệt (tiendj28, NORM-21); ASM-066, ASM-068 đã duyệt.

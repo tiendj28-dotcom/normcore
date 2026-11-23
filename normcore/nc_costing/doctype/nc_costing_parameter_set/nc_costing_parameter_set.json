@@ -97,14 +97,16 @@
    "label": "Tỷ lệ tích lũy (%)",
    "fieldtype": "Percent",
    "default": "5",
-   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)"
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)",
+   "reqd": 1
   },
   {
    "fieldname": "obligation_rate",
    "label": "Tỷ lệ nghĩa vụ tài chính (%)",
    "fieldtype": "Percent",
    "default": "0",
-   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)"
+   "description": "Giả định — chờ xác nhận (TBD-02, ASM-063)",
+   "reqd": 1
   },
   {
    "fieldname": "sb_rounding",
@@ -148,12 +150,16 @@
   {
    "fieldname": "electricity_price",
    "label": "Giá điện (đ/kWh)",
-   "fieldtype": "Currency"
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "default": "0"
   },
   {
    "fieldname": "water_price",
    "label": "Giá nước (đ/m³)",
-   "fieldtype": "Currency"
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "default": "0"
   },
   {
    "fieldname": "sb_expired",

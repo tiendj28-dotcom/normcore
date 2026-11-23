@@ -18,7 +18,7 @@ Không có BR mới; BR-COST-001 đã cài, không đổi công thức, không t
 ## 2. DocType
 
 ### 2.1 NC Costing Parameter Set (mở rộng)
-Thêm đúng các trường của `data-model.md` 3.5: `wastage_cap`, `accumulation_mode`, `accumulation_rate`, `obligation_rate`, `rounding_unit`, `reconciliation_tolerance`, `comparison_tolerance`, `electricity_price`, `water_price`, `expired_depreciation_mode`, `material_recon_tolerance`, `volume_recon_tolerance`, `eqa_cost_category`, `rental_cost_category`, `jv_cost_category`. Mặc định: ZERO, 5, 2; `rounding_unit` 100; hai ngưỡng 10; chế độ tích lũy ON_COST, tích lũy 5, nghĩa vụ 0 (khớp golden `PARAM`, ASM-063); `wastage_cap` 10 (ASM-064); ba loại chi phí tạm DRUG_SUPPLY / DEPRECIATION / DEPRECIATION. Quyền giữ nguyên (đúng dòng "Bộ tham số, chức danh, loại giá").
+Thêm đúng các trường của `data-model.md` 3.5 (đã sửa theo AMD-007/CF-004: `accumulation_rate`, `obligation_rate`, `electricity_price`, `water_price` bắt buộc): `wastage_cap`, `accumulation_mode`, `accumulation_rate`, `obligation_rate`, `rounding_unit`, `reconciliation_tolerance`, `comparison_tolerance`, `electricity_price`, `water_price`, `expired_depreciation_mode`, `material_recon_tolerance`, `volume_recon_tolerance`, `eqa_cost_category`, `rental_cost_category`, `jv_cost_category`. Mặc định: ZERO, 5, 2; `rounding_unit` 100; hai ngưỡng 10; chế độ tích lũy ON_COST, tích lũy 5, nghĩa vụ 0 (khớp golden `PARAM`, ASM-063); `wastage_cap` 10 (ASM-064); giá điện, giá nước mặc định 0 (ASM-070); ba loại chi phí tạm DRUG_SUPPLY / DEPRECIATION / DEPRECIATION. Quyền giữ nguyên (đúng dòng "Bộ tham số, chức danh, loại giá").
 Bản ghi cũ: patch `backfill_parameter_set_defaults` điền mặc định (ASM-065).
 
 `validate` (thứ tự): (1) nếu bộ đang bị khóa (xem 2.3) → `frappe.throw`; (2) kiểm khoảng giá trị bằng `costing/parameters.py`; (3) `compute_job_rates`.
@@ -34,7 +34,6 @@ Bộ "đang được dùng" khi `is_locked` = 1 trong CSDL **hoặc** có NC Cos
 ## 3. Logic thuần — `normcore/costing/parameters.py` (không import `frappe`)
 - `DEFAULTS`: các mặc định mục 2.1.
 - `check_ranges(values) -> list[str]`: các tỷ lệ % ∈ [0, 100]; `accumulation_rate` < 100 và `obligation_rate` < 100 (engine yêu cầu [0,1), BR-COST-013); số ngày, giờ > 0; `rounding_unit` ≥ 1; mode ∈ tập hợp lệ. Trả danh sách lỗi tiếng Việt.
-- `accumulation_engine_mode(mode)`: `NONE` → `None`, còn lại giữ nguyên (cầu nối tới `engine.apply_accumulation`).
 Phép tính tiền: không thêm; chức danh dùng `engine.job_rate` ↔ `golden_engine.job_rate`.
 
 ## 4. Giao diện (SCR-DSK-019): xem `ui-design.md`.
@@ -52,4 +51,4 @@ Phép tính tiền: không thêm; chức danh dùng `engine.job_rate` ↔ `golde
 | 7 | FEAT-004 không đỏ | — | — |
 
 ## 6. Giả định và rủi ro
-ASM-063..068 như trên (chốt trong `docs/decisions/assumptions.md`). Rủi ro: nhánh khác (NORM-19: FEAT-009/010) cùng thêm ASM — gộp khi merge, giữ cả hai bên.
+ASM-063..070 như trên (chốt trong `docs/decisions/assumptions.md`). Rủi ro: nhánh khác (NORM-19: FEAT-009/010) cùng thêm ASM — gộp khi merge, giữ cả hai bên.

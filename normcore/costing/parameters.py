@@ -12,6 +12,8 @@ DEFAULTS = {
 	"accumulation_mode": "ON_COST",
 	"accumulation_rate": 5,
 	"obligation_rate": 0,
+	"electricity_price": 0,
+	"water_price": 0,
 	"rounding_unit": 100,
 	"reconciliation_tolerance": 10,
 	"comparison_tolerance": 10,
@@ -71,8 +73,3 @@ def check_ranges(values: dict) -> list[str]:
 		if v not in (None, "") and v not in allowed:
 			errors.append(f"{label}: giá trị không hợp lệ ({v})")
 	return errors
-
-
-def accumulation_engine_mode(mode: str | None) -> str | None:
-	"""NONE (loại giá không tích lũy) -> None theo `engine.apply_accumulation`."""
-	return None if mode in (None, "", "NONE") else mode

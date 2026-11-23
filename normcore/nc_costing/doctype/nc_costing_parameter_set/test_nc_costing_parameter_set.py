@@ -184,3 +184,24 @@ class TestNCCostingParameterSet(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("NC Costing Parameter Set", copy.name, "is_locked"), 0)
 		copy.base_salary = 3200000
 		copy.save()
+
+	def test_FR_RES_009_bon_truong_bat_buoc_theo_srs(self):
+		for field in ("accumulation_rate", "obligation_rate", "electricity_price", "water_price"):
+			ps = _new().insert()
+			ps.reload()
+			ps.set(field, None)
+			self.assertRaises(frappe.MandatoryError, ps.save)
+			frappe.db.rollback()
+			self.assertRaises(frappe.MandatoryError, _new(**{field: ""}).insert)
+
+	def test_FR_RES_009_gia_dien_nuoc_tich_luy_nghia_vu_bang_khong_hop_le(self):
+		ps = _new(accumulation_rate=0, obligation_rate=0, electricity_price=0, water_price=0).insert()
+		ps.reload()
+		self.assertEqual((ps.accumulation_rate, ps.obligation_rate), (0, 0))
+		self.assertEqual((ps.electricity_price, ps.water_price), (0, 0))
+
+	def test_FR_RES_009_mac_dinh_tich_luy_nghia_vu_dien_nuoc(self):
+		ps = _new().insert()
+		self.assertEqual(
+			(ps.accumulation_rate, ps.obligation_rate, ps.electricity_price, ps.water_price), (5, 0, 0, 0)
+		)
