@@ -109,3 +109,19 @@ Annual depreciation,Khấu hao năm,NC Equipment
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 Duplicate,Nhân bản,NC Costing Parameter Set
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
+Verified,Đã xác minh,NC Item
+Verified,Đã xác minh,NC Item Price
+Unverified,Chưa xác minh,NC Item
+Unverified,Chưa xác minh,NC Item Price
+Verify,Xác minh,NC Item Price
+Add price,Thêm đơn giá,NC Item
+No price yet,Chưa có đơn giá,NC Item
+Price in use today,Đơn giá đang dùng hôm nay,NC Item
+Price per norm unit,Đơn giá một đơn vị định mức,NC Item
+Price code,Mã đơn giá,NC Item
+Source,Nguồn giá,NC Item
+Unit price,Đơn giá,NC Item
+Document no.,Số chứng từ,NC Item
+Valid from,Hiệu lực từ,NC Item
+Valid to,Hiệu lực đến,NC Item
+Verification,Xác minh,NC Item
