@@ -11,7 +11,14 @@ CLIN = "clinician-rule@test.local"
 
 def _r(level="Cấp 2", cat="LABOR", driver="LABOR_MIN", **kw):
 	return frappe.get_doc(
-		{"doctype": "NC Allocation Rule", "rule_name": "Quy tắc thử", "level": level, "cost_category": cat, "driver": driver, **kw}
+		{
+			"doctype": "NC Allocation Rule",
+			"rule_name": "Quy tắc thử",
+			"level": level,
+			"cost_category": cat,
+			"driver": driver,
+			**kw,
+		}
 	)
 
 

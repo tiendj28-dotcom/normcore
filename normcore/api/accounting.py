@@ -32,10 +32,14 @@ def _summary(doc):
 	un = accounting.unassigned(lines)
 	blockers = accounting.finalize_blockers(doc.status, doc.error_count, lines)
 	if doc.status == accounting.STATUS_FINAL:
-		totals = [{"cost_center": t.cost_center, "cost_category": t.cost_category, "amount": t.amount} for t in doc.totals]
+		totals = [
+			{"cost_center": t.cost_center, "cost_category": t.cost_category, "amount": t.amount}
+			for t in doc.totals
+		]
 	else:
 		totals = [
-			{"cost_center": c, "cost_category": cat, "amount": float(v)} for c, cat, v in accounting.totals(lines)
+			{"cost_center": c, "cost_category": cat, "amount": float(v)}
+			for c, cat, v in accounting.totals(lines)
 		]
 	return {
 		"name": doc.name,
@@ -45,7 +49,12 @@ def _summary(doc):
 		"error_count": doc.error_count or 0,
 		"errors": json.loads(doc.import_errors or "[]")[:MAX_ERRORS],
 		"unassigned": [
-			{"idx": u["idx"], "account_code": u.get("account_code"), "cost_center": u.get("cost_center"), "amount": u.get("amount")}
+			{
+				"idx": u["idx"],
+				"account_code": u.get("account_code"),
+				"cost_center": u.get("cost_center"),
+				"amount": u.get("amount"),
+			}
 			for u in un
 		],
 		"excluded_count": sum(1 for ln in lines if ln.get("is_excluded")),

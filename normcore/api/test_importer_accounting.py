@@ -30,7 +30,11 @@ class TestImporterAccounting(FrappeTestCase):
 	def test_TC_ACCT_05_ma_dich_vu_la_bao_loi_dong_dung_van_luu(self):
 		frappe.set_user(FIN)
 		c = make_xlsx(
-			[[2026, "DV-TEST-A", "KHOA-TEST", TT, 4000], [2026, "DV-TEST-B", "KHOA-TEST", TT, 6000], [2026, "DV-X", "KHOA-TEST", TT, 10]],
+			[
+				[2026, "DV-TEST-A", "KHOA-TEST", TT, 4000],
+				[2026, "DV-TEST-B", "KHOA-TEST", TT, 6000],
+				[2026, "DV-X", "KHOA-TEST", TT, 10],
+			],
 			header=VOL_H,
 		)
 		r = importer.run_import("nc_service_volume", c, "ghi", "v.xlsx")
@@ -48,14 +52,27 @@ class TestImporterAccounting(FrappeTestCase):
 		r = importer.run_import("nc_service_volume", c, "ghi", "v.xlsx")
 		self.assertEqual((r["created"], r["error_count"]), (0, 1))
 		self.assertIn("Mã khoa", r["errors"][0]["column"])
-		importer.run_import("nc_service_volume", make_xlsx([[2026, "DV-TEST-A", "KHOA-TEST", TT, 5]], header=VOL_H), "ghi", "v.xlsx")
-		r = importer.run_import("nc_service_volume", make_xlsx([[2026, "DV-TEST-A", "KHOA-TEST", TT, 9]], header=VOL_H), "ghi", "v.xlsx")
+		importer.run_import(
+			"nc_service_volume",
+			make_xlsx([[2026, "DV-TEST-A", "KHOA-TEST", TT, 5]], header=VOL_H),
+			"ghi",
+			"v.xlsx",
+		)
+		r = importer.run_import(
+			"nc_service_volume",
+			make_xlsx([[2026, "DV-TEST-A", "KHOA-TEST", TT, 9]], header=VOL_H),
+			"ghi",
+			"v.xlsx",
+		)
 		self.assertEqual(r["updated"], 1)
 		self.assertEqual(frappe.db.get_value("NC Service Volume", {"fiscal_year": 2026}, "volume"), 9)
 
 	def test_TC_ACCT_09_nhap_tieu_chi(self):
 		frappe.set_user(FIN)
-		c = make_xlsx([[2026, "K01", 20, None, None], [2026, "K02", 30, None, None], [2026, "K01", 5, None, None]], header=DRV_H)
+		c = make_xlsx(
+			[[2026, "K01", 20, None, None], [2026, "K02", 30, None, None], [2026, "K01", 5, None, None]],
+			header=DRV_H,
+		)
 		r = importer.run_import("nc_cost_center_driver", c, "ghi", "d.xlsx")
 		self.assertEqual((r["created"], r["error_count"]), (2, 1))
 		self.assertIn("trùng khóa", r["errors"][0]["message"])
@@ -67,4 +84,9 @@ class TestImporterAccounting(FrappeTestCase):
 		self.assertNotIn("nc_service_volume", keys)
 		self.assertNotIn("nc_cost_center_driver", keys)
 		with self.assertRaises(frappe.PermissionError):
-			importer.run_import("nc_service_volume", make_xlsx([[2026, "DV-TEST-A", "KHOA-TEST", TT, 1]], header=VOL_H), "ghi", "v.xlsx")
+			importer.run_import(
+				"nc_service_volume",
+				make_xlsx([[2026, "DV-TEST-A", "KHOA-TEST", TT, 1]], header=VOL_H),
+				"ghi",
+				"v.xlsx",
+			)

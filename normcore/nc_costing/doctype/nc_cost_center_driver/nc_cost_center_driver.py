@@ -26,12 +26,16 @@ class NCCostCenterDriver(Document):
 			{"fiscal_year": self.fiscal_year, "cost_center": self.cost_center, "name": ("!=", self.name)},
 		)
 		if dup:
-			frappe.throw(_("Đã có tiêu chí năm {0} của trung tâm {1}").format(self.fiscal_year, self.cost_center))
+			frappe.throw(
+				_("Đã có tiêu chí năm {0} của trung tâm {1}").format(self.fiscal_year, self.cost_center)
+			)
 
 
 def on_doctype_update():
 	frappe.db.add_unique(
-		"NC Cost Center Driver", ["fiscal_year", "cost_center"], constraint_name="unique_nc_cost_center_driver"
+		"NC Cost Center Driver",
+		["fiscal_year", "cost_center"],
+		constraint_name="unique_nc_cost_center_driver",
 	)
 
 

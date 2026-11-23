@@ -135,9 +135,7 @@ def check_line_changes(before, after) -> list[str]:
 	errors = []
 	for i, (b, a) in enumerate(zip(before, after, strict=True), start=1):
 		if any(
-			(_dec(b.get(f)) != _dec(a.get(f)))
-			if f == "amount"
-			else ((b.get(f) or "") != (a.get(f) or ""))
+			(_dec(b.get(f)) != _dec(a.get(f))) if f == "amount" else ((b.get(f) or "") != (a.get(f) or ""))
 			for f in SOURCE_FIELDS
 		):
 			errors.append(f"Dòng {i}: dòng chỉ thay đổi bằng cách đọc lại tệp")
@@ -177,7 +175,10 @@ def finalize_blockers(status, error_count, lines) -> list[str]:
 		out.append("không có dòng nào")
 	un = unassigned(lines)
 	if un:
-		detail = ", ".join(f"dòng {u['idx']} (tài khoản {u.get('account_code')}, trung tâm {u.get('cost_center')})" for u in un)
+		detail = ", ".join(
+			f"dòng {u['idx']} (tài khoản {u.get('account_code')}, trung tâm {u.get('cost_center')})"
+			for u in un
+		)
 		out.append(f"{len(un)} dòng chưa có loại chi phí: {detail}")
 	return out
 
@@ -190,7 +191,10 @@ def totals(lines) -> list[tuple]:
 			continue
 		k = (ln["cost_center"], ln["cost_category"])
 		acc[k] = acc.get(k, Decimal(0)) + _dec(ln.get("amount"))
-	return [(c, cat, v) for (c, cat), v in sorted(acc.items(), key=lambda kv: (kv[0][0], ALLOCATABLE.index(kv[0][1])))]
+	return [
+		(c, cat, v)
+		for (c, cat), v in sorted(acc.items(), key=lambda kv: (kv[0][0], ALLOCATABLE.index(kv[0][1])))
+	]
 
 
 def total_amount(lines) -> Decimal:

@@ -38,7 +38,14 @@ class TestAccountingUI(unittest.TestCase):
 
 	def test_nut_goi_dung_api_whitelisted(self):
 		text = _text(FILES[0])
-		for fn in ("get_import_summary", "update_line", "reapply_mapping", "reload_file", "finalize", "download_template"):
+		for fn in (
+			"get_import_summary",
+			"update_line",
+			"reapply_mapping",
+			"reload_file",
+			"finalize",
+			"download_template",
+		):
 			self.assertIn(fn, text)
 			self.assertRegex(API, rf"@frappe.whitelist\(\)\ndef {fn}\(")
 
@@ -46,10 +53,18 @@ class TestAccountingUI(unittest.TestCase):
 		self.assertIn("escape_html", _text(FILES[0]))
 
 	def test_nut_nhap_excel_tren_ba_danh_sach(self):
-		for f, key in zip(FILES[2:5], ("nc_service_volume", "nc_cost_center_driver", "nc_account_mapping"), strict=True):
+		for f, key in zip(
+			FILES[2:5], ("nc_service_volume", "nc_cost_center_driver", "nc_account_mapping"), strict=True
+		):
 			self.assertIn(f'import_set: "{key}"', _text(f))
 
 	def test_workspace_co_nhom_ke_toan(self):
 		text = _text(ROOT / "nc_core" / "workspace" / "normcore" / "normcore.json")
-		for dt in ("NC Accounting Import", "NC Account Mapping", "NC Service Volume", "NC Cost Center Driver", "NC Allocation Rule"):
+		for dt in (
+			"NC Accounting Import",
+			"NC Account Mapping",
+			"NC Service Volume",
+			"NC Cost Center Driver",
+			"NC Allocation Rule",
+		):
 			self.assertIn(f'"link_to": "{dt}"', text)

@@ -38,7 +38,9 @@ def make_xlsx(rows, header=HEADER):
 
 def make_centers():
 	for code, typ in (("K01", "Lâm sàng"), ("K02", "Lâm sàng"), ("HC", "Hỗ trợ")):
-		ensure("NC Cost Center", "cost_center_code", code, cost_center_name=f"Trung tâm {code}", center_type=typ)
+		ensure(
+			"NC Cost Center", "cost_center_code", code, cost_center_name=f"Trung tâm {code}", center_type=typ
+		)
 
 
 def ensure_default_mapping():

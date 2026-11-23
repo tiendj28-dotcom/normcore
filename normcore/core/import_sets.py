@@ -224,7 +224,9 @@ NC_ACCOUNT_MAPPING = ImportSet(
 			example="Hành chính sự nghiệp",
 		),
 		Column("account_prefix", "Tiền tố tài khoản", "Data", required=True, example="61111"),
-		Column("cost_category", "Loại chi phí", "Select", required=True, options=COST_CATEGORIES, example="LABOR"),
+		Column(
+			"cost_category", "Loại chi phí", "Select", required=True, options=COST_CATEGORIES, example="LABOR"
+		),
 		Column("note", "Ghi chú", "Data"),
 	),
 )
@@ -251,7 +253,14 @@ NC_SERVICE_VOLUME = ImportSet(
 			example="DV-TEST-A",
 		),
 		Column("department", "Mã khoa", "Link", link_doctype="NC Department", required=True, example="K01"),
-		Column("scenario", "Kịch bản sản lượng", "Select", required=True, options=SCENARIOS, example="Thực tế 12 tháng"),
+		Column(
+			"scenario",
+			"Kịch bản sản lượng",
+			"Select",
+			required=True,
+			options=SCENARIOS,
+			example="Thực tế 12 tháng",
+		),
 		Column("volume", "Sản lượng", "Float", required=True, example=4000),
 	),
 )

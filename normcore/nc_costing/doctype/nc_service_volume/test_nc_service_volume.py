@@ -10,7 +10,14 @@ CLIN = "clinician-vol@test.local"
 
 def _v(service, dept, **kw):
 	return frappe.get_doc(
-		{"doctype": "NC Service Volume", "fiscal_year": 2026, "technical_service": service, "department": dept, "volume": 4000, **kw}
+		{
+			"doctype": "NC Service Volume",
+			"fiscal_year": 2026,
+			"technical_service": service,
+			"department": dept,
+			"volume": 4000,
+			**kw,
+		}
 	)
 
 

@@ -71,12 +71,16 @@ class TestDefaultMapping(FrappeTestCase):
 		make_centers()
 		ensure_default_account_mapping()
 		rows = frappe.get_all(
-			"NC Account Mapping", {"accounting_regime": "Hành chính sự nghiệp"}, ["name", "account_prefix", "cost_category", "note"]
+			"NC Account Mapping",
+			{"accounting_regime": "Hành chính sự nghiệp"},
+			["name", "account_prefix", "cost_category", "note"],
 		)
 		self.assertEqual(len(rows), 13)
 		self.assertTrue(all("Giả định — chờ xác nhận" in (r.note or "") for r in rows))
 		ensure_default_account_mapping()  # gọi lại không trùng
-		self.assertEqual(frappe.db.count("NC Account Mapping", {"accounting_regime": "Hành chính sự nghiệp"}), 13)
+		self.assertEqual(
+			frappe.db.count("NC Account Mapping", {"accounting_regime": "Hành chính sự nghiệp"}), 13
+		)
 
 		frappe.set_user(FIN)
 		old = make_import()
@@ -87,11 +91,15 @@ class TestDefaultMapping(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("NC Account Mapping", m.name, "cost_category"), "MANAGEMENT")
 		new = make_import()
 		self.assertEqual(new.lines[3].cost_category, "MANAGEMENT")
-		self.assertEqual(frappe.get_doc("NC Accounting Import", old.name).lines[3].cost_category, "DEPRECIATION")
+		self.assertEqual(
+			frappe.get_doc("NC Accounting Import", old.name).lines[3].cost_category, "DEPRECIATION"
+		)
 		from normcore.api import accounting as api
 
 		api.reapply_mapping(old.name)
-		self.assertEqual(frappe.get_doc("NC Accounting Import", old.name).lines[3].cost_category, "MANAGEMENT")
+		self.assertEqual(
+			frappe.get_doc("NC Accounting Import", old.name).lines[3].cost_category, "MANAGEMENT"
+		)
 
 	def test_bo_nhap_nc_account_mapping_chi_finance(self):
 		from normcore.api import importer

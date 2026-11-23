@@ -17,7 +17,18 @@ DT = "NC Accounting Import"
 FIN = "finance-acct@test.local"
 AUD = "auditor-acct@test.local"
 CLIN = "clinician-acct@test.local"
-EXPECTED = ["LABOR", "LABOR", "DRUG_SUPPLY", "DEPRECIATION", "UTILITY", "MANAGEMENT", "EXCLUDED", "LABOR", "MANAGEMENT", "MANAGEMENT"]
+EXPECTED = [
+	"LABOR",
+	"LABOR",
+	"DRUG_SUPPLY",
+	"DEPRECIATION",
+	"UTILITY",
+	"MANAGEMENT",
+	"EXCLUDED",
+	"LABOR",
+	"MANAGEMENT",
+	"MANAGEMENT",
+]
 
 
 class TestNCAccountingImport(FrappeTestCase):
@@ -56,7 +67,9 @@ class TestNCAccountingImport(FrappeTestCase):
 		doc = make_import(rows)
 		self.assertEqual((doc.status, doc.error_count, doc.line_count), ("Nháp", 2, 2))
 		errs = json.loads(doc.import_errors)
-		self.assertEqual([(e["row"], e["column"]) for e in errs], [(3, "Số tiền"), (4, "Mã trung tâm chi phí")])
+		self.assertEqual(
+			[(e["row"], e["column"]) for e in errs], [(3, "Số tiền"), (4, "Mã trung tâm chi phí")]
+		)
 
 	def test_thieu_ma_tai_khoan_va_tep_khong_hop_le(self):
 		frappe.set_user(FIN)
@@ -180,7 +193,9 @@ class TestAccountingImportApi(FrappeTestCase):
 		frappe.set_user(FIN)
 		doc = make_import([*GOLDEN_ROWS, ["99999", "Lạ", "K01", 7]])
 		s = api.get_import_summary(doc.name)
-		self.assertEqual([(u["idx"], u["account_code"], u["cost_center"]) for u in s["unassigned"]], [(11, "99999", "K01")])
+		self.assertEqual(
+			[(u["idx"], u["account_code"], u["cost_center"]) for u in s["unassigned"]], [(11, "99999", "K01")]
+		)
 		with self.assertRaises(frappe.ValidationError) as ctx:
 			api.finalize(doc.name)
 		msg = str(ctx.exception)
@@ -202,7 +217,10 @@ class TestAccountingImportApi(FrappeTestCase):
 				api.update_line(doc.name, row, "MANAGEMENT", 0, reason)
 		s = api.update_line(doc.name, row, "MANAGEMENT", 0, "Sai tài khoản")
 		d = frappe.get_doc(DT, doc.name)
-		self.assertEqual((d.lines[0].cost_category, d.lines[0].changed_by, d.lines[0].change_reason), ("MANAGEMENT", FIN, "Sai tài khoản"))
+		self.assertEqual(
+			(d.lines[0].cost_category, d.lines[0].changed_by, d.lines[0].change_reason),
+			("MANAGEMENT", FIN, "Sai tài khoản"),
+		)
 		self.assertEqual(s["status"], "Nháp")
 		s = api.update_line(doc.name, d.lines[1].name, "", 1, "Không tính vào giá")
 		d.reload()
@@ -267,7 +285,9 @@ class TestAccountingImportApi(FrappeTestCase):
 		self.assertEqual(d.lines[0].changed_by, FIN)
 		s = api.reload_file(doc.name)
 		d.reload()
-		self.assertEqual((s["line_count"], d.lines[0].cost_category, d.lines[0].changed_by), (10, "LABOR", None))
+		self.assertEqual(
+			(s["line_count"], d.lines[0].cost_category, d.lines[0].changed_by), (10, "LABOR", None)
+		)
 
 	def test_quyen_api(self):
 		from normcore.api import accounting as api

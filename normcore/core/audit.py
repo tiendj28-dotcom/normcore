@@ -12,7 +12,11 @@ from frappe.utils import now_datetime
 
 EVENT = "NC Audit Event"
 SKIP = {"NC Audit Event", "NC AI Log"}
-STATE_FIELDS = {"NC Norm Set": "status", "NC Costing Run": "status", "NC Accounting Import": "status"}  # mặc định: workflow_state
+STATE_FIELDS = {
+	"NC Norm Set": "status",
+	"NC Costing Run": "status",
+	"NC Accounting Import": "status",
+}  # mặc định: workflow_state
 # DocType không lưu giá trị trước khi xóa (ASM-069): nhóm "Cấu hình AI, mẫu lệnh"
 NO_BEFORE_VALUE = set()
 LOCKED_STATES = {"Đã khóa", "Đã chốt"}

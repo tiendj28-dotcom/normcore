@@ -373,15 +373,16 @@ def process(
 			changed = {
 				k: v
 				for k, v in values.items()
-				if k not in import_set.keys
-				and normalize_existing(import_set.column(k), existing.get(k)) != v
+				if k not in import_set.keys and normalize_existing(import_set.column(k), existing.get(k)) != v
 			}
 			if not changed:
 				result.unchanged += 1
 				continue
 			if can_update and not can_update(key):
 				shown = " / ".join(map(str, key)) if import_set.composite else key
-				result.errors.append(RowError(line, key_col.label, f'bạn không có quyền sửa bản ghi "{shown}"'))
+				result.errors.append(
+					RowError(line, key_col.label, f'bạn không có quyền sửa bản ghi "{shown}"')
+				)
 				continue
 			action, values = "sua", changed
 		if mode == MODE_WRITE:

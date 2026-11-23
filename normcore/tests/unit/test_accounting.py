@@ -98,9 +98,7 @@ class TestChanges(unittest.TestCase):
 		self.assertEqual(a.check_line_changes([line()], [line(excl=1, reason="không tính")]), [])
 
 	def test_chon_excluded_tu_dat_loai_tru(self):
-		self.assertEqual(
-			a.check_line_changes([line()], [line(cat="EXCLUDED", excl=0, reason="r")]), []
-		)
+		self.assertEqual(a.check_line_changes([line()], [line(cat="EXCLUDED", excl=0, reason="r")]), [])
 
 	def test_bo_loai_tru_khi_van_excluded(self):
 		b = line("811", cat="EXCLUDED", excl=1)
