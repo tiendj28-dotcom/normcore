@@ -64,3 +64,64 @@ class TestEditorFeat006Fixes(unittest.TestCase):
 		self.assertIsNotNone(m)
 		self.assertIn("var(--text-muted)", m.group(1))
 		self.assertIn("opacity: 1", m.group(1))
+
+
+class TestFeat006ListAndErrorStrip(unittest.TestCase):
+	"""NORM-23: L1 (SCR-DSK-007) và E15 (SCR-DSK-009), ui-design.md FEAT-006."""
+
+	@classmethod
+	def setUpClass(cls):
+		import json
+
+		cls.vue = (UI_DIR / "ProcedureEditor.vue").read_text(encoding="utf-8")
+		dt = ROOT / "nc_procedure" / "doctype" / "nc_clinical_procedure" / "nc_clinical_procedure.json"
+		cls.fields = {f["fieldname"]: f for f in json.loads(dt.read_text(encoding="utf-8"))["fields"]}
+		with open(ROOT / "translations" / "vi.csv", encoding="utf-8", newline="") as f:
+			cls.vi = {row[0]: row[1] for row in csv.reader(f) if len(row) >= 2}
+
+	def test_L1_cot_danh_sach_du_bon_truong(self):
+		for fn in ("technical_service", "department", "version_no", "workflow_state"):
+			self.assertTrue(self.fields[fn].get("in_list_view"), fn)
+
+	def test_L1_list_view_settings_du_cot_cho_man_1366(self):
+		# Desk cắt còn 4 cột ở ≤ 1366px (Tên, Tag, Trạng thái + 1); cần total_fields ≥ 6 để hiện đủ
+		import ast
+
+		# đọc bằng ast: CI unit không cài frappe nên không import normcore.setup
+		tree = ast.parse((ROOT / "setup.py").read_text(encoding="utf-8"))
+		const = next(
+			ast.literal_eval(n.value)
+			for n in tree.body
+			if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", "") == "LIST_VIEW_TOTAL_FIELDS"
+		)
+		self.assertGreaterEqual(int(const["NC Clinical Procedure"]), 6)
+		hooks = (ROOT / "hooks.py").read_text(encoding="utf-8")
+		self.assertIn("normcore.setup.ensure_list_view_settings", hooks.split("after_migrate", 1)[1])
+
+	def test_L1_ten_doctype_co_ban_dich(self):
+		for name in (
+			"NC Clinical Procedure",
+			"NC Procedure Step",
+			"NC Procedure Resource",
+			"NC Procedure Citation",
+		):
+			self.assertTrue(self.vi.get(name, "").strip(), name)
+		self.assertEqual(self.vi["NC Clinical Procedure"], "Quy trình kỹ thuật")  # data-model.md, srs.md
+
+	def test_E15_loi_api_hien_o_dai_alert_khong_msgprint(self):
+		self.assertNotIn("msgprint", self.vue)
+		call = self.vue.split("call(method, args) {", 1)[1].split("refreshList()", 1)[0]
+		self.assertIn("silent: true", call)
+		self.assertIn("messageFromError", call)
+		self.assertRegex(self.vue, r'<div v-if="error"[^>]*role="alert"')
+
+	def test_E15_tao_quy_trinh_giu_thong_bao_may_chu_khi_khong_co_ban_co_san(self):
+		body = self.vue.split("this.call(create ?", 1)[1].split("saveSection(", 1)[0]
+		self.assertIn("const message = this.error", body)
+		self.assertGreaterEqual(body.count("this.error = message"), 2)
+
+	def test_E15_loi_403_doc_noi_dung_tu_responseJSON(self):
+		# 403 (_deny): Desk gọi error_callback() không đối số; e là jqXHR, nội dung ở e.responseJSON
+		self.assertIn("messageFromError(e && e.responseJSON)", self.vue)
+		fn = self.vue.split("function messageFromError(r) {", 1)[1].split("\nexport default", 1)[0]
+		self.assertIn("_server_messages", fn)

@@ -1,111 +1,131 @@
-Procedure editor,Trình soạn quy trình
-Select a procedure,Chọn quy trình
-Pick a procedure to see its steps.,Chọn một quy trình để xem các bước.
-Step ID,Mã bước
-Phase,Giai đoạn
-Step title,Tên bước
-Description,Mô tả
-No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
-Add step,Thêm bước
-This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
-Could not complete the request. Check your permissions.,Không thực hiện được yêu cầu. Kiểm tra quyền của bạn.
-Open editor,Mở trình soạn
-Publish,Ban hành
-Create norm set,Khởi tạo bộ định mức
-Lock,Khóa
-Run costing,Chạy tính giá
-View costing results,Xem kết quả tính giá
-Save the form first.,Lưu biểu mẫu trước.
-"After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
-"After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
-Costing completed.,Đã tính giá xong.
-Costing failed.,Tính giá lỗi.
-Assign user,Gán người dùng
-User,Người dùng
-Assign,Gán
-Unassign,Bỏ gán
-User assigned to department.,Đã gán người dùng vào khoa.
-Assigned users,Người dùng được gán vào khoa
-No users assigned.,Chưa gán người dùng nào.
-Import data from Excel,Nhập dữ liệu từ Excel
-Catalog,Danh mục
-Download template,Tải tệp mẫu
-Upload file,Tải tệp lên
-Check,Kiểm tra
-Confirm import,Xác nhận ghi
-You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
-No file chosen,Chưa chọn tệp
-Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
-Import result,Kết quả nhập
-Row,Dòng,Import Excel
-Column,Cột,Import Excel
-Message,Thông báo,Import Excel
-Created,Tạo mới,Import Excel
-Updated,Cập nhật,Import Excel
-Unchanged,Không đổi,Import Excel
-Errors,Lỗi,Import Excel
+Active,Đang dùng,NC Technical Service
 Add citation,Thêm trích dẫn
+Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
+Add step,Thêm bước
+"After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
+"After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
+Annual depreciation,Khấu hao năm,NC Equipment
+Annual equipment cost,Chi phí thiết bị năm,NC Equipment
+Annual machine cost,Chi phí máy năm,NC Equipment
+As of today,Tính theo ngày,NC Equipment
+Assign,Gán
+Assign user,Gán người dùng
+Assigned users,Người dùng được gán vào khoa
 Cancel,Hủy
+Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
+Catalog,Danh mục
+Check,Kiểm tra
+Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
+Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
+Column,Cột,Import Excel
+Confirm import,Xác nhận ghi
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
+Costing completed.,Đã tính giá xong.
+Costing failed.,Tính giá lỗi.
+Could not complete the request. Check your permissions.,Không thực hiện được yêu cầu. Kiểm tra quyền của bạn.
+Could not complete the request. See the message from the server.,Không thực hiện được yêu cầu. Xem thông báo từ máy chủ.
+Could not load chain status.,Không tải được tình trạng chuỗi.
 Create,Tạo
+Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
+Created,Tạo mới,Import Excel
 Delete,Xóa
 Delete this citation?,Xóa trích dẫn này?
 Delete this resource?,Xóa nguồn lực này?
 Delete this step?,Xóa bước này?
 Department,Khoa
+Description,Mô tả
+Document no.,Số chứng từ,NC Item
 Down,Xuống
+Download template,Tải tệp mẫu
+Duplicate,Nhân bản,NC Costing Parameter Set
 Edit,Sửa
+Errors,Lỗi,Import Excel
 Headcount,Số người
+Import data from Excel,Nhập dữ liệu từ Excel
+Import from Excel,Nhập từ Excel
+Import result,Kết quả nhập
+Inactive,Ngừng dùng,NC Technical Service
+Legal document,Văn bản
+Legal section,Mục văn bản
 Legal text links are provided by the document library.,Liên kết tới mục văn bản do thư viện văn bản cung cấp.
+Loading chain status…,Đang tải tình trạng chuỗi…
 Loading...,Đang tải...
+Loading…,Đang tải…,NC Equipment
+Lock,Khóa
+Machine hourly rate,Đơn giá giờ máy,NC Equipment
+Message,Thông báo,Import Excel
 Minutes per person,Số phút / người
 Move step down,Chuyển bước xuống
 Move step up,Chuyển bước lên
+NC Clinical Procedure,Quy trình kỹ thuật
+NC Procedure Citation,Trích dẫn quy trình
+NC Procedure Resource,Nguồn lực của bước
+NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
+No file chosen,Chưa chọn tệp
+No permission to view,Không có quyền xem
+No price yet,Chưa có đơn giá,NC Item
+No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
+No users assigned.,Chưa gán người dùng nào.
+None yet,Chưa có
+Open editor,Mở trình soạn
+Past useful life,Hết thời gian sử dụng,NC Equipment
+Performing department,Khoa thực hiện
+Phase,Giai đoạn
+Pick a procedure to see its steps.,Chọn một quy trình để xem các bước.
+Price code,Mã đơn giá,NC Item
+Price in use today,Đơn giá đang dùng hôm nay,NC Item
+Price per norm unit,Đơn giá một đơn vị định mức,NC Item
+Procedure editor,Trình soạn quy trình
+Publish,Ban hành
 Quantity,Số lượng
 Quote,Đoạn trích
-Legal document,Văn bản
-Legal section,Mục văn bản
+Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
 Reason,Lý do
 Relation,Quan hệ
+Retry,Thử lại
+Room hourly rate,Đơn giá giờ phòng,NC Room
+Row,Dòng,Import Excel
 Row ID,Mã dòng
+Run costing,Chạy tính giá
 Save,Lưu
 Save section,Lưu phần
+Save the form first.,Lưu biểu mẫu trước.
+Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
+Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
+Source,Nguồn giá,NC Item
+Step ID,Mã bước
+Step title,Tên bước
 Technical service,Dịch vụ kỹ thuật
+This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
+This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
 Type,Loại
+Unassign,Bỏ gán
+Unchanged,Không đổi,Import Excel
 Unit,Đơn vị
+Unit price,Đơn giá,NC Item
+Unverified,Chưa xác minh,NC Item
+Unverified,Chưa xác minh,NC Item Price
 Up,Lên
+Updated,Cập nhật,Import Excel
+Upload file,Tải tệp lên
+User,Người dùng
+User assigned to department.,Đã gán người dùng vào khoa.
+Valid from,Hiệu lực từ,NC Item
+Valid to,Hiệu lực đến,NC Item
+Verification,Xác minh,NC Item
+Verified,Đã xác minh,NC Item
+Verified,Đã xác minh,NC Item Price
+Verify,Xác minh,NC Item Price
+View costing results,Xem kết quả tính giá
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
-Could not complete the request. See the message from the server.,Không thực hiện được yêu cầu. Xem thông báo từ máy chủ.
-Performing department,Khoa thực hiện
-Import from Excel,Nhập từ Excel
-Loading chain status…,Đang tải tình trạng chuỗi…
-Could not load chain status.,Không tải được tình trạng chuỗi.
-Retry,Thử lại
-None yet,Chưa có
-Active,Đang dùng,NC Technical Service
-Inactive,Ngừng dùng,NC Technical Service
-No permission to view,Không có quyền xem
-Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
-Loading…,Đang tải…,NC Equipment
-Past useful life,Hết thời gian sử dụng,NC Equipment
-Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
-Machine hourly rate,Đơn giá giờ máy,NC Equipment
-As of today,Tính theo ngày,NC Equipment
-Annual machine cost,Chi phí máy năm,NC Equipment
-Annual equipment cost,Chi phí thiết bị năm,NC Equipment
-Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
-Room hourly rate,Đơn giá giờ phòng,NC Room
-Annual depreciation,Khấu hao năm,NC Equipment
-This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
-Duplicate,Nhân bản,NC Costing Parameter Set
-Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
+You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.

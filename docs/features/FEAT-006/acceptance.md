@@ -2,7 +2,7 @@
 
 Kết luận: **rework — Phần A đạt; Phần B (Playwright trên staging) kiểm được một phần, phần còn lại thiếu dữ liệu staging.** G1 và C4 (do PR #27 sửa) đạt trên giao diện thật. K3, và mọi mã cần quy trình "Nháp" (E1, E3–E14, K3, K4, K6, U1 của biểu mẫu nguồn lực/trích dẫn, C1) **chưa kiểm được**: tài khoản NC Clinician không tạo được dịch vụ kỹ thuật và cả 5 dịch vụ trên staging đã có bản "Đã ban hành". Có hai sai lệch nhỏ so với `ui-design.md` (L1, E15). Không ghi Test ref, As-Built, `DONE`.
 
-Bằng chứng Phần B: kịch bản Playwright (Chromium headless, 1366×768, locale `vi`) chạy qua `~/pw-venv/run.sh` trên http://112.213.88.40:8100, ảnh theo mã đính kèm ở bình luận NORM-16. Theo ASM-085 (Quyết định Lead), kết quả này thay cho câu trả lời của người duyệt.
+Bằng chứng Phần B: kịch bản Playwright (Chromium headless, 1366×768, locale `vi`) chạy qua `~/pw-venv/run.sh` trên http://112.213.88.40:8100, ảnh theo mã đính kèm ở bình luận NORM-16. Theo ASM-099 (Quyết định Lead), kết quả này thay cho câu trả lời của người duyệt.
 
 ## Môi trường kiểm
 Nhánh `ai/NORM-16-reverify-006` = `origin/develop` (đã chứa PR #27, merge 927d54f) gộp vào; HEAD kiểm `107384af82e3945dd59c9937cc644f24725ef3f2`. Site sạch `normcore-verify.test` qua `scripts/with_bench.sh` (đã xóa sau khi kiểm). Không sửa mã sản phẩm, không thêm test.
@@ -42,7 +42,7 @@ Nhánh `ai/NORM-16-reverify-006` = `origin/develop` (đã chứa PR #27, merge 9
 
 Cả bốn test trên đọc **văn bản mã nguồn Vue** bằng regex, không chạy giao diện; chúng chỉ chứng minh mã đã đổi như thiết kế, không chứng minh hành vi trong trình duyệt. Vì vậy chưa thay được Phần B.
 
-## Phần B — kiểm bằng Playwright trên staging (ASM-085)
+## Phần B — kiểm bằng Playwright trên staging (ASM-099)
 
 Tài khoản A = NC Clinician (khoa K01), B = NC Auditor (đều từ biến môi trường, không ghi mật khẩu). Dữ liệu có sẵn: 5 dịch vụ `SMOKE-*`, mỗi dịch vụ đã có một quy trình **Đã ban hành** của K01; không có bản Nháp. Hai tài khoản được QA đặt `language = vi` (mặc định là `en`, giao diện trước đó tiếng Anh).
 
