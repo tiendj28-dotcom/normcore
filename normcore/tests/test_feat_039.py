@@ -13,7 +13,9 @@ class TestQuetQuyen(FrappeTestCase):
 		# Workflow, Custom DocPerm có thể đã commit ngầm: dọn rõ ràng để không làm bẩn site test
 		for name in frappe.get_all("Workflow", {"name": ["like", "FEAT39%"]}, pluck="name"):
 			frappe.delete_doc("Workflow", name, force=True, ignore_permissions=True)
-		for name in frappe.get_all("Custom DocPerm", {"parent": "NC Norm Set", "role": "NC Auditor"}, pluck="name"):
+		for name in frappe.get_all(
+			"Custom DocPerm", {"parent": "NC Norm Set", "role": "NC Auditor"}, pluck="name"
+		):
 			frappe.delete_doc("Custom DocPerm", name, force=True, ignore_permissions=True)
 		frappe.clear_cache(doctype="NC Norm Set")
 		frappe.db.commit()
@@ -83,7 +85,7 @@ from normcore.api import importer as importer_api
 from normcore.api import item as item_api
 from normcore.api import procedure as procedure_api
 from normcore.core import audit
-from normcore.core import import_sets as _import_sets  # noqa: F401
+from normcore.core import import_sets as _import_sets
 from normcore.core import importer as importer_core
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
 from normcore.tests.utils import make_base, make_chain_data, make_param_set, make_user
@@ -123,7 +125,12 @@ class TestTCCLS44(FrappeTestCase):
 		self.finance = make_user("fin.f39@normcore.test", "NC Finance")
 		audit.log_event("Xuất tệp", "NC Department", self.dept, detail="f39")
 		frappe.get_doc(
-			{"doctype": "NC AI Log", "purpose": "DRAFT_PROCEDURE", "status": "Thành công", "user": "Administrator"}
+			{
+				"doctype": "NC AI Log",
+				"purpose": "DRAFT_PROCEDURE",
+				"status": "Thành công",
+				"user": "Administrator",
+			}
 		).insert(ignore_permissions=True)
 
 	def tearDown(self):
@@ -153,7 +160,9 @@ class TestTCCLS44(FrappeTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			frappe.delete_doc("NC Norm Set", self.chain.norm_set)
 		frappe.set_user("Administrator")
-		self.assertEqual(frappe.db.get_value("NC Norm Set", self.chain.norm_set, ["modified", "status"]), before)
+		self.assertEqual(
+			frappe.db.get_value("NC Norm Set", self.chain.norm_set, ["modified", "status"]), before
+		)
 		self.assertEqual(frappe.db.count("NC Norm Set"), count)
 		self.assertNotEqual(frappe.get_doc("NC Norm Set", self.chain.norm_set).lines[0].hospital_qty, 999)
 
@@ -188,7 +197,9 @@ class TestTCCLS44(FrappeTestCase):
 			"duplicate": param.duplicate,
 			"import_file": lambda: importer_api.import_file(set_key, "/private/files/none.xlsx", "ghi"),
 			"assign_department": lambda: access_api.assign_department(self.auditor, self.dept),
-			"client.set_value": lambda: frappe.client.set_value("NC Norm Set", self.chain.norm_set, "status", "Nháp"),
+			"client.set_value": lambda: frappe.client.set_value(
+				"NC Norm Set", self.chain.norm_set, "status", "Nháp"
+			),
 			"client.insert": lambda: frappe.client.insert(
 				{"doctype": "NC Costing Run", "title": "x", "fiscal_year": 2026, "parameter_set": param.name}
 			),

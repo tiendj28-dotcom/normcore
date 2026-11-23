@@ -14,7 +14,17 @@ from pathlib import Path
 SKIP_DIRS = {"docs", "tham-khao", ".git", "node_modules"}
 NO_LABEL_TYPES = {"Section Break", "Column Break", "Tab Break", "HTML", "Button"}
 AUDITOR = "NC Auditor"
-AUDITOR_FORBIDDEN = ("write", "create", "delete", "submit", "cancel", "amend", "import", "share", "set_user_permissions")
+AUDITOR_FORBIDDEN = (
+	"write",
+	"create",
+	"delete",
+	"submit",
+	"cancel",
+	"amend",
+	"import",
+	"share",
+	"set_user_permissions",
+)
 ROLES = (
 	"NC Clinician",
 	"NC Department Head",

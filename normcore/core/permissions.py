@@ -146,9 +146,7 @@ def readable_departments(doctype, user=None):
 
 def nc_doctypes():
 	"""Mọi DocType cha tên `NC ` (đọc CSDL, không liệt kê cứng: tự gồm DocType FEAT sau thêm)."""
-	return frappe.get_all(
-		"DocType", {"name": ["like", "NC %"], "istable": 0}, pluck="name", order_by="name"
-	)
+	return frappe.get_all("DocType", {"name": ["like", "NC %"], "istable": 0}, pluck="name", order_by="name")
 
 
 def read_only_violations(role=readonly.READ_ONLY_ROLE):
