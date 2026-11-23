@@ -1,11 +1,11 @@
 # Acceptance FEAT-006 — Kiểm định lại sau NORM-15 và NORM-22 (NORM-16)
 
-Kết luận: **rework — lỗi mã nguồn ở giao diện trình soạn ().** Phần A đạt. Phần B (Playwright trên staging, bản có NORM-22 và NORM-23): L1, E15 (do NORM-23), G1, C1–C5 và các thao tác đơn lẻ đạt; nhưng  và  gọi `.finally` trên promise của `frappe.call` (jQuery Deferred, không có `.finally`) nên ném `TypeError`: (1) cờ `busy` không bao giờ về false, mọi nút ghi (Lên, Xuống, Xóa, Lưu, Lưu phần) bị khóa sau thao tác ghi đầu tiên cho tới khi tải lại trang; (2) dòng "Đang tải…" không tắt; (3) sau khi **tạo/sao chép thành công** vẫn hiện dải lỗi đỏ "Dịch vụ đã có quy trình cho khoa này". K3 không đạt vì nguyên nhân này. Không ghi Test ref, As-Built, `DONE`.
+Kết luận: **rework — lỗi mã nguồn ở giao diện trình soạn (`ProcedureEditor.vue`).** Phần A đạt. Phần B (Playwright trên staging, bản có NORM-22 và NORM-23): L1, E15 (do NORM-23), G1, C1–C5 và các thao tác đơn lẻ đạt; nhưng `load()` và `run()` gọi `.finally` trên promise của `frappe.call` (jQuery Deferred, không có `.finally`) nên ném `TypeError`: (1) cờ `busy` không bao giờ về false, mọi nút ghi (Lên, Xuống, Xóa, Lưu, Lưu phần) bị khóa sau thao tác ghi đầu tiên cho tới khi tải lại trang; (2) dòng "Đang tải…" không tắt; (3) sau khi **tạo/sao chép thành công** vẫn hiện dải lỗi đỏ "Dịch vụ đã có quy trình cho khoa này". K3 không đạt vì nguyên nhân này. Không ghi Test ref, As-Built, `DONE`.
 
 Bằng chứng Phần B: kịch bản Playwright (Chromium headless, 1366×768, locale `vi`) chạy qua `~/pw-venv/run.sh` trên http://112.213.88.40:8100 (staging chứa `d0b4fe1`, gồm `c70a15c`), ảnh theo mã đính kèm ở bình luận NORM-16. Theo ASM-099 (Quyết định Lead), kết quả này thay cho câu trả lời của người duyệt.
 
 ## Môi trường kiểm
-Nhánh `ai/NORM-16-reverify-006` = `origin/develop` (đã chứa PR #27, merge 927d54f) gộp vào; HEAD kiểm `107384af82e3945dd59c9937cc644f24725ef3f2`. Site sạch `normcore-verify.test` qua `scripts/with_bench.sh` (đã xóa sau khi kiểm). Không sửa mã sản phẩm, không thêm test.
+Nhánh `ai/NORM-16-reverify-006` = `origin/develop` (đã chứa PR #27, merge 927d54f) gộp vào; HEAD kiểm Phần A `107384af82e3945dd59c9937cc644f24725ef3f2` (trước NORM-23); sau đó gộp develop có NORM-23 (`c70a15c`: chỉ đổi `ProcedureEditor.vue`, `vi.csv`, cột danh sách, dịch tiêu đề DocType, thêm test). Phần B kiểm trên staging có bản này; HEAD nhánh lúc kiểm `7165cad`. Site sạch `normcore-verify.test` qua `scripts/with_bench.sh` (đã xóa sau khi kiểm). Không sửa mã sản phẩm, không thêm test.
 
 ## Phần A
 
