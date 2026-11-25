@@ -131,6 +131,42 @@ def make_chain_data(service, department, job="DD"):
 	return frappe._dict(procedure=proc.name, norm_set=ns.name, cost=cost.name, run=run.name)
 
 
+def make_equipment(code="TB-HS01", department=None, equipment_type=None, **values):
+	"""Thiết bị tối thiểu cho test hồ sơ tuân thủ (FEAT-033)."""
+	if department is None:
+		_, department, _ = make_base()
+	data = dict(
+		equipment_name="Thiết bị thử",
+		acquisition_mode="Mua",
+		allocation_basis="Giờ kế hoạch",
+		original_cost=1200000000,
+		useful_life_years=8,
+		in_service_date="2022-01-01",
+		funding_source="Ngân sách",
+		planned_hours_per_year=2112,
+		utilization_rate=0.5,
+	)
+	if equipment_type:
+		data["equipment_type"] = equipment_type
+	data.update(values)
+	return ensure("NC Equipment", "equipment_code", code, department=department, **data)
+
+
+def make_private_file(name="chung-tu.txt"):
+	"""Tệp private đã tải lên; trả đường dẫn /private/files/…"""
+	file_url = f"/private/files/{name}"
+	if not frappe.db.exists("File", {"file_url": file_url}):
+		frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": name,
+				"is_private": 1,
+				"content": b"chung tu thu",
+			}
+		).insert(ignore_permissions=True)
+	return frappe.db.get_value("File", {"file_name": name, "is_private": 1}, "file_url")
+
+
 def make_cls_data(department="HS-CLS", service="GLU"):
 	"""FEAT-031: khoa Hóa sinh, dịch vụ cận lâm sàng GLU, thiết bị EQ_A (Mua) và EQ_B (Đặt theo hóa chất), cùng tiêu chí Số kết quả."""
 	_, dept, _ = make_base(department=department)

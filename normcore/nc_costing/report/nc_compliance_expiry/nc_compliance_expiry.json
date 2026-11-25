@@ -1,0 +1,31 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2026-11-23 00:00:00.000000",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "",
+ "modified": "2026-11-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Compliance Expiry",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "NC Equipment Compliance",
+ "report_name": "NC Compliance Expiry",
+ "report_type": "Script Report",
+ "roles": [
+  {"role": "NC Clinician"},
+  {"role": "NC Department Head"},
+  {"role": "NC Finance"},
+  {"role": "NC Resource Manager"},
+  {"role": "NC Director"},
+  {"role": "NC Consultant"},
+  {"role": "NC Admin"},
+  {"role": "NC Auditor"}
+ ]
+}
