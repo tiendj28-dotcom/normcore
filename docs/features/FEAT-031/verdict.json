@@ -1,1 +1,11 @@
-{"verdict": "accepted", "reasons": ["Site sạch normcore-verify.test: 486 test OK; golden, pytest 216 passed phủ 99%, check_conventions và build_rtm sạch", "TC-CLS-20..23 có test cùng mã và assertion đúng; hai mục Reviewer bắt sửa (0bd6688) đạt", "Quyền NC Test System, NC Auditor, vai trò không quyền đạt; diff PR #33 không nới test, chỉ đổi số đếm 27 → 30 (ASM-113)", "SCR-DSK-006 và SCR-DSK-032 kiểm bằng Playwright trên staging, có ảnh chụp"], "commit": "73029ce31ecd49ff5075d384d460f96a150d1fe2"}
+{
+ "verdict": "accepted",
+ "reasons": [
+  "Site sạch normcore-verify.test: 486 test OK; golden, pytest 216 passed phủ 99%, check_conventions và build_rtm sạch",
+  "TC-CLS-20..23 có test cùng mã và assertion đúng; hai mục Reviewer bắt sửa (0bd6688) đạt",
+  "Quyền NC Test System, NC Auditor, vai trò không quyền đạt; diff PR #33 không nới test, chỉ đổi số đếm 27 → 30 (ASM-113)",
+  "SCR-DSK-006 và SCR-DSK-032 kiểm bằng Playwright trên staging, có ảnh chụp",
+  "Chạy lại trên HEAD af4b073 (sau khi Dev gỡ conflict rtm-testref bằng merge develop): site sạch Ran 533 tests OK; pytest 235 passed, phủ 99%; golden, check_conventions, build_rtm (VAN DE: 0) đạt; CI PR #38 xanh cả hai job"
+ ],
+ "commit": "af4b0736ed468e89258f2cf85c112221356f6cf0"
+}
