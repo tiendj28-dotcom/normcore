@@ -2,9 +2,9 @@
 
 Người kiểm: QA (Multica, Tester iu), độc lập với người viết. Issue NORM-30. Mã đã merge (PR #33), kiểm trên HEAD develop `73029ce31ecd49ff5075d384d460f96a150d1fe2`. Verdict: **accepted**.
 
-## 0. Chạy lại sau khi gỡ conflict (HEAD `af4b073`)
+## 0. Chạy lại sau khi gỡ conflict (HEAD `2342db8`)
 
-Dev gỡ conflict `docs/rtm-testref.md` của PR #38 bằng merge develop (FEAT-033 vào trước). Phần ngoài `docs/` của nhánh không đổi so với develop tại điểm merge. QA chạy lại: site sạch `normcore-verify.test` **Ran 533 tests OK**; golden đạt; pytest unit + golden 235 passed, phủ 99%; `check_conventions.py` thoát 0; `build_rtm.py` VAN DE: 0; CI PR #38 xanh cả hai job. Verdict giữ `accepted`, `commit` = `af4b073`. Số liệu mục 1 dưới đây là lần kiểm trên `73029ce`.
+PR #38 hai lần conflict `docs/rtm-testref.md` với develop (FEAT-033, FEAT-016, FEAT-039 vào trước); Dev gỡ bằng merge develop, rồi đánh lại ASM-099 của FEAT-006 thành ASM-140 (Quyết định Lead). `git diff origin/develop HEAD` chỉ có tệp trong `docs/` (As-Built, Test ref, DONE, acceptance, verdict của FEAT-031; `assumptions.md` và `FEAT-006/acceptance.md` cho ASM-140). QA chạy lại trên `2342db8`: site sạch `normcore-verify.test` **Ran 646 tests OK**; golden đạt; pytest unit + golden 302 passed, phủ 99%; `check_conventions.py` thoát 0; `build_rtm.py` VAN DE: 0. Verdict giữ `accepted`, `commit` = `2342db8`. Số liệu mục 1 dưới đây là lần kiểm trên `73029ce`.
 
 ## 1. Chạy lại từ đầu
 
