@@ -40,6 +40,7 @@ MATRIX = {
 	"Lần tính giá, kết quả, đối soát": "- - - W - - R - R R",
 	"Số liệu kế toán, sản lượng, phân bổ": "- - - W - - R - R R",
 	"Nhật ký AI, sổ sự kiện": "- - - - - - R - R R",
+	"Cấu hình AI, mẫu lệnh": "- - - - - - - - W R",
 	# Ma trận không có dòng riêng: căn cứ ghi ở đây (ASM-008, G1 của NORM-12)
 	"NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)": "R R R R R W R R W R",
 	"NC Cost Center (G1: Admin, Finance ghi)": "R R R W R R R R W R",
@@ -57,6 +58,8 @@ DOCTYPE_ROW = {
 	"NC Equipment": "Mặt hàng, đơn giá, thiết bị, phòng",
 	"NC Room": "Mặt hàng, đơn giá, thiết bị, phòng",
 	"NC Equipment Type": "Loại thiết bị, hồ sơ tuân thủ",
+	"NC Equipment Compliance": "Loại thiết bị, hồ sơ tuân thủ",
+	"NC Settings": "Cấu hình AI, mẫu lệnh",
 	"NC Test System": "Hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm",
 	"NC Costing Run": "Lần tính giá, kết quả, đối soát",
 	"NC Accounting Import": "Số liệu kế toán, sản lượng, phân bổ",
@@ -81,6 +84,7 @@ DELETE_ALLOWED = {
 		"NC Equipment",
 		"NC Room",
 		"NC Equipment Type",
+		"NC Equipment Compliance",
 		"NC Price Category",
 	}
 }

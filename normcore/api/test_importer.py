@@ -75,7 +75,12 @@ class TestImporterAPI(FrappeTestCase):
 				with self.assertRaises(frappe.PermissionError):
 					api.run_import(KEY, content, mode)
 			# FEAT-010 (ASM-084) và FEAT-009 (ASM-096, Lead duyệt): NC Resource Manager ghi được thiết bị, phòng theo ma trận mục 4; NC Auditor không có bộ nào
-			expected = ["nc_equipment", "nc_room", "nc_item", "nc_item_price"] if user == self.rm else []
+			# FEAT-033 (ASM-105, Lead duyệt): thêm nc_equipment_compliance cho NC Resource Manager (dòng "Loại thiết bị, hồ sơ tuân thủ" quyền W)
+			expected = (
+				["nc_equipment", "nc_room", "nc_item", "nc_item_price", "nc_equipment_compliance"]
+				if user == self.rm
+				else []
+			)
 			self.assertEqual([s["key"] for s in api.list_import_sets()], expected)
 		frappe.set_user("Administrator")
 		self.assertFalse(frappe.db.exists("NC Job Title", "T-9"))

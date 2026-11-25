@@ -289,7 +289,13 @@
   }
  ],
  "index_web_pages_for_search": 0,
- "links": [],
+ "links": [
+  {
+   "group": "Hồ sơ tuân thủ",
+   "link_doctype": "NC Equipment Compliance",
+   "link_fieldname": "equipment"
+  }
+ ],
  "modified": "2026-11-22 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "NC Costing",

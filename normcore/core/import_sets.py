@@ -171,6 +171,48 @@ NC_ITEM_PRICE = ImportSet(
 
 register(NC_ITEM_PRICE)
 
+# FEAT-033, UC-020 1a, FR-CMP-001: hồ sơ tuân thủ thiết bị, khóa `record_code` (AMD-009, ASM-103).
+# Tệp chứng từ nhập bằng đường dẫn tệp private đã tải lên; không có cột trạng thái, khoa (hệ thống tính).
+COMPLIANCE_RECORD_TYPES = ("Kiểm định", "Hiệu chuẩn", "Kiểm xạ", "Giấy phép an toàn bức xạ", "Khác")
+
+NC_EQUIPMENT_COMPLIANCE = ImportSet(
+	key="nc_equipment_compliance",
+	label="Hồ sơ tuân thủ thiết bị",
+	doctype="NC Equipment Compliance",
+	key_field="record_code",
+	columns=(
+		Column("record_code", "Mã hồ sơ", "Data", required=True, example="VD-HS01"),
+		Column(
+			"equipment", "Thiết bị", "Link", required=True, link_doctype="NC Equipment", example="VD-TB01"
+		),
+		Column(
+			"record_type",
+			"Loại hồ sơ",
+			"Select",
+			required=True,
+			options=COMPLIANCE_RECORD_TYPES,
+			example="Kiểm định",
+		),
+		Column("cycle_months", "Chu kỳ (tháng)", "Int", required=True, example=12),
+		Column("provider", "Đơn vị thực hiện", "Data", required=True, example="Trung tâm kiểm định"),
+		Column(
+			"cost_per_time", "Chi phí mỗi lần (đã gồm thuế GTGT)", "Float", required=True, example=5000000
+		),
+		Column("performed_on", "Ngày thực hiện", "Date", required=True, example="2026-01-10"),
+		Column("expiry_date", "Ngày hết hạn", "Date", required=True, example="2027-01-10"),
+		Column(
+			"attachment",
+			"Tệp chứng từ (đường dẫn tệp private)",
+			"Data",
+			required=True,
+			example="/private/files/kd-tb01.pdf",
+		),
+		Column("note", "Ghi chú", "Data"),
+	),
+)
+
+register(NC_EQUIPMENT_COMPLIANCE)
+
 # FEAT-031, FR-CLS-008 (phần hệ thống xét nghiệm, ASM-116): kế hoạch chất lượng và hồ sơ tuân thủ đăng ký ở FEAT của chúng.
 # Tỷ lệ nhập theo phần trăm (2 nghĩa là 2%). Ô trống: tạo mới lấy mặc định DocType, cập nhật giữ nguyên.
 NC_TEST_SYSTEM = ImportSet(

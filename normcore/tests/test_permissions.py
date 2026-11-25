@@ -23,7 +23,8 @@ class TestPermissions(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	def test_co_37_doctype_va_10_vai_tro(self):
-		self.assertEqual(len(DOCTYPES), 37)
+		# FEAT-033 (ASM-105, Lead duyệt): 30 → 32. FEAT-016 (ASM-128, Lead duyệt trên NORM-28; Quyết định Lead NORM-32 bình luận 01a21097-3f7e-7d71-98b5-1141977debb0): thêm 5 DocType cha và 2 bảng con, 32 → 39 (số thực sau gộp, đếm bằng thư mục doctype)
+		self.assertEqual(len(DOCTYPES), 39)
 		for r in ROLES:
 			self.assertTrue(frappe.db.exists("Role", r), r)
 

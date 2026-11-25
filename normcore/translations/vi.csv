@@ -13,6 +13,7 @@ Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
+As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
 Assign,Gán
 Assign user,Gán người dùng
@@ -23,6 +24,7 @@ Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Catalog,Danh mục
 Check,Kiểm tra
+Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
@@ -68,6 +70,8 @@ Errors by line,Lỗi theo dòng
 Excel row,Dòng Excel
 Excluded,Loại trừ
 Excluded from price,Không tính vào giá
+Expired {0} days ago,Đã hết hạn {0} ngày trước
+Expires in {0} days,Còn {0} ngày đến hạn
 File errors,Dòng lỗi khi đọc tệp
 Finalize,Chốt
 Finalized: the figures can be used in a costing run.,Đã chốt: số liệu dùng được cho lần tính giá.
@@ -172,6 +176,7 @@ Unverified,Chưa xác minh,NC Item
 Unverified,Chưa xác minh,NC Item Price
 Up,Lên
 Updated,Cập nhật,Import Excel
+"Updated {0} records, sent {1} notifications","Đã cập nhật {0} hồ sơ, gửi {1} thông báo"
 "Upload an Excel file by the template (Account code, Account name, Cost center code, Amount) then click Save.","Tải tệp Excel theo mẫu (Mã tài khoản, Tên tài khoản, Mã trung tâm chi phí, Số tiền) rồi bấm Lưu."
 Upload file,Tải tệp lên
 User,Người dùng
