@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "creation": "2026-11-25 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "calibrator",
+  "points",
+  "replicates",
+  "calibrations_per_year",
+  "cost_per_calibration"
+ ],
+ "fields": [
+  {
+   "fieldname": "calibrator",
+   "label": "Chất chuẩn",
+   "fieldtype": "Link",
+   "options": "NC Item",
+   "reqd": 1,
+   "in_list_view": 1,
+   "link_filters": "[[\"NC Item\", \"item_type\", \"=\", \"Chất chuẩn\"]]"
+  },
+  {
+   "fieldname": "points",
+   "label": "Số điểm chuẩn",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "replicates",
+   "label": "Số lần lặp",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "calibrations_per_year",
+   "label": "Số lần chuẩn mỗi năm",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "cost_per_calibration",
+   "label": "Chi phí mỗi lần chuẩn",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "in_list_view": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC QC Calibration Line",
+ "owner": "Administrator",
+ "states": []
+}

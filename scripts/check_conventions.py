@@ -73,6 +73,8 @@ DOCTYPE_ROW = {
 	"NC Equipment Compliance": "Loại thiết bị, hồ sơ tuân thủ",
 	"NC Settings": "Cấu hình AI, mẫu lệnh",
 	"NC Test System": "Hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm",
+	"NC QC Plan": "Hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm",
+	"NC EQA Program": "Hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm",
 	"NC Costing Run": "Lần tính giá, kết quả, đối soát",
 	"NC Accounting Import": "Số liệu kế toán, sản lượng, phân bổ",
 	"NC Account Mapping": "Số liệu kế toán, sản lượng, phân bổ",

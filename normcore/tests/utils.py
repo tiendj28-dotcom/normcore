@@ -215,3 +215,51 @@ def make_test_system(code, service, department, equipment, share, **kw):
 	)
 	doc.insert(ignore_permissions=True)
 	return doc
+
+
+def make_qc_items():
+	"""FEAT-032: QC_L (Vật liệu nội kiểm), CAL (Chất chuẩn), HC_GLU (Hóa chất)."""
+	for code, typ in (("QC_L", "Vật liệu nội kiểm"), ("CAL", "Chất chuẩn"), ("HC_GLU", "Hóa chất")):
+		ensure("NC Item", "item_code", code, item_name=f"Mặt hàng {code}", item_type=typ, uom="ml", norm_units_per_purchase_unit=100)
+
+
+def qc_plan_values(test_system, **kw):
+	"""Kế hoạch GLU-A của golden_cls.py: D = 300, nội kiểm QC_L, chuẩn máy CAL."""
+	values = {
+		"doctype": "NC QC Plan",
+		"test_system": test_system,
+		"run_days_per_year": 300,
+		"iqc_lines": [
+			dict(qc_material="QC_L", levels=2, runs_per_day=1, qty_per_run=0.2, shared_parameter_count=20)
+		],
+		"calibration_lines": [
+			dict(calibrator="CAL", points=2, replicates=2, calibrations_per_year=12, cost_per_calibration=400000)
+		],
+	}
+	values.update(kw)
+	return values
+
+
+def make_qc_plan(test_system, **kw):
+	doc = frappe.get_doc(qc_plan_values(test_system, **kw))
+	doc.insert(ignore_permissions=True)
+	return doc
+
+
+def make_eqa_program(code="EQA-HS", department="HS-CLS", services=("GLU",), **kw):
+	values = {
+		"doctype": "NC EQA Program",
+		"eqa_code": code,
+		"program_name": "Ngoại kiểm hóa sinh",
+		"provider": "Trung tâm kiểm chuẩn",
+		"department": department,
+		"rounds_per_year": 3,
+		"samples_per_round": 4,
+		"annual_fee": 24000000,
+		"annual_shipping_fee": 1200000,
+		"services": [dict(technical_service=s) for s in services],
+	}
+	values.update(kw)
+	doc = frappe.get_doc(values)
+	doc.insert(ignore_permissions=True)
+	return doc
