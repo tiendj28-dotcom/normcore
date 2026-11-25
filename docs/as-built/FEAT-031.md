@@ -1,7 +1,8 @@
 # As-Built FEAT-031 — Dịch vụ cận lâm sàng và hệ thống xét nghiệm
 
 Issue NORM-25. FR: FR-SVC-008..011, FR-CLS-001, FR-CLS-002, FR-CLS-005..008 (một phần: 007, 008), FR-ACC-008. UC-019, SCR-DSK-006 (khối "Cận lâm sàng"), SCR-DSK-032. TC: TC-CLS-20..23.
-Giới hạn: giao diện chưa kiểm bằng trình duyệt; trang `import-excel` (FEAT-004) chưa đọc tham số `import_set` nên nút "Nhập từ Excel" của danh sách chỉ mở trang.
+Người nghiệm thu: QA (Multica), NORM-30; giao diện SCR-DSK-006 và SCR-DSK-032 đã kiểm bằng Playwright trên staging (acceptance.md mục 4).
+Giới hạn: cảnh báo thiếu kế hoạch nội kiểm chưa kiểm được (thuộc FEAT-032); luồng nhập Excel và nút Ngừng dùng chưa thao tác bằng trình duyệt; trang `import-excel` (FEAT-004) chưa đọc tham số `import_set` nên nút "Nhập từ Excel" của danh sách chỉ mở trang.
 
 ## Đã làm
 - NC Technical Service thêm nhóm trường cận lâm sàng (`is_paraclinical`, `cls_group`, `result_unit`), dịch vụ bộ (`is_panel`, `panel_costing_mode`, bảng NC Panel Component), gửi ngoài (`is_send_out`, `send_out_price`), mã ngoài (bảng NC Service Code Map, DI-09 kiểm ở `validate` và bằng chỉ mục duy nhất `unique_source_code`). Quy tắc ở `normcore/procedure/service_rules.py`.

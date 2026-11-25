@@ -102,3 +102,19 @@
 | FR-PROC-007 | `test_TC_PROC_09_trich_dan` (văn bản, mục, đoạn trích, quan hệ), `test_FR_PROC_007_trich_dan_dung_mot_dich`, `test_FR_PROC_007_quan_he_mac_dinh_chua_co_can_cu` |
 | FR-PROC-009 | `test_TC_PROC_08_lich_su_truoc_sau_nguoi_thoi_diem`, `test_TC_PROC_08_moc_thoi_gian_va_nguoi_cho_ca_hai_thay_doi` |
 | FR-PROC-013 | `test_FR_PROC_013_sao_chep`, `test_FR_PROC_013_sao_chep_cap_ma_moi_va_anh_xa`, `test_E12_sao_chep_thanh_cong_khong_hien_dai_loi` |
+
+# Test ref — FEAT-031 (ghi bởi kiểm định độc lập NORM-30)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-SVC-008 | `test_TC_CLS_20_danh_dau_can_lam_sang_yeu_cau_nhom_va_don_vi`, `test_TC_CLS_20_khong_can_lam_sang_khong_bat_buoc`, `test_FR_SVC_008_bo_co_can_lam_sang_khi_con_he_thong_bi_tu_choi` |
+| FR-SVC-009 | `test_TC_CLS_21_ma_ngoai_gan_hai_dich_vu_bi_tu_choi`, `test_TC_CLS_21_lap_trong_cung_dich_vu`, `test_TC_CLS_21_chi_muc_duy_nhat_o_co_so_du_lieu` |
+| FR-SVC-010 | `test_FR_SVC_010_dich_vu_bo` |
+| FR-SVC-011 | `test_FR_SVC_011_gui_ngoai_can_gia`, `test_FR_SVC_011_dich_vu_gui_ngoai_khong_tinh_tu_dinh_muc`, `test_FR_SVC_011_co_gui_ngoai_cu_khi_da_bo_can_lam_sang_van_tinh` |
+| FR-CLS-001 | `test_TC_CLS_20_hai_he_thong_cung_ton_tai`, `test_TC_CLS_20_thieu_truong_bat_buoc_bi_tu_choi`, `test_TC_CLS_20_dich_vu_phai_can_lam_sang` |
+| FR-CLS-002 | `test_TC_CLS_20_hai_he_thong_cung_ton_tai`, `test_get_service_systems` |
+| FR-CLS-005 | `test_FR_CLS_005_phut_chiem_may` |
+| FR-CLS-006 | `test_TC_CLS_23_ngung_dung_khong_vao_lan_tinh_moi_lan_da_khoa_giu_nguyen`, `test_TC_CLS_23_norm_sets_to_cost` (unit) |
+| FR-CLS-007 | `test_TC_CLS_20_khoi_tinh_trang_du_bon_muc`, `test_TC_CLS_20_canh_bao_tong_ty_trong_va_ngung_dung` |
+| FR-CLS-008 | `test_TC_CLS_23_dong_thiet_bi_la_bao_loi_dong_dung_duoc_luu`, `test_cap_nhat_theo_ma_va_loi_nghiep_vu_thanh_loi_dong` |
+| FR-ACC-008 | `test_TC_CLS_22_clinician_khoa_khac_khong_sua_duoc` (nc_test_system), `test_TC_CLS_22_clinician_khoa_khac_bi_tu_choi` (api/test_test_system.py), `test_khoa_khong_duoc_gan_thanh_loi_dong` |
