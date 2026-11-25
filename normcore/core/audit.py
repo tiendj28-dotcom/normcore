@@ -84,7 +84,7 @@ def _state_field(doc):
 
 def _log_state(doc, before, after):
 	etype = "Khóa" if after in LOCKED_STATES else "Chuyển trạng thái"
-	log_event(etype, doc.doctype, doc.name, before, after)
+	log_event(etype, doc.doctype, doc.name, before, after, detail=doc.flags.get("audit_detail"))
 
 
 def on_doc_validate(doc, method=None):
