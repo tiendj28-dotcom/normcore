@@ -7,3 +7,4 @@
 | T03 | check_conventions.py; `with_bench 'migrate && run-tests --module ...test_nc_legal_document && ...test_permissions && SHOW INDEX FULLTEXT'` | conv=0; Ran 19 OK; permissions Ran 3 OK; có nc_section_ft (heading, plain_text) | 15705ae |
 | T04 | `with_bench 'migrate && run-tests --module normcore.api.test_library'` | Ran 20 OK (TC-LIB-01, TC-LIB-03, OCR giả, DOCX, lập lại, Auditor, Version, get_source_view) | 0e5b721 |
 | T05 | `with_bench 'migrate && run-tests --module normcore.api.test_library_validity'` | Ran 6 OK (TC-LIB-04) | d207e33 |
+| T06 | `with_bench 'migrate && run-tests --module normcore.api.test_library_search'` | Ran 13 OK (TC-LIB-08; commit dữ liệu, tự dọn ở tearDownClass) | fd00bd0 |
