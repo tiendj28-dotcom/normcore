@@ -135,15 +135,19 @@ class TestNCTestSystemVolume(FrappeTestCase):
 class TestNCTestSystemVolumeNull(FrappeTestCase):
 	"""NORM-38: form không biến NULL thành 0 (ASM-035-04, FR-QC-006)."""
 
-	AUX = ["iqc_tests", "calibration_tests", "rerun_tests", "eqa_tests"]
+	AUX = ("iqc_tests", "calibration_tests", "rerun_tests", "eqa_tests")
 
 	def setUp(self):
 		frappe.set_user("Administrator")
 		service, dept, _ = make_cls_data()
 		make_test_system("GLU-B", service, dept, "EQ_B", 25)
-		self.name = frappe.get_doc(
-			{"doctype": DT, "fiscal_year": 2026, "test_system": "GLU-B", "patient_results": 1000}
-		).insert().name
+		self.name = (
+			frappe.get_doc(
+				{"doctype": DT, "fiscal_year": 2026, "test_system": "GLU-B", "patient_results": 1000}
+			)
+			.insert()
+			.name
+		)
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
