@@ -16,12 +16,17 @@ function render_status(frm) {
 		callback(r) {
 			if (frm.doc.name !== name || !r.message) return;
 			const esc = frappe.utils.escape_html;
+			const pill = { empty: "gray", ok: "green", warning: "orange" };
 			const cards = r.message.items
-				.map(
-					(i) =>
-						`<div class="nc-ts-card"><b>${esc(i.label)}</b><div>` +
-						`<span class="indicator-pill gray"><span>${esc(i.message)}</span></span></div></div>`
-				)
+				.map((i) => {
+					const pillHtml =
+						`<span class="indicator-pill ${pill[i.state] || "gray"}"><span>${esc(i.message)}</span></span>`;
+					if (i.key === "qc_plan" && i.state !== "empty") {
+						const href = `/app/nc-qc-plan/${encodeURIComponent("KHCL-" + name)}`;
+						return `<div class="nc-ts-card"><b>${esc(i.label)}</b><div><a href="${href}">${pillHtml}</a></div></div>`;
+					}
+					return `<div class="nc-ts-card"><b>${esc(i.label)}</b><div>${pillHtml}</div></div>`;
+				})
 				.join("");
 			const style =
 				"<style>.nc-ts{display:flex;flex-wrap:nowrap;border:1px solid var(--border-color);border-radius:var(--border-radius-md)}" +
@@ -42,6 +47,23 @@ function render_status(frm) {
 			);
 			wrapper.find(".nc-ts-retry").on("click", () => render_status(frm));
 		},
+	});
+}
+
+function add_qc_plan_button(frm) {
+	// FEAT-032, SCR-DSK-033: mở kế hoạch chất lượng của hệ thống, hoặc lập mới khi chưa có
+	frappe.db.get_value("NC QC Plan", { test_system: frm.doc.name }, "name").then((r) => {
+		const plan = r.message && r.message.name;
+		const group = __("Paraclinical");
+		if (plan) {
+			frm.add_custom_button(__("Quality plan"), () => frappe.set_route("Form", "NC QC Plan", plan), group);
+		} else if (frappe.model.can_create("NC QC Plan")) {
+			frm.add_custom_button(
+				__("Quality plan"),
+				() => frappe.new_doc("NC QC Plan", { test_system: frm.doc.name }),
+				group
+			);
+		}
 	});
 }
 
@@ -87,6 +109,7 @@ frappe.ui.form.on("NC Test System", {
 	refresh(frm) {
 		render_status(frm);
 		toggle_minutes(frm);
+		if (!frm.is_new()) add_qc_plan_button(frm);
 		if (!frm.is_new() && frm.perm[0] && frm.perm[0].write) {
 			if (frm.doc.status === "Đang dùng") {
 				frm.add_custom_button(__("Deactivate"), () => change_status(frm, "Ngừng dùng"));
