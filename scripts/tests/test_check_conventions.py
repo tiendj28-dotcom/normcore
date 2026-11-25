@@ -191,22 +191,38 @@ def test_workspace_sinh_tat_dinh_va_bo_dong_trung(tmp_path):
 	assert [s["label"] for s in data["shortcuts"]] == ["A", "B"]
 
 
-def test_asm_trung_ma_bi_bao(tmp_path):
-	p = tmp_path / "docs/decisions"
-	p.mkdir(parents=True)
-	(p / "assumptions.md").write_text("| ASM-001 | x |\n| ASM-002 | y |\n| ASM-001 | z |\n", encoding="utf-8")
+def _asm(tmp_path, old=None, **files):
+	d = tmp_path / "docs/decisions"
+	(d / "assumptions").mkdir(parents=True, exist_ok=True)
+	if old is not None:
+		(d / "assumptions.md").write_text(old, encoding="utf-8")
+	for name, text in files.items():
+		(d / "assumptions" / name).write_text(text, encoding="utf-8")
+
+
+def test_asm_trung_ma_trong_tep_cu_bi_bao(tmp_path):
+	_asm(tmp_path, old="| ASM-001 | x |\n| ASM-002 | y |\n| ASM-001 | z |\n")
 	assert codes(tmp_path) == {"NC-12"}
-	(p / "assumptions.md").write_text("| ASM-001 | x |\n| ASM-002 | y |\n", encoding="utf-8")
+	_asm(tmp_path, old="| ASM-001 | x |\n| ASM-002 | y |\n")
 	assert cc.run(tmp_path) == []
 
 
-def test_expected_doctypes_chua_sap_xep_hoac_trung(tmp_path):
-	d = tmp_path / "normcore/tests"
-	d.mkdir(parents=True)
-	f = d / "expected_doctypes.txt"
-	f.write_text("# c\nNC A\nNC B\n", encoding="utf-8")
+def test_asm_thu_muc_moi_hop_le(tmp_path):
+	_asm(
+		tmp_path,
+		old="| ASM-001 | x |\n",
+		**{"FEAT-039.md": "| ASM-039-01 | a |\n", "NORM-32.md": "| ASM-NORM32-01 | b |\n"},
+	)
 	assert cc.run(tmp_path) == []
-	f.write_text("NC B\nNC A\n", encoding="utf-8")
-	assert codes(tmp_path) == {"NC-13"}
-	f.write_text("NC A\nNC A\n", encoding="utf-8")
-	assert codes(tmp_path) == {"NC-13"}
+
+
+def test_asm_tien_to_khong_khop_ten_tep(tmp_path):
+	_asm(tmp_path, **{"FEAT-039.md": "| ASM-040-01 | a |\n"})
+	assert codes(tmp_path) == {"NC-12"}
+	_asm(tmp_path, **{"FEAT-039.md": "| ASM-039-01 | a |\n", "ghi-chu.md": "| ASM-039-02 | b |\n"})
+	assert codes(tmp_path) == {"NC-12"}
+
+
+def test_asm_trung_giua_tep_cu_va_thu_muc_moi(tmp_path):
+	_asm(tmp_path, old="| ASM-039-01 | x |\n", **{"FEAT-039.md": "| ASM-039-01 | a |\n"})
+	assert codes(tmp_path) == {"NC-12"}

@@ -1,6 +1,5 @@
 normcore/translations/vi.csv merge=union
 docs/rtm-testref.md merge=union
 normcore/nc_core/workspace/normcore/shortcuts.txt merge=union
-normcore/tests/expected_doctypes.txt merge=union
 docs/decisions/assumptions.md merge=union
 docs/decisions/conflicts.md merge=union
