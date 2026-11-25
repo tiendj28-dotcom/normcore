@@ -1,0 +1,9 @@
+{
+	"doctype": "NC QC Plan",
+	"department_field": "department",
+	"public_read": {},
+	"via": [
+		"test_system",
+		"NC Test System"
+	]
+}

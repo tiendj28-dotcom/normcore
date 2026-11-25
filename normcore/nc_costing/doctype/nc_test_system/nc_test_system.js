@@ -16,16 +16,20 @@ function render_status(frm) {
 		callback(r) {
 			if (frm.doc.name !== name || !r.message) return;
 			const esc = frappe.utils.escape_html;
-			const pill = { empty: "gray", ok: "green", warning: "orange" };
+			const colors = { ok: "green", estimated: "orange", warning: "orange" };
 			const cards = r.message.items
 				.map((i) => {
-					const pillHtml =
-						`<span class="indicator-pill ${pill[i.state] || "gray"}"><span>${esc(i.message)}</span></span>`;
-					if (i.key === "qc_plan" && i.state !== "empty") {
-						const href = `/app/nc-qc-plan/${encodeURIComponent("KHCL-" + name)}`;
-						return `<div class="nc-ts-card"><b>${esc(i.label)}</b><div><a href="${href}">${pillHtml}</a></div></div>`;
+					const pill =
+						`<span class="indicator-pill ${colors[i.state] || "gray"}"><span>${esc(i.message)}</span></span>`;
+					// FEAT-035: mục sản lượng dẫn tới danh sách NC Test System Volume của hệ thống này
+					// FEAT-032: mục kế hoạch chất lượng dẫn tới kế hoạch của hệ thống
+					let body = pill;
+					if (i.key === "volume" && i.state !== "empty") {
+						body = `<a href="/app/nc-test-system-volume?test_system=${encodeURIComponent(name)}">${pill}</a>`;
+					} else if (i.key === "qc_plan" && i.state !== "empty") {
+						body = `<a href="/app/nc-qc-plan/${encodeURIComponent("KHCL-" + name)}">${pill}</a>`;
 					}
-					return `<div class="nc-ts-card"><b>${esc(i.label)}</b><div>${pillHtml}</div></div>`;
+					return `<div class="nc-ts-card"><b>${esc(i.label)}</b><div>${body}</div></div>`;
 				})
 				.join("");
 			const style =

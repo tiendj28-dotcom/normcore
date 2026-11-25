@@ -17,3 +17,7 @@ nc-drv-s|Tiêu chí trung tâm chi phí|NC Cost Center Driver|DocType|List
 nc-rul-s|Quy tắc phân bổ|NC Allocation Rule|DocType|List
 nc-qp-s|Kế hoạch chất lượng|NC QC Plan|DocType|List
 nc-eqa-s|Chương trình ngoại kiểm|NC EQA Program|DocType|List
+nc-tsv-s|Sản lượng cận lâm sàng|NC Test System Volume|DocType|List
+nc-equ-s|Phút khai thác thiết bị|NC Equipment Usage|DocType|List
+nc-sia-s|Xuất kho thực tế|NC Stock Issue Actual|DocType|List
+nc-imv-s|Nhập sản lượng và xuất kho|import-excel|Page|

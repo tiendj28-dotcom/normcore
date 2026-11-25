@@ -3,7 +3,7 @@
 import frappe
 from frappe import _
 
-from normcore.costing import test_systems
+from normcore.costing import cls_volume, test_systems
 
 
 def _share_warning_message(service, department, total) -> str:
@@ -63,10 +63,26 @@ def get_status(test_system: str) -> dict:
 		"status": doc.status,
 		"items": [
 			{**i, "message": _(i["message"]), "label": _(i["label"])}
-			for i in test_systems.status_items(qc_plan=plan, cls_group=cls_group)
+			for i in test_systems.status_items(
+				volume=_latest_volume(doc.name), qc_plan=plan, cls_group=cls_group
+			)
 		],
 		"warnings": warnings,
 	}
+
+
+def _latest_volume(test_system):
+	"""Sản lượng kịch bản "Thực tế 12 tháng" của năm lớn nhất, chỉ trong phạm vi người dùng đọc được (ASM-035-10)."""
+	if not frappe.has_permission("NC Test System Volume", "read"):
+		return None  # vai trò không có quyền đọc sản lượng (ví dụ NC Clinician): mục hiện "Chưa có"
+	rows = frappe.get_list(
+		"NC Test System Volume",
+		filters={"test_system": test_system, "scenario": "Thực tế 12 tháng"},
+		fields=["fiscal_year", "patient_results", *cls_volume.AUX_FIELDS],
+		order_by="fiscal_year desc",
+		limit=1,
+	)
+	return rows[0] if rows else None
 
 
 @frappe.whitelist()

@@ -2,7 +2,7 @@
 
 Khoa được gán của người dùng lưu bằng User Permission trên NC Department. Hai hook dưới đây
 (`has_permission`, `permission_query_conditions`) áp phạm vi cho mọi DocType khai trong `SCOPE_RULES`;
-DocType về sau (phiếu bấm giờ, hệ thống xét nghiệm...) chỉ thêm một dòng vào `SCOPE_RULES` và `hooks.py`.
+DocType về sau chỉ thêm một tệp `core/scope_rules/<ten_doctype>.json` (NORM-37); `hooks.py` tự sinh hook từ đó.
 
 Quy tắc (ASM-039, ASM-042, ASM-043):
 - Chỉ áp cho quyền đến từ vai trò NC Clinician / NC Department Head. Vai trò khác của cùng người dùng
@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 import frappe
 from frappe import _
 
-from normcore.core import readonly
+from normcore.core import readonly, scope_registry
 
 DEPARTMENT = "NC Department"
 SCOPED_ROLES = frozenset({"NC Clinician", "NC Department Head"})
@@ -35,13 +35,8 @@ class ScopeRule:
 	via: tuple | None = None
 
 
-SCOPE_RULES = {
-	"NC Clinical Procedure": ScopeRule(public_read={"workflow_state": "Đã ban hành"}),
-	"NC Norm Set": ScopeRule(),
-	"NC Test System": ScopeRule(),  # FR-ACC-008, ASM-113
-	"NC EQA Program": ScopeRule(),  # FEAT-032
-	"NC QC Plan": ScopeRule(via=("test_system", "NC Test System")),  # FEAT-032: khoa của hệ thống xét nghiệm
-}
+# Dựng từ tệp normcore/core/scope_rules/*.json (NORM-37): thêm DocType = thêm một tệp, không sửa tệp này
+SCOPE_RULES = {dt: ScopeRule(**rule) for dt, rule in scope_registry.load_scope_rules().items()}
 
 
 def _doc_department(rule, doc):

@@ -1,3 +1,5 @@
+from normcore.core import scope_registry
+
 app_name = "normcore"
 app_title = "Normcore"
 app_publisher = "Medcons"
@@ -148,22 +150,12 @@ after_migrate = ["normcore.setup.fix_home_page", "normcore.setup.ensure_list_vie
 # -----------
 # Permissions evaluated in scripted ways
 
-# Phạm vi theo khoa (FR-ACC-003): thêm DocType mới vào core/permissions.py::SCOPE_RULES và hai dict dưới đây
+# Phạm vi theo khoa (FR-ACC-003): sinh từ normcore/core/scope_rules/*.json (NORM-37), không liệt kê tay
 permission_query_conditions = {
-	"NC Clinical Procedure": "normcore.core.permissions.permission_query_conditions",
-	"NC Norm Set": "normcore.core.permissions.permission_query_conditions",
-	"NC Test System": "normcore.core.permissions.permission_query_conditions",
-	"NC QC Plan": "normcore.core.permissions.permission_query_conditions",
-	"NC EQA Program": "normcore.core.permissions.permission_query_conditions",
+	dt: "normcore.core.permissions.permission_query_conditions" for dt in scope_registry.scope_doctypes()
 }
 
-has_permission = {
-	"NC Clinical Procedure": "normcore.core.permissions.has_permission",
-	"NC Norm Set": "normcore.core.permissions.has_permission",
-	"NC Test System": "normcore.core.permissions.has_permission",
-	"NC QC Plan": "normcore.core.permissions.has_permission",
-	"NC EQA Program": "normcore.core.permissions.has_permission",
-}
+has_permission = {dt: "normcore.core.permissions.has_permission" for dt in scope_registry.scope_doctypes()}
 
 # DocType Class
 # ---------------
@@ -188,17 +180,7 @@ has_permission = {
 # FR-ADM-005: từ chối xóa danh mục đang được tham chiếu, nêu bản ghi tham chiếu
 doc_events = {
 	dt: {"on_trash": "normcore.core.references.check_not_referenced"}
-	for dt in (
-		"NC Department",
-		"NC Cost Center",
-		"NC Job Title",
-		"NC Technical Service",
-		"NC Specialty",
-		"NC Equipment",
-		"NC Room",
-		"NC Equipment Type",
-		"NC Price Category",
-	)
+	for dt in scope_registry.load_delete_guard()  # normcore/core/delete_guard/*.json (NORM-37)
 }
 # FR-AUD-001 (ADR-014): hook chung ghi sự kiện chuyển trạng thái, khóa, xóa; không sửa controller từng DocType
 doc_events["*"] = {

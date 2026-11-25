@@ -115,19 +115,23 @@ def share_warning(total) -> bool:
 	return Decimal(str(total)) != 100
 
 
-def status_items(qc_plan=None, cls_group=None) -> list:
-	"""Bốn mục khối tình trạng FR-CLS-007; mục chưa có nguồn là 'Chưa có' (ASM-115).
-
-	`qc_plan` (FEAT-032, ASM-032-08): khi đã có kế hoạch chất lượng thì thay mục `qc_plan`."""
+def status_items(volume=None, qc_plan=None, cls_group=None) -> list:
+	"""Bốn mục khối tình trạng FR-CLS-007. Mục `volume` lấy từ FEAT-035 (ASM-035-10); mục `qc_plan` từ FEAT-032
+	(ASM-032-08, thay khi đã có kế hoạch chất lượng); hai mục còn lại thuộc FEAT khác nên 'Chưa có' (ASM-115)."""
 	spec = (
 		("norm_set", "Bộ định mức hiện hành", "FEAT-034"),
 		("qc_plan", "Kế hoạch chất lượng", "FEAT-032"),
 		("volume", "Sản lượng kịch bản mặc định", "FEAT-035"),
 		("latest_cost", "Hệ số k và giá thành lần tính gần nhất", "FEAT-036"),
 	)
-	items = [
-		{"key": k, "label": lb, "state": "empty", "message": "Chưa có", "source": src} for k, lb, src in spec
-	]
+	out = []
+	for k, lb, src in spec:
+		st = {"state": "empty", "message": "Chưa có"}
+		if k == "volume" and volume:
+			from normcore.costing.cls_volume import volume_status
+
+			st = volume_status(volume)
+		out.append({"key": k, "label": lb, "source": src, **st})
 	if qc_plan is not None:
-		items[1] = qc_plans.plan_status_item(qc_plan, cls_group)
-	return items
+		out[1] = qc_plans.plan_status_item(qc_plan, cls_group)
+	return out
