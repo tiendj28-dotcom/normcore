@@ -37,7 +37,8 @@ normcore.ImportExcel = class ImportExcel {
 		this.btn_check = this.page.add_inner_button(__("Check"), () => this.run("thu"));
 		this.btn_write = this.page.add_inner_button(__("Confirm import"), () => this.run("ghi"));
 		this.page.main.html(
-			`<div class="nc-import-file text-muted" style="margin: var(--margin-md) 0"></div>
+			`<div class="nc-import-set" style="margin: var(--margin-md) 0"></div>
+			<div class="nc-import-file text-muted" style="margin: var(--margin-md) 0"></div>
 			<div class="nc-import-result"></div>`
 		);
 		this.reset();
@@ -79,7 +80,15 @@ normcore.ImportExcel = class ImportExcel {
 		if (this.has_set(key) && this.set_field.get_value() !== key) this.set_field.set_value(key);
 	}
 
+	// NORM-38: luôn hiện tên bộ nhập đang chọn (ô chọn của trang có thể bị ẩn)
+	show_set_name() {
+		const key = this.set_field.get_value();
+		const set = (this.sets || []).find((s) => s.key === key);
+		this.page.main.find(".nc-import-set").text(set ? __("Catalog") + ": " + set.label : "");
+	}
+
 	reset() {
+		this.show_set_name();
 		this.file_url = null;
 		this.checked = false;
 		this.page.main.find(".nc-import-file").text(__("No file chosen"));

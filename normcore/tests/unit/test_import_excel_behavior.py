@@ -34,6 +34,12 @@ class TestImportExcelRouteOptions(unittest.TestCase):
 		self.assertEqual(r["value"], "nc_service_volume")
 		self.assertEqual(r["consoleErrors"], [])
 
+	def test_NORM38_luon_hien_ten_bo_nhap_dang_chon(self):
+		r = run_scenario("route_ok")
+		self.assertEqual(r["set_name"], "Catalog: Sản lượng dịch vụ")
+		r = run_scenario("no_route")
+		self.assertEqual(r["set_name"], "Catalog: Ánh xạ tài khoản")
+
 	def test_N31_01_chon_san_khi_danh_sach_da_tai_xong(self):
 		r = run_scenario("route_before_load")
 		self.assertEqual(r["value"], "nc_cost_center_driver")

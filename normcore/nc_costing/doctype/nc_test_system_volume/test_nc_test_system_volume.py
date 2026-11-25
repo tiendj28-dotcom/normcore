@@ -130,3 +130,51 @@ class TestNCTestSystemVolume(FrappeTestCase):
 		frappe.set_user(other)
 		self.assertNotIn(doc.name, frappe.get_list(DT, pluck="name"))
 		self.assertFalse(frappe.has_permission(DT, "read", doc=doc))
+
+
+class TestNCTestSystemVolumeNull(FrappeTestCase):
+	"""NORM-38: form không biến NULL thành 0 (ASM-035-04, FR-QC-006)."""
+
+	AUX = ["iqc_tests", "calibration_tests", "rerun_tests", "eqa_tests"]
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		service, dept, _ = make_cls_data()
+		make_test_system("GLU-B", service, dept, "EQ_B", 25)
+		self.name = frappe.get_doc(
+			{"doctype": DT, "fiscal_year": 2026, "test_system": "GLU-B", "patient_results": 1000}
+		).insert().name
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def _sent(self):
+		from frappe.desk.form.load import getdoc
+
+		frappe.response["docs"] = []
+		getdoc(DT, self.name)
+		doc = frappe.response["docs"][0]
+		self.assertEqual(doc.name, self.name)
+		return doc
+
+	def _db(self):
+		return list(frappe.db.get_value(DT, self.name, self.AUX, as_dict=True).values())
+
+	def test_FR_QC_006_form_nhan_null_khong_phai_0(self):
+		sent = self._sent().as_dict()
+		for f in self.AUX:
+			self.assertIsNone(sent.get(f), f)
+
+	def test_FR_QC_006_luu_form_giu_null(self):
+		sent = dict(self._sent().as_dict())  # đúng dữ liệu form nhận, rồi gửi lại
+		sent["patient_results"] = 2000
+		doc = frappe.get_doc(sent)
+		doc.save()
+		self.assertEqual(self._db(), [None] * 4)
+
+	def test_FR_QC_006_nhap_0_thi_luu_0(self):
+		doc = frappe.get_doc(DT, self.name)
+		doc.iqc_tests = 0
+		doc.save()
+		self.assertEqual(self._db(), [0, None, None, None])

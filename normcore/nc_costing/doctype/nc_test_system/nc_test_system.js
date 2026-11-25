@@ -33,6 +33,9 @@ function render_status(frm) {
 				"<style>.nc-ts{display:flex;flex-wrap:nowrap;border:1px solid var(--border-color);border-radius:var(--border-radius-md)}" +
 				".nc-ts-card{flex:1 1 0;min-width:0;padding:var(--padding-md);border-right:1px solid var(--border-color)}" +
 				".nc-ts-card:last-child{border-right:0}" +
+				// NORM-38: tiêu đề và nội dung không chồng nhau khi chữ dài ở 1366×768
+				".nc-ts-card>b{display:block;margin-bottom:var(--margin-sm)}" +
+				".nc-ts-card .indicator-pill{display:inline-block;max-width:100%;height:auto;white-space:normal;line-height:1.4;overflow-wrap:anywhere}" +
 				"@media (max-width:768px){.nc-ts{flex-direction:column}.nc-ts-card{border-right:0;border-bottom:1px solid var(--border-color)}}</style>";
 			wrapper.html(`${style}<div class="nc-ts">${cards}</div>`);
 			frm.dashboard.clear_headline();

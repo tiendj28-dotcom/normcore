@@ -28,6 +28,19 @@ class NCTestSystemVolume(Document):
 				)
 			)
 
+	def load_from_db(self):
+		super().load_from_db()
+		# NORM-38: nhớ cột test phụ đang NULL trong CSDL (ASM-035-04)
+		self._null_aux = [f for f in cls_volume.NON_NEGATIVE[1:] if self.get(f) is None]
+
+	def as_dict(self, *args, **kwargs):
+		# Frappe ép Float NULL thành 0 khi tuần tự hóa; form sẽ hiện 0 và lưu 0 thật. Trả NULL lại cho ô chưa đổi.
+		d = super().as_dict(*args, **kwargs)
+		for f in getattr(self, "_null_aux", []):
+			if f in d and not d[f]:
+				d[f] = None
+		return d
+
 	def on_update(self):
 		# Frappe ghi 0 cho ô số để trống; FR-QC-006 cần NULL để FEAT-036 ước tính từ kế hoạch (ASM-035-04)
 		blanks = [f for f in cls_volume.NON_NEGATIVE[1:] if self.get(f) in (None, "")]
