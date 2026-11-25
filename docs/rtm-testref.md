@@ -62,6 +62,16 @@
 | FR-RES-017 | `test_TC_CLS_46_chua_xac_minh_van_tinh_co_canh_bao`, `test_FR_RES_017_chua_xac_minh` |
 | FR-RES-018 | `test_TC_CLS_47_quy_doi_don_vi_dinh_muc_hc_glu`, `test_TC_CLS_47_don_gia_dinh_muc_khop_golden_cls`, `test_FR_RES_018_hoa_chat_can_so_don_vi_dinh_muc_duong` |
 
+# Test ref — FEAT-033 (ghi bởi kiểm định độc lập NORM-26)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-CMP-001 | `test_TC_CLS_27_thieu_chung_tu_bi_tu_choi`, `test_validate_record_thieu_truong_nen_tep` |
+| FR-CMP-005 | `test_TC_CLS_28_nhac_han_thong_bao_va_doi_so_ngay`, `test_due_for_reminder` |
+| FR-CMP-006 (phần dữ liệu; cảnh báo ở FEAT-036) | `test_has_valid_record`, `test_missing_required`, `test_is_valid_on_bien` |
+| FR-CMP-007 | `test_TC_CLS_28_bao_cao_liet_ke_ho_so_sap_het_han_theo_khoa`, `test_build_expiry_report_thu_tu_va_loc` |
+| FR-ADM-006 | `test_TC_CLS_28_nhac_han_thong_bao_va_doi_so_ngay`, `test_reminder_days_mac_dinh_va_loi` |
+
 # Test ref — FEAT-031 (ghi bởi kiểm định độc lập NORM-30)
 
 | FR | Test thật |
