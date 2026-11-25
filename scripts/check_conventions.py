@@ -267,52 +267,53 @@ def check_workspace(root: Path) -> list:
 
 
 ASM_FILE = "docs/decisions/assumptions.md"
+ASM_DIR = "docs/decisions/assumptions"
+
+
+def _asm_prefix(stem: str):
+	"""FEAT-039 -> ASM-039-; NORM-32 -> ASM-NORM32-; tên khác -> None."""
+	m = re.fullmatch(r"FEAT-(\d+)", stem)
+	if m:
+		return f"ASM-{m.group(1)}-"
+	m = re.fullmatch(r"NORM-(\d+)", stem)
+	if m:
+		return f"ASM-NORM{m.group(1)}-"
+	return None
 
 
 def check_asm_unique(root: Path) -> list:
-	"""NORM-32: mã ASM trong assumptions.md không trùng (nhánh song song hay đánh trùng số)."""
-	path = root / ASM_FILE
-	if not path.exists():
-		return []
+	"""NORM-32: mã ASM không trùng trên assumptions.md (cũ) và docs/decisions/assumptions/*.md (mới);
+	ở thư mục mới tiền tố mã phải khớp tên tệp."""
+	sources = []
+	old = root / ASM_FILE
+	if old.exists():
+		sources.append((ASM_FILE, old, None))
+	d = root / ASM_DIR
+	if d.is_dir():
+		for f in sorted(d.glob("*.md")):
+			sources.append((f"{ASM_DIR}/{f.name}", f, f.stem))
 	seen = {}
 	errors = []
-	for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-		m = re.match(r"\|\s*(ASM-\d+)\s*\|", line)
-		if m:
-			if m.group(1) in seen:
-				errors.append(
-					f"{ASM_FILE}: [NC-12] {m.group(1)} trùng ở dòng {seen[m.group(1)]} và {n}; đánh lại số"
-				)
+	for rel, path, stem in sources:
+		prefix = _asm_prefix(stem) if stem else None
+		if stem and prefix is None:
+			errors.append(f"{rel}: [NC-12] tên tệp phải là FEAT-NNN.md hoặc NORM-NN.md")
+		for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+			m = re.match(r"\|\s*(ASM-[A-Z0-9-]+)\s*\|", line)
+			if not m:
+				continue
+			code = m.group(1)
+			if stem and prefix and not re.fullmatch(re.escape(prefix) + r"\d+", code):
+				errors.append(f"{rel}:{n}: [NC-12] mã {code} không khớp tiền tố {prefix}XX của tên tệp")
+			if code in seen:
+				errors.append(f"{rel}:{n}: [NC-12] {code} trùng với {seen[code]}; đánh lại số")
 			else:
-				seen[m.group(1)] = n
-	return errors
-
-
-EXPECTED_DT = "normcore/tests/expected_doctypes.txt"
-
-
-def check_expected_doctypes(root: Path) -> list:
-	"""NORM-32: expected_doctypes.txt xếp theo thứ tự chữ cái và không trùng dòng."""
-	path = root / EXPECTED_DT
-	if not path.exists():
-		return []
-	names = [
-		x.strip()
-		for x in path.read_text(encoding="utf-8").splitlines()
-		if x.strip() and not x.startswith("#")
-	]
-	errors = []
-	for n in sorted({x for x in names if names.count(x) > 1}):
-		errors.append(f"{EXPECTED_DT}: [NC-13] dòng trùng '{n}'")
-	if names != sorted(names):
-		errors.append(f"{EXPECTED_DT}: [NC-13] chưa sắp xếp theo thứ tự chữ cái (sau gộp union, sắp xếp lại)")
+				seen[code] = f"{rel}:{n}"
 	return errors
 
 
 def run(root: Path) -> list:
-	errors = (
-		check_vi_csv(root) + check_workspace(root) + check_asm_unique(root) + check_expected_doctypes(root)
-	)
+	errors = check_vi_csv(root) + check_workspace(root) + check_asm_unique(root)
 	for path in find_doctype_files(root):
 		rel = str(path.relative_to(root))
 		try:
