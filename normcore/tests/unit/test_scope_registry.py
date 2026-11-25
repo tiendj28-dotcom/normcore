@@ -13,19 +13,21 @@ import check_conventions as cc
 
 from normcore.core import scope_registry as reg
 
-SIX = {
+SCOPED = {
 	"NC Clinical Procedure",
 	"NC Norm Set",
 	"NC Test System",
 	"NC Test System Volume",
 	"NC Equipment Usage",
 	"NC Stock Issue Actual",
+	"NC QC Plan",  # FEAT-032, ASM-032-11
+	"NC EQA Program",  # FEAT-032, ASM-032-11
 }
 
 
 def test_sau_doctype_hien_co_dung_nhu_truoc():
 	rules = reg.load_scope_rules()
-	assert set(rules) == SIX
+	assert set(rules) == SCOPED
 	assert rules["NC Clinical Procedure"]["public_read"] == {"workflow_state": "Đã ban hành"}
 	assert all(r["department_field"] == "department" for r in rules.values())
 	assert all(r["public_read"] == {} for dt, r in rules.items() if dt != "NC Clinical Procedure")
@@ -39,7 +41,7 @@ def test_tep_scoped_false_khong_vao_so():
 def test_hooks_sinh_tu_so():
 	import normcore.hooks as hooks
 
-	assert set(hooks.has_permission) == SIX == set(hooks.permission_query_conditions)
+	assert set(hooks.has_permission) == SCOPED == set(hooks.permission_query_conditions)
 	assert set(reg.load_delete_guard()) <= set(hooks.doc_events)
 	assert len(reg.load_delete_guard()) == 9
 
