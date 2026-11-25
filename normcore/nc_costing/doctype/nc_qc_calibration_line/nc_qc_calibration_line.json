@@ -43,7 +43,7 @@
   },
   {
    "fieldname": "cost_per_calibration",
-   "label": "Chi phí mỗi lần chuẩn",
+   "label": "Chi phí chất chuẩn mỗi lần",
    "fieldtype": "Currency",
    "reqd": 1,
    "in_list_view": 1

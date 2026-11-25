@@ -47,7 +47,7 @@ class TestValidateQcPlan(unittest.TestCase):
 			("qc_material", "Vật liệu nội kiểm"),
 			("levels", "Số mức"),
 			("runs_per_day", "Số lần chạy mỗi ngày"),
-			("qty_per_run", "Lượng dùng mỗi lần chạy"),
+			("qty_per_run", "Lượng dùng mỗi lần"),
 			("shared_parameter_count", "Số thông số dùng chung"),
 		):
 			line = {**IQC, f: None}
@@ -59,7 +59,7 @@ class TestValidateQcPlan(unittest.TestCase):
 			("points", "Số điểm chuẩn"),
 			("replicates", "Số lần lặp"),
 			("calibrations_per_year", "Số lần chuẩn mỗi năm"),
-			("cost_per_calibration", "Chi phí mỗi lần chuẩn"),
+			("cost_per_calibration", "Chi phí chất chuẩn mỗi lần"),
 		):
 			line = {**CALL, f: ""}
 			self.assertTrue(has(errs(calibration_lines=[line]), "Dòng chuẩn máy 1", "Thiếu", label), f)
