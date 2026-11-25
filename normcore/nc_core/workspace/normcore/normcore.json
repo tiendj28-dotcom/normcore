@@ -28,52 +28,52 @@
    "type": "Page"
   },
   {
+   "doc_view": "List",
    "label": "Dịch vụ kỹ thuật",
    "link_to": "NC Technical Service",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   },
   {
+   "doc_view": "List",
    "label": "Chuyên khoa",
    "link_to": "NC Specialty",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   },
   {
+   "doc_view": "List",
    "label": "Nhật ký",
    "link_to": "NC Audit Event",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   },
   {
+   "doc_view": "List",
    "label": "Nhật ký AI",
    "link_to": "NC AI Log",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   },
   {
+   "doc_view": "List",
    "label": "Thiết bị",
    "link_to": "NC Equipment",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   },
   {
+   "doc_view": "List",
    "label": "Phòng",
    "link_to": "NC Room",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   },
   {
+   "doc_view": "List",
    "label": "Hệ thống xét nghiệm",
    "link_to": "NC Test System",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   },
   {
+   "doc_view": "List",
    "label": "Hồ sơ tuân thủ",
    "link_to": "NC Equipment Compliance",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   },
   {
    "label": "Báo cáo hạn hồ sơ tuân thủ",
@@ -81,10 +81,10 @@
    "type": "Report"
   },
   {
+   "doc_view": "List",
    "label": "Tham số vận hành",
    "link_to": "NC Settings",
-   "type": "DocType",
-   "doc_view": "List"
+   "type": "DocType"
   }
  ],
  "title": "Normcore"

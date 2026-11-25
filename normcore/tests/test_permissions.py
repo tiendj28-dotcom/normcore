@@ -1,6 +1,7 @@
-"""Quyền theo data-model mục 4 cho 32 DocType: vai trò ngoài ma trận bị từ chối; NC Auditor chỉ đọc (FR-ACC-007, TC-ACC-04)."""
+"""Quyền theo data-model mục 4 cho mọi DocType đã cài: vai trò ngoài ma trận bị từ chối; NC Auditor chỉ đọc (FR-ACC-007, TC-ACC-04)."""
 
 import json
+import re
 from pathlib import Path
 
 import frappe
@@ -15,6 +16,16 @@ DOCTYPES = [
 	for p in sorted(APP.glob("nc_*/doctype/*/*.json"))
 	if p.stem == p.parent.name
 ]
+DATA_MODEL = APP.parent / "docs" / "data-model.md"
+
+
+def doctypes_in_data_model():
+	"""Tên DocType khai ở data-model mục 3 (dòng **NC ...**); nguồn duy nhất, không số cứng (NORM-32, ASM-118)."""
+	text = DATA_MODEL.read_text(encoding="utf-8")
+	body = text.split("## 3. DocType theo module", 1)[1].split("## 4. Ma trận quyền", 1)[0]
+	return set(re.findall(r"^\*\*(NC [A-Za-z0-9 ]+?)\*\*", body, flags=re.M))
+
+
 PARENTS = [d for d in DOCTYPES if not d.get("istable")]
 
 
@@ -22,9 +33,12 @@ class TestPermissions(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	def test_co_32_doctype_va_10_vai_tro(self):
-		# FEAT-033 (ASM-105, Lead duyệt): thêm NC Equipment Compliance và NC Settings, 30 → 32 (số thực sau gộp develop)
-		self.assertEqual(len(DOCTYPES), 32)
+	def test_moi_doctype_da_cai_co_trong_data_model_va_10_vai_tro(self):
+		# NORM-32 (ASM-118): bỏ số cứng. Data-model liệt kê cả DocType của FEAT chưa làm nên không thể so bằng
+		# tập; so khớp tên: mọi DocType đã cài phải được data-model khai, và có ít nhất một DocType.
+		spec = doctypes_in_data_model()
+		self.assertTrue(DOCTYPES)
+		self.assertEqual({d["name"] for d in DOCTYPES} - spec, set())
 		for r in ROLES:
 			self.assertTrue(frappe.db.exists("Role", r), r)
 
