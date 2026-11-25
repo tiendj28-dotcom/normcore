@@ -314,3 +314,41 @@ def supersede_due(today=None, for_procedure=None):
 			"Chuyển trạng thái", DT, name, approval.PUBLISHED, approval.SUPERSEDED, user="Administrator"
 		)
 	return len(names)
+
+
+def _entered_on(name, state, fallback):
+	"""Ngày quy trình vào trạng thái chờ hiện tại: sự kiện "Chuyển trạng thái" mới nhất tới `state`."""
+	rows = frappe.get_all(
+		audit.EVENT,
+		{"ref_doctype": DT, "ref_name": name, "event_type": "Chuyển trạng thái", "to_state": state},
+		pluck="event_time",
+		order_by="event_time desc, creation desc",
+		limit=1,
+	)
+	return getdate(rows[0] if rows else fallback)
+
+
+def send_approval_reminders(today=None):
+	"""FR-WF-013: nhắc người duyệt của cấp có quy trình chờ quá `approval_reminder_days`; mỗi lần vào
+	trạng thái nhắc một lần (tiêu đề có ngày vào trạng thái, ASM-007-07). Trả số thông báo tạo."""
+	today = getdate(today or nowdate())
+	days = frappe.db.get_single_value(SETTINGS, "approval_reminder_days") or DEFAULT_REMINDER_DAYS
+	rows = frappe.get_all(
+		DT, {"workflow_state": ["in", list(approval.PENDING_STATES)]}, ["name", "workflow_state", "modified"]
+	)
+	pending = [
+		{"name": r.name, "state": r.workflow_state, "entered_on": _entered_on(r.name, r.workflow_state, r.modified)}
+		for r in rows
+	]
+	created = 0
+	for p in approval.overdue(pending, today, int(days)):
+		doc = frappe.get_doc(DT, p["name"])
+		subject = f"Nhắc duyệt: {doc.name} chờ ở '{p['state']}' từ {p['entered_on'].strftime('%d/%m/%Y')}"
+		created += _notify(_recipients(p["state"], doc), subject, doc)
+	return created
+
+
+def daily_job():
+	"""Scheduler hằng ngày (hooks.py): thay thế phiên bản đến ngày hiệu lực, rồi nhắc duyệt quá hạn."""
+	supersede_due()
+	send_approval_reminders()
