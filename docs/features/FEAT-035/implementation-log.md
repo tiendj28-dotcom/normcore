@@ -9,3 +9,4 @@
 | T05 | `scripts/with_bench.sh 'bench --site normcore.test migrate && bench --site normcore.test run-tests --module normcore.api.test_importer_cls_volume'` | OK (8 test: TC-CLS-34, 35 ×2, 36, phút khai thác, quyền Auditor/Director) | (xem git log) |
 | T06 | `scripts/with_bench.sh 'bench --site normcore.test run-tests --module normcore.api.test_importer'` (Quyết định Lead trên NORM-36, ASM-035-09) | OK (8 test; assertEqual đủ danh sách NC Finance, thêm 3 khóa) | (xem git log) |
 | T07 | `scripts/with_bench.sh 'bench --site normcore.test run-tests --module normcore.api.test_test_system'` | OK (8 test, có test mục volume empty→estimated/ok) | (xem git log) |
+| T08 | `pytest normcore/tests/unit/test_cls_volume_ui_conventions.py normcore/tests/unit/test_vi_csv_order.py`; `check_conventions.py`; `scripts/with_bench.sh 'bench --site normcore.test migrate && bench build --app normcore'` | 353 unit passed; conventions thoát 0; build thoát 0 | (xem git log) |

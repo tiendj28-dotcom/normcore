@@ -16,12 +16,18 @@ function render_status(frm) {
 		callback(r) {
 			if (frm.doc.name !== name || !r.message) return;
 			const esc = frappe.utils.escape_html;
+			const colors = { ok: "green", estimated: "orange" };
 			const cards = r.message.items
-				.map(
-					(i) =>
-						`<div class="nc-ts-card"><b>${esc(i.label)}</b><div>` +
-						`<span class="indicator-pill gray"><span>${esc(i.message)}</span></span></div></div>`
-				)
+				.map((i) => {
+					const pill =
+						`<span class="indicator-pill ${colors[i.state] || "gray"}"><span>${esc(i.message)}</span></span>`;
+					// FEAT-035: mục sản lượng dẫn tới danh sách NC Test System Volume của hệ thống này
+					const body =
+						i.key === "volume" && i.state !== "empty"
+							? `<a href="/app/nc-test-system-volume?test_system=${encodeURIComponent(name)}">${pill}</a>`
+							: pill;
+					return `<div class="nc-ts-card"><b>${esc(i.label)}</b><div>${body}</div></div>`;
+				})
 				.join("");
 			const style =
 				"<style>.nc-ts{display:flex;flex-wrap:nowrap;border:1px solid var(--border-color);border-radius:var(--border-radius-md)}" +
