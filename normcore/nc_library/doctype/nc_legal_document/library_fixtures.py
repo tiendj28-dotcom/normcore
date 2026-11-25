@@ -43,8 +43,17 @@ def make_legal_document(doc_number="123/QĐ-BYT", **kw):
 
 
 def make_corrupt_file(filename="hong.pdf"):
-	"""Tệp hỏng: Frappe không cho tải PDF hỏng lên, nên ghi đè nội dung trên đĩa sau khi tải một tệp hợp lệ."""
-	url = make_legal_file(filename)
+	"""Tệp hỏng: Frappe không cho tải PDF hỏng lên, nên tải một PDF hợp lệ có nội dung riêng (để không dùng chung
+	tệp trên đĩa với tệp khác) rồi ghi đè nội dung trên đĩa bằng byte hỏng."""
+	import io
+
+	from pypdf import PdfWriter
+
+	writer = PdfWriter()
+	writer.add_blank_page(width=123, height=456)  # kích thước lạ: nội dung riêng
+	buf = io.BytesIO()
+	writer.write(buf)
+	url = make_legal_file(filename, buf.getvalue())
 	f = frappe.get_doc("File", {"file_url": url})
 	with open(f.get_full_path(), "wb") as fh:
 		fh.write(read_sample("hong.pdf"))

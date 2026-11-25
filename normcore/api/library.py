@@ -4,9 +4,13 @@ Kiểm quyền tường minh trong từng hàm whitelisted. Thông báo dùng No
 """
 
 import frappe
-from frappe.utils import getdate, today
+from frappe import _
+from frappe.utils import cint, getdate, today
 
 from normcore.library import validity
+from normcore.library.extract import ExtractionError, available_ocr, extract_pages, file_kind
+from normcore.library.search import natural_key
+from normcore.library.sections import split_sections
 
 
 def enqueue_index(name, user=None):
@@ -36,3 +40,148 @@ def refresh_section_validity(legal_document, on=None):
 	for name, status in todo:
 		frappe.db.set_value("NC Legal Section", name, "validity_status", status, update_modified=False)
 	return len(todo)
+
+
+def _commit():
+	"""Tác vụ nền cần commit từng bước; test chạy trong một giao dịch nên không commit."""
+	if not frappe.flags.in_test:
+		frappe.db.commit()
+
+
+def _write_sections(name, sections, doc_status):
+	"""Ghi mục theo `section_no`: giữ tên và hạn riêng, cập nhật nội dung, xóa mục không còn (ASM-020-12)."""
+	existing = {
+		r.section_no: r.name
+		for r in frappe.get_all(
+			"NC Legal Section", filters={"legal_document": name}, fields=["name", "section_no"]
+		)
+	}
+	keep = set()
+	for s in sections:
+		values = {
+			"heading": s.heading,
+			"page_from": s.page_from,
+			"page_to": s.page_to,
+			"plain_text": s.plain_text,
+		}
+		if s.section_no in existing:
+			doc = frappe.get_doc("NC Legal Section", existing[s.section_no])
+			doc.update(values)
+		else:
+			doc = frappe.get_doc(
+				{"doctype": "NC Legal Section", "legal_document": name, "section_no": s.section_no, **values}
+			)
+		doc.save(ignore_permissions=True)
+		keep.add(s.section_no)
+	for no, sec in existing.items():
+		if no not in keep:
+			frappe.delete_doc("NC Legal Section", sec, ignore_permissions=True, force=True)
+	return len(sections)
+
+
+def _notify_failure(doc, reason, user):
+	user = user or doc.owner
+	if not frappe.db.get_value("User", user, "enabled"):
+		return
+	frappe.get_doc(
+		{
+			"doctype": "Notification Log",
+			"type": "Alert",
+			"document_type": "NC Legal Document",
+			"document_name": doc.name,
+			"subject": _("Lập chỉ mục văn bản {0} thất bại: {1}").format(doc.doc_number, reason),
+			"for_user": user,
+			"from_user": "Administrator",
+		}
+	).insert(ignore_permissions=True)
+
+
+def _fail(name, reason, notify_user):
+	frappe.db.set_value(
+		"NC Legal Document",
+		name,
+		{"index_status": "Lỗi", "index_error": reason},
+		update_modified=False,
+	)
+	doc = frappe.get_doc("NC Legal Document", name)
+	_notify_failure(doc, reason, notify_user)
+	_commit()
+
+
+def index_document(name, notify_user=None):
+	"""Tác vụ nền: tách văn bản, tách mục, ghi mục (FR-LIB-003, 004, 005)."""
+	if not frappe.db.exists("NC Legal Document", name):
+		return
+	frappe.set_user("Administrator")
+	frappe.db.set_value(
+		"NC Legal Document", name, {"index_status": "Đang lập", "index_error": ""}, update_modified=False
+	)
+	_commit()
+	savepoint = "nc_library_index"
+	frappe.db.savepoint(savepoint)
+	try:
+		doc = frappe.get_doc("NC Legal Document", name)
+		file_doc = frappe.get_doc("File", {"file_url": doc.file})
+		pages = extract_pages(file_doc.get_content(), file_doc.file_name or doc.file, ocr=available_ocr())
+		sections = split_sections(pages, doc.is_procedure_guideline)
+		_write_sections(name, sections, doc.validity_status)
+		frappe.db.set_value(
+			"NC Legal Document", name, {"index_status": "Đã lập", "index_error": ""}, update_modified=False
+		)
+		_commit()
+	except ExtractionError as e:
+		frappe.db.rollback(save_point=savepoint)
+		_fail(name, str(e), notify_user)
+	except Exception:
+		frappe.db.rollback(save_point=savepoint)
+		frappe.log_error(title=f"Lập chỉ mục văn bản {name}")
+		_fail(name, _("Lỗi hệ thống khi lập chỉ mục"), notify_user)
+
+
+@frappe.whitelist()
+def reindex(legal_document):
+	"""Lập lại chỉ mục (thay tệp, chạy lại sau lỗi; UC-001 4b)."""
+	doc = frappe.get_doc("NC Legal Document", legal_document)
+	if not frappe.has_permission("NC Legal Document", "write", doc=doc):
+		frappe.throw(_("Bạn không có quyền lập lại chỉ mục văn bản"), frappe.PermissionError)
+	if doc.index_status == "Đang lập":
+		frappe.throw(_("Văn bản đang được lập chỉ mục"))
+	frappe.db.set_value(
+		"NC Legal Document",
+		legal_document,
+		{"index_status": "Chưa lập", "index_error": ""},
+		update_modified=False,
+	)
+	enqueue_index(legal_document, frappe.session.user)
+	return {"index_status": "Chưa lập"}
+
+
+@frappe.whitelist()
+def get_sections(legal_document, start=0, page_length=100):
+	doc = frappe.get_doc("NC Legal Document", legal_document)
+	if not frappe.has_permission("NC Legal Document", "read", doc=doc):
+		frappe.throw(_("Bạn không có quyền xem văn bản này"), frappe.PermissionError)
+	rows = frappe.get_all(
+		"NC Legal Section",
+		filters={"legal_document": legal_document},
+		fields=["name", "section_no", "heading", "page_from", "page_to", "validity_status"],
+	)
+	rows.sort(key=lambda r: natural_key(r.section_no))
+	start, page_length = cint(start), min(cint(page_length) or 100, 500)
+	return {"total": len(rows), "rows": rows[start : start + page_length]}
+
+
+@frappe.whitelist()
+def get_source_view(section):
+	sec = frappe.get_doc("NC Legal Section", section)
+	if not frappe.has_permission("NC Legal Section", "read", doc=sec):
+		frappe.throw(_("Bạn không có quyền xem mục này"), frappe.PermissionError)
+	doc = frappe.get_doc("NC Legal Document", sec.legal_document)
+	return {
+		"file_url": doc.file,
+		"file_kind": file_kind(doc.file),
+		"page_from": sec.page_from or None,
+		"page_to": sec.page_to or None,
+		"doc_number": doc.doc_number,
+		"section_no": sec.section_no,
+	}
