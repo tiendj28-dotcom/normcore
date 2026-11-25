@@ -8,6 +8,10 @@ class ProviderError(Exception):
 	"""Lỗi từ provider. Thông báo không được chứa khóa API."""
 
 
+class ProviderTimeout(ProviderError):
+	"""Dịch vụ AI không phản hồi trong thời hạn cấu hình (FR-AI-010)."""
+
+
 @dataclass(frozen=True)
 class ProviderResponse:
 	text: str
@@ -17,5 +21,12 @@ class ProviderResponse:
 
 class Provider(Protocol):
 	def complete(
-		self, purpose: str, template_code: str, variables: dict, sources: list
+		self,
+		purpose: str,
+		template_code: str,
+		variables: dict,
+		sources: list,
+		*,
+		system: str | None = None,
+		user: str | None = None,
 	) -> ProviderResponse: ...
