@@ -63,7 +63,7 @@ normcore.ImportExcel = class ImportExcel {
 		return (this.sets || []).some((s) => s.key === key);
 	}
 
-	// NORM-31 (ASM-131): chọn sẵn bộ nhập theo frappe.route_options.import_set; khóa sai/không có quyền thì bỏ qua.
+	// NORM-31 (ASM-004-01): chọn sẵn bộ nhập theo frappe.route_options.import_set; khóa sai/không có quyền thì bỏ qua.
 	apply_route_options() {
 		const key = (frappe.route_options || {}).import_set;
 		if (!key) return;

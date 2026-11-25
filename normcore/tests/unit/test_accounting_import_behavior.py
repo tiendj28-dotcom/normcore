@@ -1,4 +1,4 @@
-"""NORM-31 S3: nút "Sửa loại chi phí của dòng" (ASM-132). Chạy nc_accounting_import.js thật trong Node.
+"""NORM-31 S3: nút "Sửa loại chi phí của dòng" (ASM-016-01). Chạy nc_accounting_import.js thật trong Node.
 
 Mã kịch bản N31-09…11.
 """

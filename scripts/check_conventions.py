@@ -11,10 +11,22 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 SKIP_DIRS = {"docs", "tham-khao", ".git", "node_modules"}
 NO_LABEL_TYPES = {"Section Break", "Column Break", "Tab Break", "HTML", "Button"}
 AUDITOR = "NC Auditor"
-AUDITOR_FORBIDDEN = ("write", "create", "delete", "submit", "cancel", "amend")
+AUDITOR_FORBIDDEN = (
+	"write",
+	"create",
+	"delete",
+	"submit",
+	"cancel",
+	"amend",
+	"import",
+	"share",
+	"set_user_permissions",
+)
 ROLES = (
 	"NC Clinician",
 	"NC Department Head",
@@ -148,6 +160,16 @@ def check_doctype(data: dict, path: str) -> list:
 			if bad:
 				err("NC-06", f"{AUDITOR} có quyền không được phép: {', '.join(bad)}")
 	if not is_table:
+		aud_read = any(
+			isinstance(p, dict)
+			and p.get("role") == AUDITOR
+			and p.get("read") in (1, True, "1")
+			and not (p.get("permlevel") or 0)
+			for p in data.get("permissions") or []
+		)
+		if not aud_read:
+			err("NC-06", f"{AUDITOR} thiếu quyền đọc")
+	if not is_table:
 		errors.extend(check_permissions(data, path))
 	return errors
 
@@ -224,8 +246,74 @@ def check_vi_csv(root: Path) -> list:
 	return errors
 
 
+def check_workspace(root: Path) -> list:
+	"""NORM-32: normcore.json phải đúng bằng kết quả sinh từ shortcuts.txt (scripts/build_workspace.py)."""
+	import build_workspace as bw
+
+	src = root / bw.REL / "shortcuts.txt"
+	dst = root / bw.REL / "normcore.json"
+	if not src.exists() and not dst.exists():
+		return []
+	rel = str(bw.REL / "normcore.json")
+	if not src.exists():
+		return [f"{rel}: [NC-11] thiếu shortcuts.txt (nguồn sinh workspace)"]
+	try:
+		out = bw.render(bw.read_shortcuts(src))
+	except ValueError as e:
+		return [f"{rel}: [NC-11] {e}"]
+	if not dst.exists() or dst.read_text(encoding="utf-8") != out:
+		return [f"{rel}: [NC-11] khác kết quả sinh; chạy python3 scripts/build_workspace.py"]
+	return []
+
+
+ASM_FILE = "docs/decisions/assumptions.md"
+ASM_DIR = "docs/decisions/assumptions"
+
+
+def _asm_prefix(stem: str):
+	"""FEAT-039 -> ASM-039-; NORM-32 -> ASM-NORM32-; tên khác -> None."""
+	m = re.fullmatch(r"FEAT-(\d+)", stem)
+	if m:
+		return f"ASM-{m.group(1)}-"
+	m = re.fullmatch(r"NORM-(\d+)", stem)
+	if m:
+		return f"ASM-NORM{m.group(1)}-"
+	return None
+
+
+def check_asm_unique(root: Path) -> list:
+	"""NORM-32: mã ASM không trùng trên assumptions.md (cũ) và docs/decisions/assumptions/*.md (mới);
+	ở thư mục mới tiền tố mã phải khớp tên tệp."""
+	sources = []
+	old = root / ASM_FILE
+	if old.exists():
+		sources.append((ASM_FILE, old, None))
+	d = root / ASM_DIR
+	if d.is_dir():
+		for f in sorted(d.glob("*.md")):
+			sources.append((f"{ASM_DIR}/{f.name}", f, f.stem))
+	seen = {}
+	errors = []
+	for rel, path, stem in sources:
+		prefix = _asm_prefix(stem) if stem else None
+		if stem and prefix is None:
+			errors.append(f"{rel}: [NC-12] tên tệp phải là FEAT-NNN.md hoặc NORM-NN.md")
+		for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+			m = re.match(r"\|\s*(ASM-[A-Z0-9-]+)\s*\|", line)
+			if not m:
+				continue
+			code = m.group(1)
+			if stem and prefix and not re.fullmatch(re.escape(prefix) + r"\d+", code):
+				errors.append(f"{rel}:{n}: [NC-12] mã {code} không khớp tiền tố {prefix}XX của tên tệp")
+			if code in seen:
+				errors.append(f"{rel}:{n}: [NC-12] {code} trùng với {seen[code]}; đánh lại số")
+			else:
+				seen[code] = f"{rel}:{n}"
+	return errors
+
+
 def run(root: Path) -> list:
-	errors = check_vi_csv(root)
+	errors = check_vi_csv(root) + check_workspace(root) + check_asm_unique(root)
 	for path in find_doctype_files(root):
 		rel = str(path.relative_to(root))
 		try:

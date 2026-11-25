@@ -29,7 +29,7 @@ Loại hiện thực: Form chuẩn Desk. Bố cục không đổi. Nút "Sửa l
 | Tình huống khi bấm nút | Kết quả |
 | :-- | :-- |
 | Chưa tích dòng nào trong bảng Dòng | Hộp thông báo "Chọn một dòng trong bảng Dòng trước."; không mở hộp thoại sửa |
-| Tích từ hai dòng trở lên | Hộp thông báo "Chỉ chọn một dòng để sửa."; không mở hộp thoại sửa (ASM-132) |
+| Tích từ hai dòng trở lên | Hộp thông báo "Chỉ chọn một dòng để sửa."; không mở hộp thoại sửa (ASM-016-01) |
 | Tích đúng một dòng | Hộp thoại tiêu đề "Sửa loại chi phí: dòng {số thứ tự}, tài khoản {mã tài khoản}" (ví dụ "Sửa loại chi phí: dòng 3, tài khoản 6421"); các trường Loại chi phí, Loại trừ, Lý do (bắt buộc), mô tả mã — giữ nguyên; Lưu gọi `normcore.api.accounting.update_line` như cũ; thiếu lý do vẫn bị từ chối (TC-ACCT-04) |
 
 Số dòng là cột "#" của lưới (`idx`). Mã tài khoản thoát HTML trước khi hiển thị. Trạng thái Đã chốt, NC Auditor, người không có quyền ghi: không có nút (không đổi).

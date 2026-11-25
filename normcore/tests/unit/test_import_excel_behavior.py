@@ -1,4 +1,4 @@
-"""NORM-31 S1: trang import-excel chọn sẵn bộ nhập theo frappe.route_options.import_set (ASM-131).
+"""NORM-31 S1: trang import-excel chọn sẵn bộ nhập theo frappe.route_options.import_set (ASM-004-01).
 
 Chạy import_excel.js thật trong Node (tests/unit/js/import_excel_harness.js). Mã kịch bản N31-01…06.
 """

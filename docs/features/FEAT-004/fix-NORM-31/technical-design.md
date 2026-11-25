@@ -17,7 +17,7 @@ Ngoài phạm vi: không đổi API máy chủ, DocType, quyền, bộ nhập, c
 
 ### Hiện trạng
 - Các danh sách gọi `frappe.set_route("import-excel", { import_set: "<key>" })` (`nc_service_volume_list.js:6`, `nc_account_mapping_list.js:14`, `nc_cost_center_driver_list.js:6`, `nc_test_system_list.js:11`).
-- Frappe v15 (`frappe/public/js/frappe/router.js`): đối số object của `set_route` được gán vào `frappe.route_options`, không vào chuỗi URL; mở thẳng `/app/import-excel?import_set=<key>` thì `set_route_options_from_url()` cũng nạp query vào `frappe.route_options`. Vậy một nguồn đọc duy nhất là `frappe.route_options.import_set` (ASM-131).
+- Frappe v15 (`frappe/public/js/frappe/router.js`): đối số object của `set_route` được gán vào `frappe.route_options`, không vào chuỗi URL; mở thẳng `/app/import-excel?import_set=<key>` thì `set_route_options_from_url()` cũng nạp query vào `frappe.route_options`. Vậy một nguồn đọc duy nhất là `frappe.route_options.import_set` (ASM-004-01).
 - `import_excel.js` chỉ có `on_page_load` (chạy một lần cho mỗi phiên trang); `load_sets()` luôn chọn `sets[0]`. Lần mở thứ hai từ danh sách khác không chạy lại `on_page_load`.
 
 ### Thiết kế
@@ -43,7 +43,7 @@ Không có TC trong `docs/test-cases.md` cho hành vi này; mã kịch bản ri�
 | N31-02 | Khóa không có trong danh sách (sai hoặc không có quyền) → giá trị là `sets[0].key`, không gọi `msgprint`/`throw`, không lỗi console | Issue việc 2 |
 | N31-03 | Không có `route_options` → giá trị là `sets[0].key` (hành vi FEAT-004 cũ) | Issue việc 2 |
 | N31-04 | Trang đã tải với bộ A; mở lại trang với `import_set` = B (có quyền) → giá trị đổi sang B, tệp đã tải lên bị xóa (`file_url` null, nút Kiểm tra tắt) | Hành vi lần mở thứ hai |
-| N31-05 | Sau khi áp dụng, `frappe.route_options` là null; gọi `on_page_show` lần nữa không đổi lựa chọn người dùng đã đổi tay | ASM-131 |
+| N31-05 | Sau khi áp dụng, `frappe.route_options` là null; gọi `on_page_show` lần nữa không đổi lựa chọn người dùng đã đổi tay | ASM-004-01 |
 | N31-06 | Danh sách rỗng + có `import_set` → không chọn gì, hiện "You do not have permission to import data." như cũ | Issue việc 2 |
 
 ## 3. S2 — nhãn tiếng Việt trong `driver_errors`
@@ -73,7 +73,7 @@ Không có TC trong `docs/test-cases.md` cho hành vi này; mã kịch bản ri�
 - Nút "Edit cost category of a line" (nhóm Actions, chỉ khi Nháp và có quyền ghi — như cũ):
   - `const sel = frm.fields_dict.lines.grid.get_selected_children() || [];`
   - `sel.length === 0` → `frappe.msgprint(__("Select one line in the Lines table first."))`, không mở hộp thoại.
-  - `sel.length > 1` → `frappe.msgprint(__("Select only one line to edit."))`, không mở hộp thoại (ASM-132).
+  - `sel.length > 1` → `frappe.msgprint(__("Select only one line to edit."))`, không mở hộp thoại (ASM-016-01).
   - Đúng một dòng → `edit_line_dialog(frm, sel[0])`.
   - Bỏ hẳn nhánh `|| rows[0]`.
 - `edit_line_dialog`: tiêu đề `__("Edit cost category: line {0}, account {1}", [row.idx, row.account_code])`. `row.idx` là số thứ tự dòng trong lưới (1-based) mà người dùng thấy ở cột "#"; `account_code` đi qua `frappe.utils.escape_html` trước khi đưa vào tiêu đề (dữ liệu từ tệp Excel). Phần còn lại của hộp thoại, API `update_line`, kiểm lý do bắt buộc (TC-ACCT-04) giữ nguyên.
@@ -89,7 +89,7 @@ Không có TC trong `docs/test-cases.md` cho hành vi này; mã kịch bản ri�
 | :-- | :-- | :-- |
 | N31-09 | Không tích dòng nào, bấm nút → không tạo `frappe.ui.Dialog`, `msgprint` được gọi với "Select one line in the Lines table first." | Góp ý Reviewer NORM-28 |
 | N31-10 | Tích dòng `idx = 3`, `account_code = "6421"` → một Dialog với tiêu đề chứa "3" và "6421" (đúng chuỗi `Edit cost category: line 3, account 6421` khi `__` là định dạng đồng nhất) và `default` của `cost_category` bằng của dòng đó | Góp ý Reviewer NORM-28 |
-| N31-11 | Tích hai dòng → không tạo Dialog, `msgprint` "Select only one line to edit." | ASM-132 |
+| N31-11 | Tích hai dòng → không tạo Dialog, `msgprint` "Select only one line to edit." | ASM-016-01 |
 | N31-12 | `test_accounting_ui_conventions.py` (chuỗi `__()` có bản dịch, không mã màu cứng, đúng API) và `test_vi_csv_order.py` vẫn đạt, không sửa | Luật cứng 1 |
 
 ## 5. Cách kiểm thử
@@ -104,7 +104,7 @@ Không có TC trong `docs/test-cases.md` cho hành vi này; mã kịch bản ri�
 
 ## 6. Giả định, rủi ro
 
-- **ASM-131**: nguồn tham số là `frappe.route_options.import_set` (gồm cả query URL); tiêu thụ xong đặt `frappe.route_options = null`; khóa sai/không có quyền bỏ qua im lặng.
-- **ASM-132**: nút sửa dòng đòi đúng một dòng được tích; 0 hoặc ≥ 2 dòng → thông báo, không mở hộp thoại.
+- **ASM-004-01**: nguồn tham số là `frappe.route_options.import_set` (gồm cả query URL); tiêu thụ xong đặt `frappe.route_options = null`; khóa sai/không có quyền bỏ qua im lặng.
+- **ASM-016-01**: nút sửa dòng đòi đúng một dòng được tích; 0 hoặc ≥ 2 dòng → thông báo, không mở hộp thoại.
 - Rủi ro: `on_page_show` có thể chạy trước khi `list_import_sets` trả về → đã xử lý bằng `pending_key`. Đổi `set_value` gọi `reset()` xóa tệp đã tải lên — chấp nhận, giống người dùng tự đổi bộ nhập.
 - Rủi ro xung đột: `vi.csv` dùng `merge=union`; Dev chạy `test_vi_csv_order.py` sau mỗi lần gộp develop.

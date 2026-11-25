@@ -1,6 +1,7 @@
-"""Quyền theo data-model mục 4 cho 37 DocType: vai trò ngoài ma trận bị từ chối; NC Auditor chỉ đọc (FR-ACC-007, TC-ACC-04)."""
+"""Quyền theo data-model mục 4 cho mọi DocType đã cài: vai trò ngoài ma trận bị từ chối; NC Auditor chỉ đọc (FR-ACC-007, TC-ACC-04)."""
 
 import json
+import re
 from pathlib import Path
 
 import frappe
@@ -15,6 +16,16 @@ DOCTYPES = [
 	for p in sorted(APP.glob("nc_*/doctype/*/*.json"))
 	if p.stem == p.parent.name
 ]
+DATA_MODEL = APP.parent / "docs" / "data-model.md"
+
+
+def doctypes_in_data_model():
+	"""Tên DocType khai ở data-model mục 3 (dòng **NC ...**); nguồn duy nhất, không số cứng (NORM-32, ASM-NORM32-02)."""
+	text = DATA_MODEL.read_text(encoding="utf-8")
+	body = text.split("## 3. DocType theo module", 1)[1].split("## 4. Ma trận quyền", 1)[0]
+	return set(re.findall(r"^\*\*(NC [A-Za-z0-9 ]+?)\*\*", body, flags=re.M))
+
+
 PARENTS = [d for d in DOCTYPES if not d.get("istable")]
 
 
@@ -22,9 +33,14 @@ class TestPermissions(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	def test_co_37_doctype_va_10_vai_tro(self):
-		# FEAT-033 (ASM-105, Lead duyệt): 30 → 32. FEAT-016 (ASM-128, Lead duyệt trên NORM-28; Quyết định Lead NORM-32 bình luận 01a21097-3f7e-7d71-98b5-1141977debb0): thêm 5 DocType cha và 2 bảng con, 32 → 39 (số thực sau gộp, đếm bằng thư mục doctype)
-		self.assertEqual(len(DOCTYPES), 39)
+	def test_doctype_da_cai_khop_thu_muc_doctype_va_data_model_va_10_vai_tro(self):
+		# NORM-32 (ASM-NORM32-02): không số cứng, không danh sách viết tay. So đủ hai tập.
+		modules = frappe.get_all("Module Def", filters={"app_name": "normcore"}, pluck="name")
+		installed = set(
+			frappe.get_all("DocType", filters={"module": ["in", modules], "custom": 0}, pluck="name")
+		)
+		self.assertEqual(installed, {d["name"] for d in DOCTYPES})
+		self.assertEqual(installed - doctypes_in_data_model(), set())
 		for r in ROLES:
 			self.assertTrue(frappe.db.exists("Role", r), r)
 

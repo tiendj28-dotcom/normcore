@@ -1,0 +1,17 @@
+# Mỗi lối tắt một dòng: id|nhãn|link_to|loại|doc_view. Chỉ nối thêm cuối tệp (merge=union). Sau khi sửa: python3 scripts/build_workspace.py
+nc-imp-s|Nhập dữ liệu từ Excel|import-excel|Page|
+nc-svc-s|Dịch vụ kỹ thuật|NC Technical Service|DocType|List
+nc-spc-s|Chuyên khoa|NC Specialty|DocType|List
+nc-aud-s|Nhật ký|NC Audit Event|DocType|List
+nc-ail-s|Nhật ký AI|NC AI Log|DocType|List
+nc-eq-s|Thiết bị|NC Equipment|DocType|List
+nc-rm-s|Phòng|NC Room|DocType|List
+nc-ts-s|Hệ thống xét nghiệm|NC Test System|DocType|List
+nc-cmp-s|Hồ sơ tuân thủ|NC Equipment Compliance|DocType|List
+nc-cmr-s|Báo cáo hạn hồ sơ tuân thủ|NC Compliance Expiry|Report|
+nc-set-s|Tham số vận hành|NC Settings|DocType|List
+nc-acc-s|Nhập số liệu kế toán|NC Accounting Import|DocType|List
+nc-map-s|Bảng ánh xạ tài khoản|NC Account Mapping|DocType|List
+nc-vol-s|Sản lượng dịch vụ|NC Service Volume|DocType|List
+nc-drv-s|Tiêu chí trung tâm chi phí|NC Cost Center Driver|DocType|List
+nc-rul-s|Quy tắc phân bổ|NC Allocation Rule|DocType|List
