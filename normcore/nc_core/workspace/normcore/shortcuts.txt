@@ -15,3 +15,7 @@ nc-map-s|Bảng ánh xạ tài khoản|NC Account Mapping|DocType|List
 nc-vol-s|Sản lượng dịch vụ|NC Service Volume|DocType|List
 nc-drv-s|Tiêu chí trung tâm chi phí|NC Cost Center Driver|DocType|List
 nc-rul-s|Quy tắc phân bổ|NC Allocation Rule|DocType|List
+nc-tsv-s|Sản lượng cận lâm sàng|NC Test System Volume|DocType|List
+nc-equ-s|Phút khai thác thiết bị|NC Equipment Usage|DocType|List
+nc-sia-s|Xuất kho thực tế|NC Stock Issue Actual|DocType|List
+nc-imv-s|Nhập sản lượng và xuất kho|import-excel|Page|

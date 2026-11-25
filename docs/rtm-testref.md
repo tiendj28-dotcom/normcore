@@ -136,3 +136,13 @@
 | FR-WF-007 | `test_TC_WF_02_tu_choi_o_ca_ba_cap` |
 | FR-WF-008 | `test_TC_WF_03_sua_mo_ta_buoc_qua_form_va_api_bi_tu_choi` (nc_clinical_procedure), `test_khong_doi_trang_thai_bang_luu_thuong`, `test_khong_xoa_khi_dang_cho_duyet` |
 | FR-WF-013 | `test_FR_WF_013_nhac_khi_qua_han`, `test_FR_WF_013_theo_cau_hinh_so_ngay` |
+# Test ref — FEAT-035 (Dev ghi, QA kiểm định độc lập; thêm test quyền theo khoa của QA: `test_quyen_truong_khoa_chi_doc_khoa_minh` ở nc_stock_issue_actual và nc_equipment_usage)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-ACCT-012 | `test_mac_dinh_kich_ban_va_lay_dich_vu_khoa_tu_he_thong`, `test_DI_14_trung_nam_kich_ban_he_thong` (nc_test_system_volume); `test_trung_bon_truong` (nc_equipment_usage); `test_TC_CLS_34_ma_lis_doi_sang_ma_dich_vu_cot_trong_duoc_chap_nhan` (kịch bản Kế hoạch lưu riêng) |
+| FR-ACCT-013 | `test_TC_CLS_34_ma_lis_doi_sang_ma_dich_vu_cot_trong_duoc_chap_nhan`, `test_nguon_ma_trong_dung_ma_noi_bo`, `test_cap_nhat_giu_o_trong`, `test_phut_khai_thac` (api/test_importer_cls_volume.py); `test_o_test_phu_de_trong_la_null`, `test_thiet_bi_phut_chiem_may_luu_duoc_va_mac_dinh_kich_ban`, `test_thiet_bi_so_ket_qua_bi_tu_choi`; `test_TC_CLS_34_ma_lis_doi_sang_ma_dich_vu` (unit, `test_resolve_service`) |
+| FR-ACCT-014 | `test_TC_CLS_35_ma_he_thong_la_va_so_am_bao_loi_dong_dung_van_luu`, `test_TC_CLS_35_ma_dich_vu_ma_khoa_khong_khop_va_so_phu_sai`, `test_so_am_va_thieu_qbn`, unit `test_TC_CLS_35_so_am` |
+| FR-ACCT-015 | `test_TC_CLS_36_xuat_kho_theo_mat_hang_khoa_nam` (api/test_importer_cls_volume.py), `test_luu_va_trung_nam_khoa_mat_hang`, `test_luong_am` (nc_stock_issue_actual), unit `test_TC_CLS_36_stock_hop_le` |
+| FR-ACC-002, FR-ACC-003, FR-ACC-007 | `test_quyen_theo_ma_tran`, `test_auditor_khong_ghi_duoc`, `test_clinician_khong_doc`, `test_department_head_chi_doc_khoa_minh` (nc_test_system_volume); `test_quyen_auditor_clinician_head` (nc_equipment_usage); `test_quyen` (nc_stock_issue_actual); `test_quyen_auditor_director_va_tep_mau`; `normcore.tests.test_permissions` |
+| FR-CLS-007 (mục sản lượng) | `test_FR_CLS_007_muc_san_luong_uoc_tinh_khi_test_phu_trong` (api/test_test_system.py), `TestVolumeStatus` (unit) |

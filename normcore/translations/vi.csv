@@ -1,6 +1,7 @@
 Account,Tài khoản
 Actions,Thao tác
 Active,Đang dùng,NC Technical Service
+Actual figures,Có số thực tế
 Add citation,Thêm trích dẫn
 Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
@@ -22,6 +23,8 @@ Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
 Attach to,Gắn với
+Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
+Calibration tests,Số test chuẩn máy
 Cancel,Hủy
 Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
@@ -31,6 +34,7 @@ Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
+Clinical volume and stock issues,Sản lượng cận lâm sàng và xuất kho
 Code,Mã
 Column,Cột,Import Excel
 Comment,Ý kiến
@@ -69,6 +73,7 @@ Download DOCX,Tải DOCX
 Download template,Tải tệp mẫu
 Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
+EQA tests,Số test ngoại kiểm
 Edit,Sửa
 Edit cost category,Sửa loại chi phí
 Edit cost category of a line,Sửa loại chi phí của một dòng
@@ -91,6 +96,7 @@ Finalized: the figures can be used in a costing run.,Đã chốt: số liệu d�
 General comment,Ý kiến chung
 Has error lines,Có dòng lỗi
 Headcount,Số người
+IQC tests,Số test nội kiểm
 Import data from Excel,Nhập dữ liệu từ Excel
 Import from Excel,Nhập từ Excel
 Import result,Kết quả nhập
@@ -136,6 +142,7 @@ None,Không có
 None yet,Chưa có
 Only unresolved,Chỉ chưa xử lý
 Open comments,Ý kiến chưa xử lý
+Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Open editor,Mở trình soạn
 Past useful life,Hết thời gian sử dụng,NC Equipment
 Performing department,Khoa thực hiện
@@ -161,6 +168,7 @@ Relation,Quan hệ
 Reload file,Đọc lại tệp
 Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệp sẽ thay toàn bộ dòng và bỏ các sửa tay. Tiếp tục?
 Resolved,Đã xử lý
+Rerun tests,Số test chạy lại
 Retry,Thử lại
 Review actions,Thao tác duyệt
 Review comments,Ý kiến thẩm định
@@ -202,6 +210,7 @@ Unassign,Bỏ gán
 Unchanged,Không đổi,Import Excel
 Unit,Đơn vị
 Unit price,Đơn giá,NC Item
+Unit: {0},Đơn vị: {0}
 Unverified,Chưa xác minh,NC Item
 Unverified,Chưa xác minh,NC Item Price
 Up,Lên
@@ -219,6 +228,7 @@ Verified,Đã xác minh,NC Item
 Verified,Đã xác minh,NC Item Price
 Verify,Xác minh,NC Item Price
 View costing results,Xem kết quả tính giá
+Will be estimated from the plan,Sẽ ước tính từ kế hoạch
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
 You do not have permission to view this procedure,Bạn không có quyền xem quy trình này

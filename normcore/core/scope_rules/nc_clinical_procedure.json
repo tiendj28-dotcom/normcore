@@ -1,0 +1,7 @@
+{
+	"doctype": "NC Clinical Procedure",
+	"department_field": "department",
+	"public_read": {
+		"workflow_state": "Đã ban hành"
+	}
+}
