@@ -9,3 +9,9 @@
 ## Kiểm toàn bộ
 - Lint CI đỏ do `AUX = [...]` (RUF012) và format; sửa thành tuple, `ruff check normcore scripts` và `ruff format --check normcore scripts` sạch.
 - `run-tests --app normcore` trên site dùng chung `normcore.test` có 44 lỗi (`WorkflowPermissionError` Nháp → Đã ban hành, trùng `QT-DV-TEST-A-KHOA-TEST-v1`). Lỗi môi trường, cũng xảy ra trên `develop` nguyên bản. Theo Quyết định Lead (bình luận trên NORM-38, mục 2), bằng chứng chạy site thay bằng job "Test trên site Frappe v15" của CI. Không sửa Workflow trên site.
+
+## Lần 2 — Reviewer trả về (Code review PR #47, Quyết định Lead)
+- Mục 1: `as_dict` trước đó chỉ giữ NULL cho bản ghi qua `load_from_db`; form lưu dựng bản ghi từ dict nên mất. Sửa: bỏ `load_from_db` và `_null_aux`; `as_dict` trả `None` cho cột test phụ mỗi khi giá trị thô là `None` hoặc `""`. Đúng cho tải, lưu, tạo mới. Nhập 0 vẫn lưu 0.
+- Mục 2: thêm `test_FR_QC_006_savedocs_giu_null_ca_khi_luu_hai_lan` (qua `frappe.desk.form.save.savedocs`, kiểm `frappe.response.docs[0][f] is None` cả 4 cột, gửi lại đúng dict nhận về lần hai, DB vẫn NULL) và `test_FR_QC_006_savedocs_tao_moi_giu_null`.
+  - Với mã ở `33095a5`: đỏ, `AssertionError: 0.0 is not None : iqc_tests lần 1` và `0.0 is not None : iqc_tests`.
+  - Sau sửa: `run-tests --module ...test_nc_test_system_volume` Ran 14 tests, OK. Test cũ giữ nguyên.

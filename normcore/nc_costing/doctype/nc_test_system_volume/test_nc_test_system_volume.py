@@ -177,6 +177,41 @@ class TestNCTestSystemVolumeNull(FrappeTestCase):
 		doc.save()
 		self.assertEqual(self._db(), [None] * 4)
 
+	def test_FR_QC_006_savedocs_giu_null_ca_khi_luu_hai_lan(self):
+		"""Đi đúng đường của form: savedocs rồi gửi lại đúng dict nhận về (reviewer NORM-38)."""
+		from frappe.desk.form.save import savedocs
+
+		sent = dict(self._sent().as_dict())
+		sent["patient_results"] = 2000
+		for lan in (1, 2):
+			frappe.response["docs"] = []
+			savedocs(frappe.as_json(sent), "Save")
+			back = frappe.response["docs"][0]
+			for f in self.AUX:
+				self.assertIsNone(back[f], f"{f} lần {lan}")
+			self.assertEqual(self._db(), [None] * 4, f"lần {lan}")
+			sent = dict(back)
+			sent["patient_results"] += 1
+
+	def test_FR_QC_006_savedocs_tao_moi_giu_null(self):
+		from frappe.desk.form.save import savedocs
+
+		frappe.response["docs"] = []
+		new = {
+			"doctype": DT,
+			"__islocal": 1,
+			"name": "new-nc-test-system-volume-1",
+			"fiscal_year": 2027,
+			"test_system": "GLU-B",
+			"patient_results": 500,
+		}
+		savedocs(frappe.as_json(new), "Save")
+		back = frappe.response["docs"][0]
+		for f in self.AUX:
+			self.assertIsNone(back[f], f)
+		row = frappe.db.get_value(DT, back["name"], list(self.AUX), as_dict=True)
+		self.assertEqual(list(row.values()), [None] * 4)
+
 	def test_FR_QC_006_nhap_0_thi_luu_0(self):
 		doc = frappe.get_doc(DT, self.name)
 		doc.iqc_tests = 0
