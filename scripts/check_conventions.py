@@ -254,7 +254,9 @@ def check_asm_unique(root: Path) -> list:
 		m = re.match(r"\|\s*(ASM-\d+)\s*\|", line)
 		if m:
 			if m.group(1) in seen:
-				errors.append(f"{ASM_FILE}: [NC-12] {m.group(1)} trùng ở dòng {seen[m.group(1)]} và {n}; đánh lại số")
+				errors.append(
+					f"{ASM_FILE}: [NC-12] {m.group(1)} trùng ở dòng {seen[m.group(1)]} và {n}; đánh lại số"
+				)
 			else:
 				seen[m.group(1)] = n
 	return errors

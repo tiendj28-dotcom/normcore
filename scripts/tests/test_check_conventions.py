@@ -164,7 +164,7 @@ def test_fieldname_khong_phai_chuoi(tmp_path):
 
 
 # --- NORM-32: chống conflict ---
-import build_workspace as bw  # noqa: E402
+import build_workspace as bw
 
 
 def _ws(tmp_path, lines, stale=False):
