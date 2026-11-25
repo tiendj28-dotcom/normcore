@@ -147,7 +147,7 @@
 | FR-ACC-002, FR-ACC-003, FR-ACC-007 | `test_quyen_theo_ma_tran`, `test_auditor_khong_ghi_duoc`, `test_clinician_khong_doc`, `test_department_head_chi_doc_khoa_minh` (nc_test_system_volume); `test_quyen_auditor_clinician_head` (nc_equipment_usage); `test_quyen` (nc_stock_issue_actual); `test_quyen_auditor_director_va_tep_mau`; `normcore.tests.test_permissions` |
 | FR-CLS-007 (mục sản lượng) | `test_FR_CLS_007_muc_san_luong_uoc_tinh_khi_test_phu_trong` (api/test_test_system.py), `TestVolumeStatus` (unit) |
 
-# Test ref — FEAT-023 (ghi bởi Dev NORM-55; chờ kiểm định độc lập)
+# Test ref — FEAT-023 (Dev NORM-55 ghi; QA kiểm định độc lập, accepted)
 
 | FR | Test thật |
 | :-- | :-- |
