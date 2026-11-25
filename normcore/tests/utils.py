@@ -220,7 +220,15 @@ def make_test_system(code, service, department, equipment, share, **kw):
 def make_qc_items():
 	"""FEAT-032: QC_L (Vật liệu nội kiểm), CAL (Chất chuẩn), HC_GLU (Hóa chất)."""
 	for code, typ in (("QC_L", "Vật liệu nội kiểm"), ("CAL", "Chất chuẩn"), ("HC_GLU", "Hóa chất")):
-		ensure("NC Item", "item_code", code, item_name=f"Mặt hàng {code}", item_type=typ, uom="ml", norm_units_per_purchase_unit=100)
+		ensure(
+			"NC Item",
+			"item_code",
+			code,
+			item_name=f"Mặt hàng {code}",
+			item_type=typ,
+			uom="ml",
+			norm_units_per_purchase_unit=100,
+		)
 
 
 def qc_plan_values(test_system, **kw):
@@ -233,7 +241,13 @@ def qc_plan_values(test_system, **kw):
 			dict(qc_material="QC_L", levels=2, runs_per_day=1, qty_per_run=0.2, shared_parameter_count=20)
 		],
 		"calibration_lines": [
-			dict(calibrator="CAL", points=2, replicates=2, calibrations_per_year=12, cost_per_calibration=400000)
+			dict(
+				calibrator="CAL",
+				points=2,
+				replicates=2,
+				calibrations_per_year=12,
+				cost_per_calibration=400000,
+			)
 		],
 	}
 	values.update(kw)

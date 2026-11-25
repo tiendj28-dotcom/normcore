@@ -14,7 +14,9 @@ class NCEQAProgram(Document):
 		paraclinical = set()
 		if codes:
 			paraclinical = set(
-				frappe.get_all("NC Technical Service", {"name": ["in", codes], "is_paraclinical": 1}, pluck="name")
+				frappe.get_all(
+					"NC Technical Service", {"name": ["in", codes], "is_paraclinical": 1}, pluck="name"
+				)
 			)
 		errors = qc_plans.validate_eqa_program(values, paraclinical)
 		if errors:

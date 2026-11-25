@@ -88,7 +88,9 @@ def has_permission(doc, ptype=None, user=None, debug=False):
 		return False
 	if _doc_department(rule, doc) not in depts:
 		return False
-	if not doc.is_new() and not rule.via:  # không chuyển bản ghi của khoa khác sang khoa mình bằng cách đổi trường khoa
+	if (
+		not doc.is_new() and not rule.via
+	):  # không chuyển bản ghi của khoa khác sang khoa mình bằng cách đổi trường khoa
 		stored = frappe.db.get_value(doc.doctype, doc.name, rule.department_field)
 		if stored and stored not in depts:
 			return False

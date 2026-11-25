@@ -29,7 +29,9 @@ def _qc_plan_values(test_system):
 	if not name:
 		return None
 	return {
-		"iqc_lines": frappe.get_all("NC QC IQC Line", {"parent": name, "parenttype": "NC QC Plan"}, pluck="name"),
+		"iqc_lines": frappe.get_all(
+			"NC QC IQC Line", {"parent": name, "parenttype": "NC QC Plan"}, pluck="name"
+		),
 		"calibration_lines": frappe.get_all(
 			"NC QC Calibration Line", {"parent": name, "parenttype": "NC QC Plan"}, pluck="name"
 		),

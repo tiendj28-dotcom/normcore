@@ -78,12 +78,24 @@ class TestQcPlanApi(FrappeTestCase):
 		self.assertEqual([s["share_pct"] for s in r["shares"]], [50, 50])
 		r = api.eqa_summary(
 			json.dumps(
-				{**base, "services": [{"technical_service": "A", "share_pct": 60}, {"technical_service": "B", "share_pct": 40}]}
+				{
+					**base,
+					"services": [
+						{"technical_service": "A", "share_pct": 60},
+						{"technical_service": "B", "share_pct": 40},
+					],
+				}
 			)
 		)
 		self.assertEqual((r["mode"], r["total_pct"]), ("custom", 100))
 		r = api.eqa_summary(
-			{**base, "services": [{"technical_service": "A", "share_pct": 50}, {"technical_service": "B", "share_pct": 40}]}
+			{
+				**base,
+				"services": [
+					{"technical_service": "A", "share_pct": 50},
+					{"technical_service": "B", "share_pct": 40},
+				],
+			}
 		)
 		self.assertEqual((r["mode"], r["total_pct"]), ("invalid", 90))
 		self.assertIn("90", r["message"])

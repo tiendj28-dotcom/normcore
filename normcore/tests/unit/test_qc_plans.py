@@ -12,7 +12,9 @@ CALL = dict(calibrator="CAL", points=2, replicates=2, calibrations_per_year=12, 
 
 
 def plan(**kw):
-	base = dict(test_system="GLU-A", run_days_per_year=300, iqc_lines=[dict(IQC)], calibration_lines=[dict(CALL)])
+	base = dict(
+		test_system="GLU-A", run_days_per_year=300, iqc_lines=[dict(IQC)], calibration_lines=[dict(CALL)]
+	)
 	base.update(kw)
 	return base
 
@@ -33,7 +35,10 @@ class TestValidateQcPlan(unittest.TestCase):
 		self.assertEqual(errs(iqc_lines=[], calibration_lines=[]), [])
 
 	def test_TC_CLS_24_thieu_truong_dau(self):
-		for f, label in (("test_system", "Hệ thống xét nghiệm"), ("run_days_per_year", "Số ngày chạy mỗi năm")):
+		for f, label in (
+			("test_system", "Hệ thống xét nghiệm"),
+			("run_days_per_year", "Số ngày chạy mỗi năm"),
+		):
 			for empty in (None, "", "  "):
 				self.assertTrue(has(errs(**{f: empty}), "Thiếu", label), (f, empty))
 
@@ -95,8 +100,14 @@ SERVICES = {"GLU", "URE", "CRE"}
 
 def eqa(**kw):
 	base = dict(
-		eqa_code="EQA-HS", program_name="Ngoại kiểm hóa sinh", provider="TTKN", department="HS",
-		rounds_per_year=3, samples_per_round=4, annual_fee=24000000, annual_shipping_fee=1200000,
+		eqa_code="EQA-HS",
+		program_name="Ngoại kiểm hóa sinh",
+		provider="TTKN",
+		department="HS",
+		rounds_per_year=3,
+		samples_per_round=4,
+		annual_fee=24000000,
+		annual_shipping_fee=1200000,
 		services=[dict(technical_service="GLU", share_pct=0), dict(technical_service="URE", share_pct=0)],
 	)
 	base.update(kw)

@@ -35,7 +35,9 @@ def missing_iqc_warning(test_system: str) -> dict:
 	name = frappe.db.get_value("NC QC Plan", {"test_system": test_system})
 	if name:
 		plan = {
-			"iqc_lines": frappe.get_all("NC QC IQC Line", {"parent": name, "parenttype": "NC QC Plan"}, pluck="name")
+			"iqc_lines": frappe.get_all(
+				"NC QC IQC Line", {"parent": name, "parenttype": "NC QC Plan"}, pluck="name"
+			)
 		}
 	message = qc_plans.missing_iqc_warning(cls_group, plan, test_system)
 	return {"warning": message is not None, "message": _(message) if message else None}
@@ -55,7 +57,11 @@ def eqa_summary(program) -> dict:
 	mode = "invalid" if share_errors else ("custom" if positive else "equal")
 	shares = qc_plans.eqa_shares(rows) if mode != "invalid" else []
 	try:
-		samples = float(qc_plans.eqa_samples_per_year(program.get("rounds_per_year") or 0, program.get("samples_per_round") or 0))
+		samples = float(
+			qc_plans.eqa_samples_per_year(
+				program.get("rounds_per_year") or 0, program.get("samples_per_round") or 0
+			)
+		)
 	except Exception:
 		samples = 0.0
 	return {

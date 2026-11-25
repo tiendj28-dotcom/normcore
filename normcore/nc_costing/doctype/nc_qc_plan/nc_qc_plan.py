@@ -13,7 +13,11 @@ class NCQCPlan(Document):
 			"iqc_lines": [r.as_dict() for r in self.iqc_lines],
 			"calibration_lines": [r.as_dict() for r in self.calibration_lines],
 		}
-		codes = {r.get(f) for rows, f in ((self.iqc_lines, "qc_material"), (self.calibration_lines, "calibrator")) for r in rows}
+		codes = {
+			r.get(f)
+			for rows, f in ((self.iqc_lines, "qc_material"), (self.calibration_lines, "calibrator"))
+			for r in rows
+		}
 		codes.discard(None)
 		item_types = {}
 		if codes:

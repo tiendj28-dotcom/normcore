@@ -144,7 +144,14 @@ class TestNCQCPlan(FrappeTestCase):
 
 	def test_quyen_theo_ma_tran(self):
 		make_qc_plan("GLU-A")
-		readers = {"NC Finance", "NC Resource Manager", "NC Director", "NC Consultant", "NC Admin", "NC Auditor"}
+		readers = {
+			"NC Finance",
+			"NC Resource Manager",
+			"NC Director",
+			"NC Consultant",
+			"NC Admin",
+			"NC Auditor",
+		}
 		users = {role: make_user(f"qp.perm{i}@normcore.test", role) for i, role in enumerate(ROLES)}
 		for role, user in users.items():
 			if role in ("NC Clinician", "NC Department Head"):
@@ -167,7 +174,10 @@ class TestNCQCPlan(FrappeTestCase):
 
 	def test_vai_tro_khong_co_quyen_bi_tu_choi(self):
 		make_qc_plan("GLU-A")
-		users = {r: make_user(f"qp.none{i}@normcore.test", r) for i, r in enumerate(("NC Document Controller", "NC Council Member"))}
+		users = {
+			r: make_user(f"qp.none{i}@normcore.test", r)
+			for i, r in enumerate(("NC Document Controller", "NC Council Member"))
+		}
 		for role, user in users.items():
 			frappe.set_user(user)
 			self.assertFalse(frappe.has_permission("NC QC Plan", "read"), role)

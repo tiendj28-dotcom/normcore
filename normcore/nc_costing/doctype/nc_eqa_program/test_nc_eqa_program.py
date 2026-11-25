@@ -57,7 +57,7 @@ class TestNCEQAProgram(FrappeTestCase):
 		self.assertEqual(doc.name, "EQA-HS")
 
 	def test_TC_CLS_24_thieu_truong_bi_tu_choi(self):
-		for f in REQUIRED + ("services",):
+		for f in (*REQUIRED, "services"):
 			values = self._values()
 			values.pop(f)
 			with self.assertRaises(frappe.ValidationError, msg=f):
@@ -135,7 +135,14 @@ class TestNCEQAProgram(FrappeTestCase):
 
 	def test_quyen_theo_ma_tran(self):
 		make_eqa_program(department=self.dept)
-		readers = {"NC Finance", "NC Resource Manager", "NC Director", "NC Consultant", "NC Admin", "NC Auditor"}
+		readers = {
+			"NC Finance",
+			"NC Resource Manager",
+			"NC Director",
+			"NC Consultant",
+			"NC Admin",
+			"NC Auditor",
+		}
 		users = {role: make_user(f"eqa.perm{i}@normcore.test", role) for i, role in enumerate(ROLES)}
 		for role, user in users.items():
 			if role in ("NC Clinician", "NC Department Head"):

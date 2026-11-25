@@ -46,8 +46,8 @@ class TestQcPlanUI(unittest.TestCase):
 
 	def test_nut_ke_hoach_chat_luong_kiem_quyen_tao(self):
 		text = _text(TS)
-		self.assertIn("frappe.model.can_create(\"NC QC Plan\")", text)
-		self.assertIn("frappe.new_doc(\"NC QC Plan\"", text)
+		self.assertIn('frappe.model.can_create("NC QC Plan")', text)
+		self.assertIn('frappe.new_doc("NC QC Plan"', text)
 
 	def test_bang_dich_vu_chi_goi_y_can_lam_sang(self):
 		self.assertIn("is_paraclinical", _text(EQA))
