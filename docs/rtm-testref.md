@@ -146,3 +146,16 @@
 | FR-ACCT-015 | `test_TC_CLS_36_xuat_kho_theo_mat_hang_khoa_nam` (api/test_importer_cls_volume.py), `test_luu_va_trung_nam_khoa_mat_hang`, `test_luong_am` (nc_stock_issue_actual), unit `test_TC_CLS_36_stock_hop_le` |
 | FR-ACC-002, FR-ACC-003, FR-ACC-007 | `test_quyen_theo_ma_tran`, `test_auditor_khong_ghi_duoc`, `test_clinician_khong_doc`, `test_department_head_chi_doc_khoa_minh` (nc_test_system_volume); `test_quyen_auditor_clinician_head` (nc_equipment_usage); `test_quyen` (nc_stock_issue_actual); `test_quyen_auditor_director_va_tep_mau`; `normcore.tests.test_permissions` |
 | FR-CLS-007 (mục sản lượng) | `test_FR_CLS_007_muc_san_luong_uoc_tinh_khi_test_phu_trong` (api/test_test_system.py), `TestVolumeStatus` (unit) |
+
+# Test ref — FEAT-023 (ghi bởi Dev NORM-55; chờ kiểm định độc lập)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-AI-009 | `test_TC_AI_08_log_du_truong` (nc_ai_settings), `test_gateway_mock_tra_json_co_dinh_va_ghi_mot_log` (nc_ai_log) |
+| FR-AI-010 | `test_TC_AI_05_qua_han_giu_du_lieu` (nc_ai_settings), `test_qua_han` (unit/test_ai_providers_openai.py) |
+| FR-AI-011 | `test_TC_AI_06_*` (unit/test_ai_guard.py) |
+| FR-AI-012 | `test_TC_AI_11_doi_dia_chi`, `test_UC017_4c_bat_ai_kiem_ket_noi` (nc_ai_settings), `test_gui_dung_giao_thuc` (unit/test_ai_providers_openai.py) |
+| FR-AI-013 | `test_TC_AI_09_chan_han_muc`, `test_TC_AI_09_bien_bang_han_muc_khong_chan` (nc_ai_settings), `test_budget_exceeded_cac_bien` (unit/test_ai_guard.py) |
+| FR-AI-014 | `test_FR_AI_014_*` (nc_prompt_template), `test_new_prompt_version` (api/test_ai.py), unit/test_ai_prompts.py |
+| FR-AI-015 | `test_TC_AI_07_tat_ai_an_nut_van_chay_thu_cong` (api/test_ai.py; phần "giá tham chiếu" chưa kiểm được vì NC Benchmark Price chưa có trên develop, ASM-023-16), unit/test_ai_ui_conventions.py |
+| NFR-SEC-004 | `test_TC_NFR_04_khoa_khong_lo` (nc_ai_settings), `test_loi_khong_lo_khoa` (unit/test_ai_providers_openai.py) |

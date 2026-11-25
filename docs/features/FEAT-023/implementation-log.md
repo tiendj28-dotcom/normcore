@@ -11,3 +11,4 @@
 | T05 | `scripts/with_bench.sh 'bench --site normcore.test migrate && bench --site normcore.test run-tests --module ...nc_ai_settings.test_nc_ai_settings && ... --module ...nc_ai_log.test_nc_ai_log'` | Ran 9 tests OK; Ran 4 tests OK | (xem git log) |
 | T06 | `scripts/with_bench.sh 'bench --site normcore.test migrate && bench --site normcore.test run-tests --module normcore.api.test_ai'` | Ran 6 tests OK | (xem git log) |
 | T07 | `python3 scripts/check_conventions.py`; `pytest normcore/tests/unit -k "ui or vi_csv or i18n"`; `scripts/with_bench.sh 'bench --site normcore.test migrate && bench build --app normcore'` | exit 0; 96 passed; build exit 0 (+ node --check các tệp JS). Chuỗi giao diện viết thẳng tiếng Việt trong `__()` như tiền lệ, không thêm dòng vi.csv | (xem git log) |
+| T08 | `python3 docs/tools/build_rtm.py docs` | `VAN DE: 0` (rtm.md, verification-report.md chỉ đổi ngày, không commit) | (xem git log) |
