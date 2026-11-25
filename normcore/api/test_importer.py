@@ -105,8 +105,11 @@ class TestImporterAPI(FrappeTestCase):
 				"nc_account_mapping",
 				"nc_service_volume",
 				"nc_cost_center_driver",
+				"nc_test_system_volume",
+				"nc_equipment_usage",
+				"nc_stock_issue_actual",
 			],
-		)  # FEAT-010 (ASM-084), FEAT-009 (ASM-096), FEAT-016 (ASM-128, Lead duyệt trên NORM-28)
+		)  # FEAT-010 (ASM-084), FEAT-009 (ASM-096), FEAT-016 (ASM-128, Lead duyệt trên NORM-28), FEAT-035 (ASM-035-09, Lead duyệt trên NORM-36)
 		f = frappe.get_doc(
 			{
 				"doctype": "File",
