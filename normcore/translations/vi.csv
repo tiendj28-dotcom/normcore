@@ -140,9 +140,9 @@ No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None,Không có
 None yet,Chưa có
+Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Only unresolved,Chỉ chưa xử lý
 Open comments,Ý kiến chưa xử lý
-Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Open editor,Mở trình soạn
 Past useful life,Hết thời gian sử dụng,NC Equipment
 Performing department,Khoa thực hiện
@@ -167,8 +167,8 @@ Rejection reason,Lý do từ chối
 Relation,Quan hệ
 Reload file,Đọc lại tệp
 Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệp sẽ thay toàn bộ dòng và bỏ các sửa tay. Tiếp tục?
-Resolved,Đã xử lý
 Rerun tests,Số test chạy lại
+Resolved,Đã xử lý
 Retry,Thử lại
 Review actions,Thao tác duyệt
 Review comments,Ý kiến thẩm định
