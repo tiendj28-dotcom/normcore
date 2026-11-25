@@ -23,12 +23,16 @@ class NCPromptTemplate(Document):
 			for f in IMMUTABLE:
 				if before is not None and self.get(f) != before.get(f):
 					frappe.throw(
-						_("Mẫu lệnh đã tạo không sửa được. Dùng \"Tạo phiên bản mới\"."),
+						_('Mẫu lệnh đã tạo không sửa được. Dùng "Tạo phiên bản mới".'),
 						title=_("Mẫu lệnh"),
 					)
 		else:
-			if frappe.db.exists("NC Prompt Template", {"template_code": self.template_code, "version": self.version}):
-				frappe.throw(_("Phiên bản {0} của mẫu {1} đã tồn tại").format(self.version, self.template_code))
+			if frappe.db.exists(
+				"NC Prompt Template", {"template_code": self.template_code, "version": self.version}
+			):
+				frappe.throw(
+					_("Phiên bản {0} của mẫu {1} đã tồn tại").format(self.version, self.template_code)
+				)
 			try:
 				prompts.check_syntax(self.user_prompt)
 				prompts.parse_schema(self.output_schema)

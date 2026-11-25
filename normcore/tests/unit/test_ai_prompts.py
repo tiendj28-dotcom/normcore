@@ -7,7 +7,9 @@ from normcore.ai import prompts
 
 class TestPrompts(unittest.TestCase):
 	def test_render_tojson_giu_tieng_viet(self):
-		out = prompts.render("V={{ variables | tojson }} S={{ sources | join(',') }}", {"a": "Đã"}, ["S1", "S2"])
+		out = prompts.render(
+			"V={{ variables | tojson }} S={{ sources | join(',') }}", {"a": "Đã"}, ["S1", "S2"]
+		)
 		self.assertIn('"a": "Đã"', out)
 		self.assertIn("S1,S2", out)
 
@@ -35,7 +37,10 @@ class TestPrompts(unittest.TestCase):
 			"type": "object",
 			"required": ["items"],
 			"properties": {
-				"items": {"type": "array", "items": {"type": "object", "required": ["n"], "properties": {"n": {"type": "integer"}}}},
+				"items": {
+					"type": "array",
+					"items": {"type": "object", "required": ["n"], "properties": {"n": {"type": "integer"}}},
+				},
 				"msg": {"type": "string"},
 			},
 		}

@@ -40,4 +40,6 @@ class OpenAICompatProvider:
 		except (KeyError, IndexError, TypeError):
 			raise ProviderError("Nhà cung cấp AI trả về định dạng không hợp lệ") from None
 		usage = data.get("usage") or {}
-		return ProviderResponse(text, int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0)))
+		return ProviderResponse(
+			text, int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0))
+		)

@@ -31,7 +31,9 @@ class TestOpenAICompat(unittest.TestCase):
 
 	def test_gui_dung_giao_thuc(self):
 		seen = {}
-		p = OpenAICompatProvider("SECRET-KEY", "gpt-x", "http://llm.local/v1/", timeout=7, post=_ok_openai(seen))
+		p = OpenAICompatProvider(
+			"SECRET-KEY", "gpt-x", "http://llm.local/v1/", timeout=7, post=_ok_openai(seen)
+		)
 		r = p.complete("p", "T", {"a": 1}, [], system="SYS", user="USR")
 		self.assertEqual(seen["url"], "http://llm.local/v1/chat/completions")
 		self.assertEqual(seen["headers"]["Authorization"], "Bearer SECRET-KEY")
@@ -96,7 +98,7 @@ class TestAnthropicMoRong(unittest.TestCase):
 
 	def test_qua_han(self):
 		def post(url, headers, payload, timeout):
-			raise socket.timeout("timed out")
+			raise TimeoutError("timed out")
 
 		with self.assertRaises(ProviderTimeout):
 			anth.AnthropicProvider("k", "m", timeout=3, post=post).complete("p", "T", {}, [])
@@ -116,6 +118,7 @@ class TestDefaultPost(unittest.TestCase):
 	def test_timeout_thanh_provider_timeout(self):
 		orig = requests.post
 		try:
+
 			def boom(*a, **k):
 				raise requests.exceptions.ReadTimeout("x")
 

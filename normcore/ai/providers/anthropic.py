@@ -3,12 +3,10 @@
 import json
 
 from normcore.ai.providers import http
-from normcore.ai.providers.base import ProviderError, ProviderResponse, ProviderTimeout  # noqa: F401
+from normcore.ai.providers.base import ProviderError, ProviderResponse, ProviderTimeout
 
 DEFAULT_BASE_URL = "https://api.anthropic.com"
 API_VERSION = "2023-06-01"
-
-
 
 
 class AnthropicProvider:

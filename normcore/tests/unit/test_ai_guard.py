@@ -62,7 +62,9 @@ class TestAIGuard(unittest.TestCase):
 
 	def test_TC_AI_06_truong_cam_trong_fields_bi_tu_choi(self):
 		with self.assertRaises(guard.GuardError) as cm:
-			guard.build_source("NC Equipment", {"equipment_name": "A"}, fields=["equipment_name", "original_cost"])
+			guard.build_source(
+				"NC Equipment", {"equipment_name": "A"}, fields=["equipment_name", "original_cost"]
+			)
 		self.assertIn("original_cost", str(cm.exception))
 		with self.assertRaises(guard.GuardError):
 			guard.build_source("NC Item", {}, fields=["price_history_html"])

@@ -10,7 +10,7 @@ def default_post(url, headers, payload, timeout):
 		resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
 		resp.raise_for_status()
 		return resp.json()
-	except requests.exceptions.Timeout as e:
+	except requests.exceptions.Timeout:
 		raise ProviderTimeout(f"Dịch vụ AI không phản hồi trong {timeout} giây") from None
 
 

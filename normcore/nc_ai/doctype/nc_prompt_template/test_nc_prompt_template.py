@@ -54,14 +54,20 @@ class TestNCPromptTemplate(FrappeTestCase):
 		self.assertEqual(t2.name, "DRAFT_PROCEDURE-v2")
 		self.assertEqual(t2.version, 2)
 		self.assertEqual(frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v1", "is_active"), 0)
-		self.assertNotEqual(frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v1", "system_prompt"), "mới")
+		self.assertNotEqual(
+			frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v1", "system_prompt"), "mới"
+		)
 		self.assertEqual(
-			frappe.get_all("NC Prompt Template", {"template_code": "DRAFT_PROCEDURE", "is_active": 1}, pluck="name"),
+			frappe.get_all(
+				"NC Prompt Template", {"template_code": "DRAFT_PROCEDURE", "is_active": 1}, pluck="name"
+			),
 			["DRAFT_PROCEDURE-v2"],
 		)
 
 	def test_FR_AI_014_cu_phap_va_luoc_do_sai_bi_tu_choi(self):
-		self.assertRaises(frappe.ValidationError, _new, "SUGGEST_CLS_NORM", user_prompt="{% if %}", version=50)
+		self.assertRaises(
+			frappe.ValidationError, _new, "SUGGEST_CLS_NORM", user_prompt="{% if %}", version=50
+		)
 		self.assertRaises(frappe.ValidationError, _new, "SUGGEST_CLS_NORM", output_schema="[1]", version=51)
 
 	def test_FR_AI_014_trung_phien_ban_bi_tu_choi(self):

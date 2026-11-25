@@ -14,7 +14,10 @@ SECRET = "SK-TEST-123"
 def _ok_anthropic(seen):
 	def post(url, headers, payload, timeout):
 		seen.append({"url": url, "headers": headers, "payload": payload, "timeout": timeout})
-		return {"content": [{"type": "text", "text": '{"ok": true}'}], "usage": {"input_tokens": 3, "output_tokens": 2}}
+		return {
+			"content": [{"type": "text", "text": '{"ok": true}'}],
+			"usage": {"input_tokens": 3, "output_tokens": 2},
+		}
 
 	return post
 
@@ -22,7 +25,10 @@ def _ok_anthropic(seen):
 def _ok_openai(seen):
 	def post(url, headers, payload, timeout):
 		seen.append({"url": url, "headers": headers, "payload": payload, "timeout": timeout})
-		return {"choices": [{"message": {"content": '{"ok": true}'}}], "usage": {"prompt_tokens": 4, "completion_tokens": 1}}
+		return {
+			"choices": [{"message": {"content": '{"ok": true}'}}],
+			"usage": {"prompt_tokens": 4, "completion_tokens": 1},
+		}
 
 	return post
 
@@ -46,15 +52,19 @@ def _configure(**kw):
 
 
 def _make_log(tokens_in, tokens_out, when=None):
-	name = frappe.get_doc(
-		{
-			"doctype": "NC AI Log",
-			"purpose": "DRAFT_PROCEDURE",
-			"status": "Thành công",
-			"tokens_in": tokens_in,
-			"tokens_out": tokens_out,
-		}
-	).insert(ignore_permissions=True).name
+	name = (
+		frappe.get_doc(
+			{
+				"doctype": "NC AI Log",
+				"purpose": "DRAFT_PROCEDURE",
+				"status": "Thành công",
+				"tokens_in": tokens_in,
+				"tokens_out": tokens_out,
+			}
+		)
+		.insert(ignore_permissions=True)
+		.name
+	)
 	if when:
 		frappe.db.set_value("NC AI Log", name, "creation", when, update_modified=False)
 	return name
@@ -93,7 +103,9 @@ class TestNCAISettings(FrappeTestCase):
 		self.assertEqual(frappe.db.count("NC AI Log"), logs + 1)
 		self.assertEqual(frappe.db.get_value("NC AI Log", res.log_name, "status"), "Quá hạn")
 		self.assertEqual(frappe.db.count("NC Clinical Procedure"), n_proc)
-		self.assertEqual(str(frappe.db.get_value("NC Clinical Procedure", proc.name, "modified")), str(modified))
+		self.assertEqual(
+			str(frappe.db.get_value("NC Clinical Procedure", proc.name, "modified")), str(modified)
+		)
 		ping = gateway.ping()
 		self.assertEqual(ping.status, "Quá hạn")
 		self.assertFalse(ping.ok)

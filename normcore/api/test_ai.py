@@ -1,9 +1,9 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from normcore.ai import gateway
 from normcore.api import ai
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.ai import gateway
 from normcore.tests.utils import make_base, make_procedure, make_user, publish_procedure
 
 
@@ -61,7 +61,13 @@ class TestAIApi(FrappeTestCase):
 	def test_get_ai_usage(self):
 		_set(monthly_token_budget=1000)
 		frappe.get_doc(
-			{"doctype": "NC AI Log", "purpose": "DRAFT_PROCEDURE", "status": "Thành công", "tokens_in": 900, "tokens_out": 200}
+			{
+				"doctype": "NC AI Log",
+				"purpose": "DRAFT_PROCEDURE",
+				"status": "Thành công",
+				"tokens_in": 900,
+				"tokens_out": 200,
+			}
 		).insert(ignore_permissions=True)
 		frappe.set_user(make_user("auditor.ai7@normcore.test", "NC Auditor"))
 		u = ai.get_ai_usage()
@@ -76,7 +82,9 @@ class TestAIApi(FrappeTestCase):
 		r = ai.new_prompt_version("DRAFT_PROCEDURE", "sys2", "{{ variables | tojson }}", '{"type": "object"}')
 		self.assertEqual(r, {"name": "DRAFT_PROCEDURE-v2", "version": 2})
 		self.assertEqual(frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v1", "is_active"), 0)
-		self.assertEqual(frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v1", "system_prompt"), old)
+		self.assertEqual(
+			frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v1", "system_prompt"), old
+		)
 		frappe.set_user("Administrator")
 		self.assertEqual(gateway._active_template("DRAFT_PROCEDURE").name, "DRAFT_PROCEDURE-v2")
 		frappe.set_user(make_user("admin.ai7b@normcore.test", "NC Admin"))
