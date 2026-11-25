@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from normcore.tests.utils import make_base, make_procedure, make_user
+from normcore.tests.utils import make_base, make_procedure, make_user, to_state
 
 
 def _step(title, phase="Thực hiện"):
@@ -75,7 +75,7 @@ class TestNCClinicalProcedure(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, proc.save)
 
 	def test_ban_hanh_chi_nc_director_va_can_so_quyet_dinh(self):
-		proc = make_procedure(self.service, self.dept)
+		proc = to_state(make_procedure(self.service, self.dept), "Chờ ban hành")
 		clin = make_user("clin.proc@normcore.test", "NC Clinician")
 		director = make_user("dir.proc@normcore.test", "NC Director")
 		frappe.set_user(clin)
@@ -89,7 +89,7 @@ class TestNCClinicalProcedure(FrappeTestCase):
 		)
 
 	def test_quy_trinh_da_ban_hanh_khong_sua_khong_xoa(self):
-		proc = make_procedure(self.service, self.dept)
+		proc = to_state(make_procedure(self.service, self.dept), "Chờ ban hành")
 		proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
 		proc.publish()
 		proc = frappe.get_doc("NC Clinical Procedure", proc.name)
@@ -107,7 +107,7 @@ class TestNCClinicalProcedure(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, dup.insert)
 
 	def test_DI_02_cho_phep_ban_moi_khi_ban_cu_da_ban_hanh(self):
-		proc = make_procedure(self.service, self.dept)
+		proc = to_state(make_procedure(self.service, self.dept), "Chờ ban hành")
 		proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
 		proc.publish()
 		self._new(version_no=2).insert()

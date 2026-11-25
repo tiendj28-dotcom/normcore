@@ -92,16 +92,29 @@ def make_procedure(service, department, minutes=10, job="DD", version=1):
 	return proc
 
 
+def to_state(proc, state, decision_no=None, effective_date=None):
+	"""Dựng dữ liệu: đặt trạng thái quy trình bằng `db_set` (ASM-007-16). Chỉ dùng trong test để dựng
+	dữ liệu sẵn; hook sổ sự kiện vẫn ghi chuyển trạng thái. Test kiểm hành vi duyệt, ban hành đi đường thật."""
+	values = {"workflow_state": state}
+	if decision_no is not None:
+		values["decision_no"] = decision_no
+	if effective_date is not None:
+		values["effective_date"] = effective_date
+	proc.db_set(values)
+	return proc
+
+
+def publish_procedure(proc, decision_no="QĐ-01", effective_date="2026-12-01"):
+	"""Dựng dữ liệu: quy trình "Đã ban hành" (ASM-007-16)."""
+	return to_state(proc, "Đã ban hành", decision_no, effective_date)
+
+
 def make_chain_data(service, department, job="DD"):
 	"""Quy trình ban hành, bộ định mức khóa và lần tính "Đã tính" của một (dịch vụ, khoa) — cho test FEAT-005."""
 	from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
 
 	proc = make_procedure(service, department, job=job)
-	proc.workflow_state = "Đã ban hành"
-	proc.decision_no = "QĐ-CH"
-	proc.effective_date = "2026-01-01"
-	proc.flags.allow_publish = True
-	proc.save(ignore_permissions=True)
+	publish_procedure(proc, "QĐ-CH", "2026-01-01")
 	ns = frappe.get_doc("NC Norm Set", make_norm_set(proc.name))
 	ns.status = "Đã khóa"
 	ns.flags.allow_lock = True

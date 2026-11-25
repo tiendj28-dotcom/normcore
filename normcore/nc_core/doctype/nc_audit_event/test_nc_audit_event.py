@@ -5,12 +5,11 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import audit as audit_api
 from normcore.core import audit
-from normcore.tests.utils import make_base, make_procedure, make_user
+from normcore.tests.utils import make_base, make_procedure, make_user, publish_procedure
 
 
 def _publish(proc):
-	proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
-	proc.publish()
+	publish_procedure(proc, "QĐ-01", "2026-12-01")
 
 
 class TestNCAuditEvent(FrappeTestCase):

@@ -4,7 +4,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import make_base, make_param_set, make_procedure, make_user
+from normcore.tests.utils import make_base, make_param_set, make_procedure, make_user, publish_procedure
 
 ADMIN = "Administrator"
 
@@ -33,7 +33,7 @@ class TestFormActions(FrappeTestCase):
 		proc.db_set({"decision_no": "QD-FA", "effective_date": "2026-01-01"})
 		proc.reload()
 		frappe.set_user(self.users["director"])
-		proc.publish()
+		publish_procedure(proc, "QD-FA", "2026-01-01")
 		frappe.set_user(ADMIN)
 		return proc
 
