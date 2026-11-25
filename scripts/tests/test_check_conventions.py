@@ -198,3 +198,15 @@ def test_asm_trung_ma_bi_bao(tmp_path):
 	assert codes(tmp_path) == {"NC-12"}
 	(p / "assumptions.md").write_text("| ASM-001 | x |\n| ASM-002 | y |\n", encoding="utf-8")
 	assert cc.run(tmp_path) == []
+
+
+def test_expected_doctypes_chua_sap_xep_hoac_trung(tmp_path):
+	d = tmp_path / "normcore/tests"
+	d.mkdir(parents=True)
+	f = d / "expected_doctypes.txt"
+	f.write_text("# c\nNC A\nNC B\n", encoding="utf-8")
+	assert cc.run(tmp_path) == []
+	f.write_text("NC B\nNC A\n", encoding="utf-8")
+	assert codes(tmp_path) == {"NC-13"}
+	f.write_text("NC A\nNC A\n", encoding="utf-8")
+	assert codes(tmp_path) == {"NC-13"}

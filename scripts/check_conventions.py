@@ -262,8 +262,31 @@ def check_asm_unique(root: Path) -> list:
 	return errors
 
 
+EXPECTED_DT = "normcore/tests/expected_doctypes.txt"
+
+
+def check_expected_doctypes(root: Path) -> list:
+	"""NORM-32: expected_doctypes.txt xếp theo thứ tự chữ cái và không trùng dòng."""
+	path = root / EXPECTED_DT
+	if not path.exists():
+		return []
+	names = [
+		x.strip()
+		for x in path.read_text(encoding="utf-8").splitlines()
+		if x.strip() and not x.startswith("#")
+	]
+	errors = []
+	for n in sorted({x for x in names if names.count(x) > 1}):
+		errors.append(f"{EXPECTED_DT}: [NC-13] dòng trùng '{n}'")
+	if names != sorted(names):
+		errors.append(f"{EXPECTED_DT}: [NC-13] chưa sắp xếp theo thứ tự chữ cái (sau gộp union, sắp xếp lại)")
+	return errors
+
+
 def run(root: Path) -> list:
-	errors = check_vi_csv(root) + check_workspace(root) + check_asm_unique(root)
+	errors = (
+		check_vi_csv(root) + check_workspace(root) + check_asm_unique(root) + check_expected_doctypes(root)
+	)
 	for path in find_doctype_files(root):
 		rel = str(path.relative_to(root))
 		try:

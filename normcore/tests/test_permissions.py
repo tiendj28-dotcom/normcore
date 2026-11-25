@@ -16,6 +16,7 @@ DOCTYPES = [
 	for p in sorted(APP.glob("nc_*/doctype/*/*.json"))
 	if p.stem == p.parent.name
 ]
+EXPECTED = Path(__file__).parent / "expected_doctypes.txt"
 DATA_MODEL = APP.parent / "docs" / "data-model.md"
 
 
@@ -33,12 +34,15 @@ class TestPermissions(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	def test_moi_doctype_da_cai_co_trong_data_model_va_10_vai_tro(self):
-		# NORM-32 (ASM-118): bỏ số cứng. Data-model liệt kê cả DocType của FEAT chưa làm nên không thể so bằng
-		# tập; so khớp tên: mọi DocType đã cài phải được data-model khai, và có ít nhất một DocType.
-		spec = doctypes_in_data_model()
-		self.assertTrue(DOCTYPES)
-		self.assertEqual({d["name"] for d in DOCTYPES} - spec, set())
+	def test_doctype_da_cai_khop_tep_ky_vong_va_data_model_va_10_vai_tro(self):
+		# NORM-32 (ASM-118, Lead duyệt): so khớp đủ hai chiều với expected_doctypes.txt; tệp ⊆ data-model mục 3.
+		expected = {
+			line.strip()
+			for line in EXPECTED.read_text(encoding="utf-8").splitlines()
+			if line.strip() and not line.startswith("#")
+		}
+		self.assertEqual({d["name"] for d in DOCTYPES}, expected)
+		self.assertEqual(expected - doctypes_in_data_model(), set())
 		for r in ROLES:
 			self.assertTrue(frappe.db.exists("Role", r), r)
 
