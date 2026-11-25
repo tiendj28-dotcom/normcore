@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"nc-imp-h\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Normcore</span>\",\"col\":12}},{\"id\":\"nc-imp-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhập dữ liệu từ Excel\",\"col\":4}},{\"id\":\"nc-svc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dịch vụ kỹ thuật\",\"col\":4}},{\"id\":\"nc-spc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chuyên khoa\",\"col\":4}},{\"id\":\"nc-aud-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhật ký\",\"col\":4}},{\"id\":\"nc-ail-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhật ký AI\",\"col\":4}},{\"id\":\"nc-eq-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Thiết bị\",\"col\":4}},{\"id\":\"nc-rm-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Phòng\",\"col\":4}},{\"id\":\"nc-ts-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hệ thống xét nghiệm\",\"col\":4}},{\"id\":\"nc-cmp-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hồ sơ tuân thủ\",\"col\":4}},{\"id\":\"nc-cmr-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Báo cáo hạn hồ sơ tuân thủ\",\"col\":4}},{\"id\":\"nc-set-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tham số vận hành\",\"col\":4}}]",
+ "content": "[{\"id\":\"nc-imp-h\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Normcore</span>\",\"col\":12}},{\"id\":\"nc-imp-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhập dữ liệu từ Excel\",\"col\":4}},{\"id\":\"nc-svc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dịch vụ kỹ thuật\",\"col\":4}},{\"id\":\"nc-spc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chuyên khoa\",\"col\":4}},{\"id\":\"nc-aud-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhật ký\",\"col\":4}},{\"id\":\"nc-ail-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhật ký AI\",\"col\":4}},{\"id\":\"nc-eq-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Thiết bị\",\"col\":4}},{\"id\":\"nc-rm-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Phòng\",\"col\":4}},{\"id\":\"nc-ts-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hệ thống xét nghiệm\",\"col\":4}},{\"id\":\"nc-cmp-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hồ sơ tuân thủ\",\"col\":4}},{\"id\":\"nc-cmr-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Báo cáo hạn hồ sơ tuân thủ\",\"col\":4}},{\"id\":\"nc-set-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tham số vận hành\",\"col\":4}},{\"id\":\"nc-acc-h\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Kế toán và phân bổ</span>\",\"col\":12}},{\"id\":\"nc-acc-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nhập số liệu kế toán\",\"col\":4}},{\"id\":\"nc-map-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bảng ánh xạ tài khoản\",\"col\":4}},{\"id\":\"nc-vol-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sản lượng dịch vụ\",\"col\":4}},{\"id\":\"nc-drv-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tiêu chí trung tâm chi phí\",\"col\":4}},{\"id\":\"nc-rul-s\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quy tắc phân bổ\",\"col\":4}}]",
  "creation": "2026-11-21 00:00:00.000000",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -83,6 +83,36 @@
   {
    "label": "Tham số vận hành",
    "link_to": "NC Settings",
+   "type": "DocType",
+   "doc_view": "List"
+  },
+  {
+   "label": "Nhập số liệu kế toán",
+   "link_to": "NC Accounting Import",
+   "type": "DocType",
+   "doc_view": "List"
+  },
+  {
+   "label": "Bảng ánh xạ tài khoản",
+   "link_to": "NC Account Mapping",
+   "type": "DocType",
+   "doc_view": "List"
+  },
+  {
+   "label": "Sản lượng dịch vụ",
+   "link_to": "NC Service Volume",
+   "type": "DocType",
+   "doc_view": "List"
+  },
+  {
+   "label": "Tiêu chí trung tâm chi phí",
+   "link_to": "NC Cost Center Driver",
+   "type": "DocType",
+   "doc_view": "List"
+  },
+  {
+   "label": "Quy tắc phân bổ",
+   "link_to": "NC Allocation Rule",
    "type": "DocType",
    "doc_view": "List"
   }
