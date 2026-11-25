@@ -62,3 +62,29 @@
 | FR-RES-016 | `test_TC_CLS_46_xac_minh_khi_chua_co_tep_bi_tu_choi`, `test_FR_RES_016_xac_minh_co_tep_ghi_nguoi_va_thoi_diem` |
 | FR-RES-017 | `test_TC_CLS_46_chua_xac_minh_van_tinh_co_canh_bao`, `test_FR_RES_017_chua_xac_minh` |
 | FR-RES-018 | `test_TC_CLS_47_quy_doi_don_vi_dinh_muc_hc_glu`, `test_TC_CLS_47_don_gia_dinh_muc_khop_golden_cls`, `test_FR_RES_018_hoa_chat_can_so_don_vi_dinh_muc_duong` |
+
+# Test ref — FEAT-033 (ghi bởi kiểm định độc lập NORM-26)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-CMP-001 | `test_TC_CLS_27_thieu_chung_tu_bi_tu_choi`, `test_validate_record_thieu_truong_nen_tep` |
+| FR-CMP-005 | `test_TC_CLS_28_nhac_han_thong_bao_va_doi_so_ngay`, `test_due_for_reminder` |
+| FR-CMP-006 (phần dữ liệu; cảnh báo ở FEAT-036) | `test_has_valid_record`, `test_missing_required`, `test_is_valid_on_bien` |
+| FR-CMP-007 | `test_TC_CLS_28_bao_cao_liet_ke_ho_so_sap_het_han_theo_khoa`, `test_build_expiry_report_thu_tu_va_loc` |
+| FR-ADM-006 | `test_TC_CLS_28_nhac_han_thong_bao_va_doi_so_ngay`, `test_reminder_days_mac_dinh_va_loi` |
+
+## FEAT-016 (NORM-28)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-ACCT-001 | `test_TC_ACCT_01_nap_tep_vang_ra_ban_nhap` |
+| FR-ACCT-002 | `test_TC_ACCT_02_loi_dong`, `test_TC_ACCT_02_khong_chot_khi_con_dong_loi`, `test_TC_ACCT_02_loi_dong_khong_chot_duoc` |
+| FR-ACCT-003 | `test_TC_ACCT_03_dong_chua_gan`, `test_TC_ACCT_03_dong_chua_gan_chan_chot` |
+| FR-ACCT-004 | `test_TC_ACCT_04_doi_loai_khong_ly_do`, `test_TC_ACCT_04_update_line_can_ly_do_va_luu_nguoi_sua`, `test_TC_ACCT_04_sua_truc_tiep_khong_ly_do_bi_tu_choi` |
+| FR-ACCT-005 | `test_TC_ACCT_05_ma_dich_vu_la_bao_loi_dong_dung_van_luu`, `test_TC_ACCT_05_mac_dinh_kich_ban_va_trung_bon_truong` |
+| FR-ACCT-006 | `test_TC_ACCT_06_chot_ghi_tong_khop_golden_va_khoa`, `test_TC_ACCT_06_tong_tep_vang_khop_golden` |
+| FR-ACCT-007 | `test_TC_ACCT_09_tieu_chi_nam_va_ty_le_cap1`, `test_TC_ACCT_09_ty_le_cap1_k01_khop_golden` |
+| FR-ACCT-008 | `test_TC_ACCT_07_cap1_moi_tieu_chi`, `test_TC_ACCT_07_cap2_headcount_bi_tu_choi`, `test_TC_ACCT_07_cap2_labor_min_hop_le`, `test_TC_ACCT_07_thieu_tieu_chi_cap2_headcount_cap2_labor_min` |
+| FR-ACCT-009 | `test_TC_ACCT_08_bang_mac_dinh_va_lan_nhap_moi_theo_gia_tri_da_doi` |
+| FR-ACCT-010 | `test_TC_ACCT_09_nhap_tieu_chi` |
+| FR-ACCT-011 | `test_FR_ACCT_011_lan_nhap_thu_hai_cung_nam_giu_lan_cu` |

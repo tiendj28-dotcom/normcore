@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "creation": "2026-11-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accounting_regime",
+  "account_prefix",
+  "cost_category",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "accounting_regime",
+   "label": "Chế độ kế toán",
+   "fieldtype": "Select",
+   "options": "Hành chính sự nghiệp\nDoanh nghiệp",
+   "default": "Hành chính sự nghiệp",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "account_prefix",
+   "label": "Tiền tố tài khoản",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "cost_category",
+   "label": "Loại chi phí",
+   "fieldtype": "Select",
+   "options": "LABOR\nDRUG_SUPPLY\nDEPRECIATION\nUTILITY\nMANAGEMENT\nEXCLUDED",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "note",
+   "label": "Ghi chú",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "description": "Khớp theo tiền tố dài nhất. Sửa bảng không đổi lần nhập đã có; dùng Gán lại theo bảng ánh xạ trên lần nhập Nháp."
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Account Mapping",
+ "owner": "Administrator",
+ "sort_field": "account_prefix",
+ "sort_order": "ASC",
+ "states": [],
+ "autoname": "hash",
+ "title_field": "account_prefix",
+ "search_fields": "accounting_regime,cost_category",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ]
+}
