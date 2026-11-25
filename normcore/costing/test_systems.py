@@ -7,6 +7,8 @@ Không có phép tính tiền và không có công thức hệ số k (BR-CLS-00
 
 from decimal import Decimal, InvalidOperation
 
+from normcore.costing import qc_plans
+
 ACTIVE = "Đang dùng"
 INACTIVE = "Ngừng dùng"
 STATUSES = (ACTIVE, INACTIVE)
@@ -113,9 +115,9 @@ def share_warning(total) -> bool:
 	return Decimal(str(total)) != 100
 
 
-def status_items(volume=None) -> list:
-	"""Bốn mục khối tình trạng FR-CLS-007. Mục `volume` lấy từ FEAT-035 (ASM-035-10); ba mục còn lại
-	thuộc FEAT khác nên 'Chưa có' (ASM-115)."""
+def status_items(volume=None, qc_plan=None, cls_group=None) -> list:
+	"""Bốn mục khối tình trạng FR-CLS-007. Mục `volume` lấy từ FEAT-035 (ASM-035-10); mục `qc_plan` từ FEAT-032
+	(ASM-032-08, thay khi đã có kế hoạch chất lượng); hai mục còn lại thuộc FEAT khác nên 'Chưa có' (ASM-115)."""
 	spec = (
 		("norm_set", "Bộ định mức hiện hành", "FEAT-034"),
 		("qc_plan", "Kế hoạch chất lượng", "FEAT-032"),
@@ -130,4 +132,6 @@ def status_items(volume=None) -> list:
 
 			st = volume_status(volume)
 		out.append({"key": k, "label": lb, "source": src, **st})
+	if qc_plan is not None:
+		out[1] = qc_plans.plan_status_item(qc_plan, cls_group)
 	return out

@@ -21,6 +21,8 @@ Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
+Calculating…,Đang tính…
+Calibration,Chuẩn máy
 Calibration tests,Số test chuẩn máy
 Cancel,Hủy
 Cannot load the import summary.,Không tải được tóm tắt lần nhập.
@@ -41,6 +43,8 @@ Cost category,Loại chi phí
 Cost center,Trung tâm chi phí
 Costing completed.,Đã tính giá xong.
 Costing failed.,Tính giá lỗi.
+Could not calculate the estimated tests.,Không tính được số test ước tính.
+Could not calculate the summary.,Không tính được tóm tắt.
 Could not complete the request. Check your permissions.,Không thực hiện được yêu cầu. Kiểm tra quyền của bạn.
 Could not complete the request. See the message from the server.,Không thực hiện được yêu cầu. Xem thông báo từ máy chủ.
 Could not load chain status.,Không tải được tình trạng chuỗi.
@@ -89,6 +93,7 @@ Import data from Excel,Nhập dữ liệu từ Excel
 Import from Excel,Nhập từ Excel
 Import result,Kết quả nhập
 Inactive,Ngừng dùng,NC Technical Service
+Internal QC,Nội kiểm
 Labor,Nhân công
 Legal document,Văn bản
 Legal section,Mục văn bản
@@ -118,6 +123,7 @@ Name,Tên
 Needs review,Cần rà soát
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No file chosen,Chưa chọn tệp
+No participating services yet,Chưa có dịch vụ tham gia
 No permission to view,Không có quyền xem
 No price yet,Chưa có đơn giá,NC Item
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
@@ -127,6 +133,8 @@ None,Không có
 None yet,Chưa có
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Open editor,Mở trình soạn
+"Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
+Paraclinical,Cận lâm sàng
 Past useful life,Hết thời gian sử dụng,NC Equipment
 Performing department,Khoa thực hiện
 Phase,Giai đoạn
@@ -137,6 +145,7 @@ Price in use today,Đơn giá đang dùng hôm nay,NC Item
 Price per norm unit,Đơn giá một đơn vị định mức,NC Item
 Procedure editor,Trình soạn quy trình
 Publish,Ban hành
+Quality plan,Kế hoạch chất lượng
 Quantity,Số lượng
 Quote,Đoạn trích
 Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
@@ -153,6 +162,7 @@ Room hourly rate,Đơn giá giờ phòng,NC Room
 Row,Dòng,Import Excel
 Row ID,Mã dòng
 Run costing,Chạy tính giá
+Samples per year,Số mẫu mỗi năm
 Save,Lưu
 Save section,Lưu phần
 Save the form first.,Lưu biểu mẫu trước.
@@ -164,8 +174,11 @@ Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
 Select only one line to edit.,Chỉ chọn một dòng để sửa.
+Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
 Share (%),Tỷ trọng (%)
+Some lines are missing figures,Chưa đủ số liệu ở một số dòng
 Source,Nguồn giá,NC Item
+Split equally across {0} services ({1}% each),Chia đều cho {0} dịch vụ (mỗi dịch vụ {1}%)
 Status,Trạng thái
 Step ID,Mã bước
 Step title,Tên bước
@@ -191,6 +204,7 @@ Updated,Cập nhật,Import Excel
 "Updated {0} records, sent {1} notifications","Đã cập nhật {0} hồ sơ, gửi {1} thông báo"
 "Upload an Excel file by the template (Account code, Account name, Cost center code, Amount) then click Save.","Tải tệp Excel theo mẫu (Mã tài khoản, Tên tài khoản, Mã trung tâm chi phí, Số tiền) rồi bấm Lưu."
 Upload file,Tải tệp lên
+Used when volumes have no actual internal QC or calibration test counts (FR-QC-006),"Dùng khi sản lượng không có số test nội kiểm, chuẩn máy thực tế (FR-QC-006)"
 User,Người dùng
 User assigned to department.,Đã gán người dùng vào khoa.
 Utilities,"Điện, nước, nhiên liệu"
@@ -205,5 +219,6 @@ Will be estimated from the plan,Sẽ ước tính từ kế hoạch
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
 and {0} more errors,và {0} lỗi khác
+tests,test
 total share,tổng tỷ trọng
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
