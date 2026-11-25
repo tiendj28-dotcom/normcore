@@ -41,7 +41,9 @@ class TestVolumeErrors(unittest.TestCase):
 
 	def test_thieu_qbn(self):
 		self.assertEqual(fields(cv.volume_errors({"fiscal_year": 2026}.get)), ["patient_results"])
-		self.assertEqual(fields(cv.volume_errors({"fiscal_year": 2026, "patient_results": ""}.get)), ["patient_results"])
+		self.assertEqual(
+			fields(cv.volume_errors({"fiscal_year": 2026, "patient_results": ""}.get)), ["patient_results"]
+		)
 
 	def test_qbn_bang_0_hop_le(self):
 		self.assertEqual(cv.volume_errors({**GLU_B, "patient_results": 0}.get), [])
@@ -103,7 +105,8 @@ class TestResolveService(unittest.TestCase):
 
 
 class TestSystemMismatch(unittest.TestCase):
-	system = {"technical_service": "GLU", "department": "HS-CLS"}
+	def setUp(self):
+		self.system = {"technical_service": "GLU", "department": "HS-CLS"}
 
 	def test_khop(self):
 		self.assertEqual(cv.system_mismatch(self.system, "GLU", "HS-CLS"), [])
@@ -132,7 +135,9 @@ class TestBlankAux(unittest.TestCase):
 		self.assertEqual(cv.blank_aux(GLU_A.get), [])
 
 	def test_so_0_khong_phai_trong(self):
-		self.assertEqual(cv.blank_aux({**GLU_B, "iqc_tests": 0}.get), ["calibration_tests", "rerun_tests", "eqa_tests"])
+		self.assertEqual(
+			cv.blank_aux({**GLU_B, "iqc_tests": 0}.get), ["calibration_tests", "rerun_tests", "eqa_tests"]
+		)
 
 
 class TestUsageStock(unittest.TestCase):
@@ -147,7 +152,9 @@ class TestUsageStock(unittest.TestCase):
 		self.assertIn("Số kết quả", errs[0][1])
 
 	def test_usage_thieu_va_am(self):
-		self.assertEqual(fields(cv.usage_errors({"fiscal_year": 2026}.get, "Phút chiếm máy")), ["total_minutes"])
+		self.assertEqual(
+			fields(cv.usage_errors({"fiscal_year": 2026}.get, "Phút chiếm máy")), ["total_minutes"]
+		)
 		d = {"fiscal_year": 2026, "total_minutes": -1}
 		self.assertEqual(fields(cv.usage_errors(d.get, "Phút chiếm máy")), ["total_minutes"])
 

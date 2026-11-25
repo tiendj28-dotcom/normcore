@@ -102,7 +102,9 @@ def system_mismatch(system, service, department) -> list:
 			("service_code", f"Hệ thống thuộc dịch vụ {system.get('technical_service')}, dòng ghi {service}")
 		)
 	if not _blank(department) and department != system.get("department"):
-		errors.append(("department", f"Hệ thống thuộc khoa {system.get('department')}, dòng ghi {department}"))
+		errors.append(
+			("department", f"Hệ thống thuộc khoa {system.get('department')}, dòng ghi {department}")
+		)
 	return errors
 
 

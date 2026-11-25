@@ -37,6 +37,10 @@ SCOPE_RULES = {
 	"NC Clinical Procedure": ScopeRule(public_read={"workflow_state": "Đã ban hành"}),
 	"NC Norm Set": ScopeRule(),
 	"NC Test System": ScopeRule(),  # FR-ACC-008, ASM-113
+	# FEAT-035, ASM-035-07: Department Head đọc theo khoa
+	"NC Test System Volume": ScopeRule(),
+	"NC Equipment Usage": ScopeRule(),
+	"NC Stock Issue Actual": ScopeRule(),
 }
 
 

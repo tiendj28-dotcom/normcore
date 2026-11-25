@@ -153,12 +153,18 @@ permission_query_conditions = {
 	"NC Clinical Procedure": "normcore.core.permissions.permission_query_conditions",
 	"NC Norm Set": "normcore.core.permissions.permission_query_conditions",
 	"NC Test System": "normcore.core.permissions.permission_query_conditions",
+	"NC Test System Volume": "normcore.core.permissions.permission_query_conditions",
+	"NC Equipment Usage": "normcore.core.permissions.permission_query_conditions",
+	"NC Stock Issue Actual": "normcore.core.permissions.permission_query_conditions",
 }
 
 has_permission = {
 	"NC Clinical Procedure": "normcore.core.permissions.has_permission",
 	"NC Norm Set": "normcore.core.permissions.has_permission",
 	"NC Test System": "normcore.core.permissions.has_permission",
+	"NC Test System Volume": "normcore.core.permissions.has_permission",
+	"NC Equipment Usage": "normcore.core.permissions.has_permission",
+	"NC Stock Issue Actual": "normcore.core.permissions.has_permission",
 }
 
 # DocType Class

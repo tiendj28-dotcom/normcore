@@ -400,7 +400,9 @@ def process(
 			changed = {
 				k: v
 				for k, v in values.items()
-				if k not in import_set.keys and k in columns and normalize_existing(columns[k], existing.get(k)) != v
+				if k not in import_set.keys
+				and k in columns
+				and normalize_existing(columns[k], existing.get(k)) != v
 			}
 			if not changed:
 				result.unchanged += 1

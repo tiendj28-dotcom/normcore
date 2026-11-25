@@ -68,7 +68,7 @@ class TestPrepare(unittest.TestCase):
 	def test_cot_virtual_khong_duoc_ghi_va_prepare_bo_sung(self):
 		res, writes = run([[2026, "A", "X1", 5, None]], prepare=prep)
 		self.assertEqual(res.created, 1)
-		action, key, values = writes[0]
+		_, key, values = writes[0]
 		self.assertEqual(key, (2026, "A"))
 		self.assertNotIn("ma_ngoai", values)
 		self.assertEqual(values["dich_vu"], "DV-X1")
@@ -77,7 +77,9 @@ class TestPrepare(unittest.TestCase):
 
 	def test_row_value_error_nhieu_loi_o_ca_hai_che_do(self):
 		for mode in (im.MODE_DRY, im.MODE_WRITE):
-			res, writes = run([[2026, "A", "BAD", 5, None], [2026, "B", "OK", 1, None]], prepare=prep, mode=mode)
+			res, writes = run(
+				[[2026, "A", "BAD", 5, None], [2026, "B", "OK", 1, None]], prepare=prep, mode=mode
+			)
 			self.assertEqual(len(res.errors), 2)
 			self.assertEqual([e.row for e in res.errors], [2, 2])
 			self.assertEqual([e.column for e in res.errors], ["Mã ngoài", "Số"])
