@@ -333,3 +333,96 @@ NC_COST_CENTER_DRIVER = ImportSet(
 )
 
 register(NC_COST_CENTER_DRIVER)
+
+# FEAT-035, FR-ACCT-012..015: sản lượng cận lâm sàng, phút khai thác, xuất kho thực tế.
+# Cột `virtual` (nguồn mã, mã dịch vụ) chỉ để đổi mã ngoài sang mã dịch vụ ở `prepare` (ASM-035-01, 02).
+SOURCE_SYSTEMS = ("HIS", "LIS", "RIS")  # đúng tùy chọn NC Service Code Map.source_system
+
+NC_TEST_SYSTEM_VOLUME = ImportSet(
+	key="nc_test_system_volume",
+	label="Sản lượng cận lâm sàng",
+	doctype="NC Test System Volume",
+	key_field="test_system",
+	key_fields=("fiscal_year", "scenario", "test_system"),
+	prepare="normcore.api.cls_volume.prepare_test_system_volume",
+	columns=(
+		Column("fiscal_year", "Năm tài chính", "Int", required=True, example=2026),
+		Column(
+			"scenario",
+			"Kịch bản sản lượng",
+			"Select",
+			required=True,
+			options=SCENARIOS,
+			example="Thực tế 12 tháng",
+		),
+		Column(
+			"test_system",
+			"Mã hệ thống xét nghiệm",
+			"Link",
+			link_doctype="NC Test System",
+			required=True,
+			example="GLU-A",
+		),
+		Column(
+			"source_system", "Nguồn mã dịch vụ", "Select", options=SOURCE_SYSTEMS, virtual=True, example="LIS"
+		),
+		Column("service_code", "Mã dịch vụ", "Data", required=True, virtual=True, example="LIS-GLU"),
+		Column("department", "Mã khoa", "Link", link_doctype="NC Department", required=True, example="HS"),
+		Column("patient_results", "Số kết quả trả", "Float", required=True, example=12000),
+		Column("iqc_tests", "Số test nội kiểm", "Float", example=600),
+		Column("calibration_tests", "Số test chuẩn máy", "Float", example=48),
+		Column("rerun_tests", "Số test chạy lại", "Float", example=240),
+		Column("eqa_tests", "Số test ngoại kiểm", "Float", example=12),
+		Column("wastage_rate", "Tỷ lệ hao hụt (%)", "Float", example=3),
+		Column("avg_batch_size", "Cỡ mẻ bình quân", "Float", example=40),
+		Column("run_days", "Số ngày chạy máy", "Int", example=300),
+	),
+)
+
+register(NC_TEST_SYSTEM_VOLUME)
+
+NC_EQUIPMENT_USAGE = ImportSet(
+	key="nc_equipment_usage",
+	label="Phút khai thác thiết bị",
+	doctype="NC Equipment Usage",
+	key_field="equipment",
+	key_fields=("fiscal_year", "scenario", "equipment", "department"),
+	prepare="normcore.api.cls_volume.prepare_equipment_usage",
+	columns=(
+		Column("fiscal_year", "Năm tài chính", "Int", required=True, example=2026),
+		Column(
+			"scenario",
+			"Kịch bản sản lượng",
+			"Select",
+			required=True,
+			options=SCENARIOS,
+			example="Thực tế 12 tháng",
+		),
+		Column(
+			"equipment", "Mã thiết bị", "Link", link_doctype="NC Equipment", required=True, example="VD-TB01"
+		),
+		Column(
+			"department", "Mã khoa", "Link", link_doctype="NC Department", required=True, example="VD-K01"
+		),
+		Column("total_minutes", "Tổng số phút khai thác", "Float", required=True, example=120000),
+	),
+)
+
+register(NC_EQUIPMENT_USAGE)
+
+NC_STOCK_ISSUE_ACTUAL = ImportSet(
+	key="nc_stock_issue_actual",
+	label="Xuất kho thực tế",
+	doctype="NC Stock Issue Actual",
+	key_field="item",
+	key_fields=("fiscal_year", "department", "item"),
+	prepare="normcore.api.cls_volume.prepare_stock_issue",
+	columns=(
+		Column("fiscal_year", "Năm tài chính", "Int", required=True, example=2026),
+		Column("department", "Mã khoa", "Link", link_doctype="NC Department", required=True, example="XN"),
+		Column("item", "Mã mặt hàng", "Link", link_doctype="NC Item", required=True, example="HC_GLU"),
+		Column("issued_qty", "Lượng xuất (đơn vị mua)", "Float", required=True, example=94),
+	),
+)
+
+register(NC_STOCK_ISSUE_ACTUAL)
