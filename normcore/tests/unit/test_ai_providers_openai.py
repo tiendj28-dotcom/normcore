@@ -3,10 +3,7 @@
 import socket
 import unittest
 
-import requests
-
 from normcore.ai.providers import anthropic as anth
-from normcore.ai.providers import http
 from normcore.ai.providers.base import ProviderError, ProviderTimeout
 from normcore.ai.providers.openai_compat import OpenAICompatProvider
 
@@ -58,7 +55,7 @@ class TestOpenAICompat(unittest.TestCase):
 
 	def test_qua_han(self):
 		def post(url, headers, payload, timeout):
-			raise requests.exceptions.Timeout("read timed out")
+			raise TimeoutError("read timed out")
 
 		p = OpenAICompatProvider("k", "m", "http://x", timeout=5, post=post)
 		with self.assertRaises(ProviderTimeout) as e:
@@ -112,18 +109,3 @@ class TestAnthropicMoRong(unittest.TestCase):
 
 		anth.AnthropicProvider("k", "m", base_url="http://proxy.local/", post=post).complete("p", "T", {}, [])
 		self.assertEqual(seen["url"], "http://proxy.local/v1/messages")
-
-
-class TestDefaultPost(unittest.TestCase):
-	def test_timeout_thanh_provider_timeout(self):
-		orig = requests.post
-		try:
-
-			def boom(*a, **k):
-				raise requests.exceptions.ReadTimeout("x")
-
-			requests.post = boom
-			with self.assertRaises(ProviderTimeout):
-				http.default_post("http://x", {}, {}, 2)
-		finally:
-			requests.post = orig

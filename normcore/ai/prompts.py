@@ -2,10 +2,6 @@
 
 import json
 
-from jinja2 import StrictUndefined
-from jinja2.exceptions import TemplateError
-from jinja2.sandbox import SandboxedEnvironment
-
 
 class PromptError(Exception):
 	"""Mẫu lệnh hoặc lược đồ không hợp lệ."""
@@ -16,12 +12,18 @@ def _tojson(value):
 
 
 def _env():
+	# jinja2 do Frappe cài sẵn; import muộn để phần kiểm lược đồ chạy được ở CI unit thuần (không có jinja2)
+	from jinja2 import StrictUndefined
+	from jinja2.sandbox import SandboxedEnvironment
+
 	env = SandboxedEnvironment(undefined=StrictUndefined, autoescape=False)
 	env.filters["tojson"] = _tojson
 	return env
 
 
 def render(user_prompt: str, variables: dict, sources: list) -> str:
+	from jinja2.exceptions import TemplateError
+
 	try:
 		return _env().from_string(user_prompt).render(variables=variables or {}, sources=sources or [])
 	except TemplateError as e:
@@ -31,6 +33,8 @@ def render(user_prompt: str, variables: dict, sources: list) -> str:
 
 
 def check_syntax(user_prompt: str) -> None:
+	from jinja2.exceptions import TemplateError
+
 	try:
 		_env().parse(user_prompt)
 	except TemplateError as e:

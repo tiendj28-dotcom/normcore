@@ -6,26 +6,6 @@ from normcore.ai import prompts
 
 
 class TestPrompts(unittest.TestCase):
-	def test_render_tojson_giu_tieng_viet(self):
-		out = prompts.render(
-			"V={{ variables | tojson }} S={{ sources | join(',') }}", {"a": "Đã"}, ["S1", "S2"]
-		)
-		self.assertIn('"a": "Đã"', out)
-		self.assertIn("S1,S2", out)
-
-	def test_render_bien_thieu_bao_loi(self):
-		with self.assertRaises(prompts.PromptError):
-			prompts.render("{{ variables.khong_co }}", {}, [])
-
-	def test_render_sandbox_chan_truy_cap_nguy_hiem(self):
-		with self.assertRaises(prompts.PromptError):
-			prompts.render("{{ ''.__class__.__mro__ }}", {}, [])
-
-	def test_check_syntax(self):
-		prompts.check_syntax("{{ variables | tojson }}")
-		with self.assertRaises(prompts.PromptError):
-			prompts.check_syntax("{% if %}")
-
 	def test_parse_schema(self):
 		self.assertEqual(prompts.parse_schema('{"type": "object"}'), {"type": "object"})
 		for bad in ("", "[1]", "{khong json"):
