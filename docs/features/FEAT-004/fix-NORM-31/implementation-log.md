@@ -10,3 +10,4 @@ Pytest chạy bằng `~/frappe-bench/env/bin/python -m pytest`.
 - T06: sau khi sửa `nc_accounting_import.js` và thêm 3 khóa `vi.csv` → `pytest test_accounting_import_behavior.py test_accounting_ui_conventions.py test_vi_csv_order.py` 15 xanh.
 - T07: golden_engine, golden_cls thoát 0; build_rtm `VAN DE: 0`; pytest unit+golden 297 xanh, độ phủ costing/benchmark 99%; `scripts/with_bench.sh 'bench --site normcore.test migrate && bench --site normcore.test run-tests --app normcore'` → Ran 634 tests, OK; check_conventions thoát 0.
 - CI lần 1 đỏ do `ruff format --check` ở `allocation_rules.py`; đã chạy `ruff format`, xanh lại.
+- Gộp develop (conflict assumptions.md): đổi ASM-131→ASM-004-01 (docs/decisions/assumptions/FEAT-004.md), ASM-132→ASM-016-01 (FEAT-016.md) theo quyết định Lead và ASM-NORM32-02; giữ nguyên ASM-131…134 của FEAT-039.
