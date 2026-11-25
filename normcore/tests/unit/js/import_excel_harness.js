@@ -78,6 +78,7 @@ function snapshot(wrapper) {
 	const ie = wrapper.import_excel;
 	return {
 		value: ie.set_field.get_value(),
+		set_name: state.texts[".nc-import-set"],
 		file_url: ie.file_url,
 		btn_check_disabled: state.disabled["Check"],
 		message: state.texts[".nc-import-result"],
