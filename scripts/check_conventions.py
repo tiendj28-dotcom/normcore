@@ -53,6 +53,7 @@ MATRIX = {
 	"Số liệu kế toán, sản lượng, phân bổ": "- - - W - - R - R R",
 	"Nhật ký AI, sổ sự kiện": "- - - - - - R - R R",
 	"Cấu hình AI, mẫu lệnh": "- - - - - - - - W R",
+	"Ý kiến thẩm định": "R W W R - R W R R R",
 	# Ma trận không có dòng riêng: căn cứ ghi ở đây (ASM-008, G1 của NORM-12)
 	"NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)": "R R R R R W R R W R",
 	"NC Cost Center (G1: Admin, Finance ghi)": "R R R W R R R R W R",
@@ -82,6 +83,7 @@ DOCTYPE_ROW = {
 	"NC Service Cost": "Lần tính giá, kết quả, đối soát",
 	"NC AI Log": "Nhật ký AI, sổ sự kiện",
 	"NC Audit Event": "Nhật ký AI, sổ sự kiện",
+	"NC Review Comment": "Ý kiến thẩm định",
 	"NC Department": "NC Department (ASM-008: theo dòng Dịch vụ kỹ thuật)",
 	"NC Cost Center": "NC Cost Center (G1: Admin, Finance ghi)",
 }

@@ -13,6 +13,7 @@ from normcore.core import permissions as scope
 from normcore.procedure import approval, validation
 
 DT = "NC Clinical Procedure"
+COMMENT = "NC Review Comment"
 SETTINGS = "NC Settings"
 ROLE_CLINICIAN = "NC Clinician"
 ROLE_HEAD = "NC Department Head"
@@ -234,7 +235,57 @@ def get_review(procedure):
 
 
 def _comments_block(doc):
-	return {"comments_by_step": {}, "comments_by_section": {}, "comments_general": [], "open_comments": 0}
+	rows = frappe.get_all(
+		COMMENT,
+		{"ref_doctype": DT, "ref_name": doc.name},
+		["name", "owner", "creation", "target_section", "target_step_id", "comment", "resolved", "review_state"],
+		order_by="creation asc, name asc",
+	)
+	by_step, by_section, general = {}, {}, []
+	for r in rows:
+		if r.target_step_id:
+			by_step.setdefault(r.target_step_id, []).append(r)
+		elif r.target_section:
+			by_section.setdefault(r.target_section, []).append(r)
+		else:
+			general.append(r)
+	return {
+		"comments_by_step": by_step,
+		"comments_by_section": by_section,
+		"comments_general": general,
+		"open_comments": sum(1 for r in rows if not r.resolved),
+	}
+
+
+@frappe.whitelist()
+def add_review_comment(procedure, comment, target_section=None, target_step_id=None):
+	"""FR-WF-003: ghi ý kiến gắn phần hoặc mã bước."""
+	if not frappe.has_permission(COMMENT, "create") or not frappe.has_permission(DT, "read", doc=procedure):
+		_deny(_("Bạn không có quyền ghi ý kiến thẩm định"))
+	doc = frappe.get_doc(
+		{
+			"doctype": COMMENT,
+			"ref_doctype": DT,
+			"ref_name": procedure,
+			"comment": comment,
+			"target_section": target_section or None,
+			"target_step_id": target_step_id or None,
+		}
+	)
+	doc.insert(ignore_permissions=True)
+	return {"name": doc.name}
+
+
+@frappe.whitelist()
+def set_comment_resolved(name, resolved):
+	if not frappe.has_permission(COMMENT, "write", doc=name):
+		_deny(_("Bạn không có quyền sửa ý kiến thẩm định"))
+	doc = frappe.get_doc(COMMENT, name)
+	if not frappe.has_permission(DT, "read", doc=doc.ref_name):
+		_deny(_("Bạn không có quyền xem quy trình này"))
+	doc.resolved = 1 if str(resolved) in ("1", "true", "True") else 0
+	doc.save(ignore_permissions=True)
+	return {"resolved": doc.resolved}
 
 
 # ---- tác vụ ngày -----------------------------------------------------------------------------------------
