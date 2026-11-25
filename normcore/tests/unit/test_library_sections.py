@@ -1,7 +1,5 @@
 """Tách mục (FR-LIB-003, FEAT-020). Không cần site."""
 
-import pytest
-
 from normcore.library.extract import ExtractionError, Page, needs_ocr
 from normcore.library.sections import split_sections
 
@@ -62,8 +60,13 @@ def test_FR_LIB_003_heading_cat_140_ky_tu():
 
 
 def test_FR_LIB_005_khong_co_chu_thi_loi():
-	with pytest.raises(ExtractionError, match="Không tách được mục nào"):
+	# không import pytest: bước "run-tests --app" của CI trên site không cài pytest
+	try:
 		split_sections([Page(1, " \n "), Page(2, "")], True)
+	except ExtractionError as e:
+		assert "Không tách được mục nào" in str(e)
+	else:
+		raise AssertionError("phải ném ExtractionError")
 
 
 def test_FR_LIB_004_needs_ocr():

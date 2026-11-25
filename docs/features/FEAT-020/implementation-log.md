@@ -11,3 +11,4 @@
 | T07 | `pytest test_library_ui_conventions.py test_vi_csv_order.py`; `with_bench 'migrate && bench build --app normcore'` | 15 passed; build DONE; node --check 3 tệp JS ok | 785ae4d |
 | T08 | `python3 docs/tools/build_rtm.py docs` | VAN DE: 0 (rtm.md, verification-report.md chỉ đổi ngày sinh, đã hoàn nguyên) | 674beff |
 | T09 | golden_engine + golden_cls; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90`; `with_bench 'migrate && run-tests --app normcore'`; check_conventions.py | golden exit 0; pytest 483 passed, cov 98,64%; bench Ran 968 tests OK; conventions exit 0; build_rtm VAN DE: 0 | 86ea096 |
+| CI-fix | CI đỏ: `ModuleNotFoundError: pytest` ở test_library_sections.py (bước run-tests --app không cài pytest); bỏ `import pytest` | pytest 10 passed; import không cần pytest OK | 425ee07 |
