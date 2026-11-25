@@ -7,3 +7,4 @@ Pytest chạy bằng `~/frappe-bench/env/bin/python -m pytest`.
 - T03: test_N31_07 đỏ trước khi sửa (1 đỏ/11 xanh), sau khi thêm `DRIVER_LABELS` → `pytest test_allocation_rules.py` 12 xanh, `test_driver_errors` cũ không đổi.
 - T04: `scripts/with_bench.sh 'bench --site normcore.test migrate && bench --site normcore.test run-tests --app normcore --module ...test_nc_cost_center_driver'` → Ran 4 tests, OK (gồm test_N31_08).
 - T05: `pytest test_accounting_import_behavior.py` với `nc_accounting_import.js` của develop → 4 đỏ (N31-09, N31-10 x2, N31-11).
+- T06: sau khi sửa `nc_accounting_import.js` và thêm 3 khóa `vi.csv` → `pytest test_accounting_import_behavior.py test_accounting_ui_conventions.py test_vi_csv_order.py` 15 xanh.

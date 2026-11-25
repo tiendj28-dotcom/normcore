@@ -63,6 +63,7 @@ Duplicate,Nhân bản,NC Costing Parameter Set
 Edit,Sửa
 Edit cost category,Sửa loại chi phí
 Edit cost category of a line,Sửa loại chi phí của một dòng
+"Edit cost category: line {0}, account {1}","Sửa loại chi phí: dòng {0}, tài khoản {1}"
 Equipment is allocated by machine minutes,Thiết bị chia theo phút chiếm máy
 Error,Lỗi
 Errors,Lỗi,Import Excel
@@ -153,6 +154,8 @@ Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
 Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
+Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
+Select only one line to edit.,Chỉ chọn một dòng để sửa.
 Share (%),Tỷ trọng (%)
 Source,Nguồn giá,NC Item
 Status,Trạng thái
