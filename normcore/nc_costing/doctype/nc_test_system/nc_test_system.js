@@ -16,16 +16,19 @@ function render_status(frm) {
 		callback(r) {
 			if (frm.doc.name !== name || !r.message) return;
 			const esc = frappe.utils.escape_html;
-			const colors = { ok: "green", estimated: "orange" };
+			const colors = { ok: "green", estimated: "orange", warning: "orange" };
 			const cards = r.message.items
 				.map((i) => {
 					const pill =
 						`<span class="indicator-pill ${colors[i.state] || "gray"}"><span>${esc(i.message)}</span></span>`;
 					// FEAT-035: mục sản lượng dẫn tới danh sách NC Test System Volume của hệ thống này
-					const body =
-						i.key === "volume" && i.state !== "empty"
-							? `<a href="/app/nc-test-system-volume?test_system=${encodeURIComponent(name)}">${pill}</a>`
-							: pill;
+					// FEAT-032: mục kế hoạch chất lượng dẫn tới kế hoạch của hệ thống
+					let body = pill;
+					if (i.key === "volume" && i.state !== "empty") {
+						body = `<a href="/app/nc-test-system-volume?test_system=${encodeURIComponent(name)}">${pill}</a>`;
+					} else if (i.key === "qc_plan" && i.state !== "empty") {
+						body = `<a href="/app/nc-qc-plan/${encodeURIComponent("KHCL-" + name)}">${pill}</a>`;
+					}
 					return `<div class="nc-ts-card"><b>${esc(i.label)}</b><div>${body}</div></div>`;
 				})
 				.join("");
@@ -51,6 +54,23 @@ function render_status(frm) {
 			);
 			wrapper.find(".nc-ts-retry").on("click", () => render_status(frm));
 		},
+	});
+}
+
+function add_qc_plan_button(frm) {
+	// FEAT-032, SCR-DSK-033: mở kế hoạch chất lượng của hệ thống, hoặc lập mới khi chưa có
+	frappe.db.get_value("NC QC Plan", { test_system: frm.doc.name }, "name").then((r) => {
+		const plan = r.message && r.message.name;
+		const group = __("Paraclinical");
+		if (plan) {
+			frm.add_custom_button(__("Quality plan"), () => frappe.set_route("Form", "NC QC Plan", plan), group);
+		} else if (frappe.model.can_create("NC QC Plan")) {
+			frm.add_custom_button(
+				__("Quality plan"),
+				() => frappe.new_doc("NC QC Plan", { test_system: frm.doc.name }),
+				group
+			);
+		}
 	});
 }
 
@@ -96,6 +116,7 @@ frappe.ui.form.on("NC Test System", {
 	refresh(frm) {
 		render_status(frm);
 		toggle_minutes(frm);
+		if (!frm.is_new()) add_qc_plan_button(frm);
 		if (!frm.is_new() && frm.perm[0] && frm.perm[0].write) {
 			if (frm.doc.status === "Đang dùng") {
 				frm.add_custom_button(__("Deactivate"), () => change_status(frm, "Ngừng dùng"));

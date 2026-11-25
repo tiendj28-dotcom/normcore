@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "autoname": "format:KHCL-{test_system}",
+ "creation": "2026-11-25 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_system",
+  "col_right",
+  "run_days_per_year",
+  "iqc_section",
+  "iqc_lines",
+  "cal_section",
+  "calibration_lines",
+  "estimate_section",
+  "estimate_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_system",
+   "label": "Hệ thống xét nghiệm",
+   "fieldtype": "Link",
+   "options": "NC Test System",
+   "reqd": 1,
+   "unique": 1,
+   "set_only_once": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_right",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "run_days_per_year",
+   "label": "Số ngày chạy mỗi năm",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "Ký hiệu D khi sản lượng không có số ngày thực tế"
+  },
+  {
+   "fieldname": "iqc_section",
+   "fieldtype": "Section Break",
+   "label": "Nội kiểm"
+  },
+  {
+   "fieldname": "iqc_lines",
+   "label": "Nội kiểm",
+   "fieldtype": "Table",
+   "options": "NC QC IQC Line"
+  },
+  {
+   "fieldname": "cal_section",
+   "fieldtype": "Section Break",
+   "label": "Chuẩn máy"
+  },
+  {
+   "fieldname": "calibration_lines",
+   "label": "Chuẩn máy",
+   "fieldtype": "Table",
+   "options": "NC QC Calibration Line"
+  },
+  {
+   "fieldname": "estimate_section",
+   "fieldtype": "Section Break",
+   "label": "Số test ước tính"
+  },
+  {
+   "fieldname": "estimate_html",
+   "label": "Số test ước tính mỗi năm",
+   "fieldtype": "HTML"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC QC Plan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "search_fields": "test_system",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "test_system",
+ "track_changes": 1
+}

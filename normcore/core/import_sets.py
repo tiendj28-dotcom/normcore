@@ -249,6 +249,27 @@ NC_TEST_SYSTEM = ImportSet(
 
 register(NC_TEST_SYSTEM)
 
+# FEAT-032, FR-CLS-008 (phần kế hoạch chất lượng, ASM-032-07): chỉ phần đầu kế hoạch; bảng nội kiểm, chuẩn máy khai trên form.
+NC_QC_PLAN = ImportSet(
+	key="nc_qc_plan",
+	label="Kế hoạch chất lượng",
+	doctype="NC QC Plan",
+	key_field="test_system",
+	columns=(
+		Column(
+			"test_system",
+			"Mã hệ thống xét nghiệm",
+			"Link",
+			required=True,
+			link_doctype="NC Test System",
+			example="GLU-A",
+		),
+		Column("run_days_per_year", "Số ngày chạy mỗi năm", "Int", required=True, example=300),
+	),
+)
+
+register(NC_QC_PLAN)
+
 # FEAT-016, FR-ACCT-009: bảng ánh xạ tài khoản; khóa ghép (chế độ, tiền tố) (ASM-124).
 NC_ACCOUNT_MAPPING = ImportSet(
 	key="nc_account_mapping",

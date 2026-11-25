@@ -1,0 +1,166 @@
+{
+ "actions": [],
+ "autoname": "field:eqa_code",
+ "creation": "2026-11-25 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "eqa_code",
+  "program_name",
+  "provider",
+  "col_right",
+  "department",
+  "rounds_per_year",
+  "samples_per_round",
+  "fee_section",
+  "annual_fee",
+  "fee_col",
+  "annual_shipping_fee",
+  "svc_section",
+  "services",
+  "summary_section",
+  "summary_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "eqa_code",
+   "label": "Mã chương trình",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "program_name",
+   "label": "Tên chương trình",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "provider",
+   "label": "Đơn vị triển khai",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_right",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa tham gia",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "rounds_per_year",
+   "label": "Số đợt mỗi năm",
+   "fieldtype": "Int",
+   "reqd": 1
+  },
+  {
+   "fieldname": "samples_per_round",
+   "label": "Số mẫu mỗi đợt",
+   "fieldtype": "Int",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fee_section",
+   "fieldtype": "Section Break",
+   "label": "Phí"
+  },
+  {
+   "fieldname": "annual_fee",
+   "label": "Phí chương trình năm",
+   "fieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fee_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "annual_shipping_fee",
+   "label": "Phí vận chuyển năm",
+   "fieldtype": "Currency",
+   "default": "0"
+  },
+  {
+   "fieldname": "svc_section",
+   "fieldtype": "Section Break",
+   "label": "Dịch vụ tham gia"
+  },
+  {
+   "fieldname": "services",
+   "label": "Dịch vụ tham gia",
+   "fieldtype": "Table",
+   "options": "NC EQA Service",
+   "reqd": 1
+  },
+  {
+   "fieldname": "summary_section",
+   "fieldtype": "Section Break",
+   "label": "Tóm tắt"
+  },
+  {
+   "fieldname": "summary_html",
+   "label": "Tóm tắt",
+   "fieldtype": "HTML"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC EQA Program",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "search_fields": "program_name,provider,department",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "program_name",
+ "track_changes": 1
+}

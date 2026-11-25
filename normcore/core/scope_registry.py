@@ -39,6 +39,8 @@ def load_scope_rules(directory=None) -> dict:
 			"department_field": data.get("department_field") or "department",
 			"public_read": dict(data.get("public_read") or {}),
 		}
+		if data.get("via"):  # FEAT-032: khoa lấy qua bản ghi Link: [trường Link, DocType đích]
+			rules[data["doctype"]]["via"] = tuple(data["via"])
 	return rules
 
 
