@@ -36,18 +36,41 @@
 		<template v-if="doc">
 			<div class="nc-pe__title">
 				<strong>{{ doc.name }}</strong>
-				<span class="indicator-pill" :class="doc.workflow_state === published ? 'green' : 'gray'">{{ doc.workflow_state }}</span>
+				<span class="indicator-pill" :class="stateColor(doc.workflow_state)">{{ __(doc.workflow_state) }}</span>
 				<span v-if="doc.needs_review" class="indicator-pill orange">{{ __("Needs review") }}</span>
 			</div>
-			<div v-if="!doc.can_edit" class="nc-pe__notice" role="note">
-				{{ doc.workflow_state === published ? __("This procedure is issued and read-only.") : __("You can only view this procedure.") }}
+			<div v-if="review" class="nc-pe__reviewbar" role="toolbar" :aria-label="__('Review actions')">
+				<button v-for="a in primaryActions" :key="a" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="openAction(a)">{{ __(a) }}</button>
+				<button v-if="review.actions.includes(reject)" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openAction(reject)">{{ __(reject) }}</button>
+				<button type="button" class="btn btn-default btn-sm" @click="download('download_pdf')">{{ __("Print PDF") }}</button>
+				<button type="button" class="btn btn-default btn-sm" @click="download('download_docx')">{{ __("Download DOCX") }}</button>
+				<span v-if="review.open_comments" class="nc-pe__open" :aria-label="review.open_comments + ' ' + __('open comments')">{{ __("Open comments") }}: {{ review.open_comments }}</span>
 			</div>
+			<div v-if="reviewError" class="nc-pe__error" role="alert">{{ reviewError }}</div>
+			<div v-if="review && doc.workflow_state !== draft && !closed" class="nc-pe__notice" role="note">{{ __("This procedure is awaiting approval and cannot be edited.") }}</div>
+			<div v-else-if="closed" class="nc-pe__notice" role="note">{{ __("This procedure is issued or closed and cannot be edited. Create a new version in the revision function.") }}</div>
+			<div v-else-if="!doc.can_edit" class="nc-pe__notice" role="note">{{ __("You can only view this procedure.") }}</div>
+			<div v-if="review && review.last_reject && doc.workflow_state === draft" class="nc-pe__reject" role="note">
+				{{ __("Rejected by") }} {{ review.last_reject.by }}: {{ review.last_reject.reason }}
+			</div>
+			<section v-if="review && doc.workflow_state !== draft" class="nc-pe__dev" :aria-label="__('Deviations summary')">
+				<h4 class="nc-pe__h">{{ __("Deviations summary") }}</h4>
+				<div v-if="!review.deviations.length" class="text-muted">{{ __("No deviations or unsupported items.") }}</div>
+				<ul v-else class="nc-pe__devlist">
+					<li v-for="d in review.deviations" :key="d.idx">
+						<span class="nc-pe__rel" :class="relClass(d.relation)">{{ __(d.relation) }}</span>
+						<a href="#" @click.prevent="jump(d)">{{ d.target_step_id || __(d.target_section) }}</a>
+						<span v-if="d.deviation_reason" class="text-muted"> — {{ d.deviation_reason }}</span>
+					</li>
+				</ul>
+			</section>
 
 			<div class="nc-pe__layout">
 				<div class="nc-pe__main">
 					<section v-for="s in doc.sections" :key="s.key" class="nc-pe__section">
 						<h4 class="nc-pe__h" :class="{ 'nc-pe__h--sel': isSelected('section', s.label) }">
 							<button type="button" class="nc-pe__link" @click="select('section', s.label)">{{ __(s.label) }}</button>
+							<span v-if="badge('section', s.label)" class="nc-pe__badge" :aria-label="badge('section', s.label) + ' ' + __('open comments')">{{ __("Comments") }}: {{ badge('section', s.label) }}</span>
 						</h4>
 
 						<template v-if="s.key !== 'steps'">
@@ -76,6 +99,7 @@
 									<button type="button" class="nc-pe__link" @click="select('step', st.step_id)">
 										<strong>{{ st.step_id }}</strong> · {{ __(st.phase) }} · {{ st.step_title }}
 									</button>
+									<span v-if="badge('step', st.step_id)" class="nc-pe__badge" :aria-label="badge('step', st.step_id) + ' ' + __('open comments')">{{ __("Comments") }}: {{ badge('step', st.step_id) }}</span>
 									<span v-if="doc.can_edit" class="nc-pe__actions">
 										<button type="button" class="btn btn-default btn-xs" :disabled="i === 0 || busy" :aria-label="__('Move step up') + ' ' + st.step_id" :data-move="st.step_id + ':up'" @click="move(i, -1, $event)">{{ __("Up") }}</button>
 										<button type="button" class="btn btn-default btn-xs" :disabled="i === doc.steps.length - 1 || busy" :aria-label="__('Move step down') + ' ' + st.step_id" :data-move="st.step_id + ':down'" @click="move(i, 1, $event)">{{ __("Down") }}</button>
@@ -139,6 +163,26 @@
 						{{ __("Add citation") }}
 					</button>
 					<div class="text-muted nc-pe__hint">{{ __("Legal text links are provided by the document library.") }}</div>
+					<div v-if="review" class="nc-pe__comments">
+						<h4 class="nc-pe__h">{{ __("Review comments") }}</h4>
+						<label class="nc-pe__only"><input v-model="onlyOpen" type="checkbox" /> {{ __("Only unresolved") }}</label>
+						<div v-if="!shownComments.length" class="text-muted">{{ __("No review comments yet.") }}</div>
+						<div v-for="c in shownComments" :key="c.name" class="nc-pe__comment" :class="{ 'text-muted': c.resolved }">
+							<div class="text-muted">{{ c.owner }} · {{ __(c.review_state) }} · {{ c.creation }}<span v-if="c.target_step_id"> · {{ c.target_step_id }}</span><span v-else-if="c.target_section"> · {{ __(c.target_section) }}</span></div>
+							<div>{{ c.comment }}</div>
+							<label v-if="canResolve"><input type="checkbox" :checked="!!c.resolved" @change="resolve(c, $event.target.checked)" /> {{ __("Resolved") }}</label>
+							<span v-else-if="c.resolved">{{ __("Resolved") }}</span>
+						</div>
+						<form v-if="canComment" class="nc-pe__form nc-pe__form--comment" @submit.prevent="submitComment">
+							<select v-model="commentForm.target" class="form-control" :aria-label="__('Attach to')">
+								<option value="">{{ __("General comment") }}</option>
+								<option v-for="sec in textSections" :key="sec.label" :value="'section:' + sec.label">{{ __(sec.label) }}</option>
+								<option v-for="st in doc.steps" :key="st.step_id" :value="'step:' + st.step_id">{{ st.step_id }}</option>
+							</select>
+							<textarea v-model="commentForm.text" class="form-control" rows="3" :aria-label="__('Comment')" required></textarea>
+							<button type="submit" class="btn btn-primary btn-sm" :disabled="busy">{{ __("Save comment") }}</button>
+						</form>
+					</div>
 				</aside>
 			</div>
 
@@ -182,6 +226,26 @@
 
 <script>
 const API = "normcore.api.procedure.";
+const WF = "normcore.api.procedure_workflow.";
+const PRIMARY = ["Gửi duyệt", "Đồng ý", "Thông qua", "Ban hành"];
+const CLOSED = ["Đã ban hành", "Đã thay thế", "Đã thu hồi"];
+// Màu chỉ báo theo design.md mục 3
+const STATE_COLOR = { "Nháp": "gray", "Chờ trưởng khoa duyệt": "orange", "Chờ hội đồng thẩm định": "orange", "Chờ ban hành": "orange", "Đã ban hành": "green", "Đã thay thế": "darkgrey", "Đã thu hồi": "red" };
+const NEXT_LABEL = { "Gửi duyệt": "Chờ trưởng khoa duyệt", "Đồng ý": "Chờ hội đồng thẩm định", "Thông qua": "Chờ ban hành" };
+
+// Các dòng lỗi của máy chủ (frappe.throw nối bằng <br>), mỗi lỗi một dòng.
+function linesFromError(r) {
+	if (!r || !r._server_messages) return [];
+	try {
+		return JSON.parse(r._server_messages)
+			.map((m) => (typeof m === "string" && m.startsWith("{") ? JSON.parse(m).message : m))
+			.flatMap((m) => String(m).split(/<br\s*\/?>/i))
+			.map((m) => m.replace(/<[^>]*>/g, "").trim())
+			.filter(Boolean);
+	} catch (e) {
+		return [];
+	}
+}
 
 // Lấy nội dung lỗi của máy chủ (frappe.throw → _server_messages) thành chữ thuần để hiện ở dải lỗi.
 function messageFromError(r) {
@@ -218,6 +282,12 @@ export default {
 			relations: ["Theo hướng dẫn", "Khác biệt", "Chưa có căn cứ"],
 			suggestions: [],
 			form: { kind: "" },
+			review: null,
+			reviewError: "",
+			draft: "Nháp",
+			reject: "Từ chối",
+			onlyOpen: false,
+			commentForm: { target: "", text: "" },
 		};
 	},
 	computed: {
@@ -227,6 +297,34 @@ export default {
 		},
 		isLabor() {
 			return this.form.resource_type === "Nhân lực";
+		},
+		closed() {
+			return !!this.doc && CLOSED.includes(this.doc.workflow_state);
+		},
+		primaryActions() {
+			return PRIMARY.filter((a) => this.review && this.review.actions.includes(a));
+		},
+		textSections() {
+			return this.doc.sections.filter((x) => x.key !== "steps");
+		},
+		allComments() {
+			const r = this.review;
+			if (!r) return [];
+			const rows = [...r.comments_general, ...Object.values(r.comments_by_section).flat(), ...Object.values(r.comments_by_step).flat()];
+			return rows.sort((a, b) => String(a.creation).localeCompare(String(b.creation)));
+		},
+		shownComments() {
+			const sel = this.selection;
+			let rows = this.allComments;
+			if (sel.key) rows = rows.filter((c) => (sel.type === "step" ? c.target_step_id === sel.key : c.target_section === sel.key));
+			return this.onlyOpen ? rows.filter((c) => !c.resolved) : rows;
+		},
+		canResolve() {
+			return !!this.review && frappe.model.can_write("NC Review Comment");
+		},
+		canComment() {
+			// Ghi ý kiến chỉ ở trạng thái chờ duyệt, người có quyền tạo NC Review Comment (Auditor không)
+			return !!this.review && !this.closed && this.doc.workflow_state !== this.draft && frappe.model.can_create("NC Review Comment");
 		},
 	},
 	mounted() {
@@ -295,13 +393,113 @@ export default {
 					this.doc = doc;
 					this.drafts = Object.fromEntries(doc.sections.filter((s) => s.key !== "steps").map((s) => [s.key, s.value || ""]));
 					this.citations = this.selection.key ? this.citations : [];
-					return this.selection.key ? this.loadCitations() : null;
+					return Promise.all([this.loadReview(), this.selection.key ? this.loadCitations() : null]);
 				})
 				.catch(() => {})
 				.finally(() => (this.loading = false));
 		},
 		reload() {
 			return this.load(this.doc.name);
+		},
+		// --- thẩm định và duyệt (FEAT-007, SCR-DSK-010) ---
+		callWf(method, args) {
+			let serverError = null;
+			return Promise.resolve(
+				frappe.call({ method: WF + method, args, freeze: false, silent: true, error(r) { serverError = r; } })
+			)
+				.then((r) => r.message)
+				.catch((e) => {
+					const err = new Error("workflow call failed");
+					err.lines = linesFromError(serverError || (e && e.responseJSON));
+					throw err;
+				});
+		},
+		loadReview() {
+			this.reviewError = "";
+			return this.callWf("get_review", { procedure: this.doc.name })
+				.then((r) => {
+					this.review = r && r.actions ? r : null;
+				})
+				.catch((e) => {
+					this.review = null;
+					this.reviewError = (e.lines && e.lines[0]) || __("You do not have permission to view this procedure");
+				});
+		},
+		stateColor(state) {
+			return STATE_COLOR[state] || "gray";
+		},
+		badge(type, key) {
+			const rows = this.allComments.filter((c) => !c.resolved && (type === "step" ? c.target_step_id === key : c.target_section === key));
+			return rows.length;
+		},
+		jump(d) {
+			return this.select(d.target_step_id ? "step" : "section", d.target_step_id || d.target_section);
+		},
+		download(method) {
+			window.open("/api/method/" + WF + method + "?procedure=" + encodeURIComponent(this.doc.name));
+		},
+		resolve(c, value) {
+			return this.run(() => this.callWf("set_comment_resolved", { name: c.name, resolved: value ? 1 : 0 }).then(() => this.loadReview()).catch((e) => (this.error = (e.lines || [])[0] || "")));
+		},
+		submitComment() {
+			const [kind, key] = (this.commentForm.target || ":").split(":");
+			const args = { procedure: this.doc.name, comment: this.commentForm.text };
+			if (kind === "step") args.target_step_id = key;
+			else if (kind === "section") args.target_section = key;
+			return this.run(() =>
+				this.callWf("add_review_comment", args)
+					.then(() => {
+						this.commentForm.text = "";
+						return this.loadReview();
+					})
+					.catch((e) => (this.error = (e.lines || [])[0] || ""))
+			);
+		},
+		// Hộp thoại của Desk (không tự tạo kiểu); lỗi máy chủ hiện ngay trong hộp thoại, từng lỗi một dòng.
+		openAction(action) {
+			const fields = [];
+			let message = "";
+			if (action === this.reject) fields.push({ fieldname: "reason", fieldtype: "Small Text", label: __("Rejection reason"), reqd: 1 });
+			else if (action === "Ban hành") {
+				fields.push({ fieldname: "decision_no", fieldtype: "Data", label: __("Decision number"), reqd: 1 });
+				fields.push({ fieldname: "effective_date", fieldtype: "Date", label: __("Effective date"), reqd: 1, default: frappe.datetime.get_today() });
+				message = __("After issuing, the content of this version cannot be edited.");
+			} else if (action === "Gửi duyệt") message = __("After submitting, the procedure cannot be edited until it is returned.");
+			else message = __("The procedure will move to") + " " + __(NEXT_LABEL[action]) + ".";
+			fields.push({ fieldname: "errors", fieldtype: "HTML" });
+			const dialog = new frappe.ui.Dialog({
+				title: __(action),
+				fields: message ? [{ fieldname: "msg", fieldtype: "HTML", options: "<p>" + frappe.utils.escape_html(message) + "</p>" }, ...fields] : fields,
+				primary_action_label: __(action),
+				primary_action: (values) => this.doAction(action, values, dialog),
+			});
+			dialog.show();
+		},
+		showDialogErrors(dialog, lines) {
+			const items = lines.map((l) => "<li>" + frappe.utils.escape_html(l).replace(/(S\d{3})/g, '<a href="#" data-step="$1">$1</a>') + "</li>");
+			const html = '<div class="nc-pe__error" role="alert"><strong>' + frappe.utils.escape_html(__("Could not complete this action")) + "</strong><ul>" + items.join("") + "</ul></div>";
+			const wrapper = dialog.fields_dict.errors.$wrapper;
+			wrapper.html(html);
+			wrapper.find("a[data-step]").on("click", (ev) => {
+				ev.preventDefault();
+				dialog.hide();
+				this.select("step", ev.currentTarget.dataset.step);
+			});
+		},
+		doAction(action, values, dialog) {
+			const args = { procedure: this.doc.name, action };
+			if (values.reason) args.reason = values.reason;
+			if (values.decision_no) args.decision_no = values.decision_no;
+			if (values.effective_date) args.effective_date = values.effective_date;
+			return this.run(() =>
+				this.callWf("apply_action", args)
+					.then((r) => {
+						dialog.hide();
+						frappe.show_alert({ message: __("Moved to") + " " + __(r.workflow_state), indicator: "green" });
+						return this.refreshList().then(() => this.reload());
+					})
+					.catch((e) => this.showDialogErrors(dialog, e.lines && e.lines.length ? e.lines : [__("Could not complete the request. See the message from the server.")]))
+			);
 		},
 		// --- biểu mẫu ---
 		openForm(kind, row, stepId) {
@@ -570,6 +768,57 @@ export default {
 .nc-pe__error {
 	color: var(--red-600);
 	margin-bottom: var(--margin-md);
+}
+.nc-pe__reviewbar {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	display: flex;
+	gap: var(--padding-sm);
+	align-items: center;
+	flex-wrap: wrap;
+	background: var(--card-bg);
+	border-bottom: 1px solid var(--border-color);
+	padding: var(--padding-sm) 0;
+	margin-bottom: var(--margin-md);
+}
+.nc-pe__open {
+	margin-left: auto;
+	font-weight: 600;
+}
+.nc-pe__reject {
+	background: var(--yellow-100);
+	color: var(--text-color);
+	border: 1px solid var(--yellow-500);
+	padding: var(--padding-sm) var(--padding-md);
+	margin-bottom: var(--margin-md);
+}
+.nc-pe__dev {
+	margin-bottom: var(--margin-md);
+}
+.nc-pe__devlist {
+	padding-left: var(--padding-lg);
+}
+.nc-pe__badge {
+	font-size: var(--text-xs);
+	font-weight: 600;
+	color: var(--orange-700);
+	margin-left: var(--margin-sm);
+}
+.nc-pe__comments {
+	margin-top: var(--margin-lg);
+	border-top: 1px solid var(--border-color);
+	padding-top: var(--padding-md);
+}
+.nc-pe__comment {
+	border-bottom: 1px solid var(--border-color);
+	padding: var(--padding-sm) 0;
+}
+.nc-pe button:focus-visible,
+.nc-pe a:focus-visible,
+.nc-pe select:focus-visible,
+.nc-pe textarea:focus-visible {
+	outline: 2px solid var(--primary);
 }
 .nc-pe__hint {
 	margin-top: var(--margin-md);
