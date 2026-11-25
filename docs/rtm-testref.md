@@ -119,7 +119,7 @@
 | FR-CLS-008 | `test_TC_CLS_23_dong_thiet_bi_la_bao_loi_dong_dung_duoc_luu`, `test_cap_nhat_theo_ma_va_loi_nghiep_vu_thanh_loi_dong` |
 | FR-ACC-008 | `test_TC_CLS_22_clinician_khoa_khac_khong_sua_duoc` (nc_test_system), `test_TC_CLS_22_clinician_khoa_khac_bi_tu_choi` (api/test_test_system.py), `test_khoa_khong_duoc_gan_thanh_loi_dong` |
 
-# Test ref — FEAT-007 (ghi bởi Dev NORM-34; chờ kiểm định độc lập)
+# Test ref — FEAT-007 (Dev NORM-34 ghi; QA độc lập NORM-44 kiểm định, accepted)
 
 | FR | Test thật |
 | :-- | :-- |

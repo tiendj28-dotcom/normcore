@@ -1,5 +1,5 @@
 # As-Built: FEAT-007 Phê duyệt ba cấp, ban hành, in
-- Phiên bản app 0.0.1; Dev: NORM-34; nghiệm thu: chờ QA (chưa có `acceptance.md`, `verdict.json`)
+- Phiên bản app 0.0.1; Dev: NORM-34; nghiệm thu: Tester iu (QA độc lập, NORM-44), verdict accepted ở `223e8af`
 
 ## 1. Luồng nghiệp vụ đã xây
 Nháp → (Gửi duyệt, NC Clinician có quyền ghi quy trình) Chờ trưởng khoa duyệt → (Đồng ý, trưởng khoa cùng khoa) Chờ hội đồng thẩm định → (Thông qua, thư ký hội đồng) Chờ ban hành → (Ban hành, NC Director, bắt buộc số quyết định và ngày hiệu lực) Đã ban hành. "Từ chối" ở ba cấp chờ về Nháp, bắt buộc lý do, thông báo người soạn, lý do ghi vào sổ sự kiện (`NC Audit Event.detail`) và Comment "Workflow"; ý kiến thẩm định được giữ. Gửi duyệt kiểm FR-PROC-008, FR-PROC-012 và không còn đề xuất AI chưa xử lý, liệt kê hết lỗi một lần, giữ Nháp. Tác vụ ngày chuyển bản "Đã ban hành" cũ sang "Đã thay thế" khi bản mới đến ngày hiệu lực, và nhắc người duyệt khi chờ quá `approval_reminder_days` (mặc định 7). In PDF và xuất DOCX cùng nội dung; bản chưa ban hành có chữ "DỰ THẢO". Khác SRS/thiết kế: thư ký hội đồng là trường `NC Settings.council_secretary` (AMD-007-01); nội dung bị khóa ở cả ba trạng thái chờ (ASM-007-03, Lead đã duyệt).
