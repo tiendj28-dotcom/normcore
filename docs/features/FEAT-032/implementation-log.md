@@ -9,4 +9,5 @@
 | T05 | `with_bench.sh 'run-tests --module normcore.api.test_qc_plan && run-tests --module normcore.api.test_test_system'` | Ran 9 OK (`test_TC_CLS_26_*`); Ran 7 OK (test FEAT-031 không sửa) | 9f1e345 |
 | T06 | `with_bench.sh 'run-tests --module normcore.api.test_importer_qc_plan && run-tests --module normcore.api.test_importer'` | Ran 3 OK; Ran 8 OK | 3c17242 |
 | T07 | `pytest …test_qc_plan_ui_conventions.py …test_test_system_ui_conventions.py …test_vi_csv_order.py`; `check_conventions.py`; `build_workspace.py --check`; `with_bench.sh 'migrate && bench build --app normcore'` | 20 passed; thoát 0; thoát 0; build thoát 0. Chưa xem giao diện trên trình duyệt | fc96b49 |
-| T08 | `python3 docs/tools/build_rtm.py docs` | `VAN DE: 0`; thêm `docs/as-built/FEAT-032.md`; ASM-032-01..10 chuyển "Đã áp dụng" | (commit T08) |
+| T08 | `python3 docs/tools/build_rtm.py docs` | `VAN DE: 0`; thêm `docs/as-built/FEAT-032.md`; ASM-032-01..10 chuyển "Đã áp dụng" | 6d56631 |
+| T09 | `golden_engine.py && golden_cls.py`; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore.costing --cov=normcore.benchmark --cov-fail-under=90`; `with_bench.sh 'migrate && run-tests --app normcore'`; `check_conventions.py` | golden thoát 0; 357 passed, phủ 98,46%; bench Ran 740 OK; check thoát 0 | (commit T09) |
