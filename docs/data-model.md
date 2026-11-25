@@ -603,9 +603,17 @@ Form hiển thị (không lưu): bộ định mức hiện hành, kế hoạch c
 | source_file | Tệp nguồn | Attach | Có |
 | status | Trạng thái | Select: Nháp / Đã chốt | Có |
 | total_amount | Tổng tiền | Currency (chỉ đọc) | |
+| line_count | Số dòng | Int (chỉ đọc) **[AMD-010]** | |
+| error_count | Số dòng lỗi | Int (chỉ đọc) **[AMD-010]** | |
+| import_errors | Lỗi khi đọc tệp | Long Text (chỉ đọc; JSON danh sách lỗi theo dòng, cột) **[AMD-010]** | |
 | lines | Dòng | Table NC Accounting Import Line | |
+| totals | Tổng theo trung tâm và loại chi phí | Table NC Accounting Import Total (chỉ đọc, ghi khi chốt) **[AMD-010]** | |
+
+Lần nhập "Nháp" có `error_count` > 0 không chốt được [FR-ACCT-002].
 
 **NC Accounting Import Line** — Bảng con: `account_code` (BB), `account_name`, `cost_center` (Link, BB), `amount` (Currency, BB), `cost_category` (Select), `is_excluded` (Check), `change_reason` (Small Text), `changed_by` (Link User).
+
+**NC Accounting Import Total** **[AMD-010]** — Bảng con: `cost_center` (Link NC Cost Center, BB), `cost_category` (LABOR / DRUG_SUPPLY / DEPRECIATION / UTILITY / MANAGEMENT, BB), `amount` (Currency, BB). Ghi khi chốt lần nhập; bỏ dòng loại trừ [FR-ACCT-006].
 
 **NC Service Volume** — Sản lượng dịch vụ từ HIS [FR-ACCT-007, FR-ACCT-012]. Trường: `fiscal_year` (BB), `technical_service` (BB), `department` (BB), `scenario` **[1.1]** (Select: Thực tế 12 tháng / Kế hoạch / Công suất, BB, mặc định Thực tế 12 tháng), `volume` (Float, BB). Duy nhất theo (`fiscal_year`, `technical_service`, `department`, `scenario`); bản 1.0 duy nhất theo bộ ba đầu.
 

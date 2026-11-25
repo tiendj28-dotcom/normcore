@@ -8,3 +8,4 @@ normcore.patches.ensure_base_data
 normcore.patches.add_cost_center_to_departments
 normcore.patches.backfill_parameter_set_defaults
 normcore.patches.add_sample_price_categories
+normcore.patches.add_default_account_mapping

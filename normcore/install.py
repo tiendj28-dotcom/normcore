@@ -63,7 +63,28 @@ def before_install():
 	ensure_roles()
 
 
+def ensure_default_account_mapping():
+	"""FR-ACCT-009, ASM-118 (TBD-03): bảng ánh xạ mặc định chế độ Hành chính sự nghiệp.
+
+	Chỉ chèn dòng (chế độ, tiền tố) chưa có: không ghi đè giá trị NC Finance đã sửa.
+	"""
+	from normcore.costing import accounting
+
+	for prefix, category in accounting.DEFAULT_ACCOUNT_MAPPING:
+		filters = {"accounting_regime": accounting.DEFAULT_REGIME, "account_prefix": prefix}
+		if not frappe.db.exists("NC Account Mapping", filters):
+			frappe.get_doc(
+				{
+					"doctype": "NC Account Mapping",
+					**filters,
+					"cost_category": category,
+					"note": accounting.ASSUMPTION_NOTE,
+				}
+			).insert(ignore_permissions=True)
+
+
 def after_install():
 	ensure_roles()
 	ensure_workflow_states()
 	ensure_sample_price_categories()
+	ensure_default_account_mapping()
