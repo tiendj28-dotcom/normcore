@@ -80,7 +80,7 @@ jobs:
           node-version: "18"
       - name: Cấu hình MariaDB
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq mariadb-client libmariadb-dev
+          sudo apt-get update -qq && sudo apt-get install -y -qq mariadb-client libmariadb-dev wkhtmltopdf
           mysql --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL character_set_server = 'utf8mb4'; SET GLOBAL collation_server = 'utf8mb4_unicode_ci';"
       - name: Dựng bench
         run: |
