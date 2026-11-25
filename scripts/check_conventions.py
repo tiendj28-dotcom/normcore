@@ -16,7 +16,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 SKIP_DIRS = {"docs", "tham-khao", ".git", "node_modules"}
 NO_LABEL_TYPES = {"Section Break", "Column Break", "Tab Break", "HTML", "Button"}
 AUDITOR = "NC Auditor"
-AUDITOR_FORBIDDEN = ("write", "create", "delete", "submit", "cancel", "amend")
+AUDITOR_FORBIDDEN = (
+	"write",
+	"create",
+	"delete",
+	"submit",
+	"cancel",
+	"amend",
+	"import",
+	"share",
+	"set_user_permissions",
+)
 ROLES = (
 	"NC Clinician",
 	"NC Department Head",
@@ -149,6 +159,16 @@ def check_doctype(data: dict, path: str) -> list:
 			bad = [p for p in AUDITOR_FORBIDDEN if perm.get(p) in (1, True, "1")]
 			if bad:
 				err("NC-06", f"{AUDITOR} có quyền không được phép: {', '.join(bad)}")
+	if not is_table:
+		aud_read = any(
+			isinstance(p, dict)
+			and p.get("role") == AUDITOR
+			and p.get("read") in (1, True, "1")
+			and not (p.get("permlevel") or 0)
+			for p in data.get("permissions") or []
+		)
+		if not aud_read:
+			err("NC-06", f"{AUDITOR} thiếu quyền đọc")
 	if not is_table:
 		errors.extend(check_permissions(data, path))
 	return errors

@@ -3,9 +3,10 @@
 | FR | Test thật |
 | :-- | :-- |
 | FR-ACC-001 | `test_TC_ACC_05_guest_bi_tu_choi`, `test_TC_ACC_05_desk_chuyen_ve_trang_dang_nhap` |
-| FR-ACC-002 | `test_quyen_theo_vai_tro`, `test_auditor_chi_doc_duoc`, `test_TC_ACC_04_*` (unit/test_permission_matrix.py) |
+| FR-ACC-002 | `test_quyen_theo_vai_tro`, `test_auditor_chi_doc_duoc`, `test_TC_ACC_04_*` (unit/test_permission_matrix.py), `test_TC_CLS_44_nc06_*` (unit/test_permission_matrix.py) |
+| FR-ACC-007 | `test_TC_CLS_44_quet_quyen_sach`, `test_TC_CLS_44_quet_bat_custom_docperm`, `test_TC_CLS_44_quet_bat_workflow`, `test_TC_CLS_44_doc_so_lieu_nhat_ky`, `test_TC_CLS_44_sua_bo_dinh_muc_bi_tu_choi`, `test_TC_CLS_44_ghi_xoa_duyet_bi_tu_choi`, `test_TC_CLS_44_vai_tro_khac_khong_bi_hep` (tests/test_feat_039.py); unit/test_readonly.py |
 | FR-ACC-003 | `test_TC_ACC_01_phamvi_khoa_ghi_doc`, `test_TC_ACC_01_doc_theo_q3`, `test_TC_ACC_01_chua_gan_khoa_khong_ghi_duoc`, `test_TC_ACC_01_vai_tro_khac_khong_bi_hep` |
-| FR-ACC-004 | `test_TC_ACC_02_clinician_khong_xem_so_lieu_tai_chinh` |
+| FR-ACC-004 | `test_TC_ACC_02_clinician_khong_xem_so_lieu_tai_chinh`, `test_TC_CLS_44_doc_so_lieu_nhat_ky` |
 | FR-ACC-005 | `test_TC_ACC_03_mo_ban_ghi_ngoai_pham_vi_khong_lo_gia_tri` |
 | FR-ACC-006 | `test_FR_ACC_006_gan_va_bo_gan_co_hieu_luc_ngay`, `test_FR_ACC_006_vai_tro_khac_gan_khoa_bi_tu_choi`, `test_FR_ACC_006_nhieu_khoa_va_gan_lap_khong_trung` |
 | FR-ADM-004 | `test_TC_ADM_04_khoa_thieu_truong_bat_buoc_bi_tu_choi`, `test_TC_ADM_04_khoa_can_lam_sang_co_trung_tam_chi_phi`, `test_TC_ADM_04_trung_tam_chi_phi_thieu_truong_bi_tu_choi` |
@@ -17,7 +18,7 @@
 | FR-SVC-004 | `test_TC_SVC_03_tinh_trang_chuoi`, `test_FR_SVC_004_*` (api/test_service.py), `normcore/tests/unit/test_chain.py` |
 | FR-AUD-001 | `test_TC_AUD_01_lich_su_va_su_kien`, `test_FR_AUD_001_khoa_bo_dinh_muc`, `test_FR_AUD_001_xoa_de_lai_su_kien_va_gia_tri_truoc`, `test_FR_AUD_001_lan_tinh_gia_thanh_cong_mot_su_kien_moi_lan_chuyen` (nc_core/.../test_nc_audit_event.py) |
 | FR-AUD-002 | `test_TC_AUD_02_ban_ghi_bat_bien`, `test_FR_AUD_002_khong_tao_ngoai_ma_may_chu` |
-| FR-AUD-003 | `test_TC_AUD_03_loc_theo_quy_trinh`, `test_FR_AUD_003_loc_nguoi_thoi_gian_va_quyen`, `test_FR_AUD_003_to_time_chi_co_ngay_lay_tron_ngay` |
+| FR-AUD-003 | `test_TC_AUD_03_loc_theo_quy_trinh`, `test_FR_AUD_003_loc_nguoi_thoi_gian_va_quyen`, `test_FR_AUD_003_to_time_chi_co_ngay_lay_tron_ngay`, `test_TC_AUD_03_auditor_loc_theo_quy_trinh` |
 | FR-AUD-004 | `test_FR_AUD_004_ghi_xuat_tep` (điểm ghi; luồng xuất thuộc FEAT-019) |
 
 ## FEAT-011 (kiểm định độc lập NORM-20)
@@ -87,3 +88,17 @@
 | FR-ACCT-009 | `test_TC_ACCT_08_bang_mac_dinh_va_lan_nhap_moi_theo_gia_tri_da_doi` |
 | FR-ACCT-010 | `test_TC_ACCT_09_nhap_tieu_chi` |
 | FR-ACCT-011 | `test_FR_ACCT_011_lan_nhap_thu_hai_cung_nam_giu_lan_cu` |
+
+# Test ref — FEAT-006 (ghi bởi kiểm định độc lập NORM-16)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-PROC-001 | `test_TC_PROC_01_tao_ban_nhap`, `test_luu_phan` (api/test_procedure.py) |
+| FR-PROC-002 | `test_TC_PROC_02_tao_lan_hai_bi_tu_choi_va_dan_toi_ban_co`, `test_DI_02_chi_mot_ban_dang_soan_cho_moi_dich_vu_khoa`, `test_Q3_tu_choi_tao_va_sao_chep_khi_da_ban_hanh` |
+| FR-PROC-003 | `test_TC_PROC_03_tich_hop_sap_lai_xoa_them`, `test_TC_PROC_03_ma_buoc_bat_bien`, `test_TC_PROC_03_ma_buoc_bat_bien_khi_sap_lai_va_xoa` (unit/test_procedure_logic.py), `test_yeu_cau_giai_doan_ten_mo_ta` |
+| FR-PROC-004 | `test_TC_PROC_04_nguon_luc_nhan_luc`, `test_TC_PROC_04_nguon_luc_nhan_luc_co_ma_dong_bat_bien`, `test_nhan_luc_phai_tinh_bang_phut` |
+| FR-PROC-005 | `test_FR_PROC_005_goi_y_va_de_trong_lien_ket` |
+| FR-PROC-006 | `test_TC_PROC_03_tich_hop_sap_lai_xoa_them`, `test_reorder_chi_nhan_hoan_vi_day_du`, `test_move_len_xuong_va_chan_bien`, `test_K3_*` (unit/test_procedure_editor_behavior.py) |
+| FR-PROC-007 | `test_TC_PROC_09_trich_dan` (văn bản, mục, đoạn trích, quan hệ), `test_FR_PROC_007_trich_dan_dung_mot_dich`, `test_FR_PROC_007_quan_he_mac_dinh_chua_co_can_cu` |
+| FR-PROC-009 | `test_TC_PROC_08_lich_su_truoc_sau_nguoi_thoi_diem`, `test_TC_PROC_08_moc_thoi_gian_va_nguoi_cho_ca_hai_thay_doi` |
+| FR-PROC-013 | `test_FR_PROC_013_sao_chep`, `test_FR_PROC_013_sao_chep_cap_ma_moi_va_anh_xa`, `test_E12_sao_chep_thanh_cong_khong_hien_dai_loi` |

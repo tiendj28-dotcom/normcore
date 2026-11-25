@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["511 test OK trên normcore.test sau migrate; pytest 233 passed phủ 98,73%; check_conventions và golden thoát 0; CI PR #36 xanh", "UI kiểm bằng Playwright với NC Auditor: không có nút ghi/xóa/duyệt, API ghi bị từ chối", "Không tạo được site sạch cục bộ (thiếu DB_ROOT_PASSWORD), CI thay thế"], "commit": "6b1ad93e9f2ba1a416761588ad864393cf479c05"}

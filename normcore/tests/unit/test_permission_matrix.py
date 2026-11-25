@@ -70,3 +70,29 @@ class TestTCACC04(unittest.TestCase):
 		finally:
 			cc.MATRIX["Dịch vụ kỹ thuật, chuyên khoa"] = saved
 		self.assertTrue(any("NC-08" in e and "cột" in e for e in errs), errs)
+
+
+class TestTCCLS44NC06(unittest.TestCase):
+	def _errs(self, **extra):
+		bad = copy.deepcopy(SAMPLE)
+		bad["permissions"][-1].update(extra)
+		return cc.check_doctype(bad, "mau.json")
+
+	def test_TC_CLS_44_nc06_mau_sach(self):
+		self.assertEqual([e for e in self._errs() if "NC-06" in e], [])
+
+	def test_TC_CLS_44_nc06_import(self):
+		self.assertTrue(any("NC-06" in e and "import" in e for e in self._errs(**{"import": 1})))
+
+	def test_TC_CLS_44_nc06_share(self):
+		self.assertTrue(any("NC-06" in e and "share" in e for e in self._errs(share=1)))
+
+	def test_TC_CLS_44_nc06_set_user_permissions(self):
+		self.assertTrue(
+			any("NC-06" in e and "set_user_permissions" in e for e in self._errs(set_user_permissions=1))
+		)
+
+	def test_TC_CLS_44_nc06_thieu_read(self):
+		bad = copy.deepcopy(SAMPLE)
+		bad["permissions"] = [p for p in bad["permissions"] if p["role"] != "NC Auditor"]
+		self.assertTrue(any("NC-06" in e and "thiếu quyền đọc" in e for e in cc.check_doctype(bad, "m.json")))
