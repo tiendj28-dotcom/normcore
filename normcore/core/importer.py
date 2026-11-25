@@ -38,6 +38,17 @@ class Column:
 	options: tuple = ()
 	link_doctype: str | None = None
 	example: object = None
+	virtual: bool = False  # đọc, kiểm Link, đưa vào `prepare` nhưng không so sánh, không ghi (ASM-035-01)
+
+
+class RowValueError(ValueError):
+	"""Lỗi của một dòng do `prepare` ném: danh sách (nhãn cột, thông báo)."""
+
+	def __init__(self, errors, message=None):
+		if isinstance(errors, str):
+			errors = [(errors, message or "")]
+		self.errors = list(errors)
+		super().__init__("; ".join(f"{c}: {m}" for c, m in self.errors))
 
 
 @dataclass(frozen=True)
@@ -48,6 +59,11 @@ class ImportSet:
 	columns: tuple
 	key_field: str
 	key_fields: tuple = ()  # khóa ghép (ASM-124); rỗng = chỉ dùng key_field
+	prepare: str | None = None  # đường dẫn hàm lớp Frappe chuẩn bị dòng (ASM-035-01)
+
+	@property
+	def stored_columns(self) -> tuple:
+		return tuple(c for c in self.columns if not c.virtual)
 
 	@property
 	def keys(self) -> tuple:
@@ -342,17 +358,20 @@ def process(
 	link_exists: Callable | None = None,
 	can_update: Callable | None = None,
 	filename=None,
+	prepare: Callable | None = None,
 ) -> ImportResult:
 	"""Kiểm và (ở chế độ ghi) ghi từng dòng.
 
 	lookup(key) -> dict giá trị đang lưu (theo fieldname) hoặc None nếu chưa có.
 	write("tao"|"sua", key, values) -> ghi một dòng; ném lỗi nếu CSDL từ chối (thành lỗi của dòng).
 	link_exists(doctype, value) -> bool; can_update(key) -> bool (kiểm quyền sửa dòng cập nhật).
+	prepare(values) -> dict bổ sung giá trị, hoặc ném RowValueError (lỗi dòng); chạy ở cả hai chế độ.
 	"""
 	result = ImportResult(mode=mode)
 	valid, errors, result.warnings = parse(import_set, content, filename)
 	result.errors = list(errors)
 	key_col = import_set.column(import_set.key_field)
+	columns = {c.fieldname: c for c in import_set.columns}
 	for line, values in valid:
 		bad = False
 		if link_exists:
@@ -365,6 +384,14 @@ def process(
 					bad = True
 		if bad:
 			continue
+		if prepare:
+			try:
+				values = {**values, **prepare(values)}
+			except RowValueError as e:
+				result.errors.extend(RowError(line, c, m) for c, m in e.errors)
+				continue
+		virtual = {c.fieldname for c in import_set.columns if c.virtual}
+		values = {k: v for k, v in values.items() if k not in virtual}
 		key = import_set.key_of(values)
 		existing = lookup(key)
 		if existing is None:
@@ -373,7 +400,7 @@ def process(
 			changed = {
 				k: v
 				for k, v in values.items()
-				if k not in import_set.keys and normalize_existing(import_set.column(k), existing.get(k)) != v
+				if k not in import_set.keys and k in columns and normalize_existing(columns[k], existing.get(k)) != v
 			}
 			if not changed:
 				result.unchanged += 1

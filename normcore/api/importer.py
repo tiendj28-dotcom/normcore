@@ -65,7 +65,7 @@ def run_import(import_set_key, content, mode, filename=None):
 		name = frappe.db.get_value(dt, filters(key), "name")
 		if not name:
 			return None
-		return frappe.db.get_value(dt, name, [c.fieldname for c in s.columns], as_dict=True)
+		return frappe.db.get_value(dt, name, [c.fieldname for c in s.stored_columns], as_dict=True)
 
 	def can_update(key):
 		return bool(frappe.has_permission(dt, "write", doc=frappe.db.get_value(dt, filters(key), "name")))
@@ -95,6 +95,7 @@ def run_import(import_set_key, content, mode, filename=None):
 		link_exists=lambda link_dt, v: bool(frappe.db.exists(link_dt, v)),
 		can_update=can_update,
 		filename=filename,
+		prepare=frappe.get_attr(s.prepare) if s.prepare else None,
 	)
 	return result.as_dict()
 
