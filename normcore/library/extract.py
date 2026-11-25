@@ -33,7 +33,7 @@ def file_kind(filename):
 
 
 def needs_ocr(pages):
-	"""PDF mà tổng ký tự chữ < 20 × số trang."""
+	"""PDF mà tổng ký tự chữ < 20 ký tự mỗi trang."""
 	if not pages:
 		return True
 	chars = sum(len("".join(p.text.split())) for p in pages)
@@ -79,9 +79,7 @@ def extract_pages(content, filename, ocr=None):
 	if not needs_ocr(pages):
 		return pages
 	if ocr is None:
-		raise ExtractionError(
-			"Tệp PDF không có lớp văn bản và máy chủ chưa có bộ nhận dạng ký tự"
-		)
+		raise ExtractionError("Tệp PDF không có lớp văn bản và máy chủ chưa có bộ nhận dạng ký tự")
 	try:
 		result = ocr(content)
 	except Exception as e:

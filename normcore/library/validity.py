@@ -45,9 +45,7 @@ def changed(rows, today, section=False):
 	"""
 	out = []
 	for name, a, expiry, current in rows:
-		new = (
-			compute_section_validity(a, expiry, today) if section else compute_validity(a, expiry, today)
-		)
+		new = compute_section_validity(a, expiry, today) if section else compute_validity(a, expiry, today)
 		if new != current:
 			out.append((name, new))
 	return out

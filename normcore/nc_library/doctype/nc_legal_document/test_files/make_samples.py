@@ -9,8 +9,11 @@ import os
 HERE = os.path.dirname(__file__)
 
 _PROC = {
-	1: ("ĐO ĐIỆN TIM", "Đo điện tim là kỹ thuật ghi hoạt động điện của tim.",
-		"Người bệnh nằm yên, bộc lộ ngực và cổ chân."),
+	1: (
+		"ĐO ĐIỆN TIM",
+		"Đo điện tim là kỹ thuật ghi hoạt động điện của tim.",
+		"Người bệnh nằm yên, bộc lộ ngực và cổ chân.",
+	),
 	2: ("SIÊU ÂM BỤNG", "Siêu âm bụng tổng quát đánh giá gan, mật, tụy, lách, thận."),
 	3: ("NỘI SOI DẠ DÀY", "Nội soi dạ dày ống mềm quan sát thực quản, dạ dày, tá tràng."),
 }

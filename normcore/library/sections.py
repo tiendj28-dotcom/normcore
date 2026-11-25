@@ -79,9 +79,7 @@ def split_sections(pages, is_procedure_guideline):
 		text = "\n".join(ln for _, ln in rows).strip()
 		pgs = [p for p, ln in rows if p is not None and ln.strip()]
 		first = rows[0][0]
-		out.append(
-			Section(no, heading[:HEADING_MAX], first, pgs[-1] if pgs else first, text)
-		)
+		out.append(Section(no, heading[:HEADING_MAX], first, pgs[-1] if pgs else first, text))
 	return out
 
 
