@@ -16,12 +16,11 @@ DOCTYPES = [
 	for p in sorted(APP.glob("nc_*/doctype/*/*.json"))
 	if p.stem == p.parent.name
 ]
-EXPECTED = Path(__file__).parent / "expected_doctypes.txt"
 DATA_MODEL = APP.parent / "docs" / "data-model.md"
 
 
 def doctypes_in_data_model():
-	"""Tên DocType khai ở data-model mục 3 (dòng **NC ...**); nguồn duy nhất, không số cứng (NORM-32, ASM-139)."""
+	"""Tên DocType khai ở data-model mục 3 (dòng **NC ...**); nguồn duy nhất, không số cứng (NORM-32, ASM-NORM32-02)."""
 	text = DATA_MODEL.read_text(encoding="utf-8")
 	body = text.split("## 3. DocType theo module", 1)[1].split("## 4. Ma trận quyền", 1)[0]
 	return set(re.findall(r"^\*\*(NC [A-Za-z0-9 ]+?)\*\*", body, flags=re.M))
@@ -34,15 +33,14 @@ class TestPermissions(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	def test_doctype_da_cai_khop_tep_ky_vong_va_data_model_va_10_vai_tro(self):
-		# NORM-32 (ASM-139, Lead duyệt): so khớp đủ hai chiều với expected_doctypes.txt; tệp ⊆ data-model mục 3.
-		expected = {
-			line.strip()
-			for line in EXPECTED.read_text(encoding="utf-8").splitlines()
-			if line.strip() and not line.startswith("#")
-		}
-		self.assertEqual({d["name"] for d in DOCTYPES}, expected)
-		self.assertEqual(expected - doctypes_in_data_model(), set())
+	def test_doctype_da_cai_khop_thu_muc_doctype_va_data_model_va_10_vai_tro(self):
+		# NORM-32 (ASM-NORM32-02): không số cứng, không danh sách viết tay. So đủ hai tập.
+		modules = frappe.get_all("Module Def", filters={"app_name": "normcore"}, pluck="name")
+		installed = set(
+			frappe.get_all("DocType", filters={"module": ["in", modules], "custom": 0}, pluck="name")
+		)
+		self.assertEqual(installed, {d["name"] for d in DOCTYPES})
+		self.assertEqual(installed - doctypes_in_data_model(), set())
 		for r in ROLES:
 			self.assertTrue(frappe.db.exists("Role", r), r)
 
