@@ -8,11 +8,14 @@
   "legal_document",
   "section_no",
   "heading",
+  "col_right",
   "page_from",
   "page_to",
-  "validity_status",
   "expiry_date",
+  "validity_status",
+  "compare_section",
   "plain_text",
+  "col_source",
   "source_view_html"
  ],
  "fields": [
@@ -42,6 +45,10 @@
    "in_list_view": 1
   },
   {
+   "fieldname": "col_right",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "page_from",
    "label": "Trang từ",
    "fieldtype": "Int",
@@ -54,6 +61,11 @@
    "read_only": 1
   },
   {
+   "fieldname": "expiry_date",
+   "label": "Ngày hết hiệu lực",
+   "fieldtype": "Date"
+  },
+  {
    "fieldname": "validity_status",
    "label": "Hiệu lực",
    "fieldtype": "Select",
@@ -64,15 +76,19 @@
    "options": "\nChưa hiệu lực\nCòn hiệu lực\nHết hiệu lực"
   },
   {
-   "fieldname": "expiry_date",
-   "label": "Ngày hết hiệu lực",
-   "fieldtype": "Date"
+   "fieldname": "compare_section",
+   "fieldtype": "Section Break",
+   "label": "Đối chiếu"
   },
   {
    "fieldname": "plain_text",
    "label": "Văn bản thuần",
    "fieldtype": "Long Text",
    "reqd": 1
+  },
+  {
+   "fieldname": "col_source",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "source_view_html",
