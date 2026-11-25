@@ -29,9 +29,7 @@ def submit_errors(steps, resources, citations):
 	for i, c in enumerate(citations, 1):
 		if c.get("relation") == "Khác biệt" and _blank(c.get("deviation_reason")):
 			where = c.get("target_step_id") or c.get("target_section") or "chung"
-			errors.append(
-				f"Trích dẫn dòng {i} ({where}) thuộc loại Khác biệt nhưng chưa có lý do"
-			)
+			errors.append(f"Trích dẫn dòng {i} ({where}) thuộc loại Khác biệt nhưng chưa có lý do")
 	# (5) đề xuất AI chưa xử lý (UC-006 tiền điều kiện, ASM-007-11)
 	for s in steps:
 		if s.get("ai_suggested"):

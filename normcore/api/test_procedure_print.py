@@ -34,7 +34,15 @@ class TestPrint(WorkflowBase):
 		self.publish_via_flow()
 		html = self.html(self.name)
 		self.assertNotIn("DỰ THẢO", html)
-		for s in ("456/QĐ-BV", "Phiên bản 1", "05/03/2026", "Người soạn", "Trưởng khoa", "Hội đồng chuyên môn", "Giám đốc"):
+		for s in (
+			"456/QĐ-BV",
+			"Phiên bản 1",
+			"05/03/2026",
+			"Người soạn",
+			"Trưởng khoa",
+			"Hội đồng chuyên môn",
+			"Giám đốc",
+		):
 			self.assertIn(s, html)
 		doc = frappe.get_doc(DT, self.name)
 		text = docx_text(wf._docx_bytes(doc))

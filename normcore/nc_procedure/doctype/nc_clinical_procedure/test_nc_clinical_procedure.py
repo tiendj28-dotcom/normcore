@@ -175,16 +175,16 @@ class TestKhoaNoiDung(FrappeTestCase):
 		frappe.db.rollback()
 
 	def _desc(self, name):
-		return frappe.db.get_value(
-			"NC Procedure Step", {"parent": name, "step_id": "S001"}, "description"
-		)
+		return frappe.db.get_value("NC Procedure Step", {"parent": name, "step_id": "S001"}, "description")
 
 	def test_TC_WF_03_sua_mo_ta_buoc_qua_form_va_api_bi_tu_choi(self):
 		from normcore.api import procedure as api
 
 		for state in self.STATES:
 			with self.subTest(state=state):
-				proc = to_state(make_procedure(self.service, self.dept, version=self.STATES.index(state) + 1), state)
+				proc = to_state(
+					make_procedure(self.service, self.dept, version=self.STATES.index(state) + 1), state
+				)
 				before = self._desc(proc.name)
 				frappe.set_user(self.clin)
 				doc = frappe.get_doc("NC Clinical Procedure", proc.name)

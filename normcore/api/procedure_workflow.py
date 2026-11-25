@@ -238,7 +238,16 @@ def _comments_block(doc):
 	rows = frappe.get_all(
 		COMMENT,
 		{"ref_doctype": DT, "ref_name": doc.name},
-		["name", "owner", "creation", "target_section", "target_step_id", "comment", "resolved", "review_state"],
+		[
+			"name",
+			"owner",
+			"creation",
+			"target_section",
+			"target_step_id",
+			"comment",
+			"resolved",
+			"review_state",
+		],
 		order_by="creation asc, name asc",
 	)
 	by_step, by_section, general = {}, {}, []
@@ -303,9 +312,7 @@ def supersede_due(today=None, for_procedure=None):
 		r["effective_date"] = getdate(r["effective_date"]) if r["effective_date"] else None
 	names = approval.to_supersede(published, today)
 	if for_procedure:
-		key = {
-			(r["technical_service"], r["department"]) for r in published if r["name"] == for_procedure
-		}
+		key = {(r["technical_service"], r["department"]) for r in published if r["name"] == for_procedure}
 		same = {r["name"] for r in published if (r["technical_service"], r["department"]) in key}
 		names = [n for n in names if n in same]
 	for name in names:
@@ -337,7 +344,11 @@ def send_approval_reminders(today=None):
 		DT, {"workflow_state": ["in", list(approval.PENDING_STATES)]}, ["name", "workflow_state", "modified"]
 	)
 	pending = [
-		{"name": r.name, "state": r.workflow_state, "entered_on": _entered_on(r.name, r.workflow_state, r.modified)}
+		{
+			"name": r.name,
+			"state": r.workflow_state,
+			"entered_on": _entered_on(r.name, r.workflow_state, r.modified),
+		}
 		for r in rows
 	]
 	created = 0
@@ -391,7 +402,9 @@ def _signatures(doc):
 	if submit:
 		sigs["drafter"] = submit
 	for key, state in (("head", approval.WAIT_HEAD), ("council", approval.WAIT_COUNCIL)):
-		ev = last(from_state=state, to_state=approval.next_state(state, "Đồng ý" if key == "head" else "Thông qua"))
+		ev = last(
+			from_state=state, to_state=approval.next_state(state, "Đồng ý" if key == "head" else "Thông qua")
+		)
 		if ev:
 			sigs[key] = ev
 	ev = last(from_state=approval.WAIT_PUBLISH, to_state=approval.PUBLISHED)
@@ -404,16 +417,28 @@ def get_print_context(doc):
 	"""Ngữ cảnh in cho Print Format Jinja và DOCX (cùng nội dung). `doc` là Document hoặc tên quy trình."""
 	if isinstance(doc, str):
 		doc = frappe.get_doc(DT, doc)
-	data = {f: doc.get(f) for f in (
-		"name", "version_no", "workflow_state", "decision_no", "effective_date", "overview", "indications",
-		"contraindications", "cautions", "preparation_notes", "monitoring", "references",
-	)}
+	data = {
+		f: doc.get(f)
+		for f in (
+			"name",
+			"version_no",
+			"workflow_state",
+			"decision_no",
+			"effective_date",
+			"overview",
+			"indications",
+			"contraindications",
+			"cautions",
+			"preparation_notes",
+			"monitoring",
+			"references",
+		)
+	}
 	data["steps"] = [r.as_dict() for r in doc.steps]
 	data["resources"] = [r.as_dict() for r in doc.resources]
-	data["service_name"], data["service_code"] = (
-		frappe.db.get_value("NC Technical Service", doc.technical_service, ["service_name", "service_code"])
-		or (doc.technical_service, "")
-	)
+	data["service_name"], data["service_code"] = frappe.db.get_value(
+		"NC Technical Service", doc.technical_service, ["service_name", "service_code"]
+	) or (doc.technical_service, "")
 	data["department_name"] = (
 		frappe.db.get_value("NC Department", doc.department, "department_name") or doc.department
 	)

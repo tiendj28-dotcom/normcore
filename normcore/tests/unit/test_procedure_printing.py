@@ -16,7 +16,13 @@ def _doc(state="Nháp", **kw):
 		"department": "Khoa Hóa sinh",
 		"overview": "<p>Đại cương mẫu</p>",
 		"steps": [
-			{"step_id": "S001", "phase": "Thực hiện", "step_title": "Lấy mẫu", "description": "Mô tả A", "reference_minutes": 5},
+			{
+				"step_id": "S001",
+				"phase": "Thực hiện",
+				"step_title": "Lấy mẫu",
+				"description": "Mô tả A",
+				"reference_minutes": 5,
+			},
 		],
 		"resources": [{"step_id": "S001", "resource_text": "Găng tay", "quantity": 2, "uom": "đôi"}],
 	}
@@ -38,14 +44,21 @@ class TestPrinting(unittest.TestCase):
 		self.assertIn("DỰ THẢO", docx_text(build_docx(ctx)))
 
 	def test_TC_PROC_07_ban_ban_hanh(self):
-		ctx = print_context(
-			_doc("Đã ban hành", decision_no="123/QĐ-BV", effective_date="2026-03-05"), SIGS
-		)
+		ctx = print_context(_doc("Đã ban hành", decision_no="123/QĐ-BV", effective_date="2026-03-05"), SIGS)
 		self.assertFalse(ctx["is_draft"])
 		self.assertEqual(ctx["watermark"], "")
 		text = docx_text(build_docx(ctx))
 		self.assertNotIn("DỰ THẢO", text)
-		for s in ("123/QĐ-BV", "Phiên bản 1", "05/03/2026", "Người soạn", "Trưởng khoa", "Hội đồng chuyên môn", "Giám đốc", "09/01/2026"):
+		for s in (
+			"123/QĐ-BV",
+			"Phiên bản 1",
+			"05/03/2026",
+			"Người soạn",
+			"Trưởng khoa",
+			"Hội đồng chuyên môn",
+			"Giám đốc",
+			"09/01/2026",
+		):
 			self.assertIn(s, text)
 		self.assertEqual(len(ctx["signatures"]), 4)
 

@@ -15,7 +15,9 @@ def build_docx(ctx):
 	if ctx["is_draft"]:
 		d.add_paragraph(ctx["watermark"]).runs[0].bold = True
 	d.add_heading(ctx["title"], 0)
-	d.add_paragraph(f"{ctx['service_name']} ({ctx['service_code']})" if ctx["service_code"] else ctx["service_name"])
+	d.add_paragraph(
+		f"{ctx['service_name']} ({ctx['service_code']})" if ctx["service_code"] else ctx["service_name"]
+	)
 	d.add_paragraph(f"Khoa chủ trì: {ctx['department']}")
 	if ctx["status_note"]:
 		d.add_paragraph(ctx["status_note"])
@@ -35,7 +37,7 @@ def build_docx(ctx):
 			for ph in ctx["phases"]:
 				d.add_heading(ph["phase"], 2)
 				tb = d.add_table(rows=1, cols=4)
-				for c, h in zip(tb.rows[0].cells, ("Mã", "Tên bước", "Mô tả", "Phút")):
+				for c, h in zip(tb.rows[0].cells, ("Mã", "Tên bước", "Mô tả", "Phút"), strict=False):
 					c.text = h
 				for s in ph["steps"]:
 					cells = tb.add_row().cells
@@ -45,7 +47,7 @@ def build_docx(ctx):
 			if ctx["resources"]:
 				d.add_heading("Nguồn lực", 2)
 				tb = d.add_table(rows=1, cols=4)
-				for c, h in zip(tb.rows[0].cells, ("Bước", "Nguồn lực", "Số lượng", "Đơn vị")):
+				for c, h in zip(tb.rows[0].cells, ("Bước", "Nguồn lực", "Số lượng", "Đơn vị"), strict=False):
 					c.text = h
 				for r in ctx["resources"]:
 					cells = tb.add_row().cells

@@ -15,9 +15,7 @@ def _state(name):
 
 
 def _notified(user, name):
-	return frappe.get_all(
-		"Notification Log", {"for_user": user, "document_name": name}, pluck="subject"
-	)
+	return frappe.get_all("Notification Log", {"for_user": user, "document_name": name}, pluck="subject")
 
 
 class WorkflowBase(FrappeTestCase):
@@ -133,7 +131,9 @@ class TestApplyAction(WorkflowBase):
 
 	def test_TC_PROC_05_khac_biet_thieu_ly_do(self):
 		doc = frappe.get_doc(DT, self.name)
-		doc.append("citations", {"target_section": "Chỉ định", "relation": "Khác biệt", "legal_document": "TT"})
+		doc.append(
+			"citations", {"target_section": "Chỉ định", "relation": "Khác biệt", "legal_document": "TT"}
+		)
 		doc.save(ignore_permissions=True)  # lưu nháp vẫn được
 		with self.assertRaises(frappe.ValidationError) as cm:
 			self.act(self.clin, "Gửi duyệt")
@@ -148,7 +148,13 @@ class TestApplyAction(WorkflowBase):
 		doc.append("steps", {"phase": "Chuẩn bị", "step_title": "B2", "description": ""})
 		doc.append(
 			"resources",
-			{"step_id": doc.steps[0].step_id, "resource_type": "Vật tư", "resource_text": "Găng", "quantity": 1, "uom": ""},
+			{
+				"step_id": doc.steps[0].step_id,
+				"resource_type": "Vật tư",
+				"resource_text": "Găng",
+				"quantity": 1,
+				"uom": "",
+			},
 		)
 		doc.flags.ignore_mandatory = True  # dữ liệu cũ hoặc nhập qua đường khác có thể thiếu trường bắt buộc
 		doc.save(ignore_permissions=True)

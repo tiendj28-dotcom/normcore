@@ -177,7 +177,19 @@ CONTENT_FIELDS = (
 	"next_resource_seq",
 )
 CONTENT_TABLES = ("steps", "resources", "citations")
-_SKIP_CHILD = {"name", "modified", "creation", "modified_by", "owner", "idx", "parent", "parenttype", "parentfield", "docstatus", "doctype"}
+_SKIP_CHILD = {
+	"name",
+	"modified",
+	"creation",
+	"modified_by",
+	"owner",
+	"idx",
+	"parent",
+	"parenttype",
+	"parentfield",
+	"docstatus",
+	"doctype",
+}
 
 
 def _norm(value):

@@ -25,7 +25,14 @@ STATES = (
 
 class TestFeat007Ui(unittest.TestCase):
 	def test_trinh_soan_goi_api_duyet(self):
-		for fn in ("get_review", "apply_action", "add_review_comment", "set_comment_resolved", "download_pdf", "download_docx"):
+		for fn in (
+			"get_review",
+			"apply_action",
+			"add_review_comment",
+			"set_comment_resolved",
+			"download_pdf",
+			"download_docx",
+		):
 			self.assertIn(fn, VUE)
 
 	def test_nut_chi_hien_theo_actions_cua_may_chu(self):

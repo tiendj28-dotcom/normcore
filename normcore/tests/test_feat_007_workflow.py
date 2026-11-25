@@ -28,7 +28,9 @@ class TestWorkflowFixture(FrappeTestCase):
 		wf = self._wf()
 		data = {
 			"name": wf.name,
-			"transitions": [{"state": t.state, "action": t.action, "allowed": t.allowed} for t in wf.transitions],
+			"transitions": [
+				{"state": t.state, "action": t.action, "allowed": t.allowed} for t in wf.transitions
+			],
 			"states": [{"state": s.state, "allow_edit": s.allow_edit} for s in wf.states],
 		}
 		self.assertEqual(readonly.workflow_violations([data]), [])

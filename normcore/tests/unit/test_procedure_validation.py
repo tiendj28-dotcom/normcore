@@ -34,9 +34,7 @@ class TestSubmitErrors(unittest.TestCase):
 		self.assertIn("Khác biệt", errs[0])
 
 	def test_TC_PROC_05_khac_biet_co_ly_do_hop_le(self):
-		self.assertEqual(
-			submit_errors([_step("S001")], [], [_cit("Khác biệt", "Có lý do")]), []
-		)
+		self.assertEqual(submit_errors([_step("S001")], [], [_cit("Khác biệt", "Có lý do")]), [])
 
 	def test_TC_PROC_05_trich_dan_theo_buoc(self):
 		errs = submit_errors([_step("S001")], [], [_cit("Khác biệt", "", "", "S001")])

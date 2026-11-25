@@ -19,14 +19,20 @@ class TestNCReviewComment(WorkflowBase):
 
 	def test_TC_WF_08_y_kien_theo_buoc_hien_cho_nguoi_soan_sau_khi_bi_tra_lai(self):
 		self.to_council()
-		res = self._as(self.member, wf.add_review_comment, self.name, "Bước này thiếu chống nhiễm", target_step_id="S001")
+		res = self._as(
+			self.member, wf.add_review_comment, self.name, "Bước này thiếu chống nhiễm", target_step_id="S001"
+		)
 		self.assertEqual(frappe.db.get_value(COMMENT, res["name"], "target_step_id"), "S001")
 		self.assertEqual(frappe.db.get_value(COMMENT, res["name"], "review_state"), "Chờ hội đồng thẩm định")
-		self._as(self.member, wf.add_review_comment, self.name, "Đại cương quá ngắn", target_section="Đại cương")
+		self._as(
+			self.member, wf.add_review_comment, self.name, "Đại cương quá ngắn", target_section="Đại cương"
+		)
 		self._as(self.member, wf.add_review_comment, self.name, "Ý kiến chung")
 		self.act(self.sec, "Từ chối", reason="Cần sửa")
 		review = self._as(self.clin, wf.get_review, self.name)
-		self.assertEqual([c["comment"] for c in review["comments_by_step"]["S001"]], ["Bước này thiếu chống nhiễm"])
+		self.assertEqual(
+			[c["comment"] for c in review["comments_by_step"]["S001"]], ["Bước này thiếu chống nhiễm"]
+		)
 		self.assertEqual(len(review["comments_by_section"]["Đại cương"]), 1)
 		self.assertEqual(len(review["comments_general"]), 1)
 		self.assertEqual(review["open_comments"], 3)

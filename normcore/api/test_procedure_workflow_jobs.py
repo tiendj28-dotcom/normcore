@@ -62,5 +62,7 @@ class TestJobs(WorkflowBase):
 		self.assertTrue(any(s.startswith("Nhắc duyệt") for s in _notified(self.member, self.proc.name)))
 
 	def test_daily_job_khai_o_hooks(self):
-		self.assertIn("normcore.api.procedure_workflow.daily_job", frappe.get_hooks("scheduler_events")["daily"])
+		self.assertIn(
+			"normcore.api.procedure_workflow.daily_job", frappe.get_hooks("scheduler_events")["daily"]
+		)
 		wf.daily_job()
