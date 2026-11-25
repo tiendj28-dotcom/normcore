@@ -31,13 +31,26 @@ class ScopeRule:
 	department_field: str = "department"
 	# {trường: giá trị}: bản ghi khớp thì mọi người có quyền đọc theo vai trò đều đọc được, kể cả khoa khác
 	public_read: dict = field(default_factory=dict)
+	# (trường Link, DocType đích): DocType không có trường khoa, khoa lấy từ bản ghi được Link tới (FEAT-032, ASM-032-01)
+	via: tuple | None = None
 
 
 SCOPE_RULES = {
 	"NC Clinical Procedure": ScopeRule(public_read={"workflow_state": "Đã ban hành"}),
 	"NC Norm Set": ScopeRule(),
 	"NC Test System": ScopeRule(),  # FR-ACC-008, ASM-113
+	"NC EQA Program": ScopeRule(),  # FEAT-032
+	"NC QC Plan": ScopeRule(via=("test_system", "NC Test System")),  # FEAT-032: khoa của hệ thống xét nghiệm
 }
+
+
+def _doc_department(rule, doc):
+	"""Khoa của bản ghi: trường khoa trực tiếp, hoặc (khi có `via`) khoa của bản ghi được Link tới."""
+	if rule.via:
+		link_field, link_doctype = rule.via
+		target = doc.get(link_field)
+		return frappe.db.get_value(link_doctype, target, rule.department_field) if target else None
+	return doc.get(rule.department_field)
 
 
 def get_user_departments(user=None):
@@ -68,14 +81,14 @@ def has_permission(doc, ptype=None, user=None, debug=False):
 		return None
 	depts = get_user_departments(user)
 	if not ptype or ptype in READ_TYPES:
-		if doc.get(rule.department_field) in depts:
+		if _doc_department(rule, doc) in depts:
 			return None
 		if rule.public_read and all(doc.get(k) == v for k, v in rule.public_read.items()):
 			return None
 		return False
-	if doc.get(rule.department_field) not in depts:
+	if _doc_department(rule, doc) not in depts:
 		return False
-	if not doc.is_new():  # không chuyển bản ghi của khoa khác sang khoa mình bằng cách đổi trường khoa
+	if not doc.is_new() and not rule.via:  # không chuyển bản ghi của khoa khác sang khoa mình bằng cách đổi trường khoa
 		stored = frappe.db.get_value(doc.doctype, doc.name, rule.department_field)
 		if stored and stored not in depts:
 			return False
@@ -93,7 +106,14 @@ def permission_query_conditions(user=None, doctype=None):
 	depts = sorted(get_user_departments(user))
 	if depts:
 		in_list = ", ".join(frappe.db.escape(d) for d in depts)
-		conds.append(f"{table}.`{rule.department_field}` in ({in_list})")
+		if rule.via:
+			link_field, link_doctype = rule.via
+			conds.append(
+				f"{table}.`{link_field}` in (select `name` from `tab{link_doctype}` "
+				f"where `{rule.department_field}` in ({in_list}))"
+			)
+		else:
+			conds.append(f"{table}.`{rule.department_field}` in ({in_list})")
 	for key, value in rule.public_read.items():
 		conds.append(f"{table}.`{key}` = {frappe.db.escape(value)}")
 	return "(" + " or ".join(conds) + ")" if conds else "1=0"
