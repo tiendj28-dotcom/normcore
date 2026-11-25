@@ -102,10 +102,7 @@ fixtures = [
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "normcore.utils.jinja_methods",
-# 	"filters": "normcore.utils.jinja_filters"
-# }
+jinja = {"methods": ["normcore.api.procedure_workflow.get_print_context"]}  # FR-PROC-010
 
 # Installation
 # ------------

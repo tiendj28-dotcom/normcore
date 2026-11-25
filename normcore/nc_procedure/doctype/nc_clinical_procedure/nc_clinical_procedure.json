@@ -236,5 +236,6 @@
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1,
- "autoname": "format:QT-{technical_service}-{department}-v{version_no}"
+ "autoname": "format:QT-{technical_service}-{department}-v{version_no}",
+ "default_print_format": "NC Clinical Procedure Standard"
 }

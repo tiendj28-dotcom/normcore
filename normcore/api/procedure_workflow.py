@@ -10,7 +10,7 @@ from frappe.utils import getdate, nowdate
 
 from normcore.core import audit
 from normcore.core import permissions as scope
-from normcore.procedure import approval, validation
+from normcore.procedure import approval, printing, validation
 
 DT = "NC Clinical Procedure"
 COMMENT = "NC Review Comment"
@@ -352,3 +352,121 @@ def daily_job():
 	"""Scheduler hằng ngày (hooks.py): thay thế phiên bản đến ngày hiệu lực, rồi nhắc duyệt quá hạn."""
 	supersede_due()
 	send_approval_reminders()
+
+
+# ---- in, xuất tệp (FR-PROC-010, FR-PROC-011) --------------------------------------------------------------
+
+PRINT_FORMAT = "NC Clinical Procedure Standard"
+SIGN_STATES = {
+	"head": approval.WAIT_HEAD,
+	"council": approval.WAIT_COUNCIL,
+	"director": approval.WAIT_PUBLISH,
+}
+
+
+def _full_name(user):
+	return (frappe.db.get_value("User", user, "full_name") or user) if user else ""
+
+
+def _signatures(doc):
+	"""Người, ngày của bốn cấp từ sổ sự kiện (technical-design 5.3): người soạn = người gửi duyệt gần nhất;
+	trưởng khoa = người chuyển khỏi "Chờ trưởng khoa duyệt"; hội đồng = người chuyển khỏi "Chờ hội đồng thẩm
+	định"; giám đốc = người ban hành."""
+	rows = frappe.get_all(
+		audit.EVENT,
+		{"ref_doctype": DT, "ref_name": doc.name, "event_type": "Chuyển trạng thái"},
+		["user", "event_time", "from_state", "to_state"],
+		order_by="event_time asc, creation asc",
+	)
+
+	def last(**kw):
+		hit = None
+		for r in rows:
+			if all(r.get(k) == v for k, v in kw.items()):
+				hit = r
+		return hit
+
+	sigs = {}
+	submit = last(from_state=approval.DRAFT, to_state=approval.WAIT_HEAD)
+	if submit:
+		sigs["drafter"] = submit
+	for key, state in (("head", approval.WAIT_HEAD), ("council", approval.WAIT_COUNCIL)):
+		ev = last(from_state=state, to_state=approval.next_state(state, "Đồng ý" if key == "head" else "Thông qua"))
+		if ev:
+			sigs[key] = ev
+	ev = last(from_state=approval.WAIT_PUBLISH, to_state=approval.PUBLISHED)
+	if ev:
+		sigs["director"] = ev
+	return {k: {"user": _full_name(v.user), "date": v.event_time} for k, v in sigs.items()}
+
+
+def get_print_context(doc):
+	"""Ngữ cảnh in cho Print Format Jinja và DOCX (cùng nội dung). `doc` là Document hoặc tên quy trình."""
+	if isinstance(doc, str):
+		doc = frappe.get_doc(DT, doc)
+	data = {f: doc.get(f) for f in (
+		"name", "version_no", "workflow_state", "decision_no", "effective_date", "overview", "indications",
+		"contraindications", "cautions", "preparation_notes", "monitoring", "references",
+	)}
+	data["steps"] = [r.as_dict() for r in doc.steps]
+	data["resources"] = [r.as_dict() for r in doc.resources]
+	data["service_name"], data["service_code"] = (
+		frappe.db.get_value("NC Technical Service", doc.technical_service, ["service_name", "service_code"])
+		or (doc.technical_service, "")
+	)
+	data["department_name"] = (
+		frappe.db.get_value("NC Department", doc.department, "department_name") or doc.department
+	)
+	return printing.print_context(data, _signatures(doc))
+
+
+def _check_print(procedure):
+	if not frappe.has_permission(DT, "read", doc=procedure):
+		_deny(_("Bạn không có quyền xem quy trình này"))
+	return frappe.get_doc(DT, procedure)
+
+
+def _html(doc):
+	"""HTML tự chứa (không tải CSS, ảnh ngoài) từ Print Format mặc định; thêm Letter Head mặc định nếu có.
+	Dùng cho PDF để in được cả khi máy chủ không phân giải được tên miền site."""
+	fmt = frappe.get_doc("Print Format", PRINT_FORMAT)
+	body = frappe.render_template(fmt.html, {"doc": doc})
+	head = frappe.db.get_value("Letter Head", {"is_default": 1, "disabled": 0}, "content") or ""
+	return f"<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>{head}{body}</body></html>"
+
+
+def _pdf_bytes(doc):
+	from frappe.utils.pdf import get_pdf
+
+	return get_pdf(_html(doc))
+
+
+def _docx_bytes(doc):
+	from normcore.exports.procedure_docx import build_docx
+
+	return build_docx(get_print_context(doc))
+
+
+def _respond(filename, content):
+	frappe.local.response.filename = filename
+	frappe.local.response.filecontent = content
+	frappe.local.response.type = "download"
+
+
+@frappe.whitelist()
+def download_pdf(procedure):
+	doc = _check_print(procedure)
+	content = _pdf_bytes(doc)
+	audit.log_export("PDF", DT, doc.name, f"{doc.name}.pdf")
+	_respond(f"{doc.name}.pdf", content)
+
+
+@frappe.whitelist()
+def download_docx(procedure):
+	doc = _check_print(procedure)
+	try:
+		content = _docx_bytes(doc)
+	except ImportError:
+		frappe.throw(_("Máy chủ chưa cài thư viện python-docx, chưa xuất được DOCX"))
+	audit.log_export("DOCX", DT, doc.name, f"{doc.name}.docx")
+	_respond(f"{doc.name}.docx", content)
