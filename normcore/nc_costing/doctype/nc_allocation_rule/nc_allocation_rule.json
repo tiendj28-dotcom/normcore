@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "creation": "2026-11-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rule_name",
+  "level",
+  "cost_category",
+  "driver",
+  "cost_center"
+ ],
+ "fields": [
+  {
+   "fieldname": "rule_name",
+   "label": "Tên quy tắc",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "level",
+   "label": "Cấp phân bổ",
+   "fieldtype": "Select",
+   "options": "\nCấp 1\nCấp 2",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Cấp 1: Hỗ trợ sang Lâm sàng; Cấp 2: Lâm sàng sang Dịch vụ"
+  },
+  {
+   "fieldname": "cost_category",
+   "label": "Loại chi phí",
+   "fieldtype": "Select",
+   "options": "\nLABOR\nDRUG_SUPPLY\nDEPRECIATION\nUTILITY\nMANAGEMENT",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "driver",
+   "label": "Tiêu chí phân bổ",
+   "fieldtype": "Select",
+   "options": "\nLABOR_MIN\nMACHINE_MIN\nVOLUME\nDIRECT_COST\nREVENUE\nHEADCOUNT\nAREA",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "HEADCOUNT, AREA, REVENUE chỉ dùng ở cấp 1 (BR-COST-009)."
+  },
+  {
+   "fieldname": "cost_center",
+   "label": "Trung tâm chi phí",
+   "fieldtype": "Link",
+   "options": "NC Cost Center",
+   "in_list_view": 1,
+   "description": "Để trống = mọi trung tâm."
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Allocation Rule",
+ "owner": "Administrator",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "hash",
+ "title_field": "rule_name",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ]
+}

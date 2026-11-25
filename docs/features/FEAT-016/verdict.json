@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["TC-ACCT-01..09 và FR-ACCT-011 có test cùng mã, đối chiếu golden; bench 574 test OK; pytest 266 passed, phủ costing 99%; conventions, golden, RTM sạch; CI PR xanh; không nới test, không sửa tài liệu chỉ đọc"], "commit": "6bc6d062a3967ca3fa2245610a1550970b90737c"}

@@ -1,0 +1,87 @@
+{
+ "actions": [],
+ "creation": "2026-11-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "account_code",
+  "account_name",
+  "cost_center",
+  "amount",
+  "cost_category",
+  "is_excluded",
+  "change_reason",
+  "changed_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "account_code",
+   "label": "Mã tài khoản",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "account_name",
+   "label": "Tên tài khoản",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "label": "Trung tâm chi phí",
+   "fieldtype": "Link",
+   "options": "NC Cost Center",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "amount",
+   "label": "Số tiền",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "cost_category",
+   "label": "Loại chi phí",
+   "fieldtype": "Select",
+   "options": "\nLABOR\nDRUG_SUPPLY\nDEPRECIATION\nUTILITY\nMANAGEMENT\nEXCLUDED",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "is_excluded",
+   "label": "Loại trừ",
+   "fieldtype": "Check",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "change_reason",
+   "label": "Lý do sửa",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "changed_by",
+   "label": "Người sửa",
+   "fieldtype": "Link",
+   "options": "User",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Accounting Import Line",
+ "owner": "Administrator",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "istable": 1,
+ "editable_grid": 1
+}
