@@ -217,6 +217,7 @@ scheduler_events = {
 	"daily": [
 		"normcore.api.compliance.daily_job",  # FR-CMP-005
 		"normcore.api.procedure_workflow.daily_job",  # FR-WF-006, FR-WF-013
+		"normcore.api.library.daily_job",  # FR-LIB-006
 	]
 }
 

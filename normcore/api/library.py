@@ -185,3 +185,34 @@ def get_source_view(section):
 		"doc_number": doc.doc_number,
 		"section_no": sec.section_no,
 	}
+
+
+def refresh_validity(today=None):
+	"""Tính lại hiệu lực mọi văn bản rồi mọi mục; chỉ ghi dòng đổi (FR-LIB-006)."""
+	on = getdate(today) if today else getdate(frappe.utils.today())
+	docs = frappe.get_all(
+		"NC Legal Document", fields=["name", "effective_date", "expiry_date", "validity_status"]
+	)
+	changed_docs = validity.changed(
+		[(d.name, d.effective_date, d.expiry_date, d.validity_status) for d in docs], on
+	)
+	for name, status in changed_docs:
+		frappe.db.set_value("NC Legal Document", name, "validity_status", status, update_modified=False)
+	doc_status = {d.name: d.validity_status for d in docs}
+	doc_status.update(dict(changed_docs))
+	secs = frappe.get_all(
+		"NC Legal Section", fields=["name", "legal_document", "expiry_date", "validity_status"]
+	)
+	changed_secs = validity.changed(
+		[(s.name, doc_status.get(s.legal_document), s.expiry_date, s.validity_status) for s in secs],
+		on,
+		section=True,
+	)
+	for name, status in changed_secs:
+		frappe.db.set_value("NC Legal Section", name, "validity_status", status, update_modified=False)
+	return {"documents": len(changed_docs), "sections": len(changed_secs)}
+
+
+def daily_job():
+	"""Scheduler hằng ngày (FR-LIB-006)."""
+	refresh_validity()
