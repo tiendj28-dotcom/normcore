@@ -1,5 +1,7 @@
 """In PDF, xuất DOCX quy trình (FR-PROC-010, FR-PROC-011; TC-PROC-07)."""
 
+from unittest.mock import patch
+
 import frappe
 
 from normcore.api import procedure_workflow as wf
@@ -69,8 +71,11 @@ class TestPrint(WorkflowBase):
 		self.assertEqual(events, [f"DOCX: {self.name}.docx"])
 
 	def test_TC_PROC_07_quyen_tai(self):
-		# Auditor tải được (ASM-007-09); Resource Manager đọc được quy trình thì tải được
-		self.assertTrue(self._download(wf.download_pdf, self.auditor).filecontent.startswith(b"%PDF"))
+		# Đối tượng kiểm là quyền, không phải bộ dựng PDF (kiểm riêng ở test_TC_PROC_07_pdf_bat_dau_bang_pdf):
+		# thay bộ dựng để test không phụ thuộc wkhtmltopdf trên máy chạy test
+		with patch.object(wf, "_pdf_bytes", return_value=b"%PDF-1.4 thu"):
+			# Auditor tải được (ASM-007-09); Resource Manager đọc được quy trình thì tải được
+			self.assertTrue(self._download(wf.download_pdf, self.auditor).filecontent.startswith(b"%PDF"))
 		self.publish_via_flow()  # bản ban hành đọc công khai (FR-ACC-003)
 		rm = make_user("rm.print@normcore.test", "NC Resource Manager")
 		self.assertTrue(self._download(wf.download_docx, rm).filecontent)
