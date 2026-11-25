@@ -55,5 +55,5 @@ Dữ liệu thử (STG_ADMIN tạo, không sửa/xóa bản ghi có sẵn): NC T
 
 ## Ghi chú không chặn nghiệm thu
 - Khi xóa một dòng nguồn lực vừa thêm bằng bàn phím trong cùng phiên (không tải lại), console có một yêu cầu `delete_resource` lặp lại trả 417 ("Không thấy dòng nguồn lực R00N"); kết quả hiển thị đúng và không có dải lỗi. Nên điều tra ở FEAT sau (nghi hộp xác nhận Enter gọi hai lần); không trái FR/NFR.
-- Hai tài khoản thử được đặt `language = vi` (ASM-099).
+- Hai tài khoản thử được đặt `language = vi` (ASM-140).
 - Ngoài phạm vi: dữ liệu `THU-NORM16-*` còn trên staging (không ai có quyền xóa theo ma trận).
