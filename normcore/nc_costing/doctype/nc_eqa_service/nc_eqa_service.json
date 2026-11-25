@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "creation": "2026-11-25 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "technical_service",
+  "share_pct"
+ ],
+ "fields": [
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "options": "NC Technical Service",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "share_pct",
+   "label": "Tỷ lệ riêng (%)",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "description": "Để trống ở mọi dòng để chia đều"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC EQA Service",
+ "owner": "Administrator",
+ "states": []
+}
