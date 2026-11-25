@@ -5,7 +5,7 @@
   "TC-CLS-20..23 có test cùng mã và assertion đúng; hai mục Reviewer bắt sửa (0bd6688) đạt",
   "Quyền NC Test System, NC Auditor, vai trò không quyền đạt; diff PR #33 không nới test, chỉ đổi số đếm 27 → 30 (ASM-113)",
   "SCR-DSK-006 và SCR-DSK-032 kiểm bằng Playwright trên staging, có ảnh chụp",
-  "Chạy lại trên HEAD 2342db8 (sau hai lần gộp develop gỡ conflict và đánh lại ASM-099 của FEAT-006 thành ASM-140 theo Quyết định Lead): diff so với develop chỉ có tệp trong docs/; site sạch Ran 646 tests OK; pytest 302 passed, phủ 99%; golden, check_conventions, build_rtm (VAN DE: 0) đạt"
+  "Chạy lại trên HEAD 7613ead (sau các lần gộp develop gỡ conflict; ASM-099 của FEAT-006 theo ASM-006-01 của develop): diff so với develop chỉ có tệp FEAT-031 trong docs/; site sạch Ran 646 tests OK; pytest 302 passed, phủ 99%; golden, check_conventions, build_rtm (VAN DE: 0) đạt"
  ],
- "commit": "2342db8b08b40567d53bd246f182a806667f526d"
+ "commit": "7613eadff0060a89b046fcb2a698898736847f51"
 }

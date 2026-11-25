@@ -2,9 +2,9 @@
 
 Người kiểm: QA (Multica, Tester iu), độc lập với người viết. Issue NORM-30. Mã đã merge (PR #33), kiểm trên HEAD develop `73029ce31ecd49ff5075d384d460f96a150d1fe2`. Verdict: **accepted**.
 
-## 0. Chạy lại sau khi gỡ conflict (HEAD `2342db8`)
+## 0. Chạy lại sau khi gỡ conflict (HEAD `7613ead`)
 
-PR #38 hai lần conflict `docs/rtm-testref.md` với develop (FEAT-033, FEAT-016, FEAT-039 vào trước); Dev gỡ bằng merge develop, rồi đánh lại ASM-099 của FEAT-006 thành ASM-140 (Quyết định Lead). `git diff origin/develop HEAD` chỉ có tệp trong `docs/` (As-Built, Test ref, DONE, acceptance, verdict của FEAT-031; `assumptions.md` và `FEAT-006/acceptance.md` cho ASM-140). QA chạy lại trên `2342db8`: site sạch `normcore-verify.test` **Ran 646 tests OK**; golden đạt; pytest unit + golden 302 passed, phủ 99%; `check_conventions.py` thoát 0; `build_rtm.py` VAN DE: 0. Verdict giữ `accepted`, `commit` = `2342db8`. Số liệu mục 1 dưới đây là lần kiểm trên `73029ce`.
+PR #38 nhiều lần conflict với develop (`docs/rtm-testref.md`, rồi `docs/decisions/assumptions.md`); Dev gỡ bằng merge develop, lấy bản của develop cho ASM-006-01 và `FEAT-006/acceptance.md`. `git diff origin/develop HEAD` chỉ có tệp của FEAT-031 trong `docs/` (As-Built, Test ref, DONE, acceptance, verdict). QA chạy lại trên `7613ead`: site sạch `normcore-verify.test` **Ran 646 tests OK**; golden đạt; pytest unit + golden 302 passed, phủ 99%; `check_conventions.py` thoát 0; `build_rtm.py` VAN DE: 0. Verdict giữ `accepted`, `commit` = `7613ead`. Số liệu mục 1 dưới đây là lần kiểm trên `73029ce`.
 
 ## 1. Chạy lại từ đầu
 
