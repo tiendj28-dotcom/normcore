@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "creation": "2026-11-25 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fiscal_year",
+  "scenario",
+  "test_system",
+  "technical_service",
+  "department",
+  "col_break",
+  "patient_results",
+  "source_file",
+  "aux_section",
+  "iqc_tests",
+  "calibration_tests",
+  "rerun_tests",
+  "eqa_tests",
+  "aux_col",
+  "wastage_rate",
+  "avg_batch_size",
+  "run_days"
+ ],
+ "fields": [
+  {
+   "fieldname": "fiscal_year",
+   "label": "Năm tài chính",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "scenario",
+   "label": "Kịch bản sản lượng",
+   "fieldtype": "Select",
+   "options": "Thực tế 12 tháng\nKế hoạch\nCông suất",
+   "default": "Thực tế 12 tháng",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "test_system",
+   "label": "Hệ thống xét nghiệm",
+   "fieldtype": "Link",
+   "options": "NC Test System",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "options": "NC Technical Service",
+   "fetch_from": "test_system.technical_service",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "fetch_from": "test_system.department",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_break",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "patient_results",
+   "label": "Số kết quả trả",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "source_file",
+   "label": "Tệp nguồn",
+   "fieldtype": "Attach"
+  },
+  {
+   "fieldname": "aux_section",
+   "label": "Số test phụ (để trống: ước tính từ kế hoạch)",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "iqc_tests",
+   "label": "Số test nội kiểm",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "calibration_tests",
+   "label": "Số test chuẩn máy",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "rerun_tests",
+   "label": "Số test chạy lại",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "eqa_tests",
+   "label": "Số test ngoại kiểm",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "aux_col",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wastage_rate",
+   "label": "Tỷ lệ hao hụt (%)",
+   "fieldtype": "Percent"
+  },
+  {
+   "fieldname": "avg_batch_size",
+   "label": "Cỡ mẻ bình quân",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "run_days",
+   "label": "Số ngày chạy máy",
+   "fieldtype": "Int"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Test System Volume",
+ "owner": "Administrator",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "hash",
+ "title_field": "test_system",
+ "search_fields": "fiscal_year,scenario,technical_service",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ]
+}

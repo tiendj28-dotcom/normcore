@@ -35,6 +35,33 @@ class TestTestSystemApi(FrappeTestCase):
 		b = api.get_status("GLU-B")
 		self.assertIn("inactive", [w["code"] for w in b["warnings"]])
 
+	def _volume(self, system, **kw):
+		frappe.get_doc(
+			{"doctype": "NC Test System Volume", "fiscal_year": 2026, "test_system": system, **kw}
+		).insert(ignore_permissions=True)
+
+	def test_FR_CLS_007_muc_san_luong_uoc_tinh_khi_test_phu_trong(self):
+		def states(name):
+			return {i["key"]: i for i in api.get_status(name)["items"]}
+
+		self.assertEqual(states("GLU-B")["volume"]["state"], "empty")
+		self._volume(
+			"GLU-A", patient_results=12000, iqc_tests=600, calibration_tests=48, rerun_tests=240, eqa_tests=12
+		)
+		self._volume("GLU-B", patient_results=4000)
+		self._volume("GLU-B", patient_results=999, scenario="Kế hoạch")  # kịch bản khác không tính
+		self._volume("GLU-B", patient_results=1, fiscal_year=2025)  # năm cũ hơn không tính
+		b = states("GLU-B")
+		self.assertEqual(b["volume"]["state"], "estimated")
+		self.assertIn("4.000", b["volume"]["message"])
+		self.assertIn("ước tính từ kế hoạch", b["volume"]["message"])
+		a = states("GLU-A")
+		self.assertEqual(a["volume"]["state"], "ok")
+		self.assertIn("12.000", a["volume"]["message"])
+		for st in (a, b):
+			for key in ("norm_set", "qc_plan", "latest_cost"):
+				self.assertEqual((st[key]["state"], st[key]["message"]), ("empty", "Chưa có"))
+
 	def test_get_service_systems(self):
 		r = api.get_service_systems(self.service)
 		self.assertTrue(r["is_paraclinical"])

@@ -113,14 +113,21 @@ def share_warning(total) -> bool:
 	return Decimal(str(total)) != 100
 
 
-def status_items() -> list:
-	"""Bốn mục khối tình trạng FR-CLS-007; dữ liệu nguồn thuộc FEAT khác nên đều 'Chưa có' (ASM-115)."""
+def status_items(volume=None) -> list:
+	"""Bốn mục khối tình trạng FR-CLS-007. Mục `volume` lấy từ FEAT-035 (ASM-035-10); ba mục còn lại
+	thuộc FEAT khác nên 'Chưa có' (ASM-115)."""
 	spec = (
 		("norm_set", "Bộ định mức hiện hành", "FEAT-034"),
 		("qc_plan", "Kế hoạch chất lượng", "FEAT-032"),
 		("volume", "Sản lượng kịch bản mặc định", "FEAT-035"),
 		("latest_cost", "Hệ số k và giá thành lần tính gần nhất", "FEAT-036"),
 	)
-	return [
-		{"key": k, "label": lb, "state": "empty", "message": "Chưa có", "source": src} for k, lb, src in spec
-	]
+	out = []
+	for k, lb, src in spec:
+		st = {"state": "empty", "message": "Chưa có"}
+		if k == "volume" and volume:
+			from normcore.costing.cls_volume import volume_status
+
+			st = volume_status(volume)
+		out.append({"key": k, "label": lb, "source": src, **st})
+	return out
