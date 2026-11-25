@@ -21,7 +21,7 @@ DATA_MODEL = APP.parent / "docs" / "data-model.md"
 
 
 def doctypes_in_data_model():
-	"""Tên DocType khai ở data-model mục 3 (dòng **NC ...**); nguồn duy nhất, không số cứng (NORM-32, ASM-118)."""
+	"""Tên DocType khai ở data-model mục 3 (dòng **NC ...**); nguồn duy nhất, không số cứng (NORM-32, ASM-139)."""
 	text = DATA_MODEL.read_text(encoding="utf-8")
 	body = text.split("## 3. DocType theo module", 1)[1].split("## 4. Ma trận quyền", 1)[0]
 	return set(re.findall(r"^\*\*(NC [A-Za-z0-9 ]+?)\*\*", body, flags=re.M))
@@ -35,7 +35,7 @@ class TestPermissions(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	def test_doctype_da_cai_khop_tep_ky_vong_va_data_model_va_10_vai_tro(self):
-		# NORM-32 (ASM-118, Lead duyệt): so khớp đủ hai chiều với expected_doctypes.txt; tệp ⊆ data-model mục 3.
+		# NORM-32 (ASM-139, Lead duyệt): so khớp đủ hai chiều với expected_doctypes.txt; tệp ⊆ data-model mục 3.
 		expected = {
 			line.strip()
 			for line in EXPECTED.read_text(encoding="utf-8").splitlines()

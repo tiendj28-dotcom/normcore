@@ -1,6 +1,7 @@
 """Sổ đăng ký các bộ nhập Excel (FEAT-004). FEAT sau thêm một khai báo + một dòng `register`."""
 
 from normcore.core.importer import Column, ImportSet, register
+from normcore.costing.accounting import COST_CATEGORIES, REGIMES
 
 JOB_GROUPS = ("Bác sĩ", "Điều dưỡng", "Kỹ thuật viên", "Dược sĩ", "Hộ lý", "Khác")
 
@@ -247,3 +248,88 @@ NC_TEST_SYSTEM = ImportSet(
 )
 
 register(NC_TEST_SYSTEM)
+
+# FEAT-016, FR-ACCT-009: bảng ánh xạ tài khoản; khóa ghép (chế độ, tiền tố) (ASM-124).
+NC_ACCOUNT_MAPPING = ImportSet(
+	key="nc_account_mapping",
+	label="Bảng ánh xạ tài khoản",
+	doctype="NC Account Mapping",
+	key_field="accounting_regime",
+	key_fields=("accounting_regime", "account_prefix"),
+	columns=(
+		Column(
+			"accounting_regime",
+			"Chế độ kế toán",
+			"Select",
+			required=True,
+			options=REGIMES,
+			example="Hành chính sự nghiệp",
+		),
+		Column("account_prefix", "Tiền tố tài khoản", "Data", required=True, example="61111"),
+		Column(
+			"cost_category", "Loại chi phí", "Select", required=True, options=COST_CATEGORIES, example="LABOR"
+		),
+		Column("note", "Ghi chú", "Data"),
+	),
+)
+
+register(NC_ACCOUNT_MAPPING)
+
+# FEAT-016, FR-ACCT-007: sản lượng dịch vụ theo khóa ghép (năm, dịch vụ, khoa, kịch bản).
+SCENARIOS = ("Thực tế 12 tháng", "Kế hoạch", "Công suất")
+
+NC_SERVICE_VOLUME = ImportSet(
+	key="nc_service_volume",
+	label="Sản lượng dịch vụ",
+	doctype="NC Service Volume",
+	key_field="fiscal_year",
+	key_fields=("fiscal_year", "technical_service", "department", "scenario"),
+	columns=(
+		Column("fiscal_year", "Năm tài chính", "Int", required=True, example=2026),
+		Column(
+			"technical_service",
+			"Mã dịch vụ",
+			"Link",
+			link_doctype="NC Technical Service",
+			required=True,
+			example="DV-TEST-A",
+		),
+		Column("department", "Mã khoa", "Link", link_doctype="NC Department", required=True, example="K01"),
+		Column(
+			"scenario",
+			"Kịch bản sản lượng",
+			"Select",
+			required=True,
+			options=SCENARIOS,
+			example="Thực tế 12 tháng",
+		),
+		Column("volume", "Sản lượng", "Float", required=True, example=4000),
+	),
+)
+
+register(NC_SERVICE_VOLUME)
+
+# FEAT-016, FR-ACCT-010: tiêu chí phân bổ cấp 1 theo (năm, trung tâm chi phí).
+NC_COST_CENTER_DRIVER = ImportSet(
+	key="nc_cost_center_driver",
+	label="Tiêu chí trung tâm chi phí",
+	doctype="NC Cost Center Driver",
+	key_field="fiscal_year",
+	key_fields=("fiscal_year", "cost_center"),
+	columns=(
+		Column("fiscal_year", "Năm tài chính", "Int", required=True, example=2026),
+		Column(
+			"cost_center",
+			"Mã trung tâm chi phí",
+			"Link",
+			link_doctype="NC Cost Center",
+			required=True,
+			example="K01",
+		),
+		Column("headcount", "Số nhân lực", "Float", example=20),
+		Column("area_m2", "Diện tích (m²)", "Float"),
+		Column("revenue", "Doanh thu", "Float"),
+	),
+)
+
+register(NC_COST_CENTER_DRIVER)

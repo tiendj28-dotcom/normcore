@@ -1,8 +1,13 @@
-# Mỗi dòng một DocType đã cài, xếp theo thứ tự chữ cái, không trùng. FEAT thêm DocType thì nối dòng (merge=union); kiểm bởi scripts/check_conventions.py.
 NC AI Log
+NC Account Mapping
+NC Accounting Import
+NC Accounting Import Line
+NC Accounting Import Total
+NC Allocation Rule
 NC Audit Event
 NC Clinical Procedure
 NC Cost Center
+NC Cost Center Driver
 NC Costing Parameter Set
 NC Costing Run
 NC Department
@@ -27,6 +32,7 @@ NC Service Code Map
 NC Service Cost
 NC Service Cost Line
 NC Service Department
+NC Service Volume
 NC Settings
 NC Specialty
 NC Technical Service

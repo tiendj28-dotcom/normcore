@@ -1,11 +1,15 @@
+Account,Tài khoản
+Actions,Thao tác
 Active,Đang dùng,NC Technical Service
 Add citation,Thêm trích dẫn
 Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
 Add step,Thêm bước
 Add test system,Thêm hệ thống xét nghiệm
+"After finalizing, lines are locked and cannot be reopened. Finalize this import?","Sau khi chốt, các dòng bị khóa và không mở lại được. Chốt lần nhập này?"
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
+Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
@@ -14,7 +18,9 @@ As of today,Tính theo ngày,NC Equipment
 Assign,Gán
 Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
+Assumption,Giả định
 Cancel,Hủy
+Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Catalog,Danh mục
 Check,Kiểm tra
@@ -27,6 +33,8 @@ Column,Cột,Import Excel
 Confirm import,Xác nhận ghi
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
+Cost category,Loại chi phí
+Cost center,Trung tâm chi phí
 Costing completed.,Đã tính giá xong.
 Costing failed.,Tính giá lỗi.
 Could not complete the request. Check your permissions.,Không thực hiện được yêu cầu. Kiểm tra quyền của bạn.
@@ -45,32 +53,52 @@ Delete this citation?,Xóa trích dẫn này?
 Delete this resource?,Xóa nguồn lực này?
 Delete this step?,Xóa bước này?
 Department,Khoa
+Depreciation,Khấu hao
 Description,Mô tả
 Document no.,Số chứng từ,NC Item
 Down,Xuống
 Download template,Tải tệp mẫu
+Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
 Edit,Sửa
+Edit cost category,Sửa loại chi phí
+Edit cost category of a line,Sửa loại chi phí của một dòng
 Equipment is allocated by machine minutes,Thiết bị chia theo phút chiếm máy
+Error,Lỗi
 Errors,Lỗi,Import Excel
+Errors by line,Lỗi theo dòng
+Excel row,Dòng Excel
+Excluded,Loại trừ
+Excluded from price,Không tính vào giá
 Expired {0} days ago,Đã hết hạn {0} ngày trước
 Expires in {0} days,Còn {0} ngày đến hạn
+File errors,Dòng lỗi khi đọc tệp
+Finalize,Chốt
+Finalized: the figures can be used in a costing run.,Đã chốt: số liệu dùng được cho lần tính giá.
+"Fix the file, attach it again in Source file and click Reload file, or create a new import.","Sửa tệp, đính kèm lại ở ô Tệp nguồn rồi bấm Đọc lại tệp, hoặc tạo lần nhập mới."
+Has error lines,Có dòng lỗi
 Headcount,Số người
 Import data from Excel,Nhập dữ liệu từ Excel
 Import from Excel,Nhập từ Excel
 Import result,Kết quả nhập
 Inactive,Ngừng dùng,NC Technical Service
+Labor,Nhân công
 Legal document,Văn bản
 Legal section,Mục văn bản
 Legal text links are provided by the document library.,Liên kết tới mục văn bản do thư viện văn bản cung cấp.
+Line,Dòng
+Lines / Total amount,Số dòng / Tổng tiền
+Lines without cost category,Dòng chưa gán loại chi phí
 Loading chain status…,Đang tải tình trạng chuỗi…
 Loading status…,Đang tải tình trạng…
+Loading summary…,Đang tải tóm tắt…
 Loading test systems…,Đang tải hệ thống xét nghiệm…
 Loading...,Đang tải...
 Loading…,Đang tải…,NC Equipment
 Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
 Main equipment,Thiết bị chính
+Management,Quản lý
 Message,Thông báo,Import Excel
 Minutes per person,Số phút / người
 Move step down,Chuyển bước xuống
@@ -88,12 +116,14 @@ No price yet,Chưa có đơn giá,NC Item
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
 No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
+None,Không có
 None yet,Chưa có
 Open editor,Mở trình soạn
 Past useful life,Hết thời gian sử dụng,NC Equipment
 Performing department,Khoa thực hiện
 Phase,Giai đoạn
 Pick a procedure to see its steps.,Chọn một quy trình để xem các bước.
+Preview: written on finalize,Xem trước — ghi khi chốt
 Price code,Mã đơn giá,NC Item
 Price in use today,Đơn giá đang dùng hôm nay,NC Item
 Price per norm unit,Đơn giá một đơn vị định mức,NC Item
@@ -103,8 +133,12 @@ Quantity,Số lượng
 Quote,Đoạn trích
 Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
 Reactivate,Dùng lại
+Reapplied {0} lines; manual edits are kept,Đã gán lại {0} dòng; các dòng sửa tay giữ nguyên
+Reapply account mapping,Gán lại theo bảng ánh xạ
 Reason,Lý do
 Relation,Quan hệ
+Reload file,Đọc lại tệp
+Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệp sẽ thay toàn bộ dòng và bỏ các sửa tay. Tiếp tục?
 Retry,Thử lại
 Room hourly rate,Đơn giá giờ phòng,NC Room
 Row,Dòng,Import Excel
@@ -125,11 +159,14 @@ Status,Trạng thái
 Step ID,Mã bước
 Step title,Tên bước
 Technical service,Dịch vụ kỹ thuật
+The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
+Total,Tổng
 Total share differs from 100%,Tổng tỷ trọng khác 100%
+Totals by cost center and category,Tổng theo trung tâm và loại chi phí
 Type,Loại
 Unassign,Bỏ gán
 Unchanged,Không đổi,Import Excel
@@ -140,9 +177,11 @@ Unverified,Chưa xác minh,NC Item Price
 Up,Lên
 Updated,Cập nhật,Import Excel
 "Updated {0} records, sent {1} notifications","Đã cập nhật {0} hồ sơ, gửi {1} thông báo"
+"Upload an Excel file by the template (Account code, Account name, Cost center code, Amount) then click Save.","Tải tệp Excel theo mẫu (Mã tài khoản, Tên tài khoản, Mã trung tâm chi phí, Số tiền) rồi bấm Lưu."
 Upload file,Tải tệp lên
 User,Người dùng
 User assigned to department.,Đã gán người dùng vào khoa.
+Utilities,"Điện, nước, nhiên liệu"
 Valid from,Hiệu lực từ,NC Item
 Valid to,Hiệu lực đến,NC Item
 Verification,Xác minh,NC Item
@@ -152,4 +191,6 @@ Verify,Xác minh,NC Item Price
 View costing results,Xem kết quả tính giá
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
+and {0} more errors,và {0} lỗi khác
 total share,tổng tỷ trọng
+{0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
