@@ -39,6 +39,12 @@ class TestValues(unittest.TestCase):
 		self.assertEqual(ar.driver_errors({"headcount": 20, "area_m2": None}), [])
 		self.assertEqual(len(ar.driver_errors({"headcount": -1, "revenue": -5})), 2)
 
+	def test_N31_07_driver_errors_dung_nhan_tieng_viet(self):
+		self.assertEqual(
+			ar.driver_errors({"headcount": -1, "area_m2": -2, "revenue": -5}),
+			["Số nhân lực không được âm", "Diện tích (m²) không được âm", "Doanh thu không được âm"],
+		)
+
 	def test_volume_errors(self):
 		self.assertEqual(ar.volume_errors(0), [])
 		self.assertEqual(ar.volume_errors(None), [])

@@ -14,6 +14,8 @@ LEVEL1_ONLY = ("REVENUE", "HEADCOUNT", "AREA")
 LEVEL1, LEVEL2 = "Cấp 1", "Cấp 2"
 SUPPORT, CLINICAL = "Hỗ trợ", "Lâm sàng"
 DRIVER_FIELDS = {"HEADCOUNT": "headcount", "AREA": "area_m2", "REVENUE": "revenue"}
+# Nhãn trùng nguyên văn `label` trong nc_cost_center_driver.json (NORM-31, NFR-MNT-003).
+DRIVER_LABELS = {"headcount": "Số nhân lực", "area_m2": "Diện tích (m²)", "revenue": "Doanh thu"}
 MIN_YEAR, MAX_YEAR = 2000, 2100
 
 
@@ -33,7 +35,11 @@ def rule_errors(level, cost_category, driver, center_type=None) -> list[str]:
 
 def driver_errors(values) -> list[str]:
 	"""Số âm ở headcount, area_m2, revenue (ASM-126). `values`: dict fieldname → số."""
-	return [f"{k} không được âm" for k, v in values.items() if v is not None and Decimal(str(v)) < 0]
+	return [
+		f"{DRIVER_LABELS.get(k, k)} không được âm"
+		for k, v in values.items()
+		if v is not None and Decimal(str(v)) < 0
+	]
 
 
 def volume_errors(volume) -> list[str]:

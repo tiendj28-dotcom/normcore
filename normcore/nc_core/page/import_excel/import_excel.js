@@ -7,6 +7,10 @@ frappe.pages["import-excel"].on_page_load = function (wrapper) {
 	wrapper.import_excel = new normcore.ImportExcel(page);
 };
 
+frappe.pages["import-excel"].on_page_show = function (wrapper) {
+	if (wrapper.import_excel) wrapper.import_excel.apply_route_options();
+};
+
 frappe.provide("normcore");
 
 normcore.ImportExcel = class ImportExcel {
@@ -14,6 +18,8 @@ normcore.ImportExcel = class ImportExcel {
 		this.page = page;
 		this.file_url = null;
 		this.checked = false;
+		this.sets = null;
+		this.pending_key = null;
 		this.api = "normcore.api.importer.";
 		this.make();
 		this.load_sets();
@@ -42,12 +48,35 @@ normcore.ImportExcel = class ImportExcel {
 			method: this.api + "list_import_sets",
 			callback: (r) => {
 				const sets = r.message || [];
+				this.sets = sets;
 				this.set_field.df.options = sets.map((s) => ({ value: s.key, label: s.label }));
 				this.set_field.refresh();
-				if (sets.length) this.set_field.set_value(sets[0].key);
-				else this.show_message(__("You do not have permission to import data."));
+				const key = this.pending_key;
+				this.pending_key = null;
+				if (!sets.length) return this.show_message(__("You do not have permission to import data."));
+				this.set_field.set_value(key && this.has_set(key) ? key : sets[0].key);
 			},
 		});
+	}
+
+	has_set(key) {
+		return (this.sets || []).some((s) => s.key === key);
+	}
+
+	// NORM-31 (ASM-004-01): chọn sẵn bộ nhập theo frappe.route_options.import_set; khóa sai/không có quyền thì bỏ qua.
+	apply_route_options() {
+		const key = (frappe.route_options || {}).import_set;
+		if (!key) return;
+		frappe.route_options = null;
+		this.preselect(key);
+	}
+
+	preselect(key) {
+		if (this.sets === null) {
+			this.pending_key = key;
+			return;
+		}
+		if (this.has_set(key) && this.set_field.get_value() !== key) this.set_field.set_value(key);
 	}
 
 	reset() {

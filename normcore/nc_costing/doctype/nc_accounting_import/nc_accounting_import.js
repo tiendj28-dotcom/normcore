@@ -101,7 +101,7 @@ function call(frm, method, args, done) {
 
 function edit_line_dialog(frm, row) {
 	const d = new frappe.ui.Dialog({
-		title: __("Edit cost category"),
+		title: __("Edit cost category: line {0}, account {1}", [row.idx, esc(row.account_code)]),
 		fields: [
 			{ fieldname: "cost_category", fieldtype: "Select", label: __("Cost category"), options: ["", ...CATEGORIES].join("\n"), default: row.cost_category },
 			{ fieldname: "is_excluded", fieldtype: "Check", label: __("Excluded"), default: row.is_excluded },
@@ -147,9 +147,10 @@ frappe.ui.form.on("NC Accounting Import", {
 		frm.add_custom_button(__("Reload file"), () =>
 			frappe.confirm(__("Reloading replaces all lines and drops manual edits. Continue?"), () => call(frm, "reload_file")), __("Actions"));
 		frm.add_custom_button(__("Edit cost category of a line"), () => {
-			const rows = frm.doc.lines || [];
-			const sel = (frm.fields_dict.lines.grid.get_selected_children() || [])[0] || rows[0];
-			if (sel) edit_line_dialog(frm, sel);
+			const sel = frm.fields_dict.lines.grid.get_selected_children() || [];
+			if (sel.length === 0) return frappe.msgprint(__("Select one line in the Lines table first."));
+			if (sel.length > 1) return frappe.msgprint(__("Select only one line to edit."));
+			edit_line_dialog(frm, sel[0]);
 		}, __("Actions"));
 	},
 });
