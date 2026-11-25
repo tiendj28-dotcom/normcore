@@ -1,15 +1,16 @@
 # Acceptance FEAT-006 — Kiểm định lại sau NORM-15, NORM-22, NORM-23, NORM-27 (NORM-16)
 
-Kết luận: **accepted.** Phần A đạt ở HEAD `3a28d84fa5fc36546ebf51c3a82e45d627d9f19c`; Phần B (Playwright trên staging có đủ bản sửa NORM-22, NORM-23, NORM-27) đạt mọi mã. Lỗi `.finally` trên `frappe.call` (làm kẹt `busy`, hỏng K3, hiện dải lỗi sai sau khi tạo/sao chép) đã được NORM-27 sửa và có test hành vi; console không còn lỗi `finally`. Theo ASM-099 (Quyết định Lead), kết quả Playwright thay cho câu trả lời của người duyệt.
+Kết luận: **accepted.** Phần A đạt ở HEAD `9a6ad6bf80d7aaa5045406d4017206303da261c2`; Phần B (Playwright trên staging có đủ bản sửa NORM-22, NORM-23, NORM-27) đạt mọi mã. Lỗi `.finally` trên `frappe.call` (làm kẹt `busy`, hỏng K3, hiện dải lỗi sai sau khi tạo/sao chép) đã được NORM-27 sửa và có test hành vi; console không còn lỗi `finally`. Theo ASM-099 (Quyết định Lead), kết quả Playwright thay cho câu trả lời của người duyệt.
 
 ## Môi trường kiểm
-Nhánh `ai/NORM-16-reverify-006` = `origin/develop` @ `73029ce` (PR #34) gộp vào; HEAD kiểm `3a28d84fa5fc36546ebf51c3a82e45d627d9f19c`. Phần A: site sạch `normcore-verify.test` qua `scripts/with_bench.sh` (đã xóa). Phần B: staging http://112.213.88.40:8100 (deploy `73029ce` thành công 13:08 UTC), Chromium 1366×768, locale `vi`, tài khoản NC Clinician (khoa K01) và NC Auditor; không dùng Administrator để kiểm (chỉ dùng STG_ADMIN để tạo dữ liệu thử). Không sửa mã sản phẩm, không thêm test.
+Cập nhật 2026-11-25: sau khi Dev gỡ conflict `docs/rtm-testref.md` (merge `9a6ad6b`, chỉ gộp develop; mã và test FEAT-006 không đổi từ `3a28d84`), QA chạy lại Phần A ở HEAD `9a6ad6b` (kết quả bảng dưới); Phần B giữ nguyên vì không đổi mã. `docs/rtm-testref.md` có đủ mục FEAT-006 và FEAT-033.
+Nhánh `ai/NORM-16-reverify-006` = `origin/develop` @ `73029ce` (PR #34) gộp vào; HEAD kiểm `9a6ad6bf80d7aaa5045406d4017206303da261c2`. Phần A: site sạch `normcore-verify.test` qua `scripts/with_bench.sh` (đã xóa). Phần B: staging http://112.213.88.40:8100 (deploy `73029ce` thành công 13:08 UTC), Chromium 1366×768, locale `vi`, tài khoản NC Clinician (khoa K01) và NC Auditor; không dùng Administrator để kiểm (chỉ dùng STG_ADMIN để tạo dữ liệu thử). Không sửa mã sản phẩm, không thêm test.
 
-## Phần A (ở HEAD `3a28d84fa5fc36546ebf51c3a82e45d627d9f19c`)
+## Phần A (chạy lại ở HEAD `9a6ad6bf80d7aaa5045406d4017206303da261c2`)
 | Lệnh | Kết quả | Đạt |
 | :-- | :-- | :-: |
-| `bench --site normcore-verify.test run-tests --app normcore` | Ran 486 tests, OK | Đạt |
-| `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90` | 216 passed, độ phủ 98,73% | Đạt |
+| `bench --site normcore-verify.test run-tests --app normcore` | Ran 533 tests, OK | Đạt |
+| `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90` | 235 passed, độ phủ 98,53% | Đạt |
 | `golden_engine.py`, `--no-depr`, `golden_cls.py` | cả ba thoát 0 | Đạt |
 | `python3 scripts/check_conventions.py` | thoát 0 | Đạt |
 | `build_rtm.py` trên bản sao `docs` | thoát 0, Must chưa có TC: 0 | Đạt |
