@@ -1,0 +1,178 @@
+{
+ "actions": [],
+ "autoname": "format:HSTT-{YYYY}-{####}",
+ "creation": "2026-11-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "record_code",
+  "equipment",
+  "department",
+  "record_type",
+  "cycle_months",
+  "provider",
+  "col_break",
+  "cost_per_time",
+  "performed_on",
+  "expiry_date",
+  "status_section",
+  "attachment",
+  "status",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "record_code",
+   "label": "Mã hồ sơ",
+   "fieldtype": "Data",
+   "unique": 1,
+   "no_copy": 1,
+   "in_list_view": 1,
+   "description": "Để trống thì lấy bằng tên bản ghi. Dùng làm khóa khi nhập Excel"
+  },
+  {
+   "fieldname": "equipment",
+   "label": "Thiết bị",
+   "fieldtype": "Link",
+   "options": "NC Equipment",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa quản lý",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "read_only": 1,
+   "fetch_from": "equipment.department",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "record_type",
+   "label": "Loại hồ sơ",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "\nKiểm định\nHiệu chuẩn\nKiểm xạ\nGiấy phép an toàn bức xạ\nKhác",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cycle_months",
+   "label": "Chu kỳ (tháng)",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "description": "Lớn hơn 0"
+  },
+  {
+   "fieldname": "provider",
+   "label": "Đơn vị thực hiện",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_per_time",
+   "label": "Chi phí mỗi lần",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "description": "Đã gồm thuế GTGT"
+  },
+  {
+   "fieldname": "performed_on",
+   "label": "Ngày thực hiện",
+   "fieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expiry_date",
+   "label": "Ngày hết hạn",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status_section",
+   "label": "Chứng từ và trạng thái",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment",
+   "label": "Tệp chứng từ",
+   "fieldtype": "Attach",
+   "reqd": 1,
+   "no_copy": 1,
+   "description": "Tệp riêng tư"
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "read_only": 1,
+   "no_copy": 1,
+   "options": "\nCòn hạn\nSắp hết hạn\nHết hạn",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Hệ thống tự tính từ ngày hết hạn và số ngày nhắc"
+  },
+  {
+   "fieldname": "note",
+   "label": "Ghi chú",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Equipment Compliance",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

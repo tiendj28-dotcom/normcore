@@ -458,7 +458,9 @@ Khấu hao năm và đơn giá giờ máy không lưu trên bản ghi; bộ máy
 
 | Trường | Nhãn | Kiểu | BB | Ghi chú |
 | :-- | :-- | :-- | :-- | :-- |
+| record_code **[AMD-009]** | Mã hồ sơ | Data | | Duy nhất. Để trống thì lấy bằng tên bản ghi; không tự đặt dạng HSTT-<…> khác tên. Khóa khi nhập Excel [UC-020 1a] |
 | equipment | Thiết bị | Link NC Equipment | Có | |
+| department **[AMD-009]** | Khoa quản lý | Link NC Department | | Chỉ đọc, lấy từ `equipment.department`. Lọc danh sách, nhóm báo cáo [FR-CMP-007, SCR-DSK-035] |
 | record_type | Loại hồ sơ | Select | Có | Kiểm định / Hiệu chuẩn / Kiểm xạ / Giấy phép an toàn bức xạ / Khác |
 | cycle_months | Chu kỳ (tháng) | Int | Có | Lớn hơn 0 |
 | provider | Đơn vị thực hiện | Data | Có | |
