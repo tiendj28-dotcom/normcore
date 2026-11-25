@@ -35,7 +35,11 @@ def rule_errors(level, cost_category, driver, center_type=None) -> list[str]:
 
 def driver_errors(values) -> list[str]:
 	"""Số âm ở headcount, area_m2, revenue (ASM-126). `values`: dict fieldname → số."""
-	return [f"{DRIVER_LABELS.get(k, k)} không được âm" for k, v in values.items() if v is not None and Decimal(str(v)) < 0]
+	return [
+		f"{DRIVER_LABELS.get(k, k)} không được âm"
+		for k, v in values.items()
+		if v is not None and Decimal(str(v)) < 0
+	]
 
 
 def volume_errors(volume) -> list[str]:
