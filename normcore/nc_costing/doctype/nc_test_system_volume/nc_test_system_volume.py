@@ -28,6 +28,15 @@ class NCTestSystemVolume(Document):
 				)
 			)
 
+	def as_dict(self, *args, **kwargs):
+		# Frappe ép Float NULL thành 0 khi tuần tự hóa (lúc tải, lúc lưu, lúc tạo mới); form sẽ hiện 0 và lưu 0 thật.
+		# Giá trị thô trống nghĩa là chưa có số thực tế: trả NULL (ASM-035-04). Nhập 0 thì giữ 0.
+		d = super().as_dict(*args, **kwargs)
+		for f in cls_volume.NON_NEGATIVE[1:]:
+			if f in d and self.__dict__.get(f) in (None, ""):
+				d[f] = None
+		return d
+
 	def on_update(self):
 		# Frappe ghi 0 cho ô số để trống; FR-QC-006 cần NULL để FEAT-036 ước tính từ kế hoạch (ASM-035-04)
 		blanks = [f for f in cls_volume.NON_NEGATIVE[1:] if self.get(f) in (None, "")]
