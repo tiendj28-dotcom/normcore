@@ -4,7 +4,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import access
-from normcore.tests.utils import make_cls_data, make_user
+from normcore.tests.utils import make_base, make_cls_data, make_user
 
 DT = "NC Equipment Usage"
 
@@ -66,3 +66,21 @@ class TestNCEquipmentUsage(FrappeTestCase):
 		frappe.set_user(head)
 		self.assertIn(doc.name, frappe.get_list(DT, pluck="name"))
 		self.assertFalse(frappe.has_permission(DT, "create"))
+
+	def test_quyen_truong_khoa_chi_doc_khoa_minh(self):
+		"""QA: NC Department Head chỉ thấy phút khai thác của khoa được gán."""
+		own = self._u().insert(ignore_permissions=True)
+		make_base(department="KHOA-KHAC")
+		other = self._u(department="KHOA-KHAC").insert(ignore_permissions=True)
+		head = make_user("eu.head2@normcore.test", "NC Department Head")
+		access.assign_department(head, self.dept)
+		frappe.set_user(head)
+		names = frappe.get_list(DT, pluck="name")
+		self.assertIn(own.name, names)
+		self.assertNotIn(other.name, names)
+		self.assertFalse(frappe.has_permission(DT, "read", doc=other))
+		self.assertFalse(frappe.has_permission(DT, "write", doc=own))
+		frappe.set_user("Administrator")
+		frappe.set_user(make_user("eu.aud2@normcore.test", "NC Auditor"))
+		names = frappe.get_list(DT, pluck="name")
+		self.assertTrue({own.name, other.name} <= set(names))
