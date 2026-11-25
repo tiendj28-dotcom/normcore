@@ -1,0 +1,35 @@
+# Bot pr-sync (NORM-37): sau mỗi lần develop đổi, gộp develop vào mọi PR mở nhắm develop.
+# Ngoại lệ đã được chủ dự án yêu cầu đích danh (ASM-NORM37-01). Cần secret PR_SYNC_TOKEN (PAT có quyền
+# contents và pull-requests write): push bằng GITHUB_TOKEN không kích hoạt CI nên không dùng được.
+name: pr-sync
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+concurrency:
+  group: pr-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Đồng bộ PR với develop
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.PR_SYNC_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Gộp develop vào các PR mở
+        env:
+          GH_TOKEN: ${{ secrets.PR_SYNC_TOKEN }}
+        run: scripts/pr_sync.sh

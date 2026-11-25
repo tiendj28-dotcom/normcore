@@ -12,8 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import build_workspace as bw  # noqa: E402
-import check_conventions as cc  # noqa: E402
+import build_workspace as bw
+import check_conventions as cc
 
 
 def fix(root: Path) -> list:
