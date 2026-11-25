@@ -88,3 +88,17 @@
 | FR-ACCT-009 | `test_TC_ACCT_08_bang_mac_dinh_va_lan_nhap_moi_theo_gia_tri_da_doi` |
 | FR-ACCT-010 | `test_TC_ACCT_09_nhap_tieu_chi` |
 | FR-ACCT-011 | `test_FR_ACCT_011_lan_nhap_thu_hai_cung_nam_giu_lan_cu` |
+
+# Test ref — FEAT-006 (ghi bởi kiểm định độc lập NORM-16)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-PROC-001 | `test_TC_PROC_01_tao_ban_nhap`, `test_luu_phan` (api/test_procedure.py) |
+| FR-PROC-002 | `test_TC_PROC_02_tao_lan_hai_bi_tu_choi_va_dan_toi_ban_co`, `test_DI_02_chi_mot_ban_dang_soan_cho_moi_dich_vu_khoa`, `test_Q3_tu_choi_tao_va_sao_chep_khi_da_ban_hanh` |
+| FR-PROC-003 | `test_TC_PROC_03_tich_hop_sap_lai_xoa_them`, `test_TC_PROC_03_ma_buoc_bat_bien`, `test_TC_PROC_03_ma_buoc_bat_bien_khi_sap_lai_va_xoa` (unit/test_procedure_logic.py), `test_yeu_cau_giai_doan_ten_mo_ta` |
+| FR-PROC-004 | `test_TC_PROC_04_nguon_luc_nhan_luc`, `test_TC_PROC_04_nguon_luc_nhan_luc_co_ma_dong_bat_bien`, `test_nhan_luc_phai_tinh_bang_phut` |
+| FR-PROC-005 | `test_FR_PROC_005_goi_y_va_de_trong_lien_ket` |
+| FR-PROC-006 | `test_TC_PROC_03_tich_hop_sap_lai_xoa_them`, `test_reorder_chi_nhan_hoan_vi_day_du`, `test_move_len_xuong_va_chan_bien`, `test_K3_*` (unit/test_procedure_editor_behavior.py) |
+| FR-PROC-007 | `test_TC_PROC_09_trich_dan` (văn bản, mục, đoạn trích, quan hệ), `test_FR_PROC_007_trich_dan_dung_mot_dich`, `test_FR_PROC_007_quan_he_mac_dinh_chua_co_can_cu` |
+| FR-PROC-009 | `test_TC_PROC_08_lich_su_truoc_sau_nguoi_thoi_diem`, `test_TC_PROC_08_moc_thoi_gian_va_nguoi_cho_ca_hai_thay_doi` |
+| FR-PROC-013 | `test_FR_PROC_013_sao_chep`, `test_FR_PROC_013_sao_chep_cap_ma_moi_va_anh_xa`, `test_E12_sao_chep_thanh_cong_khong_hien_dai_loi` |

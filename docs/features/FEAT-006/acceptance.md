@@ -1,45 +1,59 @@
-# Acceptance FEAT-006 — Kiểm định độc lập (NORM-14)
+# Acceptance FEAT-006 — Kiểm định lại sau NORM-15, NORM-22, NORM-23, NORM-27 (NORM-16)
 
-Kết luận: **design-defect**. Mã và test đạt; thiết kế bỏ trường "văn bản, mục" của trích dẫn trái FR-PROC-007 (Must) / TC-PROC-09; giao diện chưa kiểm bằng trình duyệt.
+Kết luận: **accepted.** Phần A đạt ở HEAD `9a6ad6bf80d7aaa5045406d4017206303da261c2`; Phần B (Playwright trên staging có đủ bản sửa NORM-22, NORM-23, NORM-27) đạt mọi mã. Lỗi `.finally` trên `frappe.call` (làm kẹt `busy`, hỏng K3, hiện dải lỗi sai sau khi tạo/sao chép) đã được NORM-27 sửa và có test hành vi; console không còn lỗi `finally`. Theo ASM-099 (Quyết định Lead), kết quả Playwright thay cho câu trả lời của người duyệt.
 
 ## Môi trường kiểm
-Nhánh `ai/NORM-14-verify-006-001-004` từ `develop` 98d21fe; site sạch `normcore-verify.test` (đã xóa sau khi kiểm).
+Cập nhật 2026-11-25: sau khi Dev gỡ conflict `docs/rtm-testref.md` (merge `9a6ad6b`, chỉ gộp develop; mã và test FEAT-006 không đổi từ `3a28d84`), QA chạy lại Phần A ở HEAD `9a6ad6b` (kết quả bảng dưới); Phần B giữ nguyên vì không đổi mã. `docs/rtm-testref.md` có đủ mục FEAT-006 và FEAT-033.
+Nhánh `ai/NORM-16-reverify-006` = `origin/develop` @ `73029ce` (PR #34) gộp vào; HEAD kiểm `9a6ad6bf80d7aaa5045406d4017206303da261c2`. Phần A: site sạch `normcore-verify.test` qua `scripts/with_bench.sh` (đã xóa). Phần B: staging http://112.213.88.40:8100 (deploy `73029ce` thành công 13:08 UTC), Chromium 1366×768, locale `vi`, tài khoản NC Clinician (khoa K01) và NC Auditor; không dùng Administrator để kiểm (chỉ dùng STG_ADMIN để tạo dữ liệu thử). Không sửa mã sản phẩm, không thêm test.
 
-| Lệnh | Kết quả |
-| :-- | :-- |
-| `bench --site normcore-verify.test run-tests --app normcore` | 148 test, OK (147 trước khi QA thêm 1 test) |
-| `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov-fail-under=90` | 69 passed, độ phủ 98,9% |
-| `python3 docs/golden/golden_engine.py` / `--no-depr` / `golden_cls.py` | thoát 0, số khớp |
-| `python3 scripts/check_conventions.py` | thoát 0 |
-| `python3 docs/tools/build_rtm.py docs` | thoát 0, `VAN DE: 0`; 12 ghi chú có sẵn (DEF-001) |
-
-## Độ phủ tiêu chí
-
-| Tiêu chí | Bằng chứng | Đạt |
+## Phần A (chạy lại ở HEAD `9a6ad6bf80d7aaa5045406d4017206303da261c2`)
+| Lệnh | Kết quả | Đạt |
 | :-- | :-- | :-: |
-| TC-PROC-01 (bản nháp v1, 8 phần) | `test_TC_PROC_01_tao_ban_nhap`: version 1, "Nháp", đúng 8 phần, 6 nhãn đầu đúng | Đạt |
-| TC-PROC-02 (tạo lần hai bị từ chối, dẫn tới bản có) | `test_TC_PROC_02_...`: `ExistingProcedureError.existing` = tên bản nháp; chạy tay: "Dịch vụ này đã có bản đang soạn hoặc đang duyệt của khoa: QT-DVV1-KV1-v1" | Đạt |
-| TC-PROC-03 (3 bước, đổi 1↔3, xóa 2, thêm mới → S004) | `test_TC_PROC_03_tich_hop_sap_lai_xoa_them` làm đúng chuỗi của TC, kiểm thứ tự S003,S001,S004 và S004 không tái dùng S002; thêm 3 test đơn vị bất biến. Chạy tay cho cùng kết quả | Đạt |
-| TC-PROC-04 (nhân lực: chức danh, số người, mã dòng bất biến) | `test_TC_PROC_04_nguon_luc_nhan_luc`: R001, headcount 2, liên kết NC Job Title, sửa không đổi mã, xóa rồi thêm → R002 | Đạt |
-| TC-PROC-08 (lịch sử trước/sau/người/thời điểm cho cả bước và nguồn lực) | Test gốc chỉ kiểm thời điểm của bước, bỏ thời điểm của dòng nguồn lực (yếu). QA thêm `test_TC_PROC_08_moc_thoi_gian_va_nguoi_cho_ca_hai_thay_doi` (commit 5dba6de), xanh | Đạt |
-| TC-PROC-09 (trích dẫn lưu văn bản, mục, đoạn trích, quan hệ) | Test kiểm đích, quan hệ, đoạn trích, lý do, mặc định "Chưa có căn cứ", lọc theo bước/phần. **Không có "văn bản" và "mục"**: `nc_procedure_citation.json` chỉ có 5 trường (target_section, target_step_id, relation, quote, deviation_reason). Test dễ hơn TC; viết lại cho đủ cần mã sản phẩm | **Không** |
-| FR-PROC-013 sao chép | `test_FR_PROC_013_sao_chep`; chạy tay: sao chép đủ bước, mã bước cấp lại S001..S003, ghi nguồn | Đạt |
-| Tiêu chí 7 mục 5 (bàn phím, tương phản NFR-USE-004) | Chỉ soát tĩnh `ProcedureEditor.vue` (nút Lên/Xuống có aria-label, Esc đóng form). Chưa kiểm trong trình duyệt, chưa đo tương phản | **Chưa kiểm** |
-| Mỗi DocType mới: vai trò không quyền + NC Auditor chỉ đọc | NC Procedure Citation (bảng con): `test_quyen_vai_tro_chi_doc_va_auditor_bi_tu_choi` chạy 13 hàm ghi với NC Finance và NC Auditor, đều `PermissionError`, dữ liệu không đổi; `test_permissions` quét 16 DocType | Đạt |
+| `bench --site normcore-verify.test run-tests --app normcore` | Ran 533 tests, OK | Đạt |
+| `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90` | 235 passed, độ phủ 98,53% | Đạt |
+| `golden_engine.py`, `--no-depr`, `golden_cls.py` | cả ba thoát 0 | Đạt |
+| `python3 scripts/check_conventions.py` | thoát 0 | Đạt |
+| `build_rtm.py` trên bản sao `docs` | thoát 0, Must chưa có TC: 0 | Đạt |
+| Diff tài liệu chỉ đọc (`golden`, `srs.md`, `test-cases.md`, `use-cases.md`, `implementation-plan.md`, `CLAUDE.md`, `.claude`, `.github`, `.autopilot`) từ lần kiểm trước | rỗng | Đạt |
+| Diff test từ lần kiểm trước (NORM-23, NORM-27, FEAT khác) | không skip/xfail; chỉ đổi số DocType trong `test_permissions` do FEAT khác thêm DocType | Đạt |
 
-## Kiểm trực tiếp (hàm API như người dùng NC Clinician, site verify)
-Tạo quy trình → 3 bước → sắp lại → xóa → bước mới S004 → nguồn lực nhân lực R001 (headcount 2) → trích dẫn → tạo lần hai bị từ chối → sao chép sang dịch vụ khác → có 7 bản ghi Version. Kết quả khớp TC. **Chưa làm bằng giao diện** (không có trình duyệt trong môi trường QA).
+Các mục Phần A đã kiểm ở lượt trước và không đổi (mã FEAT-006 chỉ đổi ở `ProcedureEditor.vue` và test hành vi): A10 bốn đột biến làm test đỏ (bỏ lưu văn bản; bỏ lưu mục; trích dẫn của phần mất trường; sao chép bỏ hai trường), A11 gọi API theo NC Clinician / NC Auditor / NC Finance (6 hàm ghi bị `PermissionError`), diff PR #17 không xóa/skip/nới test, ASM-046 không trái FR-PROC-007, TC-PROC-09 kiểm đủ văn bản, mục, đoạn trích, quan hệ kể cả khi sao chép (FR-PROC-013).
 
-## Soát diff test và tài liệu
-- Không có test bị xóa/skip/nới trong diff `f82065b..98d21fe`; chỉ đổi `test_co_14_doctype` → `test_co_16_doctype` (số DocType, theo ASM-037) và dữ liệu dựng.
-- Fixture `make_procedure` bật `flags.ignore_single_active` (ASM-025): chỉ ở dữ liệu dựng; DI-02 có test riêng. Chấp nhận.
-- Không sửa `docs/golden/`, `srs.md`, `use-cases.md`, `test-cases.md`, `implementation-plan.md`.
-- AMD-001 đủ vấn đề/phương án/tệp sửa/ảnh hưởng; `data-model.md` mục 3.3 thêm đúng dòng đã nêu.
+## Phần B — kết quả từng mã (ảnh theo mã đính kèm ở bình luận NORM-16)
+Dữ liệu thử (STG_ADMIN tạo, không sửa/xóa bản ghi có sẵn): NC Technical Service `THU-NORM16-X`, `-Y`, `-Z`, `-W`, `-V`; NC Job Title "Điều dưỡng" (`DD`) đã có. Bản Nháp `QT-THU-NORM16-*-K01-v1` do NC Clinician tạo qua giao diện.
 
-## ASM của FEAT-006 (017..025)
-- **ASM-017 trái FR-PROC-007 / TC-PROC-09** → lý do của design-defect. Người duyệt đã hoãn đến FEAT-020 nhưng FR-PROC-007 là Must và TC-PROC-09 hiện nêu rõ "văn bản, mục".
-- ASM-018, 019, 020, 021, 022, 023, 024, 025: lấp chỗ tài liệu chưa nói, không trái FR/TC (ASM-020 chặn tạo khi đã có bản ban hành cho tới FEAT-008; ASM-019 chỉ gợi ý NC Job Title, FR-PROC-005 là Should).
+| Mã | Kết quả | Điều thấy được |
+| :-- | :-: | :-- |
+| L1 | Đạt | Cột Mã số, Trạng thái, Dịch vụ kỹ thuật, Khoa chủ trì, Phiên bản; tiêu đề "Quy trình kỹ thuật"; không cuộn ngang |
+| L2, L4, L5 | Đạt | Lọc đúng; "Mở trình soạn" mở đúng bản; NC Auditor không có nút thêm |
+| L3 | Đạt | Nháp chấm xám, Đã ban hành xanh, đều có chữ |
+| E1 | Đạt | Tạo dịch vụ W/K01: bản Nháp đủ 8 phần, **không có dải lỗi**, "Đang tải…" tắt |
+| E2 | Đạt | Tạo lần hai: dải đỏ "Dịch vụ đã có quy trình cho khoa này:" + liên kết mở đúng bản Nháp |
+| E3 | Đạt | Lưu phần rồi tải lại: còn nguyên |
+| E4 | Đạt | Bỏ trống tên bị chặn; ba lần thêm liên tiếp, không tải lại: S001, S002, S003 |
+| E5 | Đạt | S001 Xuống hai lần, S003 Lên một lần, liên tiếp: S003, S002, S001, mã giữ nguyên |
+| E6 | Đạt | Xóa S002 (có hộp xác nhận), thêm bước: S003, S001, S004, liên tiếp |
+| E7 | Đạt | Gợi ý chức danh; đơn vị "phút" chỉ đọc; R001 15 phút 2 người, sửa 20 phút vẫn R001 (liên tiếp) |
+| E8 | Đạt | Vật tư không có trong danh mục lưu được (R002), không liên kết |
+| E9 | Đạt | Cột phải hiện "Theo hướng dẫn", "Thông tư 43/2013/TT-BYT — Điều 5", đoạn trích |
+| E10 | Đạt | "Khác biệt" ở Chỉ định đủ văn bản, mục, đoạn trích, lý do; chọn qua lại chỉ hiện trích dẫn của mục đang chọn |
+| E11 | Đạt | Mặc định "Chưa có căn cứ"; sửa Mục giữ Văn bản; xóa có hộp xác nhận |
+| E12 | Đạt | Sao chép W → V: bản Nháp mở đúng, **không có dải lỗi**, bước S001..S003, nguồn lực đi theo bước |
+| E13 | Đạt | Dòng thời gian: "thay đổi giá trị cho Số lượng từ 15 đến 20 ở hàng #1", "Mô tả từ … đến …" (trước/sau, người, thời điểm) |
+| E14 | Đạt | Xóa S001 còn nguồn lực: hộp xác nhận rồi dải lỗi tiếng Việt, S001 còn nguyên |
+| E15 | Đạt | Dải đỏ `role="alert"` "Không thể tìm thấy Dịch vụ kỹ thuật: …", không hộp thoại Desk |
+| G1 | Đạt | NC Auditor mở bản Nháp: "Bạn chỉ có quyền xem quy trình này."; không còn nút ghi/tạo/sao chép; ô văn bản readonly |
+| G2 | Đạt | Bản ban hành: chỉ đọc, không nút sửa |
+| U1, U2 | Đạt | Biểu mẫu ở 1366×768 không cuộn ngang/chồng lấn; 100% tiếng Việt |
+| K1, K2 | Đạt | Tab qua mọi điều khiển không kẹt; viền focus 2px ở 34/34 điều khiển |
+| **K3** | **Đạt** | Bàn phím, 3 bước (W) và 2 bước (X): Enter trên "Xuống" ở bước đầu → tiêu điểm ở lại nút, Enter lần nữa chuyển tiếp được; bước giữa Lên/Xuống; bước cuối "Lên"; ở biên (nút vừa bấm bị khóa) tiêu điểm sang nút còn lại của cùng bước (ASM-064), không rơi về `BODY` |
+| K4, K5 | Đạt | Enter mở biểu mẫu và lưu; Esc đóng biểu mẫu trích dẫn không lưu |
+| **K6** | **Đạt** | Chỉ bàn phím, không tải lại trang: thêm nguồn lực (R003), nút "Xóa" không bị khóa, xóa qua hộp xác nhận bằng Enter; thêm trích dẫn bằng phím hiện đúng văn bản, mục, đoạn trích |
+| C1 | Đạt | Nhãn quan hệ 5,42 / 5,44 / 5,36 (≥ 4,5) |
+| C2–C5 | Đạt | 7,81 / 11,73 và 10,57 / placeholder 7,04 / nhãn trạng thái 7,81 |
+| Console | Đạt | Không còn `TypeError: …finally is not a function` ở mọi luồng |
 
-## Việc phải sửa (để người duyệt tạo issue)
-1. Thêm vào NC Procedure Citation trường văn bản và mục (hoặc quyết định FR-PROC-007 chuyển FEAT-020 qua thủ tục sửa yêu cầu); `api/procedure.py::_apply_citation`, `add_citation`, `update_citation`; viết lại `test_TC_PROC_09_trich_dan` kiểm đủ 4 thuộc tính.
-2. Người duyệt tự bấm giao diện ở 1366×768, ngôn ngữ `vi`, SCR-DSK-007/009: tạo quy trình, thêm 3 bước, Lên/Xuống, xóa, thêm bước (mã S004), thêm nguồn lực nhân lực, thêm trích dẫn, sao chép, xem lịch sử; dùng Tab/Enter/Esc không chuột; đo tương phản nhãn quan hệ và chữ phụ ≥ 4,5:1.
+## Ghi chú không chặn nghiệm thu
+- Khi xóa một dòng nguồn lực vừa thêm bằng bàn phím trong cùng phiên (không tải lại), console có một yêu cầu `delete_resource` lặp lại trả 417 ("Không thấy dòng nguồn lực R00N"); kết quả hiển thị đúng và không có dải lỗi. Nên điều tra ở FEAT sau (nghi hộp xác nhận Enter gọi hai lần); không trái FR/NFR.
+- Hai tài khoản thử được đặt `language = vi` (ASM-099).
+- Ngoài phạm vi: dữ liệu `THU-NORM16-*` còn trên staging (không ai có quyền xóa theo ma trận).
