@@ -2,7 +2,7 @@
 
 Issue NORM-34. Nguồn: `srs.md` FR-PROC-008, FR-PROC-010, FR-PROC-011, FR-PROC-012, FR-WF-001..008, FR-WF-013, FR-NOTI-001; `use-cases.md` UC-006; `data-model.md` 3.1 (NC Review Comment, NC Settings, NC Department `head_user`), 3.3 (NC Clinical Procedure và bảng con), mục 4 (dòng "Quy trình", "Ý kiến thẩm định"), mục 5.1, DI-01, DI-02, DI-07; `architecture.md` ADR-002, ADR-011, ADR-014, ADR-015; `ux-foundations.md` SCR-DSK-010; TC-PROC-05, 06, 07, TC-WF-01, 02, 03, 04, 08. Phụ thuộc FEAT-006, FEAT-001 (đều DONE; As-Built `docs/as-built/FEAT-006.md`, `docs/as-built/FEAT-001.md`).
 
-Giả định: `docs/decisions/assumptions/FEAT-007.md` (ASM-007-01..15). Sửa thiết kế: `docs/decisions/amendments/AMD-007-01.md` (thư ký hội đồng). **Q1 chờ Quyết định Lead** (mục 9): cách cập nhật các test cũ gọi `publish()` từ "Nháp".
+Giả định: `docs/decisions/assumptions/FEAT-007.md` (ASM-007-01..15). Sửa thiết kế: `docs/decisions/amendments/AMD-007-01.md` (thư ký hội đồng). Q1 (mục 9) đã có Quyết định Lead: PA1 (ASM-007-16).
 
 ## 1. Phạm vi
 
@@ -62,7 +62,7 @@ Controller `nc_clinical_procedure.py`:
 - **Chuyển trạng thái**: chỉ qua `procedure/approval.py` + API mục 3 (đặt `flags.workflow_action`) hoặc tác vụ hệ thống (`db_set`, mục 4). Lưu thường đổi `workflow_state` → `ValidationError`. Bản mới phải "Nháp" (giữ).
 - **Khóa nội dung (FR-WF-008, DI-07, ASM-007-03)**: khi `workflow_state` trước khi lưu ≠ "Nháp", so trường nội dung giữa bản trước và bản lưu: 7 phần văn bản, `doctor_request`, `technical_service`, `department`, `version_no`, `previous_version`, `copied_from`, `ai_log`, `next_step_seq`, `next_resource_seq`, mọi bảng con (`steps`, `resources`, `citations`, so theo giá trị trường, bỏ `name`, `modified`). Khác → `ValidationError` "Quy trình đã ban hành, không sửa được. Tạo phiên bản mới." (trạng thái đóng) hoặc "Quy trình đang chờ duyệt, không sửa được. Từ chối để trả về Nháp." (trạng thái chờ). Trường được đổi ngoài "Nháp": `workflow_state` (theo luồng), `decision_no`, `effective_date` (chỉ trong hành động "Ban hành"), `needs_review` (FR-LIB-009, hệ thống).
 - `on_trash`: từ chối xóa ở mọi trạng thái ≠ "Nháp" (DI-07).
-- `publish()` (nút tạm FEAT-006) giữ tên, thành lớp mỏng gọi `apply_action(self.name, "Ban hành", decision_no=self.decision_no, effective_date=self.effective_date)`: kiểm vai trò NC Director trước (PermissionError), rồi đòi trạng thái "Chờ ban hành". Hệ quả cho test cũ: mục 9, Q1.
+- `publish()` (nút tạm FEAT-006) giữ tên, thành lớp mỏng gọi `apply_action(self.name, "Ban hành", decision_no=self.decision_no, effective_date=self.effective_date)`: kiểm vai trò NC Director trước (PermissionError), rồi đòi trạng thái "Chờ ban hành". Hệ quả cho test cũ: mục 9, Q1. Bỏ hẳn `flags.allow_publish` khỏi mã sản phẩm khi không còn ai dùng (ASM-007-16); không có đường tắt chuyển trạng thái nào ngoài `apply_action` và tác vụ hệ thống `supersede_due`.
 - `DI-02` giữ nguyên (các trạng thái chờ tính là "đang duyệt").
 
 ### 2.4 Frappe Workflow (fixture, ADR-011)
@@ -174,8 +174,10 @@ Khổ A4 dọc, chữ Desk mặc định. Đầu trang: Letter Head mặc địn
 - `wkhtmltopdf` có trên máy dev (`/usr/bin/wkhtmltopdf`); chữ "DỰ THẢO" chìm bằng CSS phải kiểm trên PDF thật (QA, loại M).
 - Nút workflow chuẩn của Desk gọi `apply_workflow` (cần quyền write): form JS chặn ở `before_workflow_action` và gọi `apply_action` (ASM-007-13).
 
-## 9. Câu hỏi chờ Lead
+## 9. Câu hỏi đã được Lead quyết
 
 **Q1 — test cũ dựa vào `publish()` từ "Nháp" (luật cứng 1).** FR-WF-001..005 và data-model 5.1 chỉ cho "Ban hành" từ "Chờ ban hành"; Frappe Workflow (ADR-011) từ chối lưu `Nháp → Đã ban hành`. 13 chỗ dựng dữ liệu trong test cũ sẽ đỏ, không do lỗi mã mà do dữ liệu dựng sẵn: `tests/utils.py::make_chain_data`, `tests/test_feat_001.py` (lưu với `flags.allow_publish`); `proc.publish()` từ "Nháp" trong `nc_core/.../test_nc_audit_event.py`, `nc_costing/.../test_nc_costing_run.py`, `nc_costing/.../test_nc_norm_set.py` (2), `tests/test_form_actions.py::_published_procedure`, `tests/test_feat_039.py` (dòng 271), `nc_procedure/.../test_nc_clinical_procedure.py` (3), `api/test_procedure.py` (2). Các test kiểm quyền của `publish()` (Clinician, Auditor bị từ chối) vẫn xanh.
 - **Đề xuất (PA1)**: thêm helper `publish_procedure(proc, decision_no, effective_date)` trong `normcore/tests/utils.py` đưa quy trình đến "Đã ban hành" bằng `db_set` như dữ liệu dựng sẵn (hook vẫn ghi sổ sự kiện `Nháp → Đã ban hành`, nên assertion của `test_feat_039` giữ nguyên); thay **chỉ các dòng dựng dữ liệu** bằng helper. Ba test của `test_nc_clinical_procedure.py` kiểm chính hành vi ban hành thì đưa quy trình về "Chờ ban hành" bằng helper `to_state(proc, "Chờ ban hành")` rồi mới `publish()`; mọi assertion giữ nguyên độ chặt. Ghi ASM dẫn Quyết định Lead.
 - PA2: giữ đường tắt `publish()` từ "Nháp" cho NC Director — trái FR-WF-001..005 (bỏ qua hai cấp duyệt), không đề xuất.
+
+**Quyết định Lead (bình luận `01a2119e-b0b8-7c00-afaf-3bc21c5d7ae3` trên NORM-34): chọn PA1**, kèm ba điều kiện: (1) `publish_procedure`/`to_state` chỉ ở `tests/utils.py` để dựng dữ liệu, mã sản phẩm không có đường tắt; (2) test kiểm hành vi ban hành và chuyển trạng thái (3 test ở `test_nc_clinical_procedure`, TC-WF-01/02/04) đi đường thật (`apply_action`/`publish()`), không `db_set`; (3) không skip, không đổi sang `assertIn`, không đổi giá trị mong đợi; test kiểm quyền Clinician/Auditor giữ nguyên. Ghi ở ASM-007-16. Lead cũng đồng ý ASM-007-03 và ASM-007-09.
