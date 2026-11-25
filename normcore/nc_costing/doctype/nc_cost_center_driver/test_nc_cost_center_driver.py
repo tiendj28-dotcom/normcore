@@ -49,6 +49,14 @@ class TestNCCostCenterDriver(FrappeTestCase):
 			with self.assertRaises(frappe.ValidationError):
 				_d("K01", **kw).insert()
 
+	def test_N31_08_so_am_bao_nhan_tieng_viet(self):
+		frappe.set_user(FIN)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			_d("K01", headcount=-1).insert()
+		msg = str(cm.exception)
+		self.assertIn("Số nhân lực không được âm", msg)
+		self.assertNotIn("headcount", msg)
+
 	def test_quyen(self):
 		frappe.set_user(AUD)
 		self.assertTrue(frappe.has_permission("NC Cost Center Driver", "read"))
