@@ -118,3 +118,21 @@
 | FR-CLS-007 | `test_TC_CLS_20_khoi_tinh_trang_du_bon_muc`, `test_TC_CLS_20_canh_bao_tong_ty_trong_va_ngung_dung` |
 | FR-CLS-008 | `test_TC_CLS_23_dong_thiet_bi_la_bao_loi_dong_dung_duoc_luu`, `test_cap_nhat_theo_ma_va_loi_nghiep_vu_thanh_loi_dong` |
 | FR-ACC-008 | `test_TC_CLS_22_clinician_khoa_khac_khong_sua_duoc` (nc_test_system), `test_TC_CLS_22_clinician_khoa_khac_bi_tu_choi` (api/test_test_system.py), `test_khoa_khong_duoc_gan_thanh_loi_dong` |
+
+# Test ref — FEAT-007 (ghi bởi Dev NORM-34; chờ kiểm định độc lập)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-PROC-008 | `test_TC_PROC_05_khac_biet_thieu_ly_do` (api/test_procedure_workflow.py), `test_TC_PROC_05_*` (unit/test_procedure_validation.py) |
+| FR-PROC-010 | `test_TC_PROC_07_ban_nhap_co_du_thao`, `test_TC_PROC_07_ban_ban_hanh_day_du`, `test_TC_PROC_07_pdf_bat_dau_bang_pdf`, `test_TC_PROC_07_quyen_tai` (api/test_procedure_print.py), `test_TC_PROC_07_*` (unit/test_procedure_printing.py) |
+| FR-PROC-011 | `test_TC_PROC_07_docx_va_ghi_xuat_tep`, `test_docx_cung_noi_dung_voi_ngu_canh` (unit) |
+| FR-PROC-012 | `test_TC_PROC_06_liet_ke_du_ba_loi` (tích hợp), `test_TC_PROC_06_liet_ke_du_ba_loi` (unit/test_procedure_validation.py) |
+| FR-WF-001 | `test_TC_WF_01_luong_bon_trang_thai_va_thong_bao`, `test_workflow_fixture_khop_transitions` |
+| FR-WF-002 | `test_TC_WF_01_luong_bon_trang_thai_va_thong_bao`, `test_TC_WF_01_ca_am` |
+| FR-WF-003 | `test_TC_WF_08_y_kien_theo_buoc_hien_cho_nguoi_soan_sau_khi_bi_tra_lai`, `test_quyen_review_comment_cac_vai_tro` (nc_review_comment) |
+| FR-WF-004 | `test_TC_WF_01_luong_bon_trang_thai_va_thong_bao`, `test_TC_WF_01_ca_am`, `test_chua_cau_hinh_thu_ky` |
+| FR-WF-005 | `test_TC_WF_01_luong_bon_trang_thai_va_thong_bao`, `test_TC_WF_01_ca_am` |
+| FR-WF-006 | `test_TC_WF_04_phien_ban_cu_thay_the_dung_ngay_hieu_luc`, `test_TC_WF_04_ngay_hieu_luc_hom_nay_thay_ngay_khi_ban_hanh` (api/test_procedure_workflow_jobs.py), `test_TC_WF_04_*` (unit/test_procedure_approval.py) |
+| FR-WF-007 | `test_TC_WF_02_tu_choi_o_ca_ba_cap` |
+| FR-WF-008 | `test_TC_WF_03_sua_mo_ta_buoc_qua_form_va_api_bi_tu_choi` (nc_clinical_procedure), `test_khong_doi_trang_thai_bang_luu_thuong`, `test_khong_xoa_khi_dang_cho_duyet` |
+| FR-WF-013 | `test_FR_WF_013_nhac_khi_qua_han`, `test_FR_WF_013_theo_cau_hinh_so_ngay` |
