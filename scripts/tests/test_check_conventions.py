@@ -161,3 +161,52 @@ def test_fields_va_permissions_null_khong_van(tmp_path):
 def test_fieldname_khong_phai_chuoi(tmp_path):
 	make(tmp_path, variant(fields=[{"fieldname": 123, "fieldtype": "Data", "label": "x"}]))
 	assert codes(tmp_path) == {"NC-02"}
+
+
+# --- NORM-32: chống conflict ---
+import build_workspace as bw
+
+
+def _ws(tmp_path, lines, stale=False):
+	d = tmp_path / bw.REL
+	d.mkdir(parents=True)
+	(d / "shortcuts.txt").write_text("# c\n" + "\n".join(lines) + "\n", encoding="utf-8")
+	out = bw.render(bw.read_shortcuts(d / "shortcuts.txt"))
+	(d / "normcore.json").write_text(out + (" " if stale else ""), encoding="utf-8")
+
+
+def test_workspace_khop_nguon(tmp_path):
+	_ws(tmp_path, ["a-s|Nhãn A|NC A|DocType|List"])
+	assert cc.run(tmp_path) == []
+
+
+def test_workspace_lech_nguon_bi_bao(tmp_path):
+	_ws(tmp_path, ["a-s|Nhãn A|NC A|DocType|List"], stale=True)
+	assert codes(tmp_path) == {"NC-11"}
+
+
+def test_workspace_sinh_tat_dinh_va_bo_dong_trung(tmp_path):
+	_ws(tmp_path, ["a-s|A|NC A|DocType|List", "a-s|A|NC A|DocType|List", "b-s|B|NC B|DocType|List"])
+	data = json.loads((tmp_path / bw.REL / "normcore.json").read_text(encoding="utf-8"))
+	assert [s["label"] for s in data["shortcuts"]] == ["A", "B"]
+
+
+def test_asm_trung_ma_bi_bao(tmp_path):
+	p = tmp_path / "docs/decisions"
+	p.mkdir(parents=True)
+	(p / "assumptions.md").write_text("| ASM-001 | x |\n| ASM-002 | y |\n| ASM-001 | z |\n", encoding="utf-8")
+	assert codes(tmp_path) == {"NC-12"}
+	(p / "assumptions.md").write_text("| ASM-001 | x |\n| ASM-002 | y |\n", encoding="utf-8")
+	assert cc.run(tmp_path) == []
+
+
+def test_expected_doctypes_chua_sap_xep_hoac_trung(tmp_path):
+	d = tmp_path / "normcore/tests"
+	d.mkdir(parents=True)
+	f = d / "expected_doctypes.txt"
+	f.write_text("# c\nNC A\nNC B\n", encoding="utf-8")
+	assert cc.run(tmp_path) == []
+	f.write_text("NC B\nNC A\n", encoding="utf-8")
+	assert codes(tmp_path) == {"NC-13"}
+	f.write_text("NC A\nNC A\n", encoding="utf-8")
+	assert codes(tmp_path) == {"NC-13"}
