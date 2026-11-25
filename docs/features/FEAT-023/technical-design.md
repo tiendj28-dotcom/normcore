@@ -12,7 +12,7 @@ Giả định: `docs/decisions/assumptions/FEAT-023.md` (ASM-023-01..16). Không
 | FR-AI-010 | Thời hạn `timeout_seconds` (mặc định 180) truyền xuống bộ chuyển đổi; quá hạn → `AIResult(ok=False, status="Quá hạn")`, thông báo tiếng Việt, log "Quá hạn"; lỗi khác → "Lỗi". Gateway không ghi gì ngoài NC AI Log (không bản nháp dở). Phần "cho phép soạn thủ công" ở nơi gọi là FEAT-024 |
 | FR-AI-011 | `ai/guard.py`: bộ dựng nội dung gửi AI theo danh sách cho phép (DocType + trường). Mọi DocType kế toán, tính giá, đơn giá, giá tham chiếu, phương án giá bị từ chối (`GuardError`). Thêm nguồn "Tài liệu của hãng" (ADR-007 [1.1]) là FEAT-038; nguồn "tệp bảng giá công khai" thêm ở FEAT làm EXTRACT_PRICE_LIST (ASM-023-08) |
 | FR-AI-012 | DocType Single NC AI Settings; gateway đọc cấu hình ở **mỗi** lời gọi (không cache trong tiến trình ngoài cache tài liệu của Frappe, bị xóa khi lưu). Hai bộ chuyển đổi: Anthropic Messages (đã có, mở rộng) và tương thích OpenAI Chat Completions (mới) |
-| FR-AI-013 | Trước khi gọi: token lũy kế tháng (tổng `tokens_in + tokens_out` của NC AI Log tạo trong tháng dương lịch hiện tại) ≥ `monthly_token_budget` (> 0) → chặn, log "Bị chặn hạn mức", Notification Log cho mọi NC Admin đang bật (một lần mỗi tháng mỗi người) |
+| FR-AI-013 | Trước khi gọi: token lũy kế tháng (tổng `tokens_in + tokens_out` của NC AI Log tạo trong tháng dương lịch hiện tại) > `monthly_token_budget` (> 0; lũy kế = hạn mức thì không chặn, Quyết định Lead trên NORM-55) → chặn, log "Bị chặn hạn mức", Notification Log cho mọi NC Admin đang bật (một lần mỗi tháng mỗi người) |
 | FR-AI-014 | NC Prompt Template có phiên bản: nội dung bất biến sau khi tạo; "sửa" = API `new_prompt_version` tạo bản `version + 1`, đặt đang dùng, bản cũ giữ nguyên và thôi dùng. Mỗi `template_code` tối đa một bản đang dùng |
 | FR-AI-015 | `enabled` trong NC AI Settings. Tắt → `frappe.boot.normcore_ai_enabled = false`, API `get_ai_status` trả `enabled: false`, hàm JS `normcore.ai.enabled()` trả `false`; `gateway.ensure_enabled()` ném lỗi cho các API gọi AI của FEAT sau. Luồng thủ công không phụ thuộc AI (test hồi quy) |
 | NFR-SEC-004 | `api_key` kiểu Password (Frappe mã hóa, lưu ở `__Auth`); không trả dạng rõ qua API/REST/Version; mọi thông báo lỗi của bộ chuyển đổi che khóa; NC AI Log, Error Log không chứa khóa |
@@ -88,7 +88,7 @@ ALLOWED_CHILDREN: dict[str, dict[str, frozenset]] # DocType cha -> {trường b�
 FORBIDDEN_DOCTYPES: frozenset[str]               # danh sách tường minh để kiểm thử và đọc mã
 def is_allowed(doctype: str) -> bool
 def build_source(doctype: str, record: Mapping, fields: Iterable[str] | None = None) -> dict
-def budget_exceeded(used: int, budget: int) -> bool   # budget > 0 and used >= budget (ASM-023-04)
+def budget_exceeded(used: int, budget: int) -> bool   # budget > 0 and used > budget (ASM-023-04, Lead)
 ```
 
 | DocType được phép | Trường |
