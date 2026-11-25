@@ -1,7 +1,7 @@
 # As-Built FEAT-035 — Sản lượng cận lâm sàng và xuất kho
 
 Issue NORM-36. FR: FR-ACCT-012..015, FR-CLS-007 (mục sản lượng). UC-022. Màn hình SCR-DSK-037 (mới), SCR-DSK-021 (nút sang SCR-DSK-037). TC: TC-CLS-34, TC-CLS-35, TC-CLS-36.
-Giới hạn: giao diện chưa thao tác bằng trình duyệt (chỉ kiểm quy ước bằng test đơn vị và `bench build`); chờ kiểm định độc lập.
+Giới hạn: giao diện chưa thao tác bằng trình duyệt (SCR-DSK-037, nút ở SCR-DSK-021 chưa có trên staging; Lead quyết kiểm sau khi merge và deploy staging). Không có site sạch cục bộ (thiếu `DB_ROOT_PASSWORD`); dùng CI run 45568804074 thay (ASM-035-13). Người nghiệm thu: QA (Multica).
 
 ## Đã làm
 - Ba DocType mới: NC Test System Volume (duy nhất theo năm, kịch bản, hệ thống xét nghiệm, DI-14), NC Equipment Usage (năm, kịch bản, thiết bị, khoa), NC Stock Issue Actual (năm, khoa, mặt hàng). Quyền theo ma trận mục 4 (NC Finance ghi; NC Department Head đọc theo khoa qua `SCOPE_RULES`; NC Director, NC Admin, NC Auditor đọc; không ai xóa).
@@ -19,4 +19,4 @@ Giới hạn: giao diện chưa thao tác bằng trình duyệt (chỉ kiểm qu
 - Dòng sản lượng đọc theo (năm, kịch bản, hệ thống); `technical_service` và `department` lấy từ hệ thống.
 
 ## Giả định
-ASM-035-01..12 trong `docs/decisions/assumptions/FEAT-035.md`. ASM-035-01 và 09 do Lead duyệt trên NORM-36; ASM-035-12 (cột NULL) mới.
+ASM-035-01..13 trong `docs/decisions/assumptions/FEAT-035.md`. ASM-035-01 và 09 do Lead duyệt trên NORM-36; ASM-035-12 (cột NULL) mới.

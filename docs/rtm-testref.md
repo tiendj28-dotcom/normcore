@@ -119,7 +119,7 @@
 | FR-CLS-008 | `test_TC_CLS_23_dong_thiet_bi_la_bao_loi_dong_dung_duoc_luu`, `test_cap_nhat_theo_ma_va_loi_nghiep_vu_thanh_loi_dong` |
 | FR-ACC-008 | `test_TC_CLS_22_clinician_khoa_khac_khong_sua_duoc` (nc_test_system), `test_TC_CLS_22_clinician_khoa_khac_bi_tu_choi` (api/test_test_system.py), `test_khoa_khong_duoc_gan_thanh_loi_dong` |
 
-# Test ref — FEAT-035 (ghi bởi Dev, chờ kiểm định độc lập)
+# Test ref — FEAT-035 (Dev ghi, QA kiểm định độc lập; thêm test quyền theo khoa của QA: `test_quyen_truong_khoa_chi_doc_khoa_minh` ở nc_stock_issue_actual và nc_equipment_usage)
 
 | FR | Test thật |
 | :-- | :-- |
