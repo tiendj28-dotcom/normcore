@@ -9,3 +9,4 @@
 | T05 | `with_bench 'migrate && run-tests --module normcore.api.test_library_validity'` | Ran 6 OK (TC-LIB-04) | d207e33 |
 | T06 | `with_bench 'migrate && run-tests --module normcore.api.test_library_search'` | Ran 13 OK (TC-LIB-08; commit dữ liệu, tự dọn ở tearDownClass) | fd00bd0 |
 | T07 | `pytest test_library_ui_conventions.py test_vi_csv_order.py`; `with_bench 'migrate && bench build --app normcore'` | 15 passed; build DONE; node --check 3 tệp JS ok | 785ae4d |
+| T08 | `python3 docs/tools/build_rtm.py docs` | VAN DE: 0 (rtm.md, verification-report.md chỉ đổi ngày sinh, đã hoàn nguyên) | 674beff |
