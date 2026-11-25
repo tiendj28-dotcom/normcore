@@ -11,10 +11,22 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 SKIP_DIRS = {"docs", "tham-khao", ".git", "node_modules"}
 NO_LABEL_TYPES = {"Section Break", "Column Break", "Tab Break", "HTML", "Button"}
 AUDITOR = "NC Auditor"
-AUDITOR_FORBIDDEN = ("write", "create", "delete", "submit", "cancel", "amend")
+AUDITOR_FORBIDDEN = (
+	"write",
+	"create",
+	"delete",
+	"submit",
+	"cancel",
+	"amend",
+	"import",
+	"share",
+	"set_user_permissions",
+)
 ROLES = (
 	"NC Clinician",
 	"NC Department Head",
@@ -148,6 +160,16 @@ def check_doctype(data: dict, path: str) -> list:
 			if bad:
 				err("NC-06", f"{AUDITOR} có quyền không được phép: {', '.join(bad)}")
 	if not is_table:
+		aud_read = any(
+			isinstance(p, dict)
+			and p.get("role") == AUDITOR
+			and p.get("read") in (1, True, "1")
+			and not (p.get("permlevel") or 0)
+			for p in data.get("permissions") or []
+		)
+		if not aud_read:
+			err("NC-06", f"{AUDITOR} thiếu quyền đọc")
+	if not is_table:
 		errors.extend(check_permissions(data, path))
 	return errors
 
@@ -224,8 +246,73 @@ def check_vi_csv(root: Path) -> list:
 	return errors
 
 
+def check_workspace(root: Path) -> list:
+	"""NORM-32: normcore.json phải đúng bằng kết quả sinh từ shortcuts.txt (scripts/build_workspace.py)."""
+	import build_workspace as bw
+
+	src = root / bw.REL / "shortcuts.txt"
+	dst = root / bw.REL / "normcore.json"
+	if not src.exists() and not dst.exists():
+		return []
+	rel = str(bw.REL / "normcore.json")
+	if not src.exists():
+		return [f"{rel}: [NC-11] thiếu shortcuts.txt (nguồn sinh workspace)"]
+	try:
+		out = bw.render(bw.read_shortcuts(src))
+	except ValueError as e:
+		return [f"{rel}: [NC-11] {e}"]
+	if not dst.exists() or dst.read_text(encoding="utf-8") != out:
+		return [f"{rel}: [NC-11] khác kết quả sinh; chạy python3 scripts/build_workspace.py"]
+	return []
+
+
+ASM_FILE = "docs/decisions/assumptions.md"
+
+
+def check_asm_unique(root: Path) -> list:
+	"""NORM-32: mã ASM trong assumptions.md không trùng (nhánh song song hay đánh trùng số)."""
+	path = root / ASM_FILE
+	if not path.exists():
+		return []
+	seen = {}
+	errors = []
+	for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+		m = re.match(r"\|\s*(ASM-\d+)\s*\|", line)
+		if m:
+			if m.group(1) in seen:
+				errors.append(
+					f"{ASM_FILE}: [NC-12] {m.group(1)} trùng ở dòng {seen[m.group(1)]} và {n}; đánh lại số"
+				)
+			else:
+				seen[m.group(1)] = n
+	return errors
+
+
+EXPECTED_DT = "normcore/tests/expected_doctypes.txt"
+
+
+def check_expected_doctypes(root: Path) -> list:
+	"""NORM-32: expected_doctypes.txt xếp theo thứ tự chữ cái và không trùng dòng."""
+	path = root / EXPECTED_DT
+	if not path.exists():
+		return []
+	names = [
+		x.strip()
+		for x in path.read_text(encoding="utf-8").splitlines()
+		if x.strip() and not x.startswith("#")
+	]
+	errors = []
+	for n in sorted({x for x in names if names.count(x) > 1}):
+		errors.append(f"{EXPECTED_DT}: [NC-13] dòng trùng '{n}'")
+	if names != sorted(names):
+		errors.append(f"{EXPECTED_DT}: [NC-13] chưa sắp xếp theo thứ tự chữ cái (sau gộp union, sắp xếp lại)")
+	return errors
+
+
 def run(root: Path) -> list:
-	errors = check_vi_csv(root)
+	errors = (
+		check_vi_csv(root) + check_workspace(root) + check_asm_unique(root) + check_expected_doctypes(root)
+	)
 	for path in find_doctype_files(root):
 		rel = str(path.relative_to(root))
 		try:

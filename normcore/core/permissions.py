@@ -16,6 +16,8 @@ from dataclasses import dataclass, field
 import frappe
 from frappe import _
 
+from normcore.core import readonly
+
 DEPARTMENT = "NC Department"
 SCOPED_ROLES = frozenset({"NC Clinician", "NC Department Head"})
 # User Permission của khoa gán với applicable_for này: bộ lọc mặc định của Frappe (lọc đọc mọi DocType có
@@ -140,3 +142,36 @@ def readable_departments(doctype, user=None):
 	if doctype not in SCOPE_RULES or not _is_scoped(doctype, "read", user):
 		return None
 	return get_user_departments(user)
+
+
+def nc_doctypes():
+	"""Mọi DocType cha tên `NC ` (đọc CSDL, không liệt kê cứng: tự gồm DocType FEAT sau thêm)."""
+	return frappe.get_all("DocType", {"name": ["like", "NC %"], "istable": 0}, pluck="name", order_by="name")
+
+
+def read_only_violations(role=readonly.READ_ONLY_ROLE):
+	"""Quét quyền hiệu lực (DocPerm, Custom DocPerm, Workflow) của `role`; rỗng = chỉ đọc (FR-ACC-007).
+
+	Vận hành: `bench --site <site> execute normcore.core.permissions.read_only_violations`.
+	"""
+	doctypes = nc_doctypes()
+	out = []
+	for dt in doctypes:
+		perms = [p.as_dict() for p in frappe.get_meta(dt).get("permissions") or []]
+		out.extend(readonly.perm_violations(dt, perms, role))
+	names = frappe.get_all("Workflow", {"document_type": ["in", doctypes]}, pluck="name") if doctypes else []
+	workflows = []
+	for name in names:
+		wf = frappe.get_doc("Workflow", name)
+		workflows.append(
+			{
+				"name": wf.name,
+				"document_type": wf.document_type,
+				"transitions": [
+					{"state": t.state, "action": t.action, "allowed": t.allowed} for t in wf.transitions
+				],
+				"states": [{"state": s.state, "allow_edit": s.allow_edit} for s in wf.states],
+			}
+		)
+	out.extend(readonly.workflow_violations(workflows, role))
+	return out
