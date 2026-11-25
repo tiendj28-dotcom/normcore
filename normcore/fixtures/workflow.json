@@ -1,0 +1,107 @@
+[
+ {
+  "doctype": "Workflow",
+  "name": "NC Clinical Procedure",
+  "workflow_name": "NC Clinical Procedure",
+  "document_type": "NC Clinical Procedure",
+  "workflow_state_field": "workflow_state",
+  "is_active": 1,
+  "send_email_alert": 0,
+  "override_status": 1,
+  "states": [
+   {
+    "state": "Nháp",
+    "doc_status": "0",
+    "allow_edit": "NC Clinician"
+   },
+   {
+    "state": "Chờ trưởng khoa duyệt",
+    "doc_status": "0",
+    "allow_edit": "NC Department Head"
+   },
+   {
+    "state": "Chờ hội đồng thẩm định",
+    "doc_status": "0",
+    "allow_edit": "NC Council Member"
+   },
+   {
+    "state": "Chờ ban hành",
+    "doc_status": "0",
+    "allow_edit": "NC Director"
+   },
+   {
+    "state": "Đã ban hành",
+    "doc_status": "0",
+    "allow_edit": "NC Director"
+   },
+   {
+    "state": "Đã thay thế",
+    "doc_status": "0",
+    "allow_edit": "NC Director"
+   },
+   {
+    "state": "Đã thu hồi",
+    "doc_status": "0",
+    "allow_edit": "NC Director"
+   },
+   {
+    "state": "Nháp",
+    "doc_status": "0",
+    "allow_edit": "NC Department Head"
+   }
+  ],
+  "transitions": [
+   {
+    "state": "Nháp",
+    "action": "Gửi duyệt",
+    "next_state": "Chờ trưởng khoa duyệt",
+    "allowed": "NC Clinician",
+    "allow_self_approval": 1
+   },
+   {
+    "state": "Chờ trưởng khoa duyệt",
+    "action": "Đồng ý",
+    "next_state": "Chờ hội đồng thẩm định",
+    "allowed": "NC Department Head",
+    "allow_self_approval": 1
+   },
+   {
+    "state": "Chờ trưởng khoa duyệt",
+    "action": "Từ chối",
+    "next_state": "Nháp",
+    "allowed": "NC Department Head",
+    "allow_self_approval": 1
+   },
+   {
+    "state": "Chờ hội đồng thẩm định",
+    "action": "Thông qua",
+    "next_state": "Chờ ban hành",
+    "allowed": "NC Council Member",
+    "allow_self_approval": 1,
+    "condition": "frappe.session.user == frappe.db.get_value(\"NC Settings\", \"NC Settings\", \"council_secretary\")"
+   },
+   {
+    "state": "Chờ hội đồng thẩm định",
+    "action": "Từ chối",
+    "next_state": "Nháp",
+    "allowed": "NC Council Member",
+    "allow_self_approval": 1,
+    "condition": "frappe.session.user == frappe.db.get_value(\"NC Settings\", \"NC Settings\", \"council_secretary\")"
+   },
+   {
+    "state": "Chờ ban hành",
+    "action": "Ban hành",
+    "next_state": "Đã ban hành",
+    "allowed": "NC Director",
+    "allow_self_approval": 1
+   },
+   {
+    "state": "Chờ ban hành",
+    "action": "Từ chối",
+    "next_state": "Nháp",
+    "allowed": "NC Director",
+    "allow_self_approval": 1
+   }
+  ]
+ }
+]

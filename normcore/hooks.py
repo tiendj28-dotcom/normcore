@@ -24,7 +24,29 @@ required_apps = []
 # Fixtures: 10 vai trò (FR-ACC-002) và hai Workflow State của skeleton
 fixtures = [
 	{"dt": "Role", "filters": [["name", "like", "NC %"]]},
-	{"dt": "Workflow State", "filters": [["name", "in", ["Nháp", "Đã ban hành"]]]},
+	{
+		"dt": "Workflow State",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Nháp",
+					"Chờ trưởng khoa duyệt",
+					"Chờ hội đồng thẩm định",
+					"Chờ ban hành",
+					"Đã ban hành",
+					"Đã thay thế",
+					"Đã thu hồi",
+				],
+			]
+		],
+	},
+	{
+		"dt": "Workflow Action Master",
+		"filters": [["name", "in", ["Gửi duyệt", "Đồng ý", "Thông qua", "Ban hành", "Từ chối"]]],
+	},
+	{"dt": "Workflow", "filters": [["name", "=", "NC Clinical Procedure"]]},
 ]
 
 # Includes in <head>

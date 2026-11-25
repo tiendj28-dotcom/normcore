@@ -6,7 +6,32 @@
  },
  {
   "doctype": "Workflow State",
+  "name": "Chờ trưởng khoa duyệt",
+  "workflow_state_name": "Chờ trưởng khoa duyệt"
+ },
+ {
+  "doctype": "Workflow State",
+  "name": "Chờ hội đồng thẩm định",
+  "workflow_state_name": "Chờ hội đồng thẩm định"
+ },
+ {
+  "doctype": "Workflow State",
+  "name": "Chờ ban hành",
+  "workflow_state_name": "Chờ ban hành"
+ },
+ {
+  "doctype": "Workflow State",
   "name": "Đã ban hành",
   "workflow_state_name": "Đã ban hành"
+ },
+ {
+  "doctype": "Workflow State",
+  "name": "Đã thay thế",
+  "workflow_state_name": "Đã thay thế"
+ },
+ {
+  "doctype": "Workflow State",
+  "name": "Đã thu hồi",
+  "workflow_state_name": "Đã thu hồi"
  }
 ]
