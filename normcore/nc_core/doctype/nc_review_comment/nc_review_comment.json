@@ -1,0 +1,123 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-11-25 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ref_doctype",
+  "ref_name",
+  "target_section",
+  "target_step_id",
+  "comment",
+  "resolved",
+  "review_state"
+ ],
+ "fields": [
+  {
+   "fieldname": "ref_doctype",
+   "label": "Loại bản ghi",
+   "fieldtype": "Link",
+   "options": "DocType",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "ref_name",
+   "label": "Bản ghi",
+   "fieldtype": "Dynamic Link",
+   "options": "ref_doctype",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "target_section",
+   "label": "Phần",
+   "fieldtype": "Select",
+   "options": "\nĐại cương\nChỉ định\nChống chỉ định\nThận trọng\nChuẩn bị\nCác bước tiến hành\nTheo dõi và xử trí tai biến\nTài liệu tham khảo",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "target_step_id",
+   "label": "Mã bước",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "comment",
+   "label": "Ý kiến",
+   "fieldtype": "Text",
+   "reqd": 1
+  },
+  {
+   "fieldname": "resolved",
+   "label": "Đã xử lý",
+   "fieldtype": "Check",
+   "default": "0",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "review_state",
+   "label": "Cấp thẩm định",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "description": "Trạng thái quy trình khi ghi ý kiến (ASM-007-05)."
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Core",
+ "name": "NC Review Comment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Council Member",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Clinician",
+   "read": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Document Controller",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

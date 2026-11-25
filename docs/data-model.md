@@ -113,6 +113,7 @@ erDiagram
 | min_benchmark_facilities | Số đơn vị tham chiếu tối thiểu | Int | 3 |
 | accounting_regime | Chế độ kế toán | Select | Hành chính sự nghiệp |
 | compliance_reminder_days **[1.1]** | Số ngày nhắc hạn hồ sơ tuân thủ | Int | 30 [FR-CMP-005] |
+| council_secretary **[AMD-007-01]** | Thư ký hội đồng | Link User | — | Người dùng có vai trò NC Council Member; thực hiện Thông qua, Từ chối ở cấp hội đồng [FR-WF-004] |
 
 **NC Audit Event** — Sổ sự kiện nghiệp vụ, chỉ ghi qua mã máy chủ, không vai trò nào có quyền sửa, xóa [FR-AUD-002]. Naming: tự động.
 
@@ -831,7 +832,7 @@ NC Consultant xem số liệu kế toán chỉ khi được cấp riêng bằng 
 | :-- | :-- | :-- | :-- | :-- |
 | Nháp | Gửi duyệt | Chờ trưởng khoa duyệt | NC Clinician | FR-PROC-008, FR-PROC-012, không còn `ai_suggested` |
 | Chờ trưởng khoa duyệt | Đồng ý | Chờ hội đồng thẩm định | NC Department Head | Cùng khoa |
-| Chờ hội đồng thẩm định | Thông qua | Chờ ban hành | NC Council Member (thư ký) | |
+| Chờ hội đồng thẩm định | Thông qua | Chờ ban hành | NC Council Member (thư ký) | Người dùng = `NC Settings.council_secretary` **[AMD-007-01]** |
 | Chờ ban hành | Ban hành | Đã ban hành | NC Director | Có `decision_no`, `effective_date` |
 | Mọi trạng thái chờ | Từ chối | Nháp | Vai trò của cấp đó | Có lý do |
 | Đã ban hành | (tự động khi phiên bản mới hiệu lực) | Đã thay thế | Hệ thống | |

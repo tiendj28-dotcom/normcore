@@ -1,0 +1,27 @@
+[
+ {
+  "doctype": "Workflow Action Master",
+  "name": "Gửi duyệt",
+  "workflow_action_name": "Gửi duyệt"
+ },
+ {
+  "doctype": "Workflow Action Master",
+  "name": "Đồng ý",
+  "workflow_action_name": "Đồng ý"
+ },
+ {
+  "doctype": "Workflow Action Master",
+  "name": "Thông qua",
+  "workflow_action_name": "Thông qua"
+ },
+ {
+  "doctype": "Workflow Action Master",
+  "name": "Ban hành",
+  "workflow_action_name": "Ban hành"
+ },
+ {
+  "doctype": "Workflow Action Master",
+  "name": "Từ chối",
+  "workflow_action_name": "Từ chối"
+ }
+]

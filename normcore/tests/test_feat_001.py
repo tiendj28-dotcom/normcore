@@ -7,17 +7,13 @@ from frappe.tests.utils import FrappeTestCase
 from normcore.api import access
 from normcore.api.procedure import add_step
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import ensure, make_base, make_procedure, make_user
+from normcore.tests.utils import ensure, make_base, make_procedure, make_user, publish_procedure
 
 K01, K02 = "K01-F1", "K02-F1"
 
 
 def _publish(proc):
-	proc.workflow_state = "Đã ban hành"
-	proc.decision_no = "QĐ-1"
-	proc.effective_date = "2026-01-01"
-	proc.flags.allow_publish = True
-	proc.save(ignore_permissions=True)
+	publish_procedure(proc, "QĐ-1", "2026-01-01")
 	return proc
 
 

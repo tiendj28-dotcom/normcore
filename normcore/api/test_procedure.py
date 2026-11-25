@@ -3,7 +3,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import access
 from normcore.api import procedure as api
-from normcore.tests.utils import make_base, make_procedure, make_user
+from normcore.tests.utils import make_base, make_procedure, make_user, publish_procedure
 
 STEP = {"phase": "Thực hiện", "step_title": "Bước mới", "description": "Mô tả bước mới"}
 
@@ -49,8 +49,7 @@ class TestProcedureAPI(FrappeTestCase):
 		self.assertEqual(len(frappe.get_doc("NC Clinical Procedure", self.proc.name).steps), 1)
 
 	def test_quy_trinh_da_ban_hanh_bi_chan(self):
-		self.proc.decision_no, self.proc.effective_date = "QĐ-01", "2026-12-01"
-		self.proc.publish()
+		publish_procedure(self.proc, "QĐ-01", "2026-12-01")
 		frappe.set_user(self.clin)
 		self.assertRaises(frappe.ValidationError, api.add_step, self.proc.name, **STEP)
 
@@ -127,8 +126,7 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		name = self._draft()
 		frappe.set_user("Administrator")
 		doc = frappe.get_doc("NC Clinical Procedure", name)
-		doc.decision_no, doc.effective_date = "QĐ-01", "2026-12-01"
-		doc.publish()
+		publish_procedure(doc, "QĐ-01", "2026-12-01")
 		frappe.set_user(self.clin)
 		with self.assertRaises(api.ExistingProcedureError) as cm:
 			api.create_procedure(self.service, self.dept)

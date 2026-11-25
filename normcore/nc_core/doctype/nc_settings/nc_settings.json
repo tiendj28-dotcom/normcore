@@ -4,10 +4,32 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "approval_section",
+  "approval_reminder_days",
+  "council_secretary",
   "compliance_section",
   "compliance_reminder_days"
  ],
  "fields": [
+  {
+   "fieldname": "approval_section",
+   "label": "Phê duyệt quy trình",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "approval_reminder_days",
+   "label": "Số ngày nhắc duyệt",
+   "fieldtype": "Int",
+   "default": "7",
+   "description": "Quy trình chờ duyệt ở một cấp quá số ngày này thì nhắc người duyệt của cấp đó."
+  },
+  {
+   "fieldname": "council_secretary",
+   "label": "Thư ký hội đồng",
+   "fieldtype": "Link",
+   "options": "User",
+   "description": "Người dùng có vai trò NC Council Member; thực hiện Thông qua, Từ chối ở cấp hội đồng."
+  },
   {
    "fieldname": "compliance_section",
    "label": "Hồ sơ tuân thủ",

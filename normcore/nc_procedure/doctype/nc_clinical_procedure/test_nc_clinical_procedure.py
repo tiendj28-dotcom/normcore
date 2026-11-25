@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from normcore.tests.utils import make_base, make_procedure, make_user
+from normcore.tests.utils import make_base, make_procedure, make_user, to_state
 
 
 def _step(title, phase="Thực hiện"):
@@ -75,7 +75,7 @@ class TestNCClinicalProcedure(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, proc.save)
 
 	def test_ban_hanh_chi_nc_director_va_can_so_quyet_dinh(self):
-		proc = make_procedure(self.service, self.dept)
+		proc = to_state(make_procedure(self.service, self.dept), "Chờ ban hành")
 		clin = make_user("clin.proc@normcore.test", "NC Clinician")
 		director = make_user("dir.proc@normcore.test", "NC Director")
 		frappe.set_user(clin)
@@ -89,7 +89,7 @@ class TestNCClinicalProcedure(FrappeTestCase):
 		)
 
 	def test_quy_trinh_da_ban_hanh_khong_sua_khong_xoa(self):
-		proc = make_procedure(self.service, self.dept)
+		proc = to_state(make_procedure(self.service, self.dept), "Chờ ban hành")
 		proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
 		proc.publish()
 		proc = frappe.get_doc("NC Clinical Procedure", proc.name)
@@ -107,7 +107,7 @@ class TestNCClinicalProcedure(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, dup.insert)
 
 	def test_DI_02_cho_phep_ban_moi_khi_ban_cu_da_ban_hanh(self):
-		proc = make_procedure(self.service, self.dept)
+		proc = to_state(make_procedure(self.service, self.dept), "Chờ ban hành")
 		proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
 		proc.publish()
 		self._new(version_no=2).insert()
@@ -155,3 +155,58 @@ class TestListViewColumnsL1(FrappeTestCase):
 		listed = {f.fieldname for f in meta.fields if f.in_list_view}
 		self.assertTrue({"technical_service", "department", "version_no"} <= listed)
 		self.assertTrue(frappe._("NC Clinical Procedure", lang="vi") != "NC Clinical Procedure")
+
+
+class TestKhoaNoiDung(FrappeTestCase):
+	"""FR-WF-008, DI-07, ASM-007-03: ngoài "Nháp" không sửa nội dung, qua form lẫn API."""
+
+	STATES = ("Chờ trưởng khoa duyệt", "Chờ hội đồng thẩm định", "Chờ ban hành", "Đã ban hành", "Đã thay thế")
+
+	def setUp(self):
+		from normcore.api import access
+
+		frappe.set_user("Administrator")
+		self.service, self.dept, _ = make_base()
+		self.clin = make_user("clin.wf03@normcore.test", "NC Clinician")
+		access.assign_department(self.clin, self.dept)
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def _desc(self, name):
+		return frappe.db.get_value("NC Procedure Step", {"parent": name, "step_id": "S001"}, "description")
+
+	def test_TC_WF_03_sua_mo_ta_buoc_qua_form_va_api_bi_tu_choi(self):
+		from normcore.api import procedure as api
+
+		for state in self.STATES:
+			with self.subTest(state=state):
+				proc = to_state(
+					make_procedure(self.service, self.dept, version=self.STATES.index(state) + 1), state
+				)
+				before = self._desc(proc.name)
+				frappe.set_user(self.clin)
+				doc = frappe.get_doc("NC Clinical Procedure", proc.name)
+				doc.steps[0].description = "Sửa trái phép"
+				self.assertRaises(frappe.ValidationError, doc.save)
+				self.assertRaises(
+					frappe.ValidationError,
+					api.update_step,
+					proc.name,
+					"S001",
+					"Thực hiện",
+					"Bước 1",
+					"Sửa trái phép",
+				)
+				frappe.set_user("Administrator")
+				self.assertEqual(self._desc(proc.name), before)
+
+	def test_khong_doi_trang_thai_bang_luu_thuong(self):
+		proc = make_procedure(self.service, self.dept)
+		proc.workflow_state = "Chờ ban hành"
+		self.assertRaises(frappe.ValidationError, proc.save)
+
+	def test_khong_xoa_khi_dang_cho_duyet(self):
+		proc = to_state(make_procedure(self.service, self.dept), "Chờ hội đồng thẩm định")
+		self.assertRaises(frappe.ValidationError, frappe.delete_doc, "NC Clinical Procedure", proc.name)

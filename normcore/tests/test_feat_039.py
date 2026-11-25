@@ -262,13 +262,12 @@ class TestTCAUD03Auditor(FrappeTestCase):
 		frappe.db.rollback()
 
 	def test_TC_AUD_03_auditor_loc_theo_quy_trinh(self):
-		from normcore.tests.utils import make_procedure
+		from normcore.tests.utils import make_procedure, publish_procedure
 
 		p1 = make_procedure(self.service, self.dept)
 		p2 = make_procedure(self.service, self.dept, version=2)
-		p1.decision_no, p1.effective_date = "QĐ-39", "2026-12-01"
 		frappe.set_user(self.director)
-		p1.publish()
+		publish_procedure(p1, "QĐ-39", "2026-12-01")
 		frappe.set_user(self.auditor)
 		rows = audit_api.get_events(ref_doctype="NC Clinical Procedure", ref_name=p1.name)
 		self.assertEqual([r["to_state"] for r in rows], ["Nháp", "Đã ban hành"])

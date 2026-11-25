@@ -25,25 +25,41 @@ class NCClinicalProcedure(Document):
 		self.validate_resources()
 
 	def before_save(self):
-		prev = self.get_doc_before_save()
-		if prev and prev.workflow_state == PUBLISHED:
-			frappe.throw(
-				_("Quy trình đã ban hành, không sửa được. Tạo phiên bản mới."), title=_("Bản ghi đã khóa")
-			)
+		self.check_content_lock()
 
 	def on_trash(self):
-		if self.workflow_state == PUBLISHED:
-			frappe.throw(_("Quy trình đã ban hành, không xóa được."), title=_("Bản ghi đã khóa"))
+		if self.workflow_state != DRAFT:  # DI-07
+			frappe.throw(_("Chỉ xóa được quy trình ở trạng thái Nháp."), title=_("Bản ghi đã khóa"))
 
 	def check_state_transition(self):
 		if not self.workflow_state:
 			self.workflow_state = DRAFT
 		prev = self.get_doc_before_save()
 		before = prev.workflow_state if prev else DRAFT
-		if self.workflow_state != before and not self.flags.allow_publish:
-			frappe.throw(_("Chỉ đổi trạng thái bằng nút Ban hành"))
+		# Trạng thái chỉ đổi qua api.procedure_workflow.apply_action (đặt flags.workflow_action)
+		if self.workflow_state != before and not self.flags.workflow_action:
+			frappe.throw(_("Chỉ đổi trạng thái bằng các nút của luồng duyệt"))
 		if self.is_new() and self.workflow_state != DRAFT:
 			frappe.throw(_("Quy trình mới phải ở trạng thái Nháp"))
+
+	def check_content_lock(self):
+		"""FR-WF-008, DI-07, ASM-007-03: ngoài "Nháp" không sửa nội dung."""
+		prev = self.get_doc_before_save()
+		if not prev or prev.workflow_state == DRAFT:
+			return
+		if _content(prev) == _content(self) and self._header_unchanged(prev):
+			return
+		if prev.workflow_state in CLOSED_STATES:
+			msg = _("Quy trình đã ban hành, không sửa được. Tạo phiên bản mới.")
+		else:
+			msg = _("Quy trình đang chờ duyệt, không sửa được. Từ chối để trả về Nháp.")
+		frappe.throw(msg, title=_("Bản ghi đã khóa"))
+
+	def _header_unchanged(self, prev):
+		"""decision_no, effective_date chỉ đổi trong hành động "Ban hành"."""
+		if self.flags.workflow_action == "Ban hành":
+			return True
+		return all((prev.get(f) or "") == (self.get(f) or "") for f in ("decision_no", "effective_date"))
 
 	def assign_step_ids(self):
 		prev = self.get_doc_before_save()
@@ -130,14 +146,69 @@ class NCClinicalProcedure(Document):
 
 	@frappe.whitelist()
 	def publish(self):
-		"""Nút tạm "Ban hành" (FEAT-007 sẽ thay bằng Workflow, dữ liệu không đổi). Chỉ NC Director; FR-WF-005."""
+		"""Lớp mỏng cho nút "Ban hành" (FR-WF-005): chỉ NC Director, chỉ từ "Chờ ban hành"."""
+		from normcore.api.procedure_workflow import apply_action
+
 		if "NC Director" not in frappe.get_roles():
 			frappe.throw(_("Chỉ NC Director được ban hành quy trình"), frappe.PermissionError)
-		if self.workflow_state == PUBLISHED:
-			frappe.throw(_("Quy trình đã ban hành"))
-		if not self.decision_no or not self.effective_date:
-			frappe.throw(_("Cần nhập số quyết định ban hành và ngày hiệu lực trước khi ban hành"))
-		self.workflow_state = PUBLISHED
-		self.flags.allow_publish = True
-		self.save(ignore_permissions=True)
-		return self.workflow_state
+		result = apply_action(
+			self.name, "Ban hành", decision_no=self.decision_no, effective_date=self.effective_date
+		)
+		self.reload()
+		return result["workflow_state"]
+
+
+CONTENT_FIELDS = (
+	"overview",
+	"indications",
+	"contraindications",
+	"cautions",
+	"preparation_notes",
+	"monitoring",
+	"references",
+	"doctor_request",
+	"technical_service",
+	"department",
+	"version_no",
+	"previous_version",
+	"copied_from",
+	"ai_log",
+	"next_step_seq",
+	"next_resource_seq",
+)
+CONTENT_TABLES = ("steps", "resources", "citations")
+_SKIP_CHILD = {
+	"name",
+	"modified",
+	"creation",
+	"modified_by",
+	"owner",
+	"idx",
+	"parent",
+	"parenttype",
+	"parentfield",
+	"docstatus",
+	"doctype",
+}
+
+
+def _norm(value):
+	if value in (None, ""):
+		return ""
+	if isinstance(value, bool):
+		return int(value)
+	if isinstance(value, (int, float)):
+		return float(value)
+	return str(value)
+
+
+def _content(doc):
+	"""Bản chụp phần nội dung (trường, bảng con) để so trước và sau khi lưu."""
+	out = {f: _norm(doc.get(f)) for f in CONTENT_FIELDS}
+	for table in CONTENT_TABLES:
+		rows = []
+		for row in doc.get(table) or []:
+			d = row.as_dict() if hasattr(row, "as_dict") else dict(row)
+			rows.append({k: _norm(v) for k, v in d.items() if k not in _SKIP_CHILD})
+		out[table] = rows
+	return out

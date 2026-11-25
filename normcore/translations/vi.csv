@@ -8,8 +8,10 @@ Add resource,Thêm nguồn lực
 Add step,Thêm bước
 Add test system,Thêm hệ thống xét nghiệm
 "After finalizing, lines are locked and cannot be reopened. Finalize this import?","Sau khi chốt, các dòng bị khóa và không mở lại được. Chốt lần nhập này?"
+"After issuing, the content of this version cannot be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
+"After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
@@ -20,6 +22,7 @@ Assign,Gán
 Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
+Attach to,Gắn với
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
 Calculating…,Đang tính…
 Calibration,Chuẩn máy
@@ -36,6 +39,8 @@ Citations,Trích dẫn
 Clinical volume and stock issues,Sản lượng cận lâm sàng và xuất kho
 Code,Mã
 Column,Cột,Import Excel
+Comment,Ý kiến
+Comments,Ý kiến
 Confirm import,Xác nhận ghi
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
@@ -47,6 +52,7 @@ Could not calculate the estimated tests.,Không tính được số test ước 
 Could not calculate the summary.,Không tính được tóm tắt.
 Could not complete the request. Check your permissions.,Không thực hiện được yêu cầu. Kiểm tra quyền của bạn.
 Could not complete the request. See the message from the server.,Không thực hiện được yêu cầu. Xem thông báo từ máy chủ.
+Could not complete this action,Chưa thực hiện được thao tác này
 Could not load chain status.,Không tải được tình trạng chuỗi.
 Could not load test systems.,Không tải được hệ thống xét nghiệm.
 Could not load the status.,Không tải được tình trạng.
@@ -56,6 +62,7 @@ Create procedure,Tạo quy trình
 Created,Tạo mới,Import Excel
 Deactivate,Ngừng dùng
 Deactivate test system {0}? It will not enter new costing runs; existing runs stay unchanged.,Ngừng dùng hệ thống {0}? Hệ thống sẽ không vào các lần tính giá mới; các lần tính đã có giữ nguyên.
+Decision number,Số quyết định
 Delete,Xóa
 Delete this citation?,Xóa trích dẫn này?
 Delete this resource?,Xóa nguồn lực này?
@@ -63,8 +70,10 @@ Delete this step?,Xóa bước này?
 Department,Khoa
 Depreciation,Khấu hao
 Description,Mô tả
+Deviations summary,Tóm tắt khác biệt
 Document no.,Số chứng từ,NC Item
 Down,Xuống
+Download DOCX,Tải DOCX
 Download template,Tải tệp mẫu
 Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
@@ -73,6 +82,7 @@ Edit,Sửa
 Edit cost category,Sửa loại chi phí
 Edit cost category of a line,Sửa loại chi phí của một dòng
 "Edit cost category: line {0}, account {1}","Sửa loại chi phí: dòng {0}, tài khoản {1}"
+Effective date,Ngày hiệu lực
 Equipment is allocated by machine minutes,Thiết bị chia theo phút chiếm máy
 Error,Lỗi
 Errors,Lỗi,Import Excel
@@ -82,10 +92,12 @@ Excluded,Loại trừ
 Excluded from price,Không tính vào giá
 Expired {0} days ago,Đã hết hạn {0} ngày trước
 Expires in {0} days,Còn {0} ngày đến hạn
+Export,Xuất
 File errors,Dòng lỗi khi đọc tệp
 Finalize,Chốt
 Finalized: the figures can be used in a costing run.,Đã chốt: số liệu dùng được cho lần tính giá.
 "Fix the file, attach it again in Source file and click Reload file, or create a new import.","Sửa tệp, đính kèm lại ở ô Tệp nguồn rồi bấm Đọc lại tệp, hoặc tạo lần nhập mới."
+General comment,Ý kiến chung
 Has error lines,Có dòng lỗi
 Headcount,Số người
 IQC tests,Số test nội kiểm
@@ -115,6 +127,7 @@ Message,Thông báo,Import Excel
 Minutes per person,Số phút / người
 Move step down,Chuyển bước xuống
 Move step up,Chuyển bước lên
+Moved to,Đã chuyển sang
 NC Clinical Procedure,Quy trình kỹ thuật
 NC Procedure Citation,Trích dẫn quy trình
 NC Procedure Resource,Nguồn lực của bước
@@ -122,16 +135,20 @@ NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
+No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
 No participating services yet,Chưa có dịch vụ tham gia
 No permission to view,Không có quyền xem
 No price yet,Chưa có đơn giá,NC Item
+No review comments yet.,Chưa có ý kiến thẩm định.
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
 No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None,Không có
 None yet,Chưa có
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
+Only unresolved,Chỉ chưa xử lý
+Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
 Paraclinical,Cận lâm sàng
@@ -143,6 +160,7 @@ Preview: written on finalize,Xem trước — ghi khi chốt
 Price code,Mã đơn giá,NC Item
 Price in use today,Đơn giá đang dùng hôm nay,NC Item
 Price per norm unit,Đơn giá một đơn vị định mức,NC Item
+Print PDF,In PDF
 Procedure editor,Trình soạn quy trình
 Publish,Ban hành
 Quality plan,Kế hoạch chất lượng
@@ -153,17 +171,23 @@ Reactivate,Dùng lại
 Reapplied {0} lines; manual edits are kept,Đã gán lại {0} dòng; các dòng sửa tay giữ nguyên
 Reapply account mapping,Gán lại theo bảng ánh xạ
 Reason,Lý do
+Rejected by,Bị từ chối bởi
+Rejection reason,Lý do từ chối
 Relation,Quan hệ
 Reload file,Đọc lại tệp
 Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệp sẽ thay toàn bộ dòng và bỏ các sửa tay. Tiếp tục?
 Rerun tests,Số test chạy lại
+Resolved,Đã xử lý
 Retry,Thử lại
+Review actions,Thao tác duyệt
+Review comments,Ý kiến thẩm định
 Room hourly rate,Đơn giá giờ phòng,NC Room
 Row,Dòng,Import Excel
 Row ID,Mã dòng
 Run costing,Chạy tính giá
 Samples per year,Số mẫu mỗi năm
 Save,Lưu
+Save comment,Lưu ý kiến
 Save section,Lưu phần
 Save the form first.,Lưu biểu mẫu trước.
 Save to add test systems,Lưu để thêm hệ thống xét nghiệm
@@ -184,9 +208,12 @@ Step ID,Mã bước
 Step title,Tên bước
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
+The procedure will move to,Quy trình sẽ chuyển sang
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
+This procedure is awaiting approval and cannot be edited.,"Quy trình đang chờ duyệt, không sửa được."
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
+This procedure is issued or closed and cannot be edited. Create a new version in the revision function.,"Quy trình đã ban hành, không sửa được. Tạo phiên bản mới ở chức năng Sửa đổi."
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
 Total,Tổng
 Total share differs from 100%,Tổng tỷ trọng khác 100%
@@ -218,7 +245,9 @@ View costing results,Xem kết quả tính giá
 Will be estimated from the plan,Sẽ ước tính từ kế hoạch
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
+You do not have permission to view this procedure,Bạn không có quyền xem quy trình này
 and {0} more errors,và {0} lỗi khác
+open comments,ý kiến chưa xử lý
 tests,test
 total share,tổng tỷ trọng
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.

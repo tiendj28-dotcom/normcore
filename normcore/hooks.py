@@ -26,7 +26,29 @@ required_apps = []
 # Fixtures: 10 vai trò (FR-ACC-002) và hai Workflow State của skeleton
 fixtures = [
 	{"dt": "Role", "filters": [["name", "like", "NC %"]]},
-	{"dt": "Workflow State", "filters": [["name", "in", ["Nháp", "Đã ban hành"]]]},
+	{
+		"dt": "Workflow State",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Nháp",
+					"Chờ trưởng khoa duyệt",
+					"Chờ hội đồng thẩm định",
+					"Chờ ban hành",
+					"Đã ban hành",
+					"Đã thay thế",
+					"Đã thu hồi",
+				],
+			]
+		],
+	},
+	{
+		"dt": "Workflow Action Master",
+		"filters": [["name", "in", ["Gửi duyệt", "Đồng ý", "Thông qua", "Ban hành", "Từ chối"]]],
+	},
+	{"dt": "Workflow", "filters": [["name", "=", "NC Clinical Procedure"]]},
 ]
 
 # Includes in <head>
@@ -82,10 +104,7 @@ fixtures = [
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "normcore.utils.jinja_methods",
-# 	"filters": "normcore.utils.jinja_filters"
-# }
+jinja = {"methods": ["normcore.api.procedure_workflow.get_print_context"]}  # FR-PROC-010
 
 # Installation
 # ------------
@@ -194,7 +213,12 @@ ignore_links_on_delete = ["NC Audit Event"]
 # Scheduled Tasks
 # ---------------
 
-scheduler_events = {"daily": ["normcore.api.compliance.daily_job"]}  # FR-CMP-005
+scheduler_events = {
+	"daily": [
+		"normcore.api.compliance.daily_job",  # FR-CMP-005
+		"normcore.api.procedure_workflow.daily_job",  # FR-WF-006, FR-WF-013
+	]
+}
 
 # scheduler_events = {
 # 	"all": [

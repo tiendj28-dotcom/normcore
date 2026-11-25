@@ -2,13 +2,12 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import make_base, make_procedure, make_user
+from normcore.tests.utils import make_base, make_procedure, make_user, publish_procedure
 
 
 def _published(service, dept, **kw):
 	proc = make_procedure(service, dept, **kw)
-	proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
-	proc.publish()
+	publish_procedure(proc, "QĐ-01", "2026-12-01")
 	return proc
 
 
@@ -99,8 +98,7 @@ class TestNCNormSet(FrappeTestCase):
 		proc.resources[0].linked_doctype = None
 		proc.resources[0].linked_name = None
 		proc.save()
-		proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
-		proc.publish()
+		publish_procedure(proc, "QĐ-01", "2026-12-01")
 		self.assertRaises(frappe.ValidationError, make_norm_set, proc.name)
 
 	def test_phien_ban_dung_max_khong_dung_count(self):

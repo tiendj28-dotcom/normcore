@@ -5,13 +5,12 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.costing import engine
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import make_base, make_param_set, make_procedure, make_user
+from normcore.tests.utils import make_base, make_param_set, make_procedure, make_user, publish_procedure
 
 
 def _published_norm_set(service, dept, minutes=10):
 	proc = make_procedure(service, dept, minutes=minutes)
-	proc.decision_no, proc.effective_date = "QĐ-01", "2026-12-01"
-	proc.publish()
+	publish_procedure(proc, "QĐ-01", "2026-12-01")
 	return frappe.get_doc("NC Norm Set", make_norm_set(proc.name))
 
 
