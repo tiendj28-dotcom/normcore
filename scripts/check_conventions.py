@@ -226,6 +226,26 @@ def _csv_key(row):
 	return (row[0], row[2] if len(row) > 2 else "")
 
 
+def sort_vi_csv(root: Path) -> bool:
+	"""Sắp lại vi.csv đúng thứ tự check_vi_csv kiểm (cùng _csv_key) và bỏ dòng trùng hệt (merge=union có thể
+	nhân đôi). Trùng khóa khác bản dịch giữ nguyên để check_vi_csv báo lỗi. Trả True nếu tệp đổi."""
+	path = root / VI_CSV
+	if not path.exists():
+		return False
+	with open(path, encoding="utf-8", newline="") as fh:
+		rows = [r for r in csv.reader(fh) if r]
+	uniq = []
+	for r in rows:
+		if r not in uniq:
+			uniq.append(r)
+	out = sorted(uniq, key=_csv_key)  # sort ổn định: dòng cùng khóa giữ thứ tự cũ
+	if out == rows:
+		return False
+	with open(path, "w", encoding="utf-8", newline="") as fh:
+		csv.writer(fh, lineterminator="\n").writerows(out)
+	return True
+
+
 def check_vi_csv(root: Path) -> list:
 	"""NORM-24: vi.csv xếp theo cột đầu (rồi cột ngữ cảnh) và không trùng khóa (cột 1 + ngữ cảnh)."""
 	path = root / VI_CSV
@@ -316,6 +336,39 @@ def check_asm_unique(root: Path) -> list:
 	return errors
 
 
+SCOPE_DIR = "normcore/core/scope_rules"
+SCOPED_ROLES = ("NC Clinician", "NC Department Head")
+
+
+def check_scope_rules(data: dict, root: Path, rel: str) -> list:
+	"""NORM-37: DocType có trường Link tới NC Department và cấp quyền cho vai trò theo khoa phải có tệp
+	normcore/core/scope_rules/<ten_doctype>.json (hẹp theo khoa, hoặc "scoped": false kèm lý do)."""
+	if data.get("istable") in (1, True, "1"):
+		return []
+	has_field = any(
+		isinstance(f, dict) and f.get("fieldtype") == "Link" and f.get("options") == "NC Department"
+		for f in data.get("fields") or []
+	)
+	has_role = any(
+		isinstance(p, dict) and p.get("role") in SCOPED_ROLES for p in data.get("permissions") or []
+	)
+	name = str(data.get("name", ""))
+	if not (has_field and has_role):
+		return []
+	path = root / SCOPE_DIR / (name.lower().replace(" ", "_") + ".json")
+	if not path.exists():
+		return [f"{rel}: [NC-13] DocType '{name}' có trường khoa nhưng thiếu tệp {SCOPE_DIR}/{path.name}"]
+	try:
+		reg = json.loads(path.read_text(encoding="utf-8"))
+	except ValueError as e:
+		return [f"{SCOPE_DIR}/{path.name}: [NC-13] không đọc được JSON: {e}"]
+	if reg.get("doctype") != name:
+		return [f"{SCOPE_DIR}/{path.name}: [NC-13] trường doctype phải là '{name}'"]
+	if reg.get("scoped") is False and not str(reg.get("reason") or "").strip():
+		return [f"{SCOPE_DIR}/{path.name}: [NC-13] scoped=false phải kèm reason"]
+	return []
+
+
 def run(root: Path) -> list:
 	errors = check_vi_csv(root) + check_workspace(root) + check_asm_unique(root)
 	for path in find_doctype_files(root):
@@ -331,6 +384,7 @@ def run(root: Path) -> list:
 			errors.append(f"{rel}: [NC-00] JSON không phải đối tượng")
 			continue
 		errors.extend(check_doctype(data, rel))
+		errors.extend(check_scope_rules(data, root, rel))
 	return errors
 
 
