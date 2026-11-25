@@ -9,7 +9,16 @@ from frappe.utils import cint, getdate, today
 
 from normcore.library import validity
 from normcore.library.extract import ExtractionError, available_ocr, extract_pages, file_kind
-from normcore.library.search import natural_key
+from normcore.library.search import (
+	build_fulltext_query,
+	make_snippet,
+	matches_phrase,
+	natural_key,
+	normalize_doc_number,
+	normalize_text,
+	rank,
+	section_matches_service,
+)
 from normcore.library.sections import split_sections
 
 
@@ -216,3 +225,155 @@ def refresh_validity(today=None):
 def daily_job():
 	"""Scheduler hằng ngày (FR-LIB-006)."""
 	refresh_validity()
+
+
+MODES = ("auto", "text", "doc_number", "service")
+MAX_CANDIDATES = 2000
+_COLS = (
+	"s.name AS section, s.legal_document, d.doc_number, d.title AS doc_title, s.section_no, s.heading, "
+	"s.page_from, s.page_to, s.validity_status, d.doc_type"
+)
+_FROM = "FROM `tabNC Legal Section` s JOIN `tabNC Legal Document` d ON d.name = s.legal_document"
+
+
+def _like(q):
+	return "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+
+
+def _filters(doc_type, validity_status):
+	sql, args = "", []
+	if doc_type:
+		sql += " AND d.doc_type = %s"
+		args.append(doc_type)
+	if validity_status:
+		sql += " AND s.validity_status = %s"
+		args.append(validity_status)
+	return sql, args
+
+
+def _service_names(query):
+	"""Tên dịch vụ khớp `query` là mã dịch vụ hoặc mã HIS/LIS/RIS (không phân biệt hoa thường)."""
+	key = normalize_text(query)
+	names = set()
+	for r in frappe.db.sql(
+		"SELECT service_code, service_name FROM `tabNC Technical Service` WHERE LOWER(service_code) = %s",
+		(key,),
+		as_dict=True,
+	):
+		names.add((r.service_code, r.service_name))
+	for r in frappe.db.sql(
+		"SELECT t.service_code, t.service_name FROM `tabNC Service Code Map` m "
+		"JOIN `tabNC Technical Service` t ON t.name = m.parent "
+		"WHERE LOWER(m.external_code) = %s AND m.parenttype = 'NC Technical Service'",
+		(key,),
+		as_dict=True,
+	):
+		names.add((r.service_code, r.service_name))
+	return names
+
+
+def _search_text(query, fsql, fargs):
+	ft = build_fulltext_query(query)
+	if ft:
+		rows = frappe.db.sql(
+			f"SELECT {_COLS}, s.plain_text {_FROM} WHERE MATCH(s.heading, s.plain_text) AGAINST (%s IN BOOLEAN MODE)"
+			f"{fsql} LIMIT {MAX_CANDIDATES}",
+			[ft, *fargs],
+			as_dict=True,
+		)
+		rows = [r for r in rows if matches_phrase((r.heading or "") + " " + (r.plain_text or ""), query)]
+	else:
+		like = _like(query)
+		rows = frappe.db.sql(
+			f"SELECT {_COLS}, s.plain_text {_FROM} WHERE (s.plain_text LIKE %s OR s.heading LIKE %s)"
+			f"{fsql} LIMIT {MAX_CANDIDATES}",
+			[like, like, *fargs],
+			as_dict=True,
+		)
+	for r in rows:
+		r["match"] = "Nội dung"
+	return rows
+
+
+def _search_doc_number(query, fsql, fargs):
+	key = normalize_doc_number(query)
+	names = [
+		d.name
+		for d in frappe.get_all("NC Legal Document", fields=["name", "doc_number"])
+		if normalize_doc_number(d.doc_number) == key
+	]
+	if not names:
+		return []
+	rows = frappe.db.sql(
+		f"SELECT {_COLS}, s.plain_text {_FROM} WHERE s.legal_document IN %s{fsql}",
+		[tuple(names), *fargs],
+		as_dict=True,
+	)
+	for r in rows:
+		r["match"] = "Số hiệu"
+	return rows
+
+
+def _search_service(query, fsql, fargs):
+	found = {}
+	for code, name in _service_names(query):
+		# (a) ánh xạ đã xác nhận (có từ FEAT-022)
+		if frappe.db.table_exists("NC Section Service Map"):
+			for r in frappe.db.sql(
+				f"SELECT {_COLS}, s.plain_text {_FROM} "
+				"JOIN `tabNC Section Service Map` m ON m.parent = s.name AND m.parenttype = 'NC Legal Section' "
+				f"WHERE m.technical_service = %s AND m.mapping_status = 'Đã xác nhận'{fsql}",
+				[code, *fargs],
+				as_dict=True,
+			):
+				r["match"] = "Ánh xạ dịch vụ"
+				found[r.section] = r
+		# (b) mục của văn bản hướng dẫn QTKT có tiêu đề chứa tên dịch vụ (ASM-020-08)
+		for r in frappe.db.sql(
+			f"SELECT {_COLS}, s.plain_text {_FROM} "
+			f"WHERE d.is_procedure_guideline = 1 AND s.heading LIKE %s{fsql}",
+			[_like(name), *fargs],
+			as_dict=True,
+		):
+			if section_matches_service(r.heading, name) and r.section not in found:
+				r["match"] = "Tên dịch vụ"
+				found[r.section] = r
+	return list(found.values())
+
+
+@frappe.whitelist()
+def search_sections(query, mode="auto", doc_type=None, validity_status=None, start=0, page_length=20):
+	"""Tìm mục theo từ khóa, số hiệu hoặc mã dịch vụ (FR-LIB-010)."""
+	if not frappe.has_permission("NC Legal Section", "read"):
+		frappe.throw(_("Bạn không có quyền tìm trong thư viện văn bản"), frappe.PermissionError)
+	query = " ".join((query or "").split())
+	if len(query) < 2:
+		frappe.throw(_("Nhập ít nhất 2 ký tự"))
+	if mode not in MODES:
+		frappe.throw(_("Chế độ tìm không hợp lệ"))
+	start, page_length = cint(start), min(max(cint(page_length) or 20, 1), 100)
+	fsql, fargs = _filters(doc_type, validity_status)
+
+	if mode == "auto":
+		if _service_names(query):
+			mode = "service"
+		elif _search_doc_number(query, "", []):
+			mode = "doc_number"
+		else:
+			mode = "text"
+	if mode == "service":
+		rows = _search_service(query, fsql, fargs)
+	elif mode == "doc_number":
+		rows = _search_doc_number(query, fsql, fargs)
+	else:
+		rows = _search_text(query, fsql, fargs)
+
+	rows = rank(rows)
+	out = []
+	for r in rows[start : start + page_length]:
+		r["page_from"] = r.page_from or None
+		r["page_to"] = r.page_to or None
+		r["snippet"] = make_snippet(r.pop("plain_text", "") or "", query if mode == "text" else "")
+		r.pop("doc_type", None)
+		out.append(r)
+	return {"mode": mode, "total": len(rows), "rows": out}
