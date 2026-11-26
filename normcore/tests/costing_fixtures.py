@@ -216,3 +216,64 @@ def make_golden_world(skip_price=()):
 		).insert(ignore_permissions=True)
 	sets = [make_locked_norm_set(s, dept, s) for s in ("DV-TEST-A", "DV-TEST-B")]
 	return params, dept, sets
+
+
+def make_golden_allocation(department):
+	"""Dữ liệu phân bổ, đối soát vàng (FEAT-017): khoa gắn trung tâm K01; HC, K02, tiêu chí năm 2026
+	(HEADCOUNT theo golden_engine.HEADCOUNT), quy tắc theo L1_DRIVER/L2_DRIVER, lần nhập "Đã chốt" riêng
+	có `totals` bằng golden_engine.ACCOUNTING. Trả tên lần nhập."""
+	for code, typ in (("K01", "Lâm sàng"), ("K02", "Lâm sàng"), ("HC", "Hỗ trợ")):
+		ensure(
+			"NC Cost Center", "cost_center_code", code, cost_center_name=f"Trung tâm {code}", center_type=typ
+		)
+	frappe.db.set_value("NC Department", department, "cost_center", "K01")
+	for center, hc in g.HEADCOUNT.items():
+		frappe.get_doc(
+			{
+				"doctype": "NC Cost Center Driver",
+				"fiscal_year": 2026,
+				"cost_center": center,
+				"headcount": float(hc),
+			}
+		).insert(ignore_permissions=True)
+	for cat in g.ACCOUNTING["HC"]:
+		frappe.get_doc(
+			{
+				"doctype": "NC Allocation Rule",
+				"rule_name": f"G1-{cat}",
+				"level": "Cấp 1",
+				"cost_category": cat,
+				"driver": g.L1_DRIVER,
+				"cost_center": "HC",
+			}
+		).insert(ignore_permissions=True)
+	for cat, driver in g.L2_DRIVER.items():
+		frappe.get_doc(
+			{
+				"doctype": "NC Allocation Rule",
+				"rule_name": f"G2-{cat}",
+				"level": "Cấp 2",
+				"cost_category": cat,
+				"driver": driver,
+			}
+		).insert(ignore_permissions=True)
+	imp = frappe.get_doc({"doctype": "NC Accounting Import", "fiscal_year": 2026})
+	imp.flags.ignore_mandatory = True  # dựng dữ liệu: không có tệp nguồn
+	imp.insert(ignore_permissions=True)
+	imp.flags.nc_finalizing = True
+	for center, cats in g.ACCOUNTING.items():
+		for cat, amount in cats.items():
+			imp.append("totals", {"cost_center": center, "cost_category": cat, "amount": float(amount)})
+	imp.status = "Đã chốt"
+	imp.save(ignore_permissions=True)
+	return imp.name
+
+
+def set_accounting_total(import_name, center, category, amount):
+	"""Đổi một số kế toán trong `totals` của lần nhập đã chốt (dựng dữ liệu cho TC-COST-16)."""
+	frappe.db.set_value(
+		"NC Accounting Import Total",
+		{"parent": import_name, "cost_center": center, "cost_category": category},
+		"amount",
+		float(amount),
+	)
