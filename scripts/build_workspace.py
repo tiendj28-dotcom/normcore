@@ -77,7 +77,9 @@ def render(rows: list) -> str:
 	# Custom HTML Block (loại CustomBlock, link_to trống): đặt ngay sau tiêu đề, trước các lối tắt (FEAT-002)
 	for sid, label, _link, typ, _view in rows:
 		if typ == "CustomBlock":
-			blocks.append({"id": sid, "type": "custom_block", "data": {"custom_block_name": label, "col": 12}})
+			blocks.append(
+				{"id": sid, "type": "custom_block", "data": {"custom_block_name": label, "col": 12}}
+			)
 			custom_blocks.append({"custom_block_name": label, "label": label})
 	for sid, label, link_to, typ, view in rows:
 		if typ == "CustomBlock":

@@ -85,8 +85,9 @@ class TestPendingSources(NotifyBase):
 		def good(user):
 			return [{"name": "A", "since": "2026-01-02"}]
 
-		with patch("normcore.core.notify.register_pending_sources", return_value=[boom, good]), patch(
-			"frappe.log_error"
+		with (
+			patch("normcore.core.notify.register_pending_sources", return_value=[boom, good]),
+			patch("frappe.log_error"),
 		):
 			self.assertEqual(notify.pending_for(self.u1), [{"name": "A", "since": "2026-01-02"}])
 

@@ -18,9 +18,7 @@ class TestHomeWorkspace(FrappeTestCase):
 		labels = {s.label for s in ws.shortcuts}
 		for label in ("Dịch vụ kỹ thuật", "Tham số vận hành", "Nhập dữ liệu từ Excel", "Nhật ký"):
 			self.assertIn(label, labels)
-		self.assertEqual(
-			len([b for b in content if b["type"] == "shortcut"]), len(ws.shortcuts)
-		)
+		self.assertEqual(len([b for b in content if b["type"] == "shortcut"]), len(ws.shortcuts))
 
 	def test_block_trang_chu_goi_get_home_va_cong_khai(self):
 		block = frappe.get_doc("Custom HTML Block", "NC Trang chủ")

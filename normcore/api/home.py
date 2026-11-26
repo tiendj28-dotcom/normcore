@@ -118,8 +118,7 @@ def _service_flags(department=None):
 			if frappe.get_meta("NC Costing Run").has_field("based_on_run"):
 				fields.append("based_on_run")
 			runs = {
-				r["name"]: r
-				for r in frappe.get_list("NC Costing Run", fields=fields, limit_page_length=0)
+				r["name"]: r for r in frappe.get_list("NC Costing Run", fields=fields, limit_page_length=0)
 			}
 		rows = []
 		for c in costs:
@@ -178,7 +177,9 @@ def _dots(flags, readable):
 		if stage not in readable:
 			dots.append({"key": key, "state": "no_permission", "indicator": "gray"})
 		else:
-			dots.append({"key": key, "state": "ok" if has else "empty", "indicator": color if has else "gray"})
+			dots.append(
+				{"key": key, "state": "ok" if has else "empty", "indicator": color if has else "gray"}
+			)
 	return dots
 
 

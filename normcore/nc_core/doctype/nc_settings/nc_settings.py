@@ -4,7 +4,6 @@ from frappe.model.document import Document
 
 from normcore.core import settings
 
-
 POSITIVE = (
 	("min_time_study_cases", "Số ca bấm giờ tối thiểu"),
 	("price_valid_months", "Hạn tham chiếu đơn giá (tháng)"),

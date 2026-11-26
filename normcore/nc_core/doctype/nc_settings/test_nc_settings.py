@@ -74,7 +74,9 @@ class TestNCSettings(FrappeTestCase):
 		patch.execute()
 		self.assertEqual(frappe.db.get_single_value("NC Settings", "min_time_study_cases"), 9)
 		self.assertEqual(int(frappe.db.get_single_value("NC Settings", "price_valid_months")), 24)
-		self.assertEqual(frappe.db.get_single_value("NC Settings", "accounting_regime"), "Hành chính sự nghiệp")
+		self.assertEqual(
+			frappe.db.get_single_value("NC Settings", "accounting_regime"), "Hành chính sự nghiệp"
+		)
 		before = {f: frappe.db.get_single_value("NC Settings", f) for f in NEW_FIELDS}
 		patch.execute()
 		self.assertEqual(before, {f: frappe.db.get_single_value("NC Settings", f) for f in NEW_FIELDS})
@@ -137,9 +139,7 @@ class TestApplyImmediately(FrappeTestCase):
 		access.assign_department(head, dept)
 		frappe.db.set_value("NC Department", dept, "head_user", head)
 		proc = make_procedure(service, dept)
-		frappe.db.set_value(
-			"NC Clinical Procedure", proc.name, "workflow_state", "Chờ trưởng khoa duyệt"
-		)
+		frappe.db.set_value("NC Clinical Procedure", proc.name, "workflow_state", "Chờ trưởng khoa duyệt")
 		frappe.db.set_value(
 			"NC Clinical Procedure", proc.name, "modified", add_days(nowdate(), -3), update_modified=False
 		)
