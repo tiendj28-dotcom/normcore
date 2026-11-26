@@ -10,7 +10,7 @@ Quy ước:
   - `pytest normcore/tests/unit/test_costing_snapshot_lock.py normcore/tests/unit/test_costing_snapshot.py normcore/tests/unit/test_reconcile.py` xanh (tệp FEAT-036, FEAT-017 không sửa);
   - `grep -rn "import frappe" normcore/costing/` không in gì.
 - [x] T02 Logic thuần `costing/compare.py` (mục 3.3); viết `tests/unit/test_costing_compare.py` (tiêu chí #8 phần so sánh) — done-when: `pytest normcore/tests/unit/test_costing_compare.py` xanh.
-- [ ] T03 Golden: `tests/golden/test_snapshot_compare_golden.py` gồm `test_TC_COST_09_recompute_tu_anh_chup_vang` và `test_TC_COST_18_chenh_lech_V1_theo_cau_phan` (tiêu chí #7; số lấy từ `golden_engine.run()`, `run(False)`, không chép; −63.636,36 so thêm với TC-COST-18) — done-when:
+- [x] T03 Golden: `tests/golden/test_snapshot_compare_golden.py` gồm `test_TC_COST_09_recompute_tu_anh_chup_vang` và `test_TC_COST_18_chenh_lech_V1_theo_cau_phan` (tiêu chí #7; số lấy từ `golden_engine.run()`, `run(False)`, không chép; −63.636,36 so thêm với TC-COST-18) — done-when:
   - `python3 docs/golden/golden_engine.py && python3 docs/golden/golden_engine.py --no-depr` thoát 0;
   - `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov-fail-under=90` xanh.
 - [ ] T04 DocType và controller (mục 2.1, 4.1–4.3):
