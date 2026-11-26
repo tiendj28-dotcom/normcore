@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["TC-NORM-08 và FR-NORM-015 có test cùng mã, assertion đúng yêu cầu", "Site sạch: 1317 test OK; pytest 695 pass, phủ 99%", "Quyền: Auditor/Finance/khoa khác bị từ chối", "Diff test không xóa/nới/skip; CI xanh"], "commit": "275b3dc815ce66f7e0dad0872bcdbbeea63cd6a4"}
