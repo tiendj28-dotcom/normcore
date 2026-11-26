@@ -347,7 +347,7 @@ def per_result(eq: EquipmentInput, annual: Decimal, m=None):
 		rate = resources.machine_hourly_rate(annual, eq.planned_hours, eq.utilization)
 		return (
 			r2(Decimal(m) / 60 * rate),
-			"Giờ kế hoạch x hệ số sử dụng",
+			"Giờ kế hoạch × hệ số sử dụng",  # noqa: RUF001
 			Decimal(eq.planned_hours) * Decimal(eq.utilization),
 		)
 	raise ValueError(f"Tiêu chí chia không hợp lệ: {eq.basis}")

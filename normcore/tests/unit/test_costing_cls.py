@@ -160,7 +160,7 @@ class TestNormLines(unittest.TestCase):
 		s = with_system("GLU-A")
 		ln = cls.ClsNormLine(engine.NormLine("L", "", "EQUIPMENT", "", "", D("30")), cls.RESULT)
 		out = cls.norm_line_cost(s, ln, D(1), None, inp)
-		self.assertEqual(out.divisor_label, "Giờ kế hoạch x hệ số sử dụng")
+		self.assertEqual(out.divisor_label, "Giờ kế hoạch × hệ số sử dụng")  # noqa: RUF001
 
 
 class TestSharesEqaLow(unittest.TestCase):
