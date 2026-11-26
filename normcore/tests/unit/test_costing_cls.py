@@ -53,7 +53,29 @@ class TestEquipment(unittest.TestCase):
 			records=(cls.RecordInput(D("8000000"), D(12), False),),
 			manual_calibration=D("1"),
 		)
-		self.assertEqual(cls.compliance_annual(a, [a], "DIRECT"), D("1"))
+		# FR-CMP-002, ASM-036-11: có hồ sơ mà hết hạn hết thì phần riêng = 0 (số nhập tay chỉ dùng khi không có hồ sơ nào)
+		self.assertEqual(cls.compliance_annual(a, [a], "DIRECT"), D("0"))
+
+	def test_compliance_het_han_van_o_trong_quy_asset_va_direct(self):
+		"""Review NORM-42: EQ_A hết hạn (nhập tay 999), EQ_B còn hạn 6.000.000/năm; giá trị tài sản 3,6 tỷ và 1,2 tỷ."""
+		e = self.inp.equipment
+		a = replace(
+			e["EQ_A"], records=(cls.RecordInput(D("8000000"), D(12), False),), manual_calibration=D("999")
+		)
+		b = replace(e["EQ_B"], records=(cls.RecordInput(D("6000000"), D(12), True),))
+		peers = [a, b]
+		self.assertEqual(cls.compliance_annual(a, peers, "ASSET"), D("4500000"))
+		self.assertEqual(cls.compliance_annual(b, peers, "ASSET"), D("1500000"))
+		self.assertEqual(cls.compliance_annual(a, peers, "DIRECT"), D("0"))
+		self.assertEqual(cls.compliance_annual(b, peers, "DIRECT"), D("6000000"))
+
+	def test_compliance_khong_ho_so_nao_ngoai_quy(self):
+		"""Không có bản ghi nào: số nhập tay, tính như Gắn trực tiếp, không vào tử và mẫu của quỹ."""
+		e = self.inp.equipment
+		a = replace(e["EQ_A"], records=(), manual_calibration=D("999"))
+		b = replace(e["EQ_B"], records=(cls.RecordInput(D("6000000"), D(12), True),))
+		self.assertEqual(cls.compliance_annual(a, [a, b], "ASSET"), D("999"))
+		self.assertEqual(cls.compliance_annual(b, [a, b], "ASSET"), D("6000000"))
 
 	def test_compliance_khong_nguyen_gia_tinh_truc_tiep(self):
 		a = replace(self.inp.equipment["EQ_A"], asset_value=None)

@@ -274,21 +274,24 @@ def k_factor(qbn, qnk, qcal, qrerun, qeqa, h):
 # ---------------------------------------------------------------------------
 
 
-def _own_compliance(eq: EquipmentInput):
-	valid = [r for r in eq.records if r.valid]
-	if not valid:
-		return None
-	return sum((Decimal(r.cost_per_time) * 12 / Decimal(r.cycle_months) for r in valid), _ZERO)
+def _own_compliance(eq: EquipmentInput) -> Decimal:
+	"""Chi phí năm của các hồ sơ còn hạn (BR-CLS-011); hồ sơ hết hạn không tính, không có hồ sơ còn hạn = 0."""
+	return sum(
+		(Decimal(r.cost_per_time) * 12 / Decimal(r.cycle_months) for r in eq.records if r.valid), _ZERO
+	)
 
 
 def compliance_annual(eq: EquipmentInput, peers, mode: str) -> Decimal:
-	"""BR-CLS-011, FR-CMP-002..004. `peers`: thiết bị cùng khoa (gồm cả `eq`)."""
-	own = _own_compliance(eq)
-	if own is None:  # không có hồ sơ còn hạn: số nhập tay, tính như Gắn trực tiếp (ASM-036-11)
+	"""BR-CLS-011, FR-CMP-002..004. `peers`: thiết bị cùng khoa (gồm cả `eq`).
+
+	Không có hồ sơ nào (`not eq.records`): số nhập tay, tính như Gắn trực tiếp, ngoài quỹ chung (ASM-036-11).
+	Có hồ sơ nhưng hết hạn hết: phần riêng = 0, vẫn nằm trong quỹ và mẫu số theo giá trị tài sản."""
+	if not eq.records:
 		return Decimal(eq.manual_calibration or 0)
+	own = _own_compliance(eq)
 	if mode == ALLOC_DIRECT or eq.asset_value is None:
 		return own
-	pool_eq = [p for p in peers if p.asset_value is not None and _own_compliance(p) is not None]
+	pool_eq = [p for p in peers if p.asset_value is not None and p.records]
 	pool = sum((_own_compliance(p) for p in pool_eq), _ZERO)
 	return pool * Decimal(eq.asset_value) / sum((Decimal(p.asset_value) for p in pool_eq), _ZERO)
 

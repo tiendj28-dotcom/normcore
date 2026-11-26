@@ -139,6 +139,10 @@ class TestNCCostingCls(FrappeTestCase):
 		self.assertEqual(
 			{r.test_system: r.low_volume_warning for r in sc.test_system_costs}, {"GLU-A": 1, "GLU-B": 0}
 		)
+		# EQ_A có hồ sơ nhưng hết hạn: kiểm định = 6.000.000 (EQ_B) x 3,6 tỷ / 4,8 tỷ = 4.500.000 (ASM-036-11);
+		# thiết bị năm = 360.000.000 + 120.000.000 + 24.000.000 + 4.500.000 = 508.500.000; Qtb = 1.000 + 288.000
+		l07 = {x.test_system: x.amount for x in sc.lines if x.norm_line_id == "L07"}
+		self.assertEqual(l07["GLU-A"], 1759.52)
 
 	def test_TC_CLS_38_tai_lap_tu_anh_chup(self):
 		from normcore.costing import snapshot
