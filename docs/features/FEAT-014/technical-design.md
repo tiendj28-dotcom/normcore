@@ -5,7 +5,7 @@ Issue NORM-49. Nguồn: `srs.md` FR-TS-001..005, NFR-USE-003, FR-ADM-003, FR-NOR
 Phụ thuộc: FEAT-012 DONE trên `origin/develop` (`7ed1b85`): NC Norm Set/Line, `api/norm.py`, trang `norm-grid`. Dùng lại phạm vi khoa FEAT-001 (`core/permissions.py`, `core/scope_rules/`).
 **Phụ thuộc mềm FEAT-002 (NORM-52, chưa merge):** `normcore/core/settings.py::get` và trường `NC Settings.min_time_study_cases` do FEAT-002 làm (Quyết định Lead). FEAT-014 **không** tự tạo hai thứ này (xem mục 7, task T05).
 
-Giả định: `docs/decisions/assumptions/FEAT-014.md` (ASM-014-01..10). Không có AMD (NC Time Study, NC Time Study Line đã có trong `data-model.md`; thêm một trường bố cục HTML là ASM-014-08). Không có câu hỏi mở cho Lead.
+Giả định: `docs/decisions/assumptions/FEAT-014.md` (ASM-014-01..10). Không sửa data-model (NC Time Study, NC Time Study Line đã có trong `data-model.md`; thêm một trường bố cục HTML là ASM-014-08). AMD-014-01 (ui-design mục 3): bỏ nút trên lưới định mức, áp qua SCR-DSK-016. Không có câu hỏi mở cho Lead.
 
 Golden: không có phép tính tiền ở FEAT này (trung vị số phút không thuộc BR-COST/BR-CLS). Áp kết quả chỉ ghi `hospital_qty` của NC Norm Line; chi phí tạm tính của lưới vẫn do `costing/provisional.py` (FEAT-012) tính.
 
@@ -88,8 +88,7 @@ Mọi hàm kiểm quyền tường minh; lỗi quyền `frappe.PermissionError`,
 
 `apply_to_norm_set` lấy ca theo (`ns.technical_service`, `ns.department`, `ns.procedure`), gọi `summarize` rồi `plan_apply`, gán từng cập nhật vào dòng của `ns`, `ns.save()`. Không ghi NC Audit Event mới: `track_changes` của NC Norm Set đã lưu phiên bản trước/sau.
 
-Bộ định mức (FEAT-012) mở rộng:
-- `api/norm.py::_actions`: thêm `"apply_time_study"` khi `ns.status` = "Nháp" và `can_write` (chung nhánh với `save_line`). Không đổi hàm nào khác.
+Bộ định mức (FEAT-012): **không sửa** `api/norm.py` (AMD-014-01, ui-design mục 3).
 
 ## 4. Logic thuần — `normcore/norm/time_study.py` (mới, không import `frappe`)
 
@@ -109,7 +108,7 @@ Hằng `BASIS = "Bấm giờ"` (khớp lựa chọn `NC Norm Line.basis`). Độ
 
 - SCR-DSK-015: form NC Time Study (Desk Form chuẩn) + bảng ghi theo bước vẽ vào `entry_panel` (`nc_time_study.js`), lưu vào `lines`.
 - SCR-DSK-016: Script Report `NC Time Study Result` ("Kết quả bấm giờ", `nc_costing/report/nc_time_study_result/`) gọi `api/time_study.get_result`; nút "Áp vào bộ định mức".
-- SCR-DSK-014 (FEAT-012) mở rộng: nút "Áp kết quả bấm giờ" trong `NormGrid.vue` khi `actions` có `apply_time_study`; nút cùng tên trên form NC Norm Set.
+- SCR-DSK-014 (FEAT-012) không đổi (AMD-014-01). Form NC Norm Set có nút điều hướng "Áp kết quả bấm giờ" mở SCR-DSK-016 với bộ lọc của bộ (không gọi API).
 
 ## 6. Tiêu chí nghiệm thu
 
@@ -138,7 +137,7 @@ Hằng `BASIS = "Bấm giờ"` (khớp lựa chọn `NC Norm Line.basis`). Độ
 ## 8. Tệp chạm tới
 
 Mới: `normcore/norm/time_study.py`, `normcore/tests/unit/test_time_study.py`, `normcore/tests/unit/test_time_study_ui.py`, `normcore/nc_costing/doctype/nc_time_study/{__init__,nc_time_study.json,nc_time_study.py,nc_time_study.js,nc_time_study_list.js,test_nc_time_study.py}`, `normcore/nc_costing/doctype/nc_time_study_line/{__init__,nc_time_study_line.json,nc_time_study_line.py}`, `normcore/core/scope_rules/nc_time_study.json`, `normcore/api/time_study.py`, `normcore/api/test_time_study.py`, `normcore/nc_costing/report/nc_time_study_result/*`, `docs/as-built/FEAT-014.md`.
-Sửa: `normcore/api/norm.py` (`_actions` thêm `apply_time_study`), `normcore/public/js/norm_grid/NormGrid.vue` (nút), `normcore/nc_costing/doctype/nc_norm_set/nc_norm_set.js` (nút), `normcore/translations/vi.csv`, `docs/rtm-testref.md` (mục `## FEAT-014`, hoặc `docs/rtm-testref/FEAT-014.md` nếu đã có trên develop).
+Sửa: `normcore/nc_costing/doctype/nc_norm_set/nc_norm_set.js` (nút điều hướng, AMD-014-01), `normcore/translations/vi.csv`, `docs/rtm-testref.md` (mục `## FEAT-014`, hoặc `docs/rtm-testref/FEAT-014.md` nếu đã có trên develop).
 
 ## 9. Ghi chú cho Dev
 

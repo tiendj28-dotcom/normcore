@@ -54,7 +54,7 @@ Thiết bị hoặc DevTools 768 × 1024, chế độ chạm. Phiếu có quy tr
 
 ### 2.1 Bố cục
 
-- Bộ lọc: Dịch vụ (Link, BB), Khoa (Link, BB), Phiên bản quy trình (Link NC Clinical Procedure, lọc theo dịch vụ + khoa; trống = quy trình đã ban hành mới nhất).
+- Bộ lọc: Dịch vụ (Link, BB), Khoa (Link, BB), Phiên bản quy trình (Link NC Clinical Procedure, lọc theo dịch vụ + khoa; trống = quy trình đã ban hành mới nhất). Bộ lọc ẩn `norm_set` (Link NC Norm Set): có giá trị thì điền sẵn hộp thoại 2.2 (AMD-014-01).
 - Dải tóm tắt trên bảng (`report.page` message / `get_report_summary`): "Số ca: 6 / tối thiểu 5", "Từ 01/11/2026 đến 20/11/2026". Đủ ca: indicator `green` "Đủ số ca"; chưa đủ: indicator `yellow` "Chưa đủ số ca" + câu "Trung vị chỉ để tham khảo; áp vào bộ định mức cần xác nhận."
 - Cột: Mã bước | Tên bước | Loại (Nhân lực / Thiết bị) | Chức danh / thiết bị | Trung vị (phút, căn phải, tối đa 2 chữ số lẻ, dấu phẩy thập phân) | Số ca có số liệu.
 - Nút chính "Áp vào bộ định mức" (thanh nút report).
@@ -77,16 +77,21 @@ Thiết bị hoặc DevTools 768 × 1024, chế độ chạm. Phiếu có quy tr
 | Không quyền (Council, Resource Mgr, Doc Controller) | Report không hiện trong menu; mở URL → 403 |
 | Chỉ đọc (Auditor, Finance, Director, Admin, Consultant) | Xem đủ; nút "Áp vào bộ định mức" ẩn khi người dùng không có quyền write NC Norm Set (`frappe.model.can_write("NC Norm Set")`); máy chủ vẫn kiểm |
 
-## 3. SCR-DSK-014 — Lưới định mức (mở rộng FEAT-012)
+## 3. SCR-DSK-014 — Lưới định mức: không mở rộng (AMD-014-01)
 
-- `NormGrid.vue`, thanh nút: thêm "Áp kết quả bấm giờ" (`btn-default btn-sm`) khi `can('apply_time_study')`. Bấm → `normcore.api.time_study.apply_to_norm_set`; `needs_confirm` → dùng khối xác nhận sẵn có của lưới (`pending`) với câu như 2.2 bước 3; thành công → tải lại lưới, thông báo như 2.2 bước 4. Lỗi → khối `role="alert"` sẵn có.
-- Liên kết nhỏ "Xem kết quả bấm giờ" cạnh nút, mở SCR-DSK-016 với bộ lọc của bộ.
-- Dòng có `basis` = "Bấm giờ" hiển thị căn cứ như mọi căn cứ khác (đã có cột Căn cứ); không thêm màu.
-- Form NC Norm Set (`nc_norm_set.js`): nút "Áp kết quả bấm giờ" cùng điều kiện (bộ "Nháp", người dùng có quyền ghi), cùng luồng xác nhận, sau đó `frm.reload_doc()`.
+**AMD-014-01** (theo Quyết định Lead trên NORM-49, bình luận trả lời câu hỏi 2 của Dev, 2026-11-26).
+- **Vấn đề:** bản thiết kế trước đặt nút "Áp kết quả bấm giờ" trong `NormGrid.vue` gọi `normcore.api.time_study.apply_to_norm_set` và thêm `apply_time_study` vào `api/norm.py::_actions`. Test cũ `tests/unit/test_norm_grid_ui.py::test_chi_goi_api_norm` chỉ cho lưới gọi các hàm trong `API_FUNCS` của `normcore.api.norm`; nới danh sách này không thuộc ngoại lệ CLAUDE.md mục 3.1 (Lead không duyệt).
+- **Thay đổi:**
+  1. Không thêm nút nào vào `NormGrid.vue`; không thêm hàm bọc vào `api/norm.py`; không sửa `_actions`. Lưới giữ nguyên như FEAT-012. Dòng có `basis` = "Bấm giờ" hiện ở cột Căn cứ sẵn có.
+  2. Đường áp duy nhất: nút "Áp vào bộ định mức" ở SCR-DSK-016 (mục 2.2), gọi `normcore.api.time_study.apply_to_norm_set`, có bước xác nhận khi thiếu ca (FR-TS-005).
+  3. Form NC Norm Set (`nc_norm_set.js`): **thêm** một nút điều hướng "Áp kết quả bấm giờ" (nhóm nút chuẩn của form), chỉ hiện khi `frm.doc.status` = "Nháp" và `frappe.model.can_write("NC Norm Set")`. Nút **không gọi API**: `frappe.set_route("query-report", "NC Time Study Result", {technical_service, department, procedure, norm_set: frm.doc.name})`. Report đọc bộ lọc ẩn `norm_set` để điền sẵn ô "Bộ định mức" trong hộp thoại mục 2.2 bước 1. Lý do giữ nút: UC-010 bước 4 bắt đầu từ bộ định mức nháp; nút chỉ điều hướng nên mọi lệnh ghi vẫn qua `api/time_study` (đúng điều kiện của Lead), không chạm test của lưới.
+- **Căn cứ:** TC-TS-02, TC-TS-03 chỉ yêu cầu áp được và cảnh báo khi thiếu ca, không chỉ định vị trí nút. Đơn giản, đảo ngược được (CLAUDE.md mục 6).
+- **Tệp sửa:** `ui-design.md` mục 2.1, 3; `technical-design.md` mục 3, 5, 8; `tasks.md` T05, T07, T08. Không sửa `docs/ux-foundations.md` (SCR-DSK-014 không đổi so với tài liệu gốc; SCR-DSK-016 đã có nút "Áp vào bộ định mức").
+- **Ảnh hưởng FEAT khác:** không. FEAT-012 (lưới, `api/norm.py`) giữ nguyên.
 
 ## 4. Kiểm chung
 
-- 1366 × 768: form và report không cuộn ngang; lưới định mức giữ bố cục FEAT-012.
+- 1366 × 768: form và report không cuộn ngang; lưới định mức không đổi (AMD-014-01).
 - Bàn phím: mọi thao tác làm được bằng Tab/Enter/Esc (hộp thoại Desk đóng bằng Esc).
 - Tương phản ≥ 4,5:1 (NFR-USE-004): chỉ dùng biến màu Desk, không mã màu cứng; nhãn màu luôn có chữ.
 - Số và ngày theo NFR-LOC-001 (`format_number`, `frappe.datetime.str_to_user`).
