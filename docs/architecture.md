@@ -167,7 +167,7 @@ normcore/
   procedure/   validation.py versioning.py diff.py
   ai/          gateway.py providers/ prompts.py guard.py citation.py
   norm/        init_from_procedure.py validation.py time_study.py
-  costing/     models.py loader.py engine.py cls.py allocation.py reconcile.py snapshot.py runner.py writer.py compliance.py
+  costing/     models.py loader.py engine.py cls.py allocation.py reconcile.py snapshot.py runner.py writer.py compliance.py   # **[AMD-015-02]** `loader.py`, `writer.py` đặt ở `nc_costing/doctype/nc_costing_run/` để `costing/` giữ thuần; `rates.py` thuần mới
   benchmark/   stats.py rules.py scenario.py
   exports/     tt21_pl1.py tt21_pl2.py tt21_pl3.py tt21_pl4.py tt21_pl5.py cost_sheet.py norm_set.py
   api/         procedure.py norm.py costing.py benchmark.py library.py export.py

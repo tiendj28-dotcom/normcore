@@ -6,6 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 from normcore.api import access
 from normcore.tests.utils import (
 	confirm_norm_set,
+	costing_run_inputs,
 	ensure,
 	make_base,
 	make_cls_data,
@@ -230,6 +231,7 @@ class TestNCTestSystem(FrappeTestCase):
 				"fiscal_year": 2026,
 				"costing_date": "2026-12-31",
 				"parameter_set": old.parameter_set,
+				**costing_run_inputs(),
 			}
 		).insert(ignore_permissions=True)
 		self.assertEqual(new.test_systems_in_scope(), ["GLU-A"])

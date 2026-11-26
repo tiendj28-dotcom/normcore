@@ -5,7 +5,14 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import audit as audit_api
 from normcore.core import audit
-from normcore.tests.utils import confirm_norm_set, make_base, make_procedure, make_user, publish_procedure
+from normcore.tests.utils import (
+	confirm_norm_set,
+	costing_run_inputs,
+	make_base,
+	make_procedure,
+	make_user,
+	publish_procedure,
+)
 
 
 def _publish(proc):
@@ -166,6 +173,7 @@ class TestNCAuditEvent(FrappeTestCase):
 				"fiscal_year": 2026,
 				"costing_date": "2026-12-31",
 				"parameter_set": params.name,
+				**costing_run_inputs(),
 			}
 		)
 		run.insert(ignore_permissions=True)
