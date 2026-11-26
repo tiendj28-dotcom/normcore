@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "creation": "2026-11-26 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "protocol",
+  "base_url",
+  "model",
+  "api_key",
+  "timeout_seconds",
+  "max_output_tokens",
+  "budget_section",
+  "monthly_token_budget",
+  "usage_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "enabled",
+   "label": "Bật AI",
+   "fieldtype": "Check",
+   "default": "0",
+   "description": "Tắt thì các nút gọi AI bị ẩn; mọi luồng thủ công vẫn chạy. Bật lần đầu sẽ kiểm tra kết nối."
+  },
+  {
+   "fieldname": "protocol",
+   "label": "Giao thức",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "OpenAI-compatible\nAnthropic Messages",
+   "default": "Anthropic Messages"
+  },
+  {
+   "fieldname": "base_url",
+   "label": "Địa chỉ",
+   "fieldtype": "Data",
+   "description": "Bắt buộc với OpenAI-compatible. Để trống với Anthropic Messages thì dùng https://api.anthropic.com."
+  },
+  {
+   "fieldname": "model",
+   "label": "Mô hình",
+   "fieldtype": "Data",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "fieldname": "api_key",
+   "label": "Khóa",
+   "fieldtype": "Password",
+   "description": "Lưu mã hóa, không hiển thị lại. Để trống thì dùng biến môi trường NORMCORE_AI_API_KEY hoặc site_config."
+  },
+  {
+   "fieldname": "timeout_seconds",
+   "label": "Thời hạn (giây)",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "default": "180"
+  },
+  {
+   "fieldname": "max_output_tokens",
+   "label": "Số token trả về tối đa",
+   "fieldtype": "Int",
+   "default": "4096"
+  },
+  {
+   "fieldname": "budget_section",
+   "label": "Hạn mức",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "monthly_token_budget",
+   "label": "Hạn mức token tháng",
+   "fieldtype": "Int",
+   "default": "0",
+   "description": "0 = không giới hạn. Lũy kế tháng vượt hạn mức thì chặn các lần gọi AI mới và thông báo NC Admin."
+  },
+  {
+   "fieldname": "usage_html",
+   "label": "Đã dùng tháng này",
+   "fieldtype": "HTML"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC AI",
+ "name": "NC AI Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

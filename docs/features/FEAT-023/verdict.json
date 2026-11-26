@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["7/7 TC có test cùng mã, assertion đúng yêu cầu", "945 test bench OK trên normcore.test; 477 unit+golden pass, phủ 99%", "CI xanh; không test bị nới; không sửa tài liệu chỉ đọc", "Hạn chế: không tạo được site sạch (thiếu DB_ROOT_PASSWORD) và chưa kiểm UI Playwright"], "commit": "3d85819434e84d96434ae4589bc50511f4a25c80"}

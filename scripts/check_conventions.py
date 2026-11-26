@@ -75,6 +75,8 @@ DOCTYPE_ROW = {
 	"NC Equipment Type": "Loại thiết bị, hồ sơ tuân thủ",
 	"NC Equipment Compliance": "Loại thiết bị, hồ sơ tuân thủ",
 	"NC Settings": "Cấu hình AI, mẫu lệnh",
+	"NC AI Settings": "Cấu hình AI, mẫu lệnh",
+	"NC Prompt Template": "Cấu hình AI, mẫu lệnh",
 	"NC Test System": "Hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm",
 	"NC QC Plan": "Hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm",
 	"NC EQA Program": "Hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm",
