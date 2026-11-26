@@ -169,15 +169,26 @@ def render(rows: list, modified: str | None = None) -> str:
 	return json.dumps(doc, ensure_ascii=False, indent=1, sort_keys=True) + "\n"
 
 
+SHORTCUTS_NOTE = "# Sinh bởi normcore/generated.py từ shortcuts.d/*.txt (NORM-60); không sửa, không commit.\n"
+
+
 def write_workspace(root: Path, modified: str | None = None) -> bool:
+	"""Ghi normcore.json từ mảnh, và shortcuts.txt tổng hợp (tệp sinh, để test đọc thẳng `shortcuts.txt` như
+	test_norm_template_ui.py của FEAT-034 vẫn chạy; ASM-NORM60-09)."""
 	if not ((root / REL / "shortcuts.d").is_dir()):
 		return False
-	out = render(read_sources(root), modified)
-	dst = root / REL / "normcore.json"
-	if dst.exists() and dst.read_text(encoding="utf-8") == out:
-		return False
-	dst.write_text(out, encoding="utf-8")
-	return True
+	rows = read_sources(root)
+	changed = False
+	for name, text in (
+		("normcore.json", render(rows, modified)),
+		("shortcuts.txt", SHORTCUTS_NOTE + "".join("|".join(r) + "\n" for r in rows)),
+	):
+		dst = root / REL / name
+		if dst.exists() and dst.read_text(encoding="utf-8") == text:
+			continue
+		dst.write_text(text, encoding="utf-8")
+		changed = True
+	return changed
 
 
 def build_all(root: Path, modified: str | None = None) -> list:

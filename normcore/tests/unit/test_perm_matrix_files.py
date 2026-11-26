@@ -128,11 +128,14 @@ class TestConventionsOnFragments:
 		errs = cc.check_workspace(tmp_path)
 		assert errs and "NC-11" in errs[0]
 
-	def test_nc11_con_shortcuts_txt_canh_shortcuts_d(self, tmp_path):
+	def test_nc11_shortcuts_txt_dang_duoc_git_theo_doi(self, tmp_path):
 		import build_workspace as bw
 
 		d = tmp_path / bw.REL / "shortcuts.d"
 		d.mkdir(parents=True)
 		(d / "A.txt").write_text("a1|Một|NC Item|DocType|List\n", encoding="utf-8")
 		(tmp_path / bw.REL / "shortcuts.txt").write_text("a2|Hai|NC Room|DocType|List\n", encoding="utf-8")
-		assert any("shortcuts.txt" in e for e in cc.check_workspace(tmp_path))
+		assert cc.check_workspace(tmp_path) == []  # tệp sinh không theo dõi thì hợp lệ
+		subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+		subprocess.run(["git", "-C", str(tmp_path), "add", "-f", str(bw.REL / "shortcuts.txt")], check=True)
+		assert any("shortcuts.txt" in e and "NC-11" in e for e in cc.check_workspace(tmp_path))

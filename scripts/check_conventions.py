@@ -387,9 +387,10 @@ def check_workspace(root: Path) -> list:
 	if frag.is_dir():
 		rel = str(bw.REL / "shortcuts.d")
 		errors = []
-		if (root / bw.REL / "shortcuts.txt").exists():
+		if _git_tracked(root, str(bw.REL / "shortcuts.txt")):
 			errors.append(
-				f"{bw.REL}/shortcuts.txt: [NC-11] còn shortcuts.txt cạnh shortcuts.d/; chuyển vào mảnh"
+				f"{bw.REL}/shortcuts.txt: [NC-11] shortcuts.txt là tệp sinh nhưng đang được git theo dõi; "
+				"chuyển dòng vào shortcuts.d/ rồi git rm --cached"
 			)
 		try:
 			bw.render(bw.read_sources(root))

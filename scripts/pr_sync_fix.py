@@ -34,7 +34,7 @@ LEGACY = {  # tệp chung cũ -> mảnh nền
 	str(bw.REL / "shortcuts.txt"): SC_NEW,
 	"docs/rtm-testref.md": RTM_NEW,
 }
-GENERATED = (cc.VI_CSV, str(bw.REL / "normcore.json"))
+GENERATED = (cc.VI_CSV, str(bw.REL / "normcore.json"), str(bw.REL / "shortcuts.txt"))
 
 
 def _git(root: Path, *args, check=True):

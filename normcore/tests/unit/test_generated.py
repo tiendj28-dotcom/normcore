@@ -134,3 +134,16 @@ def test_cli_build_generated_chay_duoc(tmp_path):
 	)
 	assert r.returncode == 0, r.stderr
 	assert (root / "normcore/translations/vi.csv").exists()
+
+
+def test_write_workspace_sinh_ca_shortcuts_txt_tong_hop(tmp_path):
+	"""ASM-NORM60-09: test cũ đọc thẳng shortcuts.txt vẫn thấy dòng của mọi mảnh."""
+	root = _tree(
+		tmp_path,
+		{},
+		{"00-base.txt": "a1|Một|NC Item|DocType|List\n", "FEAT-9.txt": "a2|Hai|NC Room|DocType|List\n"},
+	)
+	g.write_workspace(root)
+	text = (root / g.REL / "shortcuts.txt").read_text(encoding="utf-8")
+	assert "a1|Một|NC Item|DocType|List" in text and "a2|Hai|NC Room|DocType|List" in text
+	assert g.read_shortcuts(root / g.REL / "shortcuts.txt") == g.read_sources(root)
