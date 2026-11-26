@@ -10,5 +10,5 @@ Mỗi DocType mới thêm **một tệp** `<ten_doctype_snake>.json` ở đây t
 - Tên tệp = tên DocType viết thường, khoảng trắng thành `_` (`nc_norm_template.json`).
 - `row`: dòng của `docs/data-model.md` mục 4 (hoặc ghi chú ASM). Nếu dòng đã có trong `MATRIX`, `codes` phải khớp.
 - `codes`: 10 ký hiệu `R`, `W` hoặc `-` theo thứ tự `ROLES` trong `check_conventions.py`.
-- `delete`: vai trò được thêm quyền xóa, hiện chỉ `["NC Admin"]` hoặc `[]`.
+- `delete`: vai trò được thêm quyền xóa: `NC Admin` hoặc vai trò đã có trong `DELETE_ALLOWED` của `check_conventions.py`; `[]` nếu không có.
 - Không khai lại DocType đã có trong bảng literal. `check_conventions.py` báo NC-08 nếu tệp sai.
