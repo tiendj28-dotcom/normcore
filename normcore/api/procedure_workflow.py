@@ -78,12 +78,15 @@ def _actor_error(doc, action, user):
 	elif state == approval.WAIT_PUBLISH:
 		if ROLE_DIRECTOR not in roles:
 			return _("Chỉ NC Director được ban hành hoặc từ chối ở cấp này")
+	elif state == approval.PUBLISHED:  # Thu hồi (FR-WF-012)
+		if ROLE_DIRECTOR not in roles:
+			return _("Chỉ NC Director được thu hồi quy trình")
 	return None
 
 
 def _available_actions(doc, user):
 	out = []
-	for src, act, _dst, _role in approval.TRANSITIONS:
+	for src, act, _dst, _role in approval.ACTIONS:
 		if src == doc.workflow_state and _actor_error(doc, act, user) is None:
 			out.append(act)
 	return out
@@ -157,6 +160,10 @@ def apply_action(procedure, action, reason=None, decision_no=None, effective_dat
 		doc.effective_date = getdate(effective_date)
 	elif action == "Từ chối" and not reason:
 		frappe.throw(_("Cần nhập lý do từ chối"))
+	elif action == "Thu hồi":
+		if not reason:
+			frappe.throw(_("Cần nhập lý do thu hồi"))
+		return _withdraw(doc, reason)
 
 	doc.workflow_state = new_state
 	doc.flags.workflow_action = action
@@ -164,6 +171,17 @@ def apply_action(procedure, action, reason=None, decision_no=None, effective_dat
 	doc.save(ignore_permissions=True)
 	doc.add_comment("Workflow", f"{action}: {state} → {new_state}" + (f" — {reason}" if reason else ""))
 	_after_action(doc, action, state, new_state, reason)
+	return {"workflow_state": new_state}
+
+
+def _withdraw(doc, reason):
+	"""FR-WF-012: Thu hồi đi đường hệ thống như "Đã thay thế" (ASM-008-02): không có transition trong fixture
+	Workflow; kiểm vai trò ở `_actor_error`, lý do bắt buộc, ghi sổ sự kiện."""
+	state, new_state = doc.workflow_state, approval.WITHDRAWN
+	frappe.db.set_value(DT, doc.name, "workflow_state", new_state, update_modified=False)
+	audit.log_event("Chuyển trạng thái", DT, doc.name, state, new_state, detail=reason)
+	doc.add_comment("Workflow", f"Thu hồi: {state} → {new_state} — {reason}")
+	_notify([doc.owner], f"{doc.name}: đã thu hồi — {reason}", doc)
 	return {"workflow_state": new_state}
 
 
@@ -202,6 +220,24 @@ def _last_reject(name):
 	return {"by": rows[0].user, "at": rows[0].event_time, "reason": rows[0].detail}
 
 
+def _last_withdraw(name):
+	rows = frappe.get_all(
+		audit.EVENT,
+		{
+			"ref_doctype": DT,
+			"ref_name": name,
+			"event_type": "Chuyển trạng thái",
+			"to_state": approval.WITHDRAWN,
+		},
+		["user", "event_time", "detail"],
+		order_by="event_time desc, creation desc",
+		limit=1,
+	)
+	if not rows:
+		return None
+	return {"by": rows[0].user, "at": rows[0].event_time, "reason": rows[0].detail}
+
+
 @frappe.whitelist()
 def get_review(procedure):
 	if not frappe.has_permission(DT, "read", doc=procedure):
@@ -227,6 +263,7 @@ def get_review(procedure):
 		"is_secretary": bool(user) and user == _secretary(),
 		"deviations": deviations,
 		"last_reject": _last_reject(doc.name),
+		"last_withdraw": _last_withdraw(doc.name),
 		"decision_no": doc.decision_no,
 		"effective_date": doc.effective_date,
 	}
