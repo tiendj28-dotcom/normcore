@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["6 TC (CLS-16..19, 39, 40) có test cùng mã, khớp golden", "Site sạch: 1845 test bench OK; pytest 1088 passed, độ phủ costing 99
