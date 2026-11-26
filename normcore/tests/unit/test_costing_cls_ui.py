@@ -24,7 +24,13 @@ class TestCostingClsUI(unittest.TestCase):
 		for f in (RUN_JS, COST_JS):
 			used = set(re.findall(r"__\(\s*\"((?:[^\"\\]|\\.)*)\"", _t(f)))
 			self.assertEqual(sorted(used - set(vi)), [], f.name)
-		for key in ("Paraclinical", "Estimated from plan", "Low volume", "How k is calculated", "Results by test system"):
+		for key in (
+			"Paraclinical",
+			"Estimated from plan",
+			"Low volume",
+			"How k is calculated",
+			"Results by test system",
+		):
 			self.assertIn(key, vi)
 
 	def test_khong_ma_mau_cung(self):

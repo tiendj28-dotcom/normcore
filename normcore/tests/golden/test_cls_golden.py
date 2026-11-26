@@ -17,9 +17,13 @@ def by_id(result, system):
 def golden_by_id(code, mode="ASSET", **kw):
 	lines = g.system_lines(code, mode, **kw)[0]
 	out, n = {}, {}
-	for lid, level, comp, res, amt, note in lines:
+	for lid, _level, _comp, _res, amt, _note in lines:
 		n[lid] = n.get(lid, 0) + 1
-		out[lid if lid in ("L01", "L02", "L03", "L04", "L05", "L06", "L07", "EQ-P", "EQ-E") else f"{lid}{n[lid]}"] = amt
+		out[
+			lid
+			if lid in ("L01", "L02", "L03", "L04", "L05", "L06", "L07", "EQ-P", "EQ-E")
+			else f"{lid}{n[lid]}"
+		] = amt
 	return out
 
 
@@ -54,13 +58,27 @@ class TestClsGolden(unittest.TestCase):
 			self.assertEqual(by_id(r, sysc)["L02"].amount, D(l2))
 			self.assertEqual(by_id(r, sysc)["L03"].amount, D(l3))
 		# hao hụt của dòng không áp cho dòng nhân k
-		inp = f.service_input()
+		f.service_input()
 		s = f.system("GLU-A")
 		lines = tuple(
 			cls.ClsNormLine(
-				engine.NormLine(x.norm.line_id, "", x.norm.component, x.norm.resource, x.norm.resource_label,
-					x.norm.hospital_qty, wastage_rate=D("0.05")),
-				x.cost_level, x.apply_k, x.attach, x.attach_equipment, x.is_main_reagent, x.nominal_tests, x.open_days)
+				engine.NormLine(
+					x.norm.line_id,
+					"",
+					x.norm.component,
+					x.norm.resource,
+					x.norm.resource_label,
+					x.norm.hospital_qty,
+					wastage_rate=D("0.05"),
+				),
+				x.cost_level,
+				x.apply_k,
+				x.attach,
+				x.attach_equipment,
+				x.is_main_reagent,
+				x.nominal_tests,
+				x.open_days,
+			)
 			for x in s.lines
 		)
 		s2 = f.system("GLU-A", lines=lines)
@@ -132,7 +150,9 @@ class TestClsGolden(unittest.TestCase):
 			r = f.cost(on=late, expired_mode=mode)
 			l7 = by_id(r, "GLU-A")["L07"]
 			self.assertEqual(l7.amount, D(expect))
-			self.assertEqual(l7.amount, g.per_result("EQ_A", g.equipment_annual("EQ_A", on=late, expired_mode=mode)))
+			self.assertEqual(
+				l7.amount, g.per_result("EQ_A", g.equipment_annual("EQ_A", on=late, expired_mode=mode))
+			)
 			self.assertIn(f"({mode})", l7.warning)
 
 	def test_TC_CLS_12_V3_may_thue(self):
@@ -168,7 +188,7 @@ class TestClsGolden(unittest.TestCase):
 		for code in ("GLU-A", "GLU-B"):
 			got = {k: v.amount for k, v in by_id(r, code).items()}
 			want = {}
-			for lid, level, comp, res, amt, note in g.system_lines(code)[0]:
+			for lid, _level, _comp, _res, amt, _note in g.system_lines(code)[0]:
 				if lid in ("EQ-P", "EQ-E") and amt == 0:
 					continue  # golden ghi dòng 0; mã không sinh dòng khi không có linh kiện hay công suất
 				want["QC-N1" if lid == "QC-N" else "QC-C1" if lid == "QC-C" else lid] = amt
@@ -176,7 +196,9 @@ class TestClsGolden(unittest.TestCase):
 
 	def test_nguon_mau_so_moi_dong(self):
 		for ln in f.cost().lines:
-			self.assertTrue(ln.cost_level and ln.divisor_label and ln.divisor_value is not None and ln.divisor_source)
+			self.assertTrue(
+				ln.cost_level and ln.divisor_label and ln.divisor_value is not None and ln.divisor_source
+			)
 
 
 if __name__ == "__main__":

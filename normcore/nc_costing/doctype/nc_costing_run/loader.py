@@ -8,7 +8,18 @@ from decimal import Decimal
 import frappe
 from frappe.utils import cint, flt, getdate
 
-from normcore.costing import cls, compliance, engine, pricing, qc_plans, rates, resources, runner, snapshot, test_systems
+from normcore.costing import (
+	cls,
+	compliance,
+	engine,
+	pricing,
+	qc_plans,
+	rates,
+	resources,
+	runner,
+	snapshot,
+	test_systems,
+)
 
 LOCKED_NORM = "Đã khóa"
 VOLUME_SCENARIO = "Thực tế 12 tháng"  # mặc định; lần tính dùng `run.volume_scenario` (FR-COST-017)
@@ -392,7 +403,9 @@ def _load_cls(ctx, eligible):
 		if v.test_system in names:
 			ctx.ts_vol[v.test_system] = v
 		eq, dept = main_of.get(v.test_system, (None, None))
-		if eq and v.patient_results is not None:  # Qtb = Σ kết quả các hệ thống cùng máy, cùng khoa (ASM-036-10)
+		if (
+			eq and v.patient_results is not None
+		):  # Qtb = Σ kết quả các hệ thống cùng máy, cùng khoa (ASM-036-10)
 			key = (eq, v.department or dept)
 			ctx.qtb[key] = ctx.qtb.get(key, Decimal(0)) + _d(v.patient_results)
 	for r in frappe.get_all(
@@ -406,7 +419,10 @@ def _load_cls(ctx, eligible):
 			plan = frappe.get_doc("NC QC Plan", {"test_system": n})
 			ctx.plans[n] = plan
 			ctx.cls_items |= {r.qc_material for r in plan.iqc_lines if r.qc_material}
-	ctx.eqa = [frappe.get_doc("NC EQA Program", n) for n in frappe.get_all("NC EQA Program", pluck="name", order_by="name")]
+	ctx.eqa = [
+		frappe.get_doc("NC EQA Program", n)
+		for n in frappe.get_all("NC EQA Program", pluck="name", order_by="name")
+	]
 	depts = {e["department"] for e in entries}
 	codes = set(frappe.get_all("NC Equipment", {"department": ["in", sorted(depts)]}, pluck="name"))
 	for t in ctx.ts.values():
@@ -552,7 +568,8 @@ def _cls_system(ctx, dept, service, t) -> cls.TestSystemInput:
 		(
 			qc_plans.eqa_samples_per_year(p.rounds_per_year, p.samples_per_round)
 			for p in ctx.eqa
-			if any(r.technical_service == service for r in p.services) and (not p.department or p.department == dept)
+			if any(r.technical_service == service for r in p.services)
+			and (not p.department or p.department == dept)
 		),
 		Decimal(0),
 	)

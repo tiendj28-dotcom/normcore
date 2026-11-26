@@ -30,7 +30,12 @@ LIFE_RESULT, LIFE_HOUR = "Số kết quả", "Giờ chạy"
 LOW_VOLUME_LABEL = "Sản lượng thấp"
 EXPIRED_ZERO_NOTE = "Hết thời gian sử dụng: khấu hao = 0 (ZERO)"
 EXPIRED_CONTINUE_NOTE = "Hết thời gian sử dụng: tiếp tục tính khấu hao (CONTINUE)"
-_CATEGORY_COMPONENT = {"LABOR": "LABOR", "DRUG_SUPPLY": "DRUG", "DEPRECIATION": "EQUIPMENT", "UTILITY": "UTILITY"}
+_CATEGORY_COMPONENT = {
+	"LABOR": "LABOR",
+	"DRUG_SUPPLY": "DRUG",
+	"DEPRECIATION": "EQUIPMENT",
+	"UTILITY": "UTILITY",
+}
 
 
 def _q(x, quantum) -> Decimal:
@@ -295,8 +300,14 @@ def _peers(eq: EquipmentInput, inp: ClsServiceInput):
 def equipment_annual(eq: EquipmentInput, inp: ClsServiceInput):
 	"""BR-CLS-009: chi phí thiết bị năm của khoa và các ghi chú hiển thị. Trả (annual, notes)."""
 	machine = resources.machine_annual(
-		eq.mode, eq.original_cost, eq.life_years, eq.in_service, eq.contract_cost,
-		inp.on, inp.expired_mode, inp.include_depr,
+		eq.mode,
+		eq.original_cost,
+		eq.life_years,
+		eq.in_service,
+		eq.contract_cost,
+		inp.on,
+		inp.expired_mode,
+		inp.include_depr,
 	)
 	calibration = compliance_annual(eq, _peers(eq, inp), inp.allocation_mode)
 	comps = [(c.cost, c.life_basis, c.life_value, c.vendor_paid) for c in eq.components]
@@ -307,10 +318,14 @@ def equipment_annual(eq: EquipmentInput, inp: ClsServiceInput):
 	if eq.mode == resources.BUY:
 		if not inp.include_depr:
 			notes.append(engine.DEPR_EXCLUDED_WARNING)
-		elif inp.on is not None and eq.in_service is not None and resources.is_expired(
-			eq.in_service, eq.life_years, inp.on
+		elif (
+			inp.on is not None
+			and eq.in_service is not None
+			and resources.is_expired(eq.in_service, eq.life_years, inp.on)
 		):
-			notes.append(EXPIRED_CONTINUE_NOTE if inp.expired_mode == resources.CONTINUE else EXPIRED_ZERO_NOTE)
+			notes.append(
+				EXPIRED_CONTINUE_NOTE if inp.expired_mode == resources.CONTINUE else EXPIRED_ZERO_NOTE
+			)
 	return annual, notes
 
 
@@ -330,7 +345,11 @@ def per_result(eq: EquipmentInput, annual: Decimal, m=None):
 		if m is None:
 			raise ValueError("Thiếu số phút máy áp dụng")
 		rate = resources.machine_hourly_rate(annual, eq.planned_hours, eq.utilization)
-		return r2(Decimal(m) / 60 * rate), "Giờ kế hoạch × hệ số sử dụng", Decimal(eq.planned_hours) * Decimal(eq.utilization)
+		return (
+			r2(Decimal(m) / 60 * rate),
+			"Giờ kế hoạch x hệ số sử dụng",
+			Decimal(eq.planned_hours) * Decimal(eq.utilization),
+		)
 	raise ValueError(f"Tiêu chí chia không hợp lệ: {eq.basis}")
 
 
@@ -344,7 +363,9 @@ def part_per_result(eq: EquipmentInput, m=None) -> Decimal:
 			out += r2(Decimal(p.cost) / Decimal(p.life_value))
 		elif p.life_basis == LIFE_HOUR:
 			if m is None:
-				raise ValueError(f"Thiết bị {eq.code} có linh kiện tính theo giờ chạy mà thiếu phút chiếm máy một ca")
+				raise ValueError(
+					f"Thiết bị {eq.code} có linh kiện tính theo giờ chạy mà thiếu phút chiếm máy một ca"
+				)
 			out += r2(Decimal(p.cost) / Decimal(p.life_value) * Decimal(m) / 60)
 	return out
 
@@ -408,10 +429,21 @@ def norm_line_cost(sys, line: ClsNormLine, k, rate: engine.LineRate | None, inp,
 	def made(amount, label, value, source=SRC_ACTUAL, **kw):
 		return base(
 			engine.CostLine(
-				engine.LINE_DIRECT, n.component, amount, n.step_id, n.line_id, n.resource_label,
-				q, u, rate.source, "; ".join(rate.warnings),
+				engine.LINE_DIRECT,
+				n.component,
+				amount,
+				n.step_id,
+				n.line_id,
+				n.resource_label,
+				q,
+				u,
+				rate.source,
+				"; ".join(rate.warnings),
 			),
-			label, value, source, **kw,
+			label,
+			value,
+			source,
+			**kw,
 		)
 
 	if n.component == "LABOR":
@@ -423,19 +455,32 @@ def norm_line_cost(sys, line: ClsNormLine, k, rate: engine.LineRate | None, inp,
 		amount, label, value = per_result(eq, annual, m)
 		return base(
 			engine.CostLine(
-				engine.LINE_DIRECT, "EQUIPMENT", amount, n.step_id, n.line_id, n.resource_label or eq.code,
-				q, None,
+				engine.LINE_DIRECT,
+				"EQUIPMENT",
+				amount,
+				n.step_id,
+				n.line_id,
+				n.resource_label or eq.code,
+				q,
+				None,
 				f"{eq.code} · {eq.mode} · {'Theo giá trị tài sản' if inp.allocation_mode == ALLOC_ASSET else 'Gắn trực tiếp thiết bị'}",
 				"; ".join(notes),
 			),
-			label, value, SRC_ACTUAL, cost_category=_category_for(eq, inp),
+			label,
+			value,
+			SRC_ACTUAL,
+			cost_category=_category_for(eq, inp),
 		)
 	if line.cost_level == RESULT:
 		if line.apply_k:
 			return made(r2(q * u * Decimal(k)), "Kết quả", Decimal(1), _src(estimated), k_factor=Decimal(k))
 		return base(engine.direct_line(n, rate))
 	if line.cost_level == TUBE:
-		return made(r2(q * (1 + w) * u / Decimal(sys.tests_per_tube)), "Số xét nghiệm mỗi ống", Decimal(sys.tests_per_tube))
+		return made(
+			r2(q * (1 + w) * u / Decimal(sys.tests_per_tube)),
+			"Số xét nghiệm mỗi ống",
+			Decimal(sys.tests_per_tube),
+		)
 	if line.cost_level == BATCH:
 		return made(r2(q * (1 + w) * u / Decimal(sys.batch)), "Cỡ mẻ", Decimal(sys.batch))
 	# DAY, PERIOD (BR-CLS-005)
@@ -451,9 +496,23 @@ def norm_line_cost(sys, line: ClsNormLine, k, rate: engine.LineRate | None, inp,
 
 def _auto(sys, comp, lid, label, amount, level, origin, dl, dv, **kw):
 	return engine.CostLine(
-		engine.LINE_DIRECT, comp, amount, "", lid, label, None, None, "", kw.pop("warning", ""),
-		test_system=sys.code, line_origin=origin, cost_level=level, divisor_label=dl, divisor_value=dv,
-		divisor_source=SRC_ACTUAL, **kw,
+		engine.LINE_DIRECT,
+		comp,
+		amount,
+		"",
+		lid,
+		label,
+		None,
+		None,
+		"",
+		kw.pop("warning", ""),
+		test_system=sys.code,
+		line_origin=origin,
+		cost_level=level,
+		divisor_label=dl,
+		divisor_value=dv,
+		divisor_source=SRC_ACTUAL,
+		**kw,
 	)
 
 
@@ -469,15 +528,32 @@ def system_lines(sys: TestSystemInput, inp: ClsServiceInput):
 	m = sys.minutes_per_case
 	parts = part_per_result(eq, m)
 	if parts > 0 or has_per_use_parts(eq):
-		out.append(_auto(sys, "EQUIPMENT", "EQ-P", eq.code, parts, RESULT, ORIGIN_EQUIP, "Tuổi thọ linh kiện", Decimal(1)))
+		out.append(
+			_auto(
+				sys,
+				"EQUIPMENT",
+				"EQ-P",
+				eq.code,
+				parts,
+				RESULT,
+				ORIGIN_EQUIP,
+				"Tuổi thọ linh kiện",
+				Decimal(1),
+			)
+		)
 	if eq.power is not None:
 		amount, label, value = power_per_result(eq, _days(sys), inp.electricity_price, m)
 		out.append(_auto(sys, "UTILITY", "EQ-E", eq.code, amount, DAY, ORIGIN_EQUIP, label, value))
 	for i, c in enumerate(sys.iqc, 1):  # BR-CLS-006
 		u = Decimal(c.rate.rate)
 		amount = r2(
-			Decimal(c.qty_per_run) * Decimal(c.levels) * Decimal(c.runs_per_day) * Decimal(_days(sys)) * u
-			/ Decimal(c.shared_params) / qbn
+			Decimal(c.qty_per_run)
+			* Decimal(c.levels)
+			* Decimal(c.runs_per_day)
+			* Decimal(_days(sys))
+			* u
+			/ Decimal(c.shared_params)
+			/ qbn
 		)
 		out.append(_auto(sys, "DRUG", f"QC-N{i}", c.item, amount, PERIOD, ORIGIN_QC, "Qbn", qbn))
 	for i, c in enumerate(sys.cal, 1):  # BR-CLS-007
@@ -503,7 +579,7 @@ def shares(systems):
 
 
 def eqa_per_result(eqa, qsum) -> Decimal:
-	"""BR-CLS-008, FR-QC-004: r2(Σ (phí + vận chuyển) × tỷ lệ ÷ ΣQbn)."""
+	"""BR-CLS-008, FR-QC-004: r2(Σ (phí + vận chuyển) x tỷ lệ ÷ ΣQbn)."""
 	total = sum(((Decimal(e.fee) + Decimal(e.shipping)) * Decimal(e.share) for e in eqa), _ZERO)
 	return r2(total / Decimal(qsum))
 
@@ -547,7 +623,9 @@ def validate(c: ClsServiceInput, service="", department="") -> list:
 			continue
 		batch_lines = [x.norm.line_id for x in s.lines if x.cost_level == BATCH and not x.norm.excluded]
 		if batch_lines and (not s.batch or Decimal(s.batch) <= 0):
-			errors.append(f"Hệ thống {s.code} có dòng Theo mẻ ({', '.join(batch_lines)}) nhưng thiếu cỡ mẻ bình quân")
+			errors.append(
+				f"Hệ thống {s.code} có dòng Theo mẻ ({', '.join(batch_lines)}) nhưng thiếu cỡ mẻ bình quân"
+			)
 		if any(x.cost_level == TUBE and not x.norm.excluded for x in s.lines) and (
 			not s.tests_per_tube or Decimal(s.tests_per_tube) <= 0
 		):
@@ -570,7 +648,9 @@ def validate(c: ClsServiceInput, service="", department="") -> list:
 		for i in s.iqc:
 			if i.rate is None:
 				errors.append(f"Hệ thống {s.code}: vật liệu nội kiểm {i.item} thiếu đơn giá")
-		if s.actual.h is not None and Decimal(s.actual.h) >= 1 or (s.actual.h is None and Decimal(s.est_h) >= 1):
+		if (s.actual.h is not None and Decimal(s.actual.h) >= 1) or (
+			s.actual.h is None and Decimal(s.est_h) >= 1
+		):
 			errors.append(f"Hệ thống {s.code} có tỷ lệ hao hụt từ 100% trở lên")
 		if eq is not None and eq.basis == resources.BASIS_MINUTE and not s.minutes_per_case:
 			errors.append(f"Hệ thống {s.code} thiếu số phút chiếm máy một ca")
@@ -586,9 +666,14 @@ def validate(c: ClsServiceInput, service="", department="") -> list:
 		elif eq.basis == resources.BASIS_RESULT and (not eq.qtb or Decimal(eq.qtb) <= 0):
 			errors.append(f"Thiết bị {code} thiếu Qtb năm {c.fiscal_year}, kịch bản {c.scenario}")
 		elif eq.basis == resources.BASIS_MINUTE and (not eq.mtb or Decimal(eq.mtb) <= 0):
-			errors.append(f"Thiết bị {code} thiếu phút khai thác (Mtb) năm {c.fiscal_year}, kịch bản {c.scenario}")
+			errors.append(
+				f"Thiết bị {code} thiếu phút khai thác (Mtb) năm {c.fiscal_year}, kịch bản {c.scenario}"
+			)
 		elif eq.basis == resources.BASIS_HOURS and (
-			not eq.planned_hours or not eq.utilization or Decimal(eq.planned_hours) <= 0 or Decimal(eq.utilization) <= 0
+			not eq.planned_hours
+			or not eq.utilization
+			or Decimal(eq.planned_hours) <= 0
+			or Decimal(eq.utilization) <= 0
 		):
 			errors.append(f"Thiết bị {code} thiếu giờ khai thác kế hoạch hoặc hệ số sử dụng")
 	return errors
@@ -610,8 +695,19 @@ def _fix_rounding(parts: dict, total: Decimal) -> dict:
 def _error(inp, c, msg):
 	vols = [Decimal(s.qbn) for s in c.systems if s.qbn]
 	return engine.ServiceResult(
-		inp.service, inp.department, inp.norm_set, engine.STATUS_ERROR, msg, (), {}, {}, _ZERO, {}, None,
-		sum(vols, _ZERO) if vols else inp.volume, True,
+		inp.service,
+		inp.department,
+		inp.norm_set,
+		engine.STATUS_ERROR,
+		msg,
+		(),
+		{},
+		{},
+		_ZERO,
+		{},
+		None,
+		sum(vols, _ZERO) if vols else inp.volume,
+		True,
 	)
 
 
@@ -638,17 +734,40 @@ def _cost(inp, c: ClsServiceInput):
 		direct = sum((x.amount for x in lines), _ZERO)
 		is_low = False
 		for x in s.lines:
-			if x.is_main_reagent and x.nominal_tests and x.open_days and low_volume(total, (x.nominal_tests, x.open_days)):
+			if (
+				x.is_main_reagent
+				and x.nominal_tests
+				and x.open_days
+				and low_volume(total, (x.nominal_tests, x.open_days))
+			):
 				is_low = True
-				low.append(f"{s.code} ({vn(open_tests(total, x.open_days))} test trong {vn(x.open_days, 0)} ngày < {vn(x.nominal_tests, 0)})")
+				low.append(
+					f"{s.code} ({vn(open_tests(total, x.open_days))} test trong {vn(x.open_days, 0)} ngày < {vn(x.nominal_tests, 0)})"
+				)
 		sys_lines[s.code] = lines
 		sys_costs.append(
 			TestSystemCost(
-				s.code, s.norm_set, Decimal(s.qbn), r6(share[s.code] * 100), qnk, qcal, qrerun, qeqa,
-				h * 100, k, estimated, direct, is_low, source, total, s.equipment,
+				s.code,
+				s.norm_set,
+				Decimal(s.qbn),
+				r6(share[s.code] * 100),
+				qnk,
+				qcal,
+				qrerun,
+				qeqa,
+				h * 100,
+				k,
+				estimated,
+				direct,
+				is_low,
+				source,
+				total,
+				s.equipment,
 			)
 		)
-	weighted = r2(sum((share[s.code] * tc.direct_cost for s, tc in zip(systems, sys_costs)), _ZERO))
+	weighted = r2(
+		sum((share[s.code] * tc.direct_cost for s, tc in zip(systems, sys_costs, strict=False)), _ZERO)
+	)
 	eqa = eqa_per_result(c.eqa, qsum) if c.eqa else _ZERO
 	direct_total = weighted + eqa
 
@@ -666,13 +785,28 @@ def _cost(inp, c: ClsServiceInput):
 	if c.eqa:
 		eqa_lines.append(
 			engine.CostLine(
-				engine.LINE_DIRECT, eqa_comp, eqa, "", "EQA", "Ngoại kiểm", None, None, "", "",
-				line_origin=ORIGIN_EQA, cost_level=PERIOD, divisor_label="Tổng Qbn của dịch vụ",
-				divisor_value=qsum, divisor_source=SRC_ACTUAL, cost_category=c.eqa_category,
+				engine.LINE_DIRECT,
+				eqa_comp,
+				eqa,
+				"",
+				"EQA",
+				"Ngoại kiểm",
+				None,
+				None,
+				"",
+				"",
+				line_origin=ORIGIN_EQA,
+				cost_level=PERIOD,
+				divisor_label="Tổng Qbn của dịch vụ",
+				divisor_value=qsum,
+				divisor_source=SRC_ACTUAL,
+				cost_category=c.eqa_category,
 			)
 		)
 	by_comp = {k: r2(v) for k, v in agg(lambda x: x.component).items()}
-	by_cat = {k: r2(v) for k, v in agg(lambda x: x.cost_category or engine.COMPONENT_CATEGORY[x.component]).items()}
+	by_cat = {
+		k: r2(v) for k, v in agg(lambda x: x.cost_category or engine.COMPONENT_CATEGORY[x.component]).items()
+	}
 	if c.eqa:
 		by_comp[eqa_comp] = by_comp.get(eqa_comp, _ZERO) + eqa
 		by_cat[eqa_cat] = by_cat.get(eqa_cat, _ZERO) + eqa
@@ -683,8 +817,21 @@ def _cost(inp, c: ClsServiceInput):
 	status = engine.STATUS_WARN if (low or line_warned) else engine.STATUS_OK
 	message = f"{LOW_VOLUME_LABEL}: " + "; ".join(low) if low else ""
 	return engine.ServiceResult(
-		inp.service, inp.department, inp.norm_set, status, message, lines, by_comp, by_cat, direct_total,
-		{}, None, qsum, True, eqa, tuple(sys_costs),
+		inp.service,
+		inp.department,
+		inp.norm_set,
+		status,
+		message,
+		lines,
+		by_comp,
+		by_cat,
+		direct_total,
+		{},
+		None,
+		qsum,
+		True,
+		eqa,
+		tuple(sys_costs),
 	)
 
 
@@ -692,7 +839,7 @@ def group_by_system(lines) -> list:
 	"""Gom dòng theo hệ thống rồi theo cấu phần/bước (SCR-DSK-023). Dòng cấp dịch vụ vào nhóm trống."""
 	out = []
 	codes = sorted({x.test_system for x in lines if x.test_system})
-	for code in codes + [""]:
+	for code in [*codes, ""]:
 		rows = [x for x in lines if x.test_system == code]
 		if rows:
 			out.append({"test_system": code, "groups": engine.group_explanation(rows)})

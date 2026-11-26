@@ -21,13 +21,15 @@ class TestAuxAndK(unittest.TestCase):
 	def test_aux_actual_va_hon_hop(self):
 		s = with_system("GLU-A", actual=cls.AuxCounts(qnk=D("600"), h=D("0.03")))
 		qnk, qcal, qrerun, qeqa, h, est = cls.aux_counts(s)
-		self.assertEqual((qnk, qcal, qrerun, qeqa, h, est), (D("600"), D("48"), D("240"), D("12"), D("0.03"), True))
+		self.assertEqual(
+			(qnk, qcal, qrerun, qeqa, h, est), (D("600"), D("48"), D("240"), D("12"), D("0.03"), True)
+		)
 
 	def test_aux_chan_doan_hinh_anh(self):
 		s = with_system("GLU-A", actual=cls.AuxCounts())
-		qnk, qcal, qrerun, qeqa, h, est = cls.aux_counts(s, imaging=True)
+		qnk, qcal, qrerun, qeqa, h, _est = cls.aux_counts(s, imaging=True)
 		self.assertEqual((qnk, qcal, qeqa, h), (D(0), D(0), D(0), D(0)))
-		k, total = cls.k_factor(s.qbn, qnk, qcal, qrerun, qeqa, h)
+		k, _total = cls.k_factor(s.qbn, qnk, qcal, qrerun, qeqa, h)
 		self.assertEqual(k, cls.r6(D(1) + qrerun / s.qbn))
 
 	def test_k_factor_loi(self):
@@ -46,7 +48,11 @@ class TestEquipment(unittest.TestCase):
 		self.assertEqual(cls.compliance_annual(a, [a], "ASSET"), D("5000000"))
 
 	def test_compliance_ho_so_het_han_khong_tinh(self):
-		a = replace(self.inp.equipment["EQ_A"], records=(cls.RecordInput(D("8000000"), D(12), False),), manual_calibration=D("1"))
+		a = replace(
+			self.inp.equipment["EQ_A"],
+			records=(cls.RecordInput(D("8000000"), D(12), False),),
+			manual_calibration=D("1"),
+		)
 		self.assertEqual(cls.compliance_annual(a, [a], "DIRECT"), D("1"))
 
 	def test_compliance_khong_nguyen_gia_tinh_truc_tiep(self):
@@ -58,7 +64,7 @@ class TestEquipment(unittest.TestCase):
 		a = inp.equipment["EQ_A"]
 		self.assertEqual(cls.per_result(a, D("300000"))[0], D("1.00"))
 		h = replace(a, basis=resources.BASIS_HOURS, planned_hours=D("3000"), utilization=D("0.8"))
-		amount, label, value = cls.per_result(h, D("2400000"), D("30"))
+		amount, _label, value = cls.per_result(h, D("2400000"), D("30"))
 		self.assertEqual((amount, value), (D("500.00"), D("2400.0")))
 		with self.assertRaises(ValueError):
 			cls.per_result(replace(a, qtb=None), D(1))
@@ -72,25 +78,45 @@ class TestEquipment(unittest.TestCase):
 			cls.per_result(replace(a, basis="?"), D(1))
 
 	def test_linh_kien_gio_chay_va_dien(self):
-		a = replace(self.inp.equipment["EQ_A"], components=(cls.ComponentInput(D("6000"), cls.LIFE_HOUR, D("100")),))
+		a = replace(
+			self.inp.equipment["EQ_A"], components=(cls.ComponentInput(D("6000"), cls.LIFE_HOUR, D("100")),)
+		)
 		self.assertEqual(cls.part_per_result(a, D("30")), D("30.00"))
 		with self.assertRaises(ValueError):
 			cls.part_per_result(a)
-		dat = replace(a, mode=resources.VENDOR, components=(cls.ComponentInput(D("6000"), cls.LIFE_RESULT, D("100"), True),))
+		dat = replace(
+			a,
+			mode=resources.VENDOR,
+			components=(cls.ComponentInput(D("6000"), cls.LIFE_RESULT, D("100"), True),),
+		)
 		self.assertEqual(cls.part_per_result(dat), D(0))
 		b = self.inp.equipment["EQ_B"]
 		self.assertEqual(cls.power_per_result(b, D(300), D(3000)), (D(0), "", D(0)))
-		a2 = replace(self.inp.equipment["EQ_A"], power=replace(self.inp.equipment["EQ_A"].power, continuous=False))
-		self.assertEqual(cls.power_per_result(a2, D("300"), D("3000"))[0], cls.r2(D("1.2") * 0 + (D(2) * 8 + D("0.5") * 16) * 3000 * 300 / 300000))
+		a2 = replace(
+			self.inp.equipment["EQ_A"], power=replace(self.inp.equipment["EQ_A"].power, continuous=False)
+		)
+		self.assertEqual(
+			cls.power_per_result(a2, D("300"), D("3000"))[0],
+			cls.r2(D("1.2") * 0 + (D(2) * 8 + D("0.5") * 16) * 3000 * 300 / 300000),
+		)
 
 
 class TestNormLines(unittest.TestCase):
 	def line(self, level, comp="SUPPLY", res="CUVET", attach="", attach_eq="", w="0", qty="1", **kw):
-		return cls.ClsNormLine(engine.NormLine("X", "S1", comp, res, res, D(qty), wastage_rate=D(w)), level, False, attach, attach_eq, **kw)
+		return cls.ClsNormLine(
+			engine.NormLine("X", "S1", comp, res, res, D(qty), wastage_rate=D(w)),
+			level,
+			False,
+			attach,
+			attach_eq,
+			**kw,
+		)
 
 	def cost(self, line, rate=D("1200"), **sys_kw):
 		s = with_system("GLU-A", **sys_kw)
-		return cls.norm_line_cost(s, line, D("1.1"), engine.LineRate(rate, "p", warnings=("w1",)), f.service_input())
+		return cls.norm_line_cost(
+			s, line, D("1.1"), engine.LineRate(rate, "p", warnings=("w1",)), f.service_input()
+		)
 
 	def test_cac_cap_phat_sinh(self):
 		self.assertEqual(self.cost(self.line(cls.TUBE, w="0.5")).amount, D("450.00"))  # 1*1.5*1200/4
@@ -104,10 +130,14 @@ class TestNormLines(unittest.TestCase):
 
 	def test_dong_loai_tru_va_thanh_toan_rieng(self):
 		s = with_system("GLU-A")
-		ln = cls.ClsNormLine(engine.NormLine("X", "", "SUPPLY", "R", "R", D(1), excluded=True, exclude_reason="x"), cls.RESULT)
+		ln = cls.ClsNormLine(
+			engine.NormLine("X", "", "SUPPLY", "R", "R", D(1), excluded=True, exclude_reason="x"), cls.RESULT
+		)
 		self.assertEqual(cls.norm_line_cost(s, ln, D(1), None, f.service_input()).amount, D(0))
 		l2 = self.line(cls.RESULT)
-		out = cls.norm_line_cost(s, l2, D(1), engine.LineRate(D(5), "p", billed_separately=True), f.service_input())
+		out = cls.norm_line_cost(
+			s, l2, D(1), engine.LineRate(D(5), "p", billed_separately=True), f.service_input()
+		)
 		self.assertEqual(out.amount, D(0))
 
 	def test_thue_va_lien_doanh_loai_chi_phi(self):
@@ -116,17 +146,21 @@ class TestNormLines(unittest.TestCase):
 		eqline = cls.ClsNormLine(engine.NormLine("L", "", "EQUIPMENT", "EQ_C", "EQ_C", D(1)), cls.RESULT)
 		out = cls.norm_line_cost(s, eqline, D(1), None, inp)
 		self.assertEqual((out.amount, out.cost_category), (D("1500.00"), "RENT_CAT"))
-		inp2 = replace(inp, equipment={**inp.equipment, "EQ_C": replace(inp.equipment["EQ_C"], mode=resources.JOINT)})
+		inp2 = replace(
+			inp, equipment={**inp.equipment, "EQ_C": replace(inp.equipment["EQ_C"], mode=resources.JOINT)}
+		)
 		self.assertEqual(cls.norm_line_cost(s, eqline, D(1), None, inp2).cost_category, "JV_CAT")
 
 	def test_gio_ke_hoach(self):
 		inp = f.service_input()
-		a = replace(inp.equipment["EQ_A"], basis=resources.BASIS_HOURS, planned_hours=D("3000"), utilization=D("0.8"))
+		a = replace(
+			inp.equipment["EQ_A"], basis=resources.BASIS_HOURS, planned_hours=D("3000"), utilization=D("0.8")
+		)
 		inp = replace(inp, equipment={**inp.equipment, "EQ_A": a})
 		s = with_system("GLU-A")
 		ln = cls.ClsNormLine(engine.NormLine("L", "", "EQUIPMENT", "", "", D("30")), cls.RESULT)
 		out = cls.norm_line_cost(s, ln, D(1), None, inp)
-		self.assertEqual(out.divisor_label, "Giờ kế hoạch × hệ số sử dụng")
+		self.assertEqual(out.divisor_label, "Giờ kế hoạch x hệ số sử dụng")
 
 
 class TestSharesEqaLow(unittest.TestCase):
@@ -141,7 +175,10 @@ class TestSharesEqaLow(unittest.TestCase):
 		self.assertEqual(cls.shares([a2])[0], {"GLU-A": D(1)})
 
 	def test_eqa_va_low_volume(self):
-		self.assertEqual(cls.eqa_per_result([cls.EqaInput("E", D("24000000"), D("1200000"), D(1) / 21)], D("16000")), D("75.00"))
+		self.assertEqual(
+			cls.eqa_per_result([cls.EqaInput("E", D("24000000"), D("1200000"), D(1) / 21)], D("16000")),
+			D("75.00"),
+		)
 		self.assertEqual(cls.eqa_per_result([], D(1)), D(0))
 		self.assertFalse(cls.low_volume(D("12900"), (D(200), D(30))))
 		self.assertFalse(cls.low_volume(D("4740"), (D(200), D(30))))
@@ -158,14 +195,21 @@ class TestValidate(unittest.TestCase):
 		self.assertEqual(self.err(f.service_input()), [])
 
 	def test_TC_CLS_15_a_thieu_san_luong(self):
-		inp = f.service_input(systems=(f.system("GLU-A"), f.system("GLU-B", qbn=None, has_volume=False, manual_share_pct=D(25))))
+		inp = f.service_input(
+			systems=(f.system("GLU-A"), f.system("GLU-B", qbn=None, has_volume=False, manual_share_pct=D(25)))
+		)
 		inp = replace(inp, systems=(replace(inp.systems[0], manual_share_pct=D(75)), inp.systems[1]))
 		r = f.cost(inp=inp)
 		self.assertEqual(r.status, "Lỗi")
 		self.assertIn("Hệ thống GLU-B thiếu sản lượng năm 2026, kịch bản Thực tế 12 tháng", r.message)
 
 	def test_TC_CLS_15_b_qbn_bang_0(self):
-		inp = f.service_input(systems=(f.system("GLU-A", qbn=D(0), manual_share_pct=D(75)), f.system("GLU-B", manual_share_pct=D(25))))
+		inp = f.service_input(
+			systems=(
+				f.system("GLU-A", qbn=D(0), manual_share_pct=D(75)),
+				f.system("GLU-B", manual_share_pct=D(25)),
+			)
+		)
 		r = f.cost(inp=inp)
 		self.assertEqual(r.status, "Lỗi")
 		self.assertIn("Hệ thống GLU-A có số kết quả trả bằng 0", r.message)
@@ -181,7 +225,9 @@ class TestValidate(unittest.TestCase):
 		b = f.system("GLU-B", qbn=None, has_volume=False, manual_share_pct=D(30))
 		r = f.cost(inp=f.service_input(systems=(a, b)))
 		self.assertEqual(r.status, "Lỗi")
-		self.assertIn("Tổng tỷ trọng sản lượng các hệ thống của dịch vụ GLU tại khoa XN là 90%, khác 100%", r.message)
+		self.assertIn(
+			"Tổng tỷ trọng sản lượng các hệ thống của dịch vụ GLU tại khoa XN là 90%, khác 100%", r.message
+		)
 
 	def test_cac_loi_khac(self):
 		inp = f.service_input()
@@ -190,7 +236,9 @@ class TestValidate(unittest.TestCase):
 			"chưa có bộ định mức Đã khóa": f.system("GLU-A", norm_set=None),
 			"Theo ống mẫu nhưng thiếu số xét nghiệm": f.system("GLU-A", tests_per_tube=None),
 			"thiếu số ngày chạy máy": f.system("GLU-A", run_days=None),
-			"dòng thiếu đơn giá: L02": f.system("GLU-A", rates={k: v for k, v in a.rates.items() if k != "L02"}),
+			"dòng thiếu đơn giá: L02": f.system(
+				"GLU-A", rates={k: v for k, v in a.rates.items() if k != "L02"}
+			),
 			"vật liệu nội kiểm QC_L thiếu đơn giá": f.system("GLU-A", iqc=(replace(a.iqc[0], rate=None),)),
 			"hao hụt từ 100%": f.system("GLU-A", actual=cls.AuxCounts(h=D(1))),
 		}
@@ -207,7 +255,9 @@ class TestValidate(unittest.TestCase):
 		):
 			errs = self.err(replace(inp, equipment={**e, "EQ_A": eq}))
 			self.assertTrue(any(text in x for x in errs), text)
-		errs = self.err(replace(inp, equipment={**e, "EQ_A": replace(e["EQ_A"], basis=resources.BASIS_MINUTE, mtb=D(5))}))
+		errs = self.err(
+			replace(inp, equipment={**e, "EQ_A": replace(e["EQ_A"], basis=resources.BASIS_MINUTE, mtb=D(5))})
+		)
 		self.assertTrue(any("thiếu số phút chiếm máy một ca" in x for x in errs))
 		self.assertTrue(any("không có dữ liệu" in x for x in self.err(replace(inp, equipment={}))))
 
@@ -240,7 +290,12 @@ class TestCostService(unittest.TestCase):
 			seen.update({x.service: x.volume for x in costed})
 			return {}
 
-		out = runner.run([{"service": "GLU", "department": "XN", "norm_set": ""}], lambda e: inp, f.PARAMS, allocate=allocate)
+		out = runner.run(
+			[{"service": "GLU", "department": "XN", "norm_set": ""}],
+			lambda e: inp,
+			f.PARAMS,
+			allocate=allocate,
+		)
 		self.assertEqual(seen["GLU"], D("16000"))
 		self.assertEqual(out[0].volume, D("16000"))
 		self.assertTrue(out[0].is_paraclinical)
@@ -248,7 +303,9 @@ class TestCostService(unittest.TestCase):
 	def test_ngoai_kiem_va_loai_chi_phi(self):
 		inp = f.service_input(eqa_category="UTILITY")
 		r = f.cost(inp=inp)
-		self.assertEqual(r.direct_by_category["UTILITY"] - f.cost().direct_by_category.get("UTILITY", D(0)), D("75.00"))
+		self.assertEqual(
+			r.direct_by_category["UTILITY"] - f.cost().direct_by_category.get("UTILITY", D(0)), D("75.00")
+		)
 		self.assertEqual(sum(r.direct_by_component.values()), r.direct_total)
 		self.assertTrue(any(x.line_origin == cls.ORIGIN_EQA for x in r.lines))
 

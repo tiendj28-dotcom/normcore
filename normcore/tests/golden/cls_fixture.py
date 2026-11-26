@@ -30,10 +30,14 @@ def equipment(code, **override):
 		contract_cost=e.get("contract"),
 		maintenance=e["maint"],
 		maintenance_vendor_paid=e["maint_vendor"],
-		components=tuple(cls.ComponentInput(x["cost"], LIFE[x["basis"]], x["life"], x["vendor"]) for x in e["parts"]),
+		components=tuple(
+			cls.ComponentInput(x["cost"], LIFE[x["basis"]], x["life"], x["vendor"]) for x in e["parts"]
+		),
 		dept_share=e["dept_share"],
 		asset_value=e["asset_value"],
-		power=cls.PowerInput(p["run_kw"], p["run_h"], p["standby_kw"], p["standby_h"], p["continuous"]) if p else None,
+		power=cls.PowerInput(p["run_kw"], p["run_h"], p["standby_kw"], p["standby_h"], p["continuous"])
+		if p
+		else None,
 		manual_calibration=D("0"),
 		records=tuple(cls.RecordInput(c["cost"], c["cycle"], True) for c in e["compliance"]),
 		qtb=u.get("qtb"),
@@ -51,8 +55,13 @@ def system(code, **override):
 		line = engine.NormLine(lid, "", comp, res or "", res or "", qty, wastage_rate=D("0"))
 		norm_lines.append(
 			cls.ClsNormLine(
-				line, level, apply_k, cls.ATTACH_EQUIP if attach == "EQUIP" else "",
-				"", res == "HC_GLU", g.ITEM["HC_GLU"]["nominal"] if res == "HC_GLU" else None,
+				line,
+				level,
+				apply_k,
+				cls.ATTACH_EQUIP if attach == "EQUIP" else "",
+				"",
+				res == "HC_GLU",
+				g.ITEM["HC_GLU"]["nominal"] if res == "HC_GLU" else None,
 				g.ITEM["HC_GLU"]["open_days"] if res == "HC_GLU" else None,
 			)
 		)
@@ -61,7 +70,14 @@ def system(code, **override):
 		elif comp != "EQUIPMENT":
 			rates[lid] = engine.LineRate(g.unit_price(res), res)
 	iqc = tuple(
-		cls.IqcLine(i["item"], i["levels"], i["runs"], i["qty"], i["shared"], engine.LineRate(g.unit_price(i["item"]), i["item"]))
+		cls.IqcLine(
+			i["item"],
+			i["levels"],
+			i["runs"],
+			i["qty"],
+			i["shared"],
+			engine.LineRate(g.unit_price(i["item"]), i["item"]),
+		)
 		for i in g.IQC
 	)
 	cal = tuple(cls.CalLine(c["points"], c["reps"], c["per_year"], c["cost"]) for c in g.CAL)
@@ -88,7 +104,9 @@ def system(code, **override):
 	return cls.TestSystemInput(**kw)
 
 
-def service_input(codes=("GLU-A", "GLU-B"), mode=cls.ALLOC_ASSET, on=None, expired_mode=None, include_depr=True, **override):
+def service_input(
+	codes=("GLU-A", "GLU-B"), mode=cls.ALLOC_ASSET, on=None, expired_mode=None, include_depr=True, **override
+):
 	kw = dict(
 		scenario="Thực tế 12 tháng",
 		fiscal_year=2026,

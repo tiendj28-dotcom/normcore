@@ -272,7 +272,9 @@ def _paraclinical(sc, lines, label) -> dict:
 				"groups": _groups([c for c in lines if c.test_system == r.test_system], label),
 			}
 		)
-	weighted = sum((Decimal(str(r.share_pct or 0)) / 100 * Decimal(str(r.direct_cost or 0)) for r in rows), Decimal(0))
+	weighted = sum(
+		(Decimal(str(r.share_pct or 0)) / 100 * Decimal(str(r.direct_cost or 0)) for r in rows), Decimal(0)
+	)
 	return {
 		"systems": systems,
 		"service_lines": [_line_dict(c) for c in lines if not c.test_system and c.line_origin],
@@ -302,7 +304,9 @@ def get_explanation(service_cost):
 	alloc_total = sum((c.amount for c in lines if c.line_type == engine.LINE_ALLOC), Decimal(0))
 	groups = _groups(lines, label)
 	paraclinical = _paraclinical(sc, lines, label) if sc.is_paraclinical else None
-	if paraclinical:  # tổng dịch vụ là bình quân gia quyền các hệ thống (BR-CLS-013), không phải cộng mọi dòng
+	if (
+		paraclinical
+	):  # tổng dịch vụ là bình quân gia quyền các hệ thống (BR-CLS-013), không phải cộng mọi dòng
 		direct_total = Decimal(str(paraclinical["direct_total"]))
 	structure = []
 	for field, name in (

@@ -16,13 +16,20 @@ class TestSnapshot(unittest.TestCase):
 		again = snapshot.from_plain(json.loads(json.dumps(plain)))
 		self.assertEqual(again, svc)
 		self.assertEqual(snapshot.from_plain(snapshot.to_plain(f.PARAMS)), f.PARAMS)
-		self.assertEqual(snapshot.from_plain(snapshot.to_plain([date(2026, 1, 2), None, True, 3])), [date(2026, 1, 2), None, True, 3])
+		self.assertEqual(
+			snapshot.from_plain(snapshot.to_plain([date(2026, 1, 2), None, True, 3])),
+			[date(2026, 1, 2), None, True, 3],
+		)
 
 	def test_kieu_la_bi_tu_choi(self):
 		with self.assertRaises(TypeError):
 			snapshot.to_plain(object())
 		with self.assertRaises(TypeError):
-			snapshot.to_plain(cls.TestSystemCost("a", None, D(1), D(1), D(0), D(0), D(0), D(0), D(0), D(1), False, D(1), False))
+			snapshot.to_plain(
+				cls.TestSystemCost(
+					"a", None, D(1), D(1), D(0), D(0), D(0), D(0), D(0), D(1), False, D(1), False
+				)
+			)
 		with self.assertRaises(ValueError):
 			snapshot.from_plain({"x": 1})
 

@@ -45,7 +45,9 @@ def _items():
 			norm_units_per_purchase_unit=float(it["units"]),
 		)
 		if code == "HC_GLU":
-			values.update(nominal_tests=int(it["nominal"]), open_stability_days=int(it["open_days"]), is_main_reagent=1)
+			values.update(
+				nominal_tests=int(it["nominal"]), open_stability_days=int(it["open_days"]), is_main_reagent=1
+			)
 		ensure("NC Item", "item_code", code, **values)
 		frappe.get_doc(
 			{
@@ -59,7 +61,15 @@ def _items():
 				"valid_from": "2026-01-01",
 			}
 		).insert(ignore_permissions=True).db_set("verification_status", "Đã xác minh")
-	ensure("NC Item", "item_code", "CAL", item_name="CAL", item_type="Chất chuẩn", uom="ml", norm_units_per_purchase_unit=1)
+	ensure(
+		"NC Item",
+		"item_code",
+		"CAL",
+		item_name="CAL",
+		item_type="Chất chuẩn",
+		uom="ml",
+		norm_units_per_purchase_unit=1,
+	)
 
 
 def _equipment(code):
@@ -91,7 +101,10 @@ def _equipment(code):
 			in_service_date=e["in_service"].isoformat(),
 		)
 	else:
-		values.update(contract_asset_value=float(e["asset_value"] or 0), annual_contract_cost=float(e.get("contract") or 0))
+		values.update(
+			contract_asset_value=float(e["asset_value"] or 0),
+			annual_contract_cost=float(e.get("contract") or 0),
+		)
 	if e["power"]:
 		p = e["power"]
 		values.update(
@@ -172,21 +185,40 @@ def make_cls_golden():
 
 	Qtb = 300.000 (EQ_A), 100.000 (EQ_B) nhờ hệ thống phụ "Ngừng dùng" (ASM-036-10)."""
 	params, other_dept, other_sets = cf.make_golden_world()
-	ensure("NC Cost Center", "cost_center_code", DEPT, cost_center_name="Khoa xét nghiệm", center_type="Lâm sàng")
-	ensure("NC Department", "department_code", DEPT, department_name="Khoa xét nghiệm", department_type="Lâm sàng", cost_center=DEPT)
-	frappe.db.set_value("NC Costing Parameter Set", params.name, "electricity_price", float(gc.PARAM["electricity_price"]))
+	ensure(
+		"NC Cost Center", "cost_center_code", DEPT, cost_center_name="Khoa xét nghiệm", center_type="Lâm sàng"
+	)
+	ensure(
+		"NC Department",
+		"department_code",
+		DEPT,
+		department_name="Khoa xét nghiệm",
+		department_type="Lâm sàng",
+		cost_center=DEPT,
+	)
+	frappe.db.set_value(
+		"NC Costing Parameter Set", params.name, "electricity_price", float(gc.PARAM["electricity_price"])
+	)
 	_items()
 	ensure_service("GLU")
-	frappe.db.set_value("NC Technical Service", "GLU", {"is_paraclinical": 1, "cls_group": "Hóa sinh", "result_unit": "Kết quả xét nghiệm"})
+	frappe.db.set_value(
+		"NC Technical Service",
+		"GLU",
+		{"is_paraclinical": 1, "cls_group": "Hóa sinh", "result_unit": "Kết quả xét nghiệm"},
+	)
 	ensure_service("PHU")
-	frappe.db.set_value("NC Technical Service", "PHU", {"is_paraclinical": 1, "cls_group": "Hóa sinh", "result_unit": "Kết quả xét nghiệm"})
+	frappe.db.set_value(
+		"NC Technical Service",
+		"PHU",
+		{"is_paraclinical": 1, "cls_group": "Hóa sinh", "result_unit": "Kết quả xét nghiệm"},
+	)
 	for code in ("EQ_A", "EQ_B"):
 		_equipment(code)
 		_compliance(code)
-	a = make_test_system("GLU-A", "GLU", DEPT, "EQ_A", 75, est_rerun_rate=2, est_wastage_rate=3)
-	b = make_test_system("GLU-B", "GLU", DEPT, "EQ_B", 25, est_rerun_rate=2, est_wastage_rate=3)
-	pa = make_test_system("PHU-A", "PHU", DEPT, "EQ_A", 100, status="Ngừng dùng")
-	pb = make_test_system("PHU-B", "PHU", DEPT, "EQ_B", 100, status="Ngừng dùng")
+	make_test_system("GLU-A", "GLU", DEPT, "EQ_A", 75, est_rerun_rate=2, est_wastage_rate=3)
+	make_test_system("GLU-B", "GLU", DEPT, "EQ_B", 25, est_rerun_rate=2, est_wastage_rate=3)
+	make_test_system("PHU-A", "PHU", DEPT, "EQ_A", 100, status="Ngừng dùng")
+	make_test_system("PHU-B", "PHU", DEPT, "EQ_B", 100, status="Ngừng dùng")
 	for code, s in gc.SYSTEMS.items():
 		act = s["actual"] or {}
 		frappe.get_doc(
@@ -205,19 +237,39 @@ def make_cls_golden():
 				"run_days": int(s["run_days"]),
 			}
 		).insert(ignore_permissions=True)
-	for code, qtb in (("PHU-A", gc.USAGE["EQ_A"]["qtb"] - gc.SYSTEMS["GLU-A"]["qbn"]), ("PHU-B", gc.USAGE["EQ_B"]["qtb"] - gc.SYSTEMS["GLU-B"]["qbn"])):
+	for code, qtb in (
+		("PHU-A", gc.USAGE["EQ_A"]["qtb"] - gc.SYSTEMS["GLU-A"]["qbn"]),
+		("PHU-B", gc.USAGE["EQ_B"]["qtb"] - gc.SYSTEMS["GLU-B"]["qbn"]),
+	):
 		frappe.get_doc(
-			{"doctype": "NC Test System Volume", "fiscal_year": 2026, "scenario": "Thực tế 12 tháng", "test_system": code, "patient_results": float(qtb)}
+			{
+				"doctype": "NC Test System Volume",
+				"fiscal_year": 2026,
+				"scenario": "Thực tế 12 tháng",
+				"test_system": code,
+				"patient_results": float(qtb),
+			}
 		).insert(ignore_permissions=True)
 	frappe.get_doc(
-		{"doctype": "NC Service Volume", "fiscal_year": 2026, "technical_service": "GLU", "department": DEPT, "scenario": "Thực tế 12 tháng", "volume": 15800}
+		{
+			"doctype": "NC Service Volume",
+			"fiscal_year": 2026,
+			"technical_service": "GLU",
+			"department": DEPT,
+			"scenario": "Thực tế 12 tháng",
+			"volume": 15800,
+		}
 	).insert(ignore_permissions=True)
 	for code in ("GLU-A", "GLU-B"):
 		make_qc_plan(code)
 	others = [f"XN{i:02d}" for i in range(20)]
 	for o in others:
 		ensure_service(o)
-		frappe.db.set_value("NC Technical Service", o, {"is_paraclinical": 1, "cls_group": "Hóa sinh", "result_unit": "Kết quả xét nghiệm"})
+		frappe.db.set_value(
+			"NC Technical Service",
+			o,
+			{"is_paraclinical": 1, "cls_group": "Hóa sinh", "result_unit": "Kết quả xét nghiệm"},
+		)
 	make_eqa_program(code="EQA-GOLD", department=DEPT, services=["GLU", *others])
 	proc = make_procedure("GLU", DEPT)
 	publish_procedure(proc, "QĐ-CLS", "2026-01-01")

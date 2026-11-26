@@ -193,7 +193,9 @@ class TestCostingClsApi(FrappeTestCase):
 		self.run = fx.make_run(self.world)
 		frappe.set_user(FIN)
 		api.start_costing(self.run.name, 1)
-		self.cost = frappe.get_value("NC Service Cost", {"costing_run": self.run.name, "technical_service": "GLU"}, "name")
+		self.cost = frappe.get_value(
+			"NC Service Cost", {"costing_run": self.run.name, "technical_service": "GLU"}, "name"
+		)
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -218,9 +220,17 @@ class TestCostingClsApi(FrappeTestCase):
 		p = e["paraclinical"]
 		self.assertEqual([s["test_system"] for s in p["systems"]], ["GLU-A", "GLU-B"])
 		a, b = p["systems"]
-		self.assertEqual((a["patient_results"], a["q_iqc"], a["q_calibration"], a["q_rerun"], a["q_eqa"]), (12000, 600, 48, 240, 12))
-		self.assertEqual((a["total_tests"], a["wastage_rate"], a["k_factor"], a["k_estimated"]), (12900, 3, 1.108247, False))
-		self.assertEqual((b["k_factor"], b["k_estimated"], b["share_source"]), (1.221649, True, "Từ số kết quả trả"))
+		self.assertEqual(
+			(a["patient_results"], a["q_iqc"], a["q_calibration"], a["q_rerun"], a["q_eqa"]),
+			(12000, 600, 48, 240, 12),
+		)
+		self.assertEqual(
+			(a["total_tests"], a["wastage_rate"], a["k_factor"], a["k_estimated"]),
+			(12900, 3, 1.108247, False),
+		)
+		self.assertEqual(
+			(b["k_factor"], b["k_estimated"], b["share_source"]), (1.221649, True, "Từ số kết quả trả")
+		)
 		self.assertEqual((p["weighted_direct"], p["eqa_cost"], p["direct_total"]), (42203.67, 75.0, 42278.67))
 		self.assertEqual(e["header"]["direct_total"], 42278.67)
 		n = 0
@@ -229,7 +239,14 @@ class TestCostingClsApi(FrappeTestCase):
 				for st in g["steps"]:
 					for ln in st["lines"]:
 						n += 1
-						for f in ("test_system", "cost_level", "divisor_label", "divisor_value", "divisor_source", "line_origin"):
+						for f in (
+							"test_system",
+							"cost_level",
+							"divisor_label",
+							"divisor_value",
+							"divisor_source",
+							"line_origin",
+						):
 							self.assertTrue(ln[f] not in (None, ""), (ln["norm_line_id"], f))
 						self.assertEqual(ln["k_factor"] is not None, ln["norm_line_id"] in ("L02", "L03"))
 		self.assertEqual(n, 20)  # GLU-A 11 dòng, GLU-B 9 (không linh kiện, không điện)
@@ -243,7 +260,14 @@ class TestCostingClsApi(FrappeTestCase):
 		self.assertEqual(len(doc.test_system_costs), 2)
 		self.assertEqual(api.get_explanation(self.cost)["paraclinical"]["systems"][0]["test_system"], "GLU-A")
 		with self.assertRaises(frappe.PermissionError):
-			frappe.get_doc({"doctype": "NC Service Cost", "costing_run": self.run.name, "technical_service": "GLU", "department": "XN"}).insert()
+			frappe.get_doc(
+				{
+					"doctype": "NC Service Cost",
+					"costing_run": self.run.name,
+					"technical_service": "GLU",
+					"department": "XN",
+				}
+			).insert()
 		frappe.set_user(CLIN)
 		with self.assertRaises(frappe.PermissionError):
 			api.get_explanation(self.cost)

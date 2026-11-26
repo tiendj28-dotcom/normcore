@@ -235,7 +235,10 @@ class TestNCCostingRunInputs(FrappeTestCase):
 	def test_khoa_dau_vao_kich_ban_khi_da_tinh(self):
 		run = self._doc().insert(ignore_permissions=True)
 		run.db_set("status", "Đã tính")
-		for field, value in (("volume_scenario", "Kế hoạch"), ("compliance_allocation_mode", "Gắn trực tiếp thiết bị")):
+		for field, value in (
+			("volume_scenario", "Kế hoạch"),
+			("compliance_allocation_mode", "Gắn trực tiếp thiết bị"),
+		):
 			run.reload()
 			run.set(field, value)
 			with self.assertRaisesRegex(frappe.ValidationError, "không sửa được đầu vào"):

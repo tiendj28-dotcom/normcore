@@ -35,9 +35,25 @@ class TestNCCostingCls(FrappeTestCase):
 		self.assertEqual(run.status, "Đã tính")
 		sc = self._cost(run)
 		self.assertEqual(sc.calc_status, "Thành công", sc.calc_message)
-		per, weighted, eqa, direct, qsum = g.service_direct()
+		per, _weighted, eqa, direct, _qsum = g.service_direct()
 		self.assertEqual(sc.eqa_cost, float(eqa))
-		self.assertEqual(round(sum(sc.get(f) for f in ("direct_labor", "direct_drug", "direct_supply", "direct_equipment", "direct_infra", "direct_utility")), 2), float(direct))
+		self.assertEqual(
+			round(
+				sum(
+					sc.get(f)
+					for f in (
+						"direct_labor",
+						"direct_drug",
+						"direct_supply",
+						"direct_equipment",
+						"direct_infra",
+						"direct_utility",
+					)
+				),
+				2,
+			),
+			float(direct),
+		)
 		self.assertEqual(
 			{r.test_system: (r.direct_cost, r.k_factor, r.share_pct) for r in sc.test_system_costs},
 			{"GLU-A": (float(per["GLU-A"]), 1.108247, 75.0), "GLU-B": (float(per["GLU-B"]), 1.221649, 25.0)},
@@ -59,7 +75,6 @@ class TestNCCostingCls(FrappeTestCase):
 
 	def test_TC_CLS_15_dung_dich_vu_GLU_tren_site(self):
 		"""Bốn ca của TC-CLS-15; mỗi ca chạy lại từ dữ liệu sạch (rollback giữa các ca)."""
-		cases = []
 
 		def a():
 			frappe.db.delete("NC Test System Volume", {"test_system": "GLU-B"})
@@ -88,15 +103,31 @@ class TestNCCostingCls(FrappeTestCase):
 
 	def test_TC_CLS_37_canh_bao_tren_lan_tinh(self):
 		frappe.get_doc(
-			{"doctype": "NC Equipment Type", "type_code": "XN-BB", "type_name": "Máy xét nghiệm bắt buộc", "compliance_required": 1}
+			{
+				"doctype": "NC Equipment Type",
+				"type_code": "XN-BB",
+				"type_name": "Máy xét nghiệm bắt buộc",
+				"compliance_required": 1,
+			}
 		).insert(ignore_permissions=True)
 		frappe.db.set_value("NC Equipment", "EQ_A", "equipment_type", "XN-BB")
-		frappe.db.set_value("NC Equipment Compliance", {"equipment": "EQ_A"}, {"performed_on": "2025-01-01", "expiry_date": "2025-12-31"})
+		frappe.db.set_value(
+			"NC Equipment Compliance",
+			{"equipment": "EQ_A"},
+			{"performed_on": "2025-01-01", "expiry_date": "2025-12-31"},
+		)
 		# V8: sản lượng thấp của GLU-A
 		frappe.db.set_value(
 			"NC Test System Volume",
 			{"test_system": "GLU-A"},
-			{"patient_results": 1000, "iqc_tests": None, "calibration_tests": None, "rerun_tests": None, "eqa_tests": None, "wastage_rate": None},
+			{
+				"patient_results": 1000,
+				"iqc_tests": None,
+				"calibration_tests": None,
+				"rerun_tests": None,
+				"eqa_tests": None,
+				"wastage_rate": None,
+			},
 		)
 		run = self._run()
 		self.assertEqual(run.status, "Đã tính")
@@ -105,7 +136,9 @@ class TestNCCostingCls(FrappeTestCase):
 		sc = self._cost(run)
 		self.assertEqual(sc.calc_status, "Cảnh báo")
 		self.assertIn("Sản lượng thấp: GLU-A", sc.calc_message)
-		self.assertEqual({r.test_system: r.low_volume_warning for r in sc.test_system_costs}, {"GLU-A": 1, "GLU-B": 0})
+		self.assertEqual(
+			{r.test_system: r.low_volume_warning for r in sc.test_system_costs}, {"GLU-A": 1, "GLU-B": 0}
+		)
 
 	def test_TC_CLS_38_tai_lap_tu_anh_chup(self):
 		from normcore.costing import snapshot
@@ -115,13 +148,31 @@ class TestNCCostingCls(FrappeTestCase):
 		before = self._cost(run)
 		snap = loader.capture_snapshot(run, run.scope()["eligible"])
 		blob = snapshot.dumps(snap)
-		self.assertEqual(snapshot.digest(blob), snapshot.digest(snapshot.dumps(__import__("json").loads(blob))))
+		self.assertEqual(
+			snapshot.digest(blob), snapshot.digest(snapshot.dumps(__import__("json").loads(blob)))
+		)
 		# sửa kế hoạch chất lượng và hồ sơ tuân thủ sau khi chụp
 		frappe.db.set_value("NC QC IQC Line", {"parent": "KHCL-GLU-A"}, "levels", 3)
 		frappe.db.set_value("NC Equipment Compliance", {"equipment": "EQ_A"}, "cost_per_time", 16000000)
 		results = snapshot.reproduce(__import__("json").loads(blob))
 		glu = next(r for r in results if r.service == "GLU")
-		self.assertEqual(float(glu.direct_total), round(sum(before.get(f) for f in ("direct_labor", "direct_drug", "direct_supply", "direct_equipment", "direct_infra", "direct_utility")), 2))
+		self.assertEqual(
+			float(glu.direct_total),
+			round(
+				sum(
+					before.get(f)
+					for f in (
+						"direct_labor",
+						"direct_drug",
+						"direct_supply",
+						"direct_equipment",
+						"direct_infra",
+						"direct_utility",
+					)
+				),
+				2,
+			),
+		)
 		self.assertEqual(float(glu.eqa_cost), before.eqa_cost)
 		self.assertEqual(
 			{t.test_system: (float(t.k_factor), float(t.direct_cost)) for t in glu.test_system_costs},
@@ -133,11 +184,15 @@ class TestNCCostingCls(FrappeTestCase):
 		# tính lại trực tiếp từ CSDL (đã sửa) thì khác
 		run.run_costing()
 		after = self._cost(run.reload())
-		self.assertNotEqual(after.direct_equipment + after.direct_drug, before.direct_equipment + before.direct_drug)
+		self.assertNotEqual(
+			after.direct_equipment + after.direct_drug, before.direct_equipment + before.direct_drug
+		)
 
 	def test_TC_CLS_51_san_luong_tren_site(self):
 		run = self._run()
-		self.assertEqual(frappe.db.get_value("NC Service Volume", {"technical_service": "GLU"}, "volume"), 15800)
+		self.assertEqual(
+			frappe.db.get_value("NC Service Volume", {"technical_service": "GLU"}, "volume"), 15800
+		)
 		self.assertEqual(self._cost(run).volume, 16000)
 
 	def test_che_do_gan_truc_tiep_va_kich_ban(self):
