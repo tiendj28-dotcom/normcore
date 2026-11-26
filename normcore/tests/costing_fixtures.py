@@ -31,6 +31,11 @@ def make_price_category(code="PC-GOLD", include_depreciation=1, include_accumula
 	)
 
 
+def make_price_category_no_depr(code="PC-GOLD-V1"):
+	"""Loại giá biến thể V1 (không tính khấu hao), TC-COST-18."""
+	return make_price_category(code, include_depreciation=0)
+
+
 def make_golden_params():
 	"""Bộ tham số theo golden PARAM và JOB (đơn giá giờ công do controller tính)."""
 	P = g.PARAM
