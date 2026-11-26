@@ -11,7 +11,7 @@ QA dùng ngay sau `normcore-verify` khi verdict là `accepted`, trên **cùng nh
 
 ## Kiểm trước khi bắt đầu
 1. `docs/features/FEAT-NNN/verdict.json` có `"verdict": "accepted"`. Không phải: dừng, quay lại kết quả của `normcore-verify`.
-2. Mã không đổi sau lần kiểm: `git diff --name-only <commit trong verdict> HEAD` chỉ chứa `docs/features/FEAT-NNN/acceptance.md`, `verdict.json`. Có tệp khác: chạy lại `normcore-verify`.
+2. Mã không đổi sau lần kiểm: `git diff --name-only <commit trong verdict> HEAD` chỉ chứa `docs/features/FEAT-NNN/acceptance.md`, `verdict.json`. Có tệp khác: chạy lại `normcore-verify`. Nếu sau lần kiểm `develop` được gộp vào nhánh, áp dụng mục "Giữ verdict sau khi gộp develop" của `normcore-verify`: diff riêng chỉ khác ở tệp sinh thì verdict còn hiệu lực, chỉ cần CI xanh trên HEAD mới.
 
 ## Các bước
 0. Dùng tệp ngữ cảnh từ skill `normcore-feat-context`. Lấy danh sách FR trong đó để ghi Test ref.

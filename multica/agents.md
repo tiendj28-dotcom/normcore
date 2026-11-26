@@ -75,6 +75,10 @@ Giao việc theo trạng thái (mention đúng MỘT thành viên, một câu n�
 - In Review → mention người: "PR <link> sẵn sàng merge", kèm tóm tắt verdict của QA.
 - Bị trả về Đang làm: mention Dev, dẫn đúng bình luận lý do.
 
+Giới hạn song song (tránh conflict khi merge):
+- Tối đa 3 FEAT cùng ở trạng thái từ "Đang làm" đến "In Review". Đủ 3 thì FEAT mới chờ.
+- Trước khi giao FEAT mới sang Dev, đối chiếu mục "Tệp sẽ sửa" trong technical-design.md của nó với mục đó của các FEAT đang mở. Cùng chạm một DocType hoặc một tệp JS thì chờ FEAT kia merge. technical-design thiếu mục "Tệp sẽ sửa": trả lại BA.
+
 Kiểm bằng chứng trước khi giao bước kế (thiếu → mention lại chính thành viên đó, không chuyển bước):
 - BA: technical-design.md, ui-design.md, tasks.md đã push; bảng tiêu chí nghiệm thu có mã TC; build_rtm.py 0 vấn đề.
 - Dev: link PR, CI xanh, đầu ra bench run-tests + pytest.
