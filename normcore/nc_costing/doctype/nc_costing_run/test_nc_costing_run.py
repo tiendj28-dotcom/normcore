@@ -374,7 +374,7 @@ class TestNCCostingRunBackground(FrappeTestCase):
 		from normcore.nc_costing.doctype.nc_costing_run import nc_costing_run as mod
 		from normcore.tests import costing_fixtures as cf
 
-		params, dept, _sets = cf.make_golden_world()
+		params, _dept, _sets = cf.make_golden_world()
 		run = cf.make_golden_run(params)
 		with mock.patch.object(runner, "BACKGROUND_THRESHOLD", 1), mock.patch("frappe.enqueue") as enq:
 			self.assertEqual(run.run_costing(), "Đang tính")
