@@ -225,7 +225,9 @@ def _latest_published(service, department):
 def _newer_procedure(ns):
 	"""Tên quy trình "Đã ban hành" mới hơn quy trình của bộ, hoặc None."""
 	target = _latest_published(ns.technical_service, ns.department)
-	if target and target.version_no > (frappe.db.get_value("NC Clinical Procedure", ns.procedure, "version_no") or 0):
+	if target and target.version_no > (
+		frappe.db.get_value("NC Clinical Procedure", ns.procedure, "version_no") or 0
+	):
 		return target.name
 	return None
 
@@ -310,7 +312,13 @@ def get_norm_set(name):
 	removed = [x for x in lines if x["step_removed"] and not x["service_level"]]
 	if removed:  # FR-NORM-015: nhóm riêng, đặt trước nhóm Chung
 		groups.append(
-			{"step_id": None, "removed": True, "title": _("Bước đã bỏ"), "lines": removed, "total": _total(removed)}
+			{
+				"step_id": None,
+				"removed": True,
+				"title": _("Bước đã bỏ"),
+				"lines": removed,
+				"total": _total(removed),
+			}
 		)
 	general = [
 		x for x in lines if not x["step_removed"] and (x["service_level"] or x["step_id"] not in step_keys)
@@ -318,9 +326,7 @@ def get_norm_set(name):
 	groups.append(
 		{"step_id": None, "title": _("Chung cho cả dịch vụ"), "lines": general, "total": _total(general)}
 	)
-	missing = (
-		steps_without_lines(step_keys, [x for x in lines]) if ns.status == DRAFT else []
-	)
+	missing = steps_without_lines(step_keys, [x for x in lines]) if ns.status == DRAFT else []
 	step_title = {s["step_id"]: s["step_title"] for s in steps}
 	return {
 		"steps_without_lines": [{"step_id": m, "step_title": step_title.get(m)} for m in missing],
@@ -529,7 +535,9 @@ def new_version(norm_set):
 			"message": _("Đã có bộ định mức đang soạn theo quy trình {0}: {1}").format(target, existing[0]),
 		}
 	step_ids = [s.step_id for s in frappe.get_doc("NC Clinical Procedure", target).steps]
-	old = [{**{f: r.get(f) for f in ctl.LINE_INPUTS}, "step_removed": r.get("step_removed")} for r in src.lines]
+	old = [
+		{**{f: r.get(f) for f in ctl.LINE_INPUTS}, "step_removed": r.get("step_removed")} for r in src.lines
+	]
 	res = carry_lines(old, step_ids)
 	version = (
 		frappe.db.get_value(

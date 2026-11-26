@@ -149,7 +149,9 @@ class NCNormSet(Document):
 		for r in self.lines:
 			before = old.get(r.name)
 			# FR-NORM-015, AMD-013-01: cờ chỉ do new_version đặt; mọi đường ghi khác chuẩn hóa lại
-			r.step_removed = removed_flag(r.as_dict(), before and before.as_dict(), step_ids, creating_version)
+			r.step_removed = removed_flag(
+				r.as_dict(), before and before.as_dict(), step_ids, creating_version
+			)
 			if prev:
 				changed = before is None or _inputs(before) != _inputs(r)
 			else:  # khởi tạo từ quy trình: dòng chưa liên kết được lưu (AMD-012-01); dòng thêm tay phải đủ

@@ -96,7 +96,7 @@ class TestCarry(unittest.TestCase):
 
 
 class TestRemovedFlag(unittest.TestCase):
-	STEPS = {"S001", "S003"}
+	STEPS = frozenset({"S001", "S003"})
 
 	def test_tao_phien_ban_giu_co(self):
 		self.assertEqual(removed_flag({"step_id": "S002"}, None, self.STEPS, True), 1)
@@ -105,13 +105,17 @@ class TestRemovedFlag(unittest.TestCase):
 		self.assertEqual(removed_flag({"step_id": "S002"}, {"step_removed": 1}, self.STEPS, False), 1)
 
 	def test_client_tu_dat_khong_co_tac_dung(self):
-		self.assertEqual(removed_flag({"step_id": "S002", "step_removed": 1}, {"step_removed": 0}, self.STEPS, False), 0)
+		self.assertEqual(
+			removed_flag({"step_id": "S002", "step_removed": 1}, {"step_removed": 0}, self.STEPS, False), 0
+		)
 
 	def test_buoc_hop_le_go_co(self):
 		self.assertEqual(removed_flag({"step_id": "S003"}, {"step_removed": 1}, self.STEPS, False), 0)
 
 	def test_service_level_go_co(self):
-		self.assertEqual(removed_flag({"step_id": "S002", "service_level": 1}, {"step_removed": 1}, self.STEPS, False), 0)
+		self.assertEqual(
+			removed_flag({"step_id": "S002", "service_level": 1}, {"step_removed": 1}, self.STEPS, False), 0
+		)
 
 	def test_khong_co_buoc(self):
 		self.assertEqual(removed_flag({"step_id": None}, {"step_removed": 1}, self.STEPS, True), 0)

@@ -68,7 +68,13 @@ def carry_lines(old_lines, step_ids) -> dict:
 			if step not in removed_steps:
 				removed_steps.append(step)
 		lines.append(line)
-	return {"lines": lines, "carried": carried, "removed": removed, "removed_steps": removed_steps, "step_order": list(step_ids)}
+	return {
+		"lines": lines,
+		"carried": carried,
+		"removed": removed,
+		"removed_steps": removed_steps,
+		"step_order": list(step_ids),
+	}
 
 
 def steps_without_lines(step_ids, lines) -> list[str]:
@@ -96,9 +102,7 @@ def format_note(res, missing) -> str:
 	def part(items):
 		return ", ".join(items) if items else "không có"
 
-	removed_by_line = {
-		ln.get("line_id"): ln.get("step_id") for ln in res["lines"] if ln.get("step_removed")
-	}
+	removed_by_line = {ln.get("line_id"): ln.get("step_id") for ln in res["lines"] if ln.get("step_removed")}
 	carried_steps = {
 		ln.get("step_id")
 		for ln in res["lines"]

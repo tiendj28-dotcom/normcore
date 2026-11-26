@@ -52,7 +52,11 @@ class TestNormVersion(RevisionBase):
 		}
 
 	def test_TC_NORM_08_phien_ban_theo_quy_trinh_moi(self):
-		prior = max(frappe.get_all(NS, {"technical_service": self.service, "department": self.dept}, pluck="version_no"))
+		prior = max(
+			frappe.get_all(
+				NS, {"technical_service": self.service, "department": self.dept}, pluck="version_no"
+			)
+		)
 		res = self.as_user(self.clin, api.new_version, self.src)
 		new = frappe.get_doc(NS, res["name"])
 		self.assertEqual(new.status, "Nháp")
@@ -73,7 +77,12 @@ class TestNormVersion(RevisionBase):
 		self.assertIn("Bước đã bỏ", titles)
 		self.assertLess(titles.index("Bước đã bỏ"), titles.index("Chung cho cả dịch vụ"))
 		self.assertEqual(got["doc"]["newer_procedure"], None)
-		self.assertTrue(frappe.get_all("Comment", {"reference_doctype": NS, "reference_name": new.name, "content": ["like", "%S005%"]}))
+		self.assertTrue(
+			frappe.get_all(
+				"Comment",
+				{"reference_doctype": NS, "reference_name": new.name, "content": ["like", "%S005%"]},
+			)
+		)
 		# bộ nguồn không đổi
 		self.assertEqual(frappe.db.get_value(NS, self.src, "status"), "Đã khóa")
 
@@ -83,18 +92,18 @@ class TestNormVersion(RevisionBase):
 		self.assertTrue(any("Thuộc bước đã bỏ" in b["reasons"] for b in got["blockers"]))
 		with self.assertRaises(frappe.ValidationError):
 			self.as_user(self.head, api.confirm_set, name)
-		lid = [r.line_id for r in frappe.get_doc(NS, name).lines if r.step_removed][0]
+		lid = next(r.line_id for r in frappe.get_doc(NS, name).lines if r.step_removed)
 		with self.assertRaises(frappe.ValidationError):
 			self.as_user(self.head, api.confirm_line, name, lid)
 
 	def test_FR_NORM_015_xu_ly_dong_buoc_bo(self):
 		name = self.as_user(self.clin, api.new_version, self.src)["name"]
 		ns = frappe.get_doc(NS, name)
-		gone = [r.line_id for r in ns.lines if r.step_removed][0]
-		kept = [r.line_id for r in ns.lines if r.step_id == "S003"][0]
+		gone = next(r.line_id for r in ns.lines if r.step_removed)
+		kept = next(r.line_id for r in ns.lines if r.step_id == "S003")
 		# gán bước hợp lệ → cờ gỡ
 		self.as_user(self.clin, api.save_line, name, {"step_id": "S003"}, gone, 1)
-		row = [r for r in frappe.get_doc(NS, name).lines if r.line_id == gone][0]
+		row = next(r for r in frappe.get_doc(NS, name).lines if r.line_id == gone)
 		self.assertEqual((row.step_id, int(row.step_removed)), ("S003", 0))
 		# xóa dòng có cờ được; dòng từ quy trình không cờ vẫn không xóa được
 		name2 = self.as_user(self.clin, api.new_version, self.src)
@@ -104,7 +113,7 @@ class TestNormVersion(RevisionBase):
 
 	def test_FR_NORM_015_xoa_dong_co_co(self):
 		name = self.as_user(self.clin, api.new_version, self.src)["name"]
-		gone = [r.line_id for r in frappe.get_doc(NS, name).lines if r.step_removed][0]
+		gone = next(r.line_id for r in frappe.get_doc(NS, name).lines if r.step_removed)
 		self.as_user(self.clin, api.delete_line, name, gone)
 		self.assertNotIn(gone, [r.line_id for r in frappe.get_doc(NS, name).lines])
 
