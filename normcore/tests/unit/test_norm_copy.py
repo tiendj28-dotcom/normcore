@@ -76,10 +76,21 @@ class TestCopyLines(unittest.TestCase):
 		self.assertEqual(len(out), 2)  # L01 và L05 (chung cho cả dịch vụ)
 		self.assertEqual(skipped[0], {"line_id": "L02", "reason": "Mã bước S002 không còn trong quy trình"})
 
-	def test_dong_nguon_luc_khong_con_bo_lien_ket(self):
-		out, _ = self.run_copy(resource_rows={"R1"})
+	def test_dong_nguon_luc_khong_con_bi_bo_qua(self):
+		out, skipped = self.run_copy(resource_rows={"R1"})
+		self.assertEqual([o["line_id"] for o in out], ["L01"])
+		self.assertEqual(len(skipped), 6)
+		self.assertEqual(
+			skipped[0], {"line_id": "L02", "reason": "Dòng nguồn lực R2 không còn trong quy trình"}
+		)
 		self.assertEqual(out[0]["procedure_resource_row"], "R1")
-		self.assertIsNone(out[1]["procedure_resource_row"])
+
+	def test_dong_them_tay_khong_co_dong_nguon_luc_van_duoc_chep(self):
+		lines = golden_lines()
+		lines[1]["procedure_resource_row"] = None
+		out, skipped = self.run_copy(lines=lines, resource_rows=set())
+		self.assertEqual([o["line_id"] for o in out], ["L02"])
+		self.assertEqual(len(skipped), 6)
 
 	def test_mat_hang_ke_hoach_bi_bo(self):
 		out, skipped = self.run_copy(qc_items={"HC_PT"})

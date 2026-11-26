@@ -184,7 +184,8 @@ class TestLines(ClsBase):
 		out = api.save_line(ns.name, {"cost_level": "RESULT"}, eq_line)  # xóa Gắn với theo ASM-034-09
 		self.assertEqual(_line(ns.name, eq_line).attach_to, None)
 		cost = next(x for g in out["norm_set"]["groups"] for x in g["lines"] if x["line_id"] == eq_line)
-		self.assertEqual(cost["cost"].get("missing") or "ok", cost["cost"].get("missing") or "ok")
+		# về RESULT, không nhân k: không còn hoãn tính sang lần tính giá (ASM-034-22)
+		self.assertNotEqual(cost["cost"].get("missing"), "Tính ở lần tính giá")
 		# cờ k ở dòng nhân lực: từ chối
 		with self.assertRaises(frappe.ValidationError):
 			api.save_line(ns.name, {"apply_k": 1}, "L001")
@@ -445,3 +446,23 @@ class TestCopyVersion(ClsBase):
 		again = api.new_version(src)  # đã có bộ đang soạn của hệ thống
 		self.assertEqual(again["name"], new.name)
 		self.assertIn("message", again)
+
+	def test_sao_chep_bo_qua_dong_nguon_luc_khong_con_o_quy_trinh_dich(self):
+		# dòng nguồn chưa liên kết (AMD-012-01), dòng nguồn lực gốc không còn ở quy trình đích: ASM-034-26
+		ns = self.create("GLU-A")
+		frappe.db.set_value("NC Norm Line", {"parent": ns.name, "line_id": "L002"}, "resource", None)
+		ns.reload()
+		l002 = next(r for r in ns.lines if r.line_id == "L002")
+		self.assertTrue(l002.procedure_resource_row)
+		self.assertFalse(l002.resource)
+		# quy trình đích: bản 2 đã ban hành chỉ còn dòng nguồn lực Nhân lực R001
+		publish_procedure(make_procedure(self.service, self.dept, minutes=10, version=2))
+		total = len(ns.lines)
+		out = api.copy_norm_set(ns.name, "GLU-B")
+		self.assertEqual([s["line_id"] for s in out["skipped"]], ["L002"])
+		self.assertIn(l002.procedure_resource_row, out["skipped"][0]["reason"])
+		new = frappe.get_doc("NC Norm Set", out["name"])
+		self.assertEqual(new.copied_from, ns.name)
+		self.assertEqual(len(new.lines), total - 1)
+		self.assertNotIn("L002", [r.line_id for r in new.lines])
+		self.assertNotEqual(new.procedure, self.proc.name)  # bộ mới theo quy trình bản 2

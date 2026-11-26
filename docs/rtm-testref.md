@@ -233,7 +233,7 @@
 | FR-NORM-022 | `test_TC_CLS_29_khoi_tao_gan_he_thong_va_them_khoan_muc_bat_buoc`, `test_khong_co_mau_khong_them_dong` (api/test_norm_cls.py), `unit/test_norm_templates.py::TestApplyTemplate` |
 | FR-NORM-023 | `test_TC_CLS_32_xac_nhan_can_so_xn_moi_ong_va_khoan_muc_bat_buoc`, `test_set_blockers_dung_truoc_loi_dong` (api/test_norm_cls.py), `unit/test_norm_cls.py::TestMandatoryStatus` |
 | FR-NORM-024 | `test_TC_CLS_31_tu_choi_dong_trung_ke_hoach_chat_luong` (api/test_norm_cls.py), `unit/test_norm_cls.py::TestLineErrorsCls` |
-| FR-NORM-025 | `test_TC_CLS_33_sao_chep_khoa_hai_bo_va_xuat`, `test_sao_chep_bo_cac_dong_thuoc_ke_hoach_chat_luong`, `test_sao_chep_tu_choi` (api/test_norm_cls.py), `unit/test_norm_copy.py` |
+| FR-NORM-025 | `test_TC_CLS_33_sao_chep_khoa_hai_bo_va_xuat`, `test_sao_chep_bo_cac_dong_thuoc_ke_hoach_chat_luong`, `test_sao_chep_tu_choi`, `test_sao_chep_bo_qua_dong_nguon_luc_khong_con_o_quy_trinh_dich` (api/test_norm_cls.py), `unit/test_norm_copy.py` |
 | FR-OUT-011 | `test_TC_CLS_33_sao_chep_khoa_hai_bo_va_xuat` (api/test_norm_cls.py), `test_TC_CLS_33_tep_xuat_co_k_6_chu_so`, `test_TC_CLS_33_k_uoc_tinh_co_nhan`, `test_TC_CLS_33_chua_co_lan_tinh_gia`, `test_TC_CLS_33_trang_dong_co_cap_phat_sinh_dung_gia_tri` (exports/test_norm_set_export.py) |
 | FR-QC-007 (phần còn lại của TC-CLS-26) | `test_TC_CLS_26_canh_bao_tren_bo_dinh_muc_van_khoa_duoc` (api/test_norm_cls.py) |
 | Quyền (FR-ACC-002, FR-ACC-007) | `test_quyen_norm_template_theo_ma_tran`, `test_quyen_norm_template_council_member_bi_tu_choi`, `test_quyen_norm_template_auditor_chi_doc`, `test_quyen_norm_template_clinician_khong_tao_duoc`, `test_quyen_norm_template_finance_tao_duoc` (nc_norm_template), `test_auditor_khong_tao_duoc` (api/test_norm_cls.py) |

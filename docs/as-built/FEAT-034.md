@@ -1,7 +1,7 @@
 # As-Built FEAT-034 — Định mức theo hệ thống xét nghiệm
 
 Issue NORM-40. FR: FR-NORM-017..025, FR-OUT-011 (phần Excel); FR-QC-007 (phần còn lại của TC-CLS-26). UC-021, SCR-DSK-014 (phần [1.1]), SCR-DSK-041. TC: TC-CLS-26, TC-CLS-29..33.
-Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica). Giả định: `docs/decisions/assumptions/FEAT-034.md` (ASM-034-01..25); sửa thiết kế: `docs/decisions/amendments/AMD-034-01.md` (đã áp vào `docs/data-model.md` 3.5).
+Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica). Giả định: `docs/decisions/assumptions/FEAT-034.md` (ASM-034-01..26); sửa thiết kế: `docs/decisions/amendments/AMD-034-01.md` (đã áp vào `docs/data-model.md` 3.5).
 
 ## Đã làm
 - **Logic thuần** (không import `frappe`): `norm/validation.py` (cấp phát sinh, `normalize_line`, DI-17, gắn với, kiểm nội kiểm FR-NORM-024, `is_placeholder`, `set_blockers`, `mandatory_status`), `norm/templates.py` (`template_errors`, `pick_template`, `apply_template`, `default_apply_k`, `DEFAULT_TEMPLATES`), `norm/copy.py::copy_lines`, `exports/norm_set.py` (`build_workbook`, `latest_k`, chỉ `openpyxl`).
@@ -15,6 +15,7 @@ Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica). Gi�
 - `export_norm_set` không đưa vào `actions` (ASM-034-24): test cũ `test_quyen_norm_set_auditor_chi_doc` đòi `actions` của NC Auditor rỗng. Nút "Xuất Excel" luôn hiện; máy chủ kiểm quyền đọc.
 - Vue gọi `save_head`, `copy_norm_set` qua `this.cls(...)` thay vì `this.call("...")` để `test_norm_grid_ui.py` (FEAT-012, danh sách 9 hàm) giữ nguyên; `test_norm_cls_ui.py` kiểm riêng danh sách mới.
 - Dòng giữ chỗ LABOR chưa sửa cũng bỏ kiểm Số người, Số phút; `new_version`, `copy_norm_set` đặt `flags.from_procedure` (ASM-034-25).
+- Sao chép bỏ qua dòng có dòng nguồn lực gốc không còn ở quy trình đích (ASM-034-26, Reviewer + Lead, lần trả về 1), kèm lý do ở `skipped`; không làm hỏng cả lần sao chép.
 - Lệnh `bench execute frappe.db.count --kwargs "{'doctype': ...}"` ở done-when T09 dùng sai tên tham số; chạy với `dt`.
 
 ## Giới hạn, nợ kỹ thuật

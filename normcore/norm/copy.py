@@ -17,6 +17,10 @@ def copy_lines(lines, step_ids, resource_rows, equipment_map, qc_items, inputs=N
 				{"line_id": lid, "reason": f"Mã bước {ln.get('step_id')} không còn trong quy trình"}
 			)
 			continue
+		row = ln.get("procedure_resource_row")
+		if row and row not in resource_rows:  # ASM-034-26: dòng nguồn lực gốc không còn ở quy trình đích
+			skipped.append({"line_id": lid, "reason": f"Dòng nguồn lực {row} không còn trong quy trình"})
+			continue
 		if (
 			ln.get("resource")
 			and ln["resource"] in qc_items
@@ -25,8 +29,6 @@ def copy_lines(lines, step_ids, resource_rows, equipment_map, qc_items, inputs=N
 			skipped.append({"line_id": lid, "reason": "Mặt hàng thuộc kế hoạch chất lượng của hệ thống đích"})
 			continue
 		new = {k: v for k, v in ln.items() if (inputs is None or k in inputs) and k not in CONFIRM_KEYS}
-		if new.get("procedure_resource_row") and new["procedure_resource_row"] not in resource_rows:
-			new["procedure_resource_row"] = None
 		if new.get("attach_equipment") in (equipment_map or {}):
 			new["attach_equipment"] = equipment_map[new["attach_equipment"]]
 		kept.append(new)
