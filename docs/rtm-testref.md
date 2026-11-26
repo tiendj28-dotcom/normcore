@@ -232,7 +232,7 @@
 | Quyền (FR-ACC-003, FR-ACC-007) | `test_quyen_norm_set_council_khong_co_quyen`, `test_quyen_norm_set_auditor_chi_doc`, `test_quyen_norm_set_finance_khong_sua_khong_xac_nhan`, `test_quyen_norm_set_clinician_khong_confirm_set_lock`, `test_quyen_norm_set_clinician_khoa_khac_khong_ghi` |
 | Giao diện SCR-DSK-013, 014 | `unit/test_norm_grid_ui.py`, `unit/test_form_buttons_i18n.py` |
 
-## FEAT-034 (NORM-40, ghi bởi Dev; QA kiểm định lại)
+## FEAT-034 (NORM-40; QA đã kiểm định lại, accepted)
 
 | FR | Test thật |
 | :-- | :-- |
