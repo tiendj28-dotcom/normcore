@@ -12,10 +12,16 @@ from normcore.costing import engine, pricing, resources
 from normcore.costing import provisional as prov
 from normcore.nc_costing.doctype.nc_norm_set import nc_norm_set as ctl
 from normcore.norm import validation, workflow
-from normcore.norm.init_from_procedure import RESOURCE_DOCTYPE_BY_COMPONENT
+from normcore.norm.init_from_procedure import (
+	RESOURCE_DOCTYPE_BY_COMPONENT,
+	carry_lines,
+	format_note,
+	steps_without_lines,
+)
 
 NS = "NC Norm Set"
 DRAFT, CONFIRMED, LOCKED = workflow.DRAFT, workflow.CONFIRMED, workflow.LOCKED
+REPLACED_STATUS = workflow.REPLACED
 # Trường người dùng được nhập qua save_line (không gồm mã dòng, dòng gốc, đề xuất AI, xác nhận)
 SAVE_FIELDS = tuple(
 	f for f in ctl.LINE_INPUTS if f not in ("line_id", "procedure_resource_row", "ai_suggested")
@@ -78,7 +84,7 @@ def _label(doctype, name, cache):
 
 
 def _dict(row):
-	return {f: row.get(f) for f in (*ctl.LINE_INPUTS, *ctl.CONFIRM_FIELDS)}
+	return {f: row.get(f) for f in (*ctl.LINE_INPUTS, *ctl.CONFIRM_FIELDS, "step_removed")}
 
 
 # ---------------------------------------------------------------- đơn giá tạm tính (ASM-012-11)
@@ -204,6 +210,26 @@ def _cost(prices, row):
 # ---------------------------------------------------------------- đọc
 
 
+def _latest_published(service, department):
+	"""FR-NORM-015, ASM-013-01: quy trình "Đã ban hành" có version_no lớn nhất của (dịch vụ, khoa); không có → None."""
+	rows = frappe.get_all(
+		"NC Clinical Procedure",
+		{"technical_service": service, "department": department, "workflow_state": "Đã ban hành"},
+		["name", "version_no"],
+		order_by="version_no desc",
+		limit=1,
+	)
+	return rows[0] if rows else None
+
+
+def _newer_procedure(ns):
+	"""Tên quy trình "Đã ban hành" mới hơn quy trình của bộ, hoặc None."""
+	target = _latest_published(ns.technical_service, ns.department)
+	if target and target.version_no > (frappe.db.get_value("NC Clinical Procedure", ns.procedure, "version_no") or 0):
+		return target.name
+	return None
+
+
 def _actions(ns):
 	roles = set(frappe.get_roles())
 	out = []
@@ -211,12 +237,16 @@ def _actions(ns):
 	if ns.status == DRAFT:
 		if can_write:
 			out += ["save_line", "delete_line"]
+			if frappe.has_permission(NS, "create") and _newer_procedure(ns):
+				out.append("new_version")
 			if roles & set(workflow.ROLE_OF_ACTION["confirm_line"]):
 				out.append("confirm_line")
 			if "NC Department Head" in roles:
 				out.append("confirm_set")
 	elif ns.status == CONFIRMED and "NC Finance" in roles:
 		out += ["return_set", "lock_set"]
+		if can_write and frappe.has_permission(NS, "create") and _newer_procedure(ns):
+			out.append("new_version")
 	elif ns.status == LOCKED and can_write and frappe.has_permission(NS, "create"):
 		out.append("new_version")
 	return out
@@ -253,6 +283,7 @@ def get_norm_set(name):
 			}
 		)
 		lines.append(d)
+		d["step_removed"] = bool(d.get("step_removed"))
 		key = "service" if d["service_level"] else (d["step_id"] or "service")
 		summary_rows.append(
 			(key, d["component"], Decimal(cost["amount"]) if cost else None, bool(d["is_excluded"]))
@@ -270,14 +301,31 @@ def get_norm_set(name):
 	step_keys = [s["step_id"] for s in steps]
 	groups = []
 	for s in steps:
-		g = [x for x in lines if not x["service_level"] and x["step_id"] == s["step_id"]]
+		g = [
+			x
+			for x in lines
+			if not x["service_level"] and not x["step_removed"] and x["step_id"] == s["step_id"]
+		]
 		groups.append({"step_id": s["step_id"], "title": s["step_title"], "lines": g, "total": _total(g)})
-	general = [x for x in lines if x["service_level"] or x["step_id"] not in step_keys]
+	removed = [x for x in lines if x["step_removed"] and not x["service_level"]]
+	if removed:  # FR-NORM-015: nhóm riêng, đặt trước nhóm Chung
+		groups.append(
+			{"step_id": None, "removed": True, "title": _("Bước đã bỏ"), "lines": removed, "total": _total(removed)}
+		)
+	general = [
+		x for x in lines if not x["step_removed"] and (x["service_level"] or x["step_id"] not in step_keys)
+	]
 	groups.append(
 		{"step_id": None, "title": _("Chung cho cả dịch vụ"), "lines": general, "total": _total(general)}
 	)
+	missing = (
+		steps_without_lines(step_keys, [x for x in lines]) if ns.status == DRAFT else []
+	)
+	step_title = {s["step_id"]: s["step_title"] for s in steps}
 	return {
+		"steps_without_lines": [{"step_id": m, "step_title": step_title.get(m)} for m in missing],
 		"doc": {
+			"newer_procedure": _newer_procedure(ns) if ns.status != REPLACED_STATUS else None,
 			"name": ns.name,
 			"technical_service": ns.technical_service,
 			"technical_service_name": frappe.db.get_value(
@@ -384,7 +432,7 @@ def delete_line(norm_set, line_id):
 	ns = _load(norm_set, "write")
 	_need_draft(ns)
 	row = _line(ns, line_id)
-	if row.procedure_resource_row:  # ASM-012-07
+	if row.procedure_resource_row and not cint(row.step_removed):  # ASM-012-07; ASM-013-05
 		frappe.throw(_("Dòng lấy từ quy trình không xóa được; đánh dấu Loại trừ nếu không tính"))
 	ns.remove(row)
 	ns.save()
@@ -397,6 +445,12 @@ def confirm_line(norm_set, line_id):
 	ns = _load(norm_set, "write")
 	_need_draft(ns)
 	row = _line(ns, line_id)
+	if cint(row.step_removed):  # FR-NORM-015
+		frappe.throw(
+			_(
+				"Dòng {0} thuộc bước đã bỏ ({1}): gán bước khác, chuyển Chung cho cả dịch vụ hoặc xóa trước khi xác nhận"
+			).format(line_id, row.step_id)
+		)
 	if not row.resource:
 		frappe.throw(_("Dòng {0} chưa liên kết danh mục, chưa xác nhận được").format(line_id))
 	if cint(row.ai_suggested):
@@ -453,6 +507,66 @@ def lock_set(norm_set):
 def new_version(norm_set):
 	frappe.has_permission(NS, "create", throw=True)
 	src = _load(norm_set, "write")
+	target = _newer_procedure(src)
+	if not target:  # hành vi FEAT-012 (ASM-012-09)
+		return _new_version_same_procedure(src)
+	if src.status == workflow.REPLACED:  # FR-NORM-015, ASM-013-02
+		frappe.throw(_("Bộ định mức đã thay thế, không tạo phiên bản được"))
+	existing = frappe.get_all(
+		NS,
+		{
+			"technical_service": src.technical_service,
+			"department": src.department,
+			"status": ["in", [DRAFT, CONFIRMED]],
+			"procedure": target,
+		},
+		pluck="name",
+	)
+	if existing:  # ASM-013-03
+		return {
+			"name": existing[0],
+			"existing": 1,
+			"message": _("Đã có bộ định mức đang soạn theo quy trình {0}: {1}").format(target, existing[0]),
+		}
+	step_ids = [s.step_id for s in frappe.get_doc("NC Clinical Procedure", target).steps]
+	old = [{**{f: r.get(f) for f in ctl.LINE_INPUTS}, "step_removed": r.get("step_removed")} for r in src.lines]
+	res = carry_lines(old, step_ids)
+	version = (
+		frappe.db.get_value(
+			NS, {"technical_service": src.technical_service, "department": src.department}, "max(version_no)"
+		)
+		or 0
+	) + 1
+	new = frappe.new_doc(NS)
+	new.update(
+		{
+			"technical_service": src.technical_service,
+			"department": src.department,
+			"procedure": target,
+			"version_no": version,
+			"previous_version": src.name,
+			"status": DRAFT,
+			"next_line_seq": src.next_line_seq,
+		}
+	)
+	for line in res["lines"]:
+		new.append("lines", line)
+	new.flags.norm_action = "new_version"
+	new.insert()
+	missing = steps_without_lines(step_ids, res["lines"])
+	new.add_comment("Info", format_note(res, missing))
+	return {
+		"name": new.name,
+		"procedure": target,
+		"existing": 0,
+		"carried": res["carried"],
+		"removed": res["removed"],
+		"removed_steps": res["removed_steps"],
+		"steps_without_lines": missing,
+	}
+
+
+def _new_version_same_procedure(src):
 	if src.status != LOCKED:
 		frappe.throw(_("Chỉ tạo phiên bản mới từ bộ Đã khóa"))
 	open_sets = frappe.get_all(
