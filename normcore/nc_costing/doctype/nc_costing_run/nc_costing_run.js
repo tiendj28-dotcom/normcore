@@ -3,6 +3,9 @@ const API = "normcore.api.costing.";
 const PROGRESS_EVENT = "normcore_costing_progress";
 const LOCK_METHOD = "normcore.api.costing.lock_run"; // FEAT-017: khoa sau khi đối soát
 const RECON_REPORT = "NC Reconciliation";
+const DUPLICATE_METHOD = "normcore.api.costing.duplicate_run"; // FEAT-018
+const VERIFY_METHOD = "normcore.api.costing.verify_snapshot";
+const COMPARE_REPORT = "NC Costing Run Comparison";
 const RESULT_COLOR = { "Thành công": "green", "Cảnh báo": "yellow", "Lỗi": "red" };
 
 function esc(v) {
@@ -102,7 +105,11 @@ function render_status_banner(frm) {
 	} else if (frm.doc.status === "Đã tính") {
 		frm.dashboard.set_headline_alert(__("To change the inputs, duplicate the costing run."), "blue");
 	} else if (frm.doc.status === "Đã khóa") {
-		frm.dashboard.set_headline_alert(__("This record is locked and cannot be edited."), "green");
+		const h = frm.doc.snapshot_hash;
+		const msg = h
+			? __("Locked · snapshot {0}. It cannot be recalculated or edited; duplicate it to create a new costing run.", [h.slice(0, 12)])
+			: __("Locked (no input snapshot). It cannot be recalculated or edited; duplicate it to create a new costing run.");
+		frm.dashboard.set_headline_alert(msg, "green");
 	}
 }
 
@@ -140,19 +147,109 @@ function lock_run(frm) {
 				});
 				return;
 			}
-			frappe.confirm(__("Lock costing run {0}? It cannot be recalculated and explanations cannot be edited afterwards.", [frm.doc.name]), () => {
-				frappe.call({
-					method: LOCK_METHOD,
-					args: { run: frm.doc.name },
-					freeze: true,
-					callback() {
-						frappe.show_alert({ message: __("Locked."), indicator: "green" });
-						frm.reload_doc();
-					},
+			frappe.confirm(
+				`${__("Lock costing run {0}? It cannot be recalculated and explanations cannot be edited afterwards.", [frm.doc.name])} ${__("The system will recalculate from the current data to check, then save the input snapshot.")}`,
+				() => {
+					frappe.call({
+						method: LOCK_METHOD,
+						args: { run: frm.doc.name },
+						freeze: true,
+						freeze_message: __("Saving the input snapshot…"),
+						callback() {
+							frappe.show_alert({ message: __("Locked."), indicator: "green" });
+							frm.reload_doc();
+						},
+						error() {
+							frappe.msgprint({ title: __("Cannot lock"), indicator: "red", message: __("The lock was refused. If the inputs changed after the run, run costing again, then lock.") });
+						},
+					});
+				}
+			);
+		},
+	});
+}
+
+function duplicate_run(frm) {
+	frappe.confirm(__("Create a new costing run in Draft with the same inputs and scope? Results, reconciliation and the snapshot are not copied."), () => {
+		frappe.call({
+			method: DUPLICATE_METHOD,
+			args: { run: frm.doc.name },
+			freeze: true,
+			callback(r) {
+				const name = (r.message || {}).name;
+				if (!name) return;
+				frappe.show_alert({ message: __("Created {0}", [name]), indicator: "green" });
+				frappe.set_route("Form", "NC Costing Run", name);
+			},
+		});
+	});
+}
+
+function verify_snapshot(frm) {
+	frappe.call({
+		method: VERIFY_METHOD,
+		args: { run: frm.doc.name },
+		freeze: true,
+		freeze_message: __("Recalculating from the snapshot…"),
+		callback(r) {
+			const m = r.message || {};
+			if (m.ok) {
+				frappe.msgprint({
+					title: __("Reproduction matches"),
+					indicator: "green",
+					message: __("Recalculating from the snapshot (schema {0}) matches the locked results in every field: {1} services, {2} explanation lines, {3} reconciliation lines.", [m.version, m.services, m.lines, m.recon_lines]),
 				});
+				return;
+			}
+			const items = (m.diffs || []).map((x) => `<li>${esc(x)}</li>`).join("");
+			frappe.msgprint({
+				title: __("Reproduction does not match"),
+				indicator: "red",
+				message: `<div role="alert"><div style="max-height:50vh;overflow:auto"><ul>${items}</ul></div><b>${__("Total {0} differences", [m.diff_count || 0])}</b></div>`,
 			});
 		},
 	});
+}
+
+function compare_dialog(frm) {
+	const d = new frappe.ui.Dialog({
+		title: __("Compare with another costing run"),
+		fields: [
+			{
+				fieldtype: "Link",
+				fieldname: "other_run",
+				label: __("Costing run to compare"),
+				options: "NC Costing Run",
+				reqd: 1,
+				get_query: () => ({ filters: { status: ["in", ["Đã tính", "Đã khóa"]], name: ["!=", frm.doc.name] }, order_by: "modified desc" }),
+			},
+		],
+		primary_action_label: __("Compare"),
+		primary_action(values) {
+			d.hide();
+			frappe.set_route("query-report", COMPARE_REPORT, { base_run: frm.doc.name, other_run: values.other_run });
+		},
+	});
+	d.show();
+}
+
+function add_lock_buttons(frm) {
+	if (frm.doc.status !== "Đang tính") {
+		frappe.call({
+			method: API + "get_run_results",
+			args: { run: frm.doc.name },
+			callback(r) {
+				if (!(r.message || {}).can_duplicate) return;
+				frm.add_custom_button(__("Duplicate"), () => duplicate_run(frm)).addClass(frm.doc.status === "Đã khóa" ? "btn-primary" : "btn-default");
+			},
+		});
+	}
+	if (frm.doc.status === "Đã khóa" && frm.doc.snapshot_file) {
+		frm.add_custom_button(__("Check reproduction"), () => verify_snapshot(frm));
+	}
+	if (["Đã tính", "Đã khóa"].includes(frm.doc.status)) {
+		frm.add_custom_button(__("Compare with another run"), () => compare_dialog(frm));
+	}
 }
 
 function render_results(frm) {
@@ -321,6 +418,8 @@ frappe.ui.form.on("NC Costing Run", {
 		if (frm.doc.status === "Đã tính" && can_write(frm)) {
 			frm.add_custom_button(__("Lock"), () => lock_run(frm)).addClass("btn-primary");
 		}
+		add_lock_buttons(frm);
+		if (frm.doc.status === "Đã khóa") frm.disable_form();
 		render_allocation_warnings(frm);
 		render_results(frm);
 	},

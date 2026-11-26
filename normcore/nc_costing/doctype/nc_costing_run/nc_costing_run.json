@@ -17,7 +17,10 @@
   "status",
   "progress",
   "run_warnings",
-  "allocation_warnings"
+  "allocation_warnings",
+  "snapshot_section",
+  "snapshot_file",
+  "snapshot_hash"
  ],
  "fields": [
   {
@@ -86,7 +89,8 @@
    "fieldname": "progress",
    "label": "Tiến độ (%)",
    "fieldtype": "Percent",
-   "read_only": 1
+   "read_only": 1,
+   "no_copy": 1
   },
   {
    "fieldname": "volume_scenario",
@@ -117,7 +121,30 @@
    "fieldname": "allocation_warnings",
    "label": "Cảnh báo phân bổ",
    "fieldtype": "Small Text",
-   "read_only": 1
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "snapshot_section",
+   "label": "Ảnh chụp đầu vào",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.snapshot_file"
+  },
+  {
+   "fieldname": "snapshot_file",
+   "label": "Ảnh chụp đầu vào",
+   "fieldtype": "Attach",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Tệp private, chỉ do thao tác Khóa ghi (FR-COST-011)"
+  },
+  {
+   "fieldname": "snapshot_hash",
+   "label": "Mã băm ảnh chụp",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "sha256 của JSON chuẩn hóa trước khi nén"
   }
  ],
  "index_web_pages_for_search": 0,
