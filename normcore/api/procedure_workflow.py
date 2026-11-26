@@ -183,6 +183,7 @@ def apply_action(procedure, action, reason=None, decision_no=None, effective_dat
 			frappe.throw(_("Cần nhập số quyết định ban hành và ngày hiệu lực"))
 		doc.decision_no = decision_no
 		doc.effective_date = getdate(effective_date)
+		doc.needs_review = 0  # FR-LIB-009: ban hành xong là đã rà soát (ASM-021-06)
 	elif action == "Từ chối" and not reason:
 		frappe.throw(_("Cần nhập lý do từ chối"))
 	elif action == "Thu hồi":

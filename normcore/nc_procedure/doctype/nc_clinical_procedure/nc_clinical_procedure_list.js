@@ -12,6 +12,7 @@ frappe.listview_settings["NC Clinical Procedure"] = {
 	add_fields: ["workflow_state", "needs_review"],
 	get_indicator(doc) {
 		const state = doc.workflow_state || "Nháp";
+		if (doc.needs_review && state === "Đã ban hành") return ["Cần rà soát", "yellow", "needs_review,=,1"];
 		return [__(state), NC_STATE_COLOR[state] || "gray", `workflow_state,=,${state}`];
 	},
 };
