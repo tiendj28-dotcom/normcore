@@ -87,9 +87,8 @@ def make_golden_resources(department, skip_price=()):
 				"document_no": "HD-1",
 				"document_date": "2026-01-01",
 				"valid_from": "2026-01-01",
-				"verification_status": "Đã xác minh",
 			}
-		).insert(ignore_permissions=True)
+		).insert(ignore_permissions=True).db_set("verification_status", "Đã xác minh")  # dựng dữ liệu
 	e = g.EQUIP["EQ1"]
 	frappe.get_doc(
 		{
@@ -161,6 +160,7 @@ def make_locked_norm_set(service, department, golden_service="DV-TEST-A"):
 				"is_excluded": 1 if l.excluded else 0,
 				"exclude_reason": "Thanh toán riêng" if l.excluded else None,
 				"basis": "Quy trình",
+				"uom": "phút" if l.comp in ("LABOR", "EQUIPMENT", "INFRA") else "đơn vị",
 			}
 		)
 	ns = frappe.get_doc(
@@ -203,5 +203,16 @@ def make_golden_world(skip_price=()):
 	make_price_category()
 	params = make_golden_params()
 	make_golden_resources(dept, skip_price)
+	for svc, vol in g.VOLUME.items():
+		frappe.get_doc(
+			{
+				"doctype": "NC Service Volume",
+				"fiscal_year": 2026,
+				"technical_service": svc,
+				"department": dept,
+				"scenario": "Thực tế 12 tháng",
+				"volume": float(vol),
+			}
+		).insert(ignore_permissions=True)
 	sets = [make_locked_norm_set(s, dept, s) for s in ("DV-TEST-A", "DV-TEST-B")]
 	return params, dept, sets

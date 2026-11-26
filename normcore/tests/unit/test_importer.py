@@ -6,7 +6,6 @@ from datetime import date, datetime
 
 from openpyxl import Workbook, load_workbook
 
-from normcore.core import import_sets  # đăng ký bộ nhập
 from normcore.core import importer as im
 
 _TC = unittest.TestCase()

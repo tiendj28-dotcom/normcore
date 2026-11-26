@@ -153,7 +153,7 @@ class TestNCCostingRun(FrappeTestCase):
 		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 0)
 
 
-from normcore.tests import accounting_fixtures as af  # noqa: E402
+from normcore.tests import accounting_fixtures as af
 
 
 class TestNCCostingRunInputs(FrappeTestCase):
@@ -222,3 +222,136 @@ class TestNCCostingRunInputs(FrappeTestCase):
 		run.reload()
 		run.fiscal_year = 2032
 		run.save(ignore_permissions=True)
+
+
+class TestNCCostingRunGolden(FrappeTestCase):
+	"""FR-COST-002, 003, 007, 010, 016: lần tính trên site với dữ liệu vàng."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def _world(self, **kw):
+		from normcore.tests import costing_fixtures as cf
+
+		self.cf = cf
+		self.params, self.dept, self.sets = cf.make_golden_world(**kw)
+		return cf
+
+	def _costs(self, run):
+		return {
+			c.technical_service: frappe.get_doc("NC Service Cost", c.name)
+			for c in frappe.get_all(
+				"NC Service Cost", {"costing_run": run.name}, ["name", "technical_service"]
+			)
+		}
+
+	def test_TC_COST_01_tren_site_tong_truc_tiep_va_gia(self):
+		self._world()
+		run = self.cf.make_golden_run(self.params)
+		self.assertEqual(run.run_costing(), "Đã tính")
+		a = self._costs(run)["DV-TEST-A"]
+		self.assertEqual(a.calc_status, "Thành công")
+		self.assertEqual(sum(ln.amount for ln in a.lines), 183963.06)
+		self.assertEqual((a.direct_labor, a.direct_utility), (a.direct_labor, 1500.0))
+		self.assertEqual(a.full_cost, 183963.06)  # chưa có phân bổ (ASM-015-02)
+		self.assertEqual(a.volume, 4000)
+
+	def test_TC_COST_17_dich_vu_chua_khoa_bi_liet_ke_va_bo_qua(self):
+		cf = self._world()
+		cf.ensure("NC Technical Service", "service_code", "DV-CHUA", service_name="Chưa khóa")
+		svc = frappe.get_doc("NC Technical Service", "DV-CHUA")
+		svc.is_active = 1
+		svc.append("departments", {"department": self.dept})
+		svc.save(ignore_permissions=True)
+		for s in ("DV-TEST-A", "DV-TEST-B"):
+			doc = frappe.get_doc("NC Technical Service", s)
+			doc.is_active = 1
+			doc.append("departments", {"department": self.dept})
+			doc.save(ignore_permissions=True)
+		run = cf.make_golden_run(
+			self.params,
+			scope_services=[{"technical_service": "DV-TEST-A"}, {"technical_service": "DV-CHUA"}],
+		)
+		info = run.scope()
+		self.assertEqual(info["ineligible"], [("DV-CHUA", self.dept)])
+		self.assertEqual([e["service"] for e in info["eligible"]], ["DV-TEST-A"])
+		with self.assertRaisesRegex(frappe.ValidationError, "DV-CHUA"):
+			run.run_costing()
+		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 0)
+		self.assertEqual(run.reload().status, "Nháp")
+		run.run_costing(confirm_ineligible=1)
+		self.assertEqual(list(self._costs(run)), ["DV-TEST-A"])
+
+	def test_TC_COST_07_V4_tren_site_dich_vu_khac_van_tinh(self):
+		self._world(skip_price=("THUOCX",))
+		run = self.cf.make_golden_run(self.params)
+		run.run_costing()
+		costs = self._costs(run)
+		a, b = costs["DV-TEST-A"], costs["DV-TEST-B"]
+		self.assertEqual(a.calc_status, "Lỗi")
+		self.assertIn("L05", a.calc_message)
+		self.assertEqual(len(a.lines), 0)
+		self.assertEqual(b.calc_status, "Thành công")
+		self.assertEqual(b.direct_labor + b.direct_supply, 32822.44)
+
+	def test_TC_COST_06_bang_giai_trinh_ghi_khau_hao_bi_loai(self):
+		self._world()
+		self.cf.make_price_category("PC-V1", include_depreciation=0)
+		run = self.cf.make_golden_run(self.params, price_category="PC-V1")
+		run.run_costing()
+		a = self._costs(run)["DV-TEST-A"]
+		by = {ln.norm_line_id: ln for ln in a.lines}
+		self.assertEqual((by["L07"].unit_rate, by["L08"].unit_rate, by["L08"].amount), (34090.9091, 0, 0))
+		for lid in ("L07", "L08"):
+			self.assertIn("Khấu hao bị loại", by[lid].warning)
+		self.assertFalse(by["L01"].warning)
+
+	def test_TC_COST_15_dong_giai_trinh_du_nguon(self):
+		from unittest import mock
+
+		from normcore.costing import engine
+
+		self._world()
+		run = self.cf.make_golden_run(self.params)
+		rule = frappe.get_doc(
+			{
+				"doctype": "NC Allocation Rule",
+				"rule_name": "Quy tắc thử",
+				"level": "Cấp 2",
+				"cost_category": "LABOR",
+				"driver": "LABOR_MIN",
+			}
+		).insert(ignore_permissions=True)
+		alloc = engine.CostLine(
+			"Phân bổ",
+			"LABOR",
+			Decimal("100"),
+			allocation_rule=rule.name,
+			driver_value=10,
+			driver_total=40,
+			pool_amount=400,
+		)
+		pools = "normcore.nc_costing.doctype.nc_costing_run.nc_costing_run.allocate_pools"
+		with mock.patch(pools, return_value={("DV-TEST-A", self.dept): [alloc]}):
+			self.assertEqual(
+				run.run_costing(), "Đã tính", frappe.get_all("Error Log", pluck="error", limit=1)
+			)
+		a = self._costs(run)["DV-TEST-A"]
+		direct = [ln for ln in a.lines if ln.line_type == "Trực tiếp"]
+		self.assertEqual(len(direct), 11)
+		for ln in direct:
+			with self.subTest(line=ln.norm_line_id):
+				self.assertTrue(ln.step_id or ln.norm_line_id == "L10")  # L10 là dòng chung (service_level)
+				self.assertTrue(ln.resource_label and ln.rate_source)
+				self.assertIsNotNone(ln.applied_qty)
+				self.assertIsNotNone(ln.unit_rate)
+		(pl,) = [ln for ln in a.lines if ln.line_type == "Phân bổ"]
+		self.assertEqual(
+			(pl.component, pl.allocation_rule, pl.driver_value, pl.driver_total, pl.amount),
+			("LABOR", rule.name, 10, 40, 100),
+		)
+		self.assertEqual((a.alloc_labor, a.full_cost), (100, 184063.06))

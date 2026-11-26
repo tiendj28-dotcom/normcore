@@ -3,7 +3,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, nowdate
 
 from normcore.nc_costing.report.nc_compliance_expiry.nc_compliance_expiry import execute
-from normcore.tests.utils import make_base, make_equipment, make_private_file, make_user
+from normcore.tests.utils import make_base, make_equipment, make_private_file
 
 
 def _hs(equipment, days, **kw):

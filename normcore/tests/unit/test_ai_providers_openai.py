@@ -1,6 +1,5 @@
 """Bộ chuyển đổi OpenAI-compatible, thời hạn và system/user của Anthropic (FR-AI-010, FR-AI-012). Không gọi mạng."""
 
-import socket
 import unittest
 
 from normcore.ai.providers import anthropic as anth

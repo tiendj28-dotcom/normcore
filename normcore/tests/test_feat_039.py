@@ -92,7 +92,6 @@ from normcore.api import importer as importer_api
 from normcore.api import item as item_api
 from normcore.api import procedure as procedure_api
 from normcore.core import audit
-from normcore.core import import_sets as _import_sets
 from normcore.core import importer as importer_core
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
 from normcore.tests.utils import (
