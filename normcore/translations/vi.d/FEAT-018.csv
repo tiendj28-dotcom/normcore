@@ -1,0 +1,32 @@
+Base run,Lần gốc
+Check reproduction,Kiểm tra tái lập
+Compare,So sánh
+Compare with another costing run,So sánh với lần tính giá khác
+Compare with another run,So sánh với lần tính khác
+Compared run,Lần so sánh
+Costing run to compare,Lần tính để so sánh
+"Create a new costing run in Draft with the same inputs and scope? Results, reconciliation and the snapshot are not copied.","Tạo lần tính giá mới ở trạng thái Nháp với cùng đầu vào và phạm vi? Kết quả, đối soát và ảnh chụp không được chép."
+Difference,Chênh lệch
+Difference (%),Chênh lệch (%)
+Difference = compared run - base run.,Chênh lệch = lần so sánh − lần gốc.
+Different,Khác
+Inputs differ,Đầu vào khác nhau
+Locked (no input snapshot). It cannot be recalculated or edited; duplicate it to create a new costing run.,"Đã khóa (không có ảnh chụp đầu vào). Không tính lại, không sửa được; dùng Nhân bản để tạo lần tính mới."
+Locked · snapshot {0}. It cannot be recalculated or edited; duplicate it to create a new costing run.,"Đã khóa · ảnh chụp {0}. Không tính lại, không sửa được; dùng Nhân bản để tạo lần tính mới."
+Only in base run,Chỉ ở lần gốc
+Only in compared run,Chỉ ở lần so sánh
+Only services with a difference,Chỉ dịch vụ có chênh lệch
+"Recalculating from the snapshot (schema {0}) matches the locked results in every field: {1} services, {2} explanation lines, {3} reconciliation lines.","Tính lại từ ảnh chụp (lược đồ {0}) trùng kết quả đã khóa ở mọi trường: {1} dịch vụ, {2} dòng giải trình, {3} dòng đối soát."
+Recalculating from the snapshot…,Đang tính lại từ ảnh chụp…
+Reproduction does not match,Tái lập không khớp
+Reproduction matches,Tái lập trùng khớp
+Saving the input snapshot…,Đang lưu ảnh chụp đầu vào…
+Select two costing runs to compare.,Chọn hai lần tính giá để so sánh.
+Service / component,Dịch vụ / cấu phần
+Services,Dịch vụ
+"The lock was refused. If the inputs changed after the run, run costing again, then lock.","Không khóa được. Nếu đầu vào đã đổi sau lần tính, hãy chạy tính giá lại rồi khóa."
+"The system will recalculate from the current data to check, then save the input snapshot.","Hệ thống sẽ tính lại từ dữ liệu hiện tại để kiểm, rồi lưu ảnh chụp đầu vào."
+The two costing runs give the same result for every service.,Hai lần tính giá cho cùng kết quả ở mọi dịch vụ.
+Total full cost difference,Tổng chênh lệch giá thành
+Total {0} differences,Tổng {0} khác biệt
+With difference,Có chênh lệch
