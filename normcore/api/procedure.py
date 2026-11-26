@@ -669,6 +669,16 @@ def _ai_access(technical_service, department=None):
 			_deny(_("Bạn không có quyền với khoa này"))
 
 
+def _legal_documents(names):
+	"""{tên mục: tên NC Legal Document chứa mục} (NORM-65: `legal_document` là Link tới tên văn bản)."""
+	if not names:
+		return {}
+	rows = frappe.db.sql(
+		"SELECT name, legal_document FROM `tabNC Legal Section` WHERE name IN %s", (tuple(names),)
+	)
+	return dict(rows)
+
+
 def _doc_numbers(names):
 	if not names:
 		return {}
@@ -866,8 +876,8 @@ def run_ai_draft(draft_job, technical_service, department, doctor_request, extra
 	try:
 		_job_set(draft_job, status="running", user=user)
 		sources = _collect_sources(technical_service, extra_sections, strict=False)
-		numbers = _doc_numbers([s["name"] for s in sources])
-		check_sources = [dict(s, doc_number=numbers.get(s["name"])) for s in sources]
+		owners = _legal_documents([s["name"] for s in sources])
+		check_sources = [dict(s, legal_document=owners.get(s["name"])) for s in sources]
 		service = frappe.db.get_value(
 			"NC Technical Service", technical_service, ["service_code", "service_name"], as_dict=True
 		)

@@ -130,9 +130,10 @@ class NCClinicalProcedure(Document):
 		self._check_verbatim_quotes()
 
 	def _check_verbatim_quotes(self):
-		"""DI-08 (ASM-024-08): đoạn trích phải có nguyên văn trong mục NC Legal Section được dẫn.
+		"""DI-08: đoạn trích phải có nguyên văn trong mục NC Legal Section được dẫn.
 
-		Chỉ kiểm khi `legal_section` là tên một mục có thật; trích dẫn tay dạng chữ tự do không kiểm được.
+		`legal_section` là Link (NORM-65, ASM-024-16) nên mọi trích dẫn có mục đều được kiểm; tên không tồn tại
+		đã bị kiểm Link từ chối trước khi tới đây.
 		"""
 		from normcore.ai import citation
 

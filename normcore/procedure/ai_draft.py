@@ -162,7 +162,7 @@ def build_rows(draft, sources, doctor_request):
 			{
 				"relation": rel,
 				"legal_section": it["section"],
-				"legal_document": src.get("doc_number") or "",
+				"legal_document": src.get("legal_document") or "",
 				"quote": it["quote"],
 				"deviation_reason": resolve_deviation_reason(it.get("request_excerpt"), doctor_request)
 				if rel == citation.REL_DEVIATION

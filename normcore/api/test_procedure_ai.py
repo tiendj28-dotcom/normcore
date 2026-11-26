@@ -166,7 +166,8 @@ class TestDI08(FrappeTestCase):
 	def test_DI_08_doan_trich_nguyen_van(self):
 		self.assertRaises(frappe.ValidationError, self._cite, self.sec["1"], "nhịn ăn 8 giờ")
 		self._cite(self.sec["1"], "nhịn ăn 6 giờ, trước khi  thực hiện")  # khác khoảng trắng/dấu câu
-		self._cite("Điều 5", "chữ tự do không bị kiểm")
+		# NORM-65 (ASM-024-16): legal_section là Link, chữ tự do không còn hợp lệ
+		self.assertRaises(frappe.LinkValidationError, self._cite, "Điều 5", "chữ tự do")
 
 
 SECTION_KEYS = (

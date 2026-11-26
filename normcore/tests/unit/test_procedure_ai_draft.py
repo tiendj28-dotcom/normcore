@@ -2,7 +2,7 @@ import unittest
 
 from normcore.procedure import ai_draft as d
 
-SRC = [{"name": "LS-1", "doc_number": "12/QĐ", "plain_text": "Nhịn ăn 6 giờ. Đặt đường truyền."}]
+SRC = [{"name": "LS-1", "legal_document": "LD-1", "plain_text": "Nhịn ăn 6 giờ. Đặt đường truyền."}]
 
 
 def cit(q, rel="Theo hướng dẫn", **kw):
@@ -35,7 +35,7 @@ def test_parse_va_build_5_buoc():
 	assert all(rows[0]["relation"] == "Theo hướng dẫn" for rows in r.citations.values())
 	assert r.sections["overview"].startswith("<p>&lt;b&gt;")
 	assert r.steps[0]["ai_suggested"] == 1 and r.resources[0][0]["ai_suggested"] == 1
-	assert r.citations[("step", 0)][0]["legal_document"] == "12/QĐ"
+	assert r.citations[("step", 0)][0]["legal_document"] == "LD-1"
 
 
 def test_TC_AI_02_build_rows_mot_trich_dan_sai():
