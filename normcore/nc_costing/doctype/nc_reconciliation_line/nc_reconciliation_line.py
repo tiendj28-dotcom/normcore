@@ -15,6 +15,8 @@ class NCReconciliationLine(Document):
 	def validate(self):
 		prev = None if self.is_new() else self.get_doc_before_save()
 		if prev is None:
+			if (self.recon_type or "Tài chính") == "Tài chính" and not (self.cost_center and self.cost_category):
+				frappe.throw(_("Dòng đối soát tài chính cần trung tâm chi phí và loại chi phí"))
 			return
 		changed = [
 			f.fieldname
