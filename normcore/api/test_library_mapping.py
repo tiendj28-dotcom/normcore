@@ -230,3 +230,76 @@ class TestLibraryMappingConfirm(MappingTestBase):
 		self.assertEqual(api.confirm_exact(doc.name), {"confirmed": 1})
 		self.assertEqual(api.suggest_mappings(doc.name)["sections"], 3)
 		self.assertEqual(api.remove_mapping(row), {"removed": 1})
+
+
+class RecordingProvider:
+	"""Provider giả lập ghi lại `sources` mà gateway chuyển cho nhà cung cấp (không gọi mạng)."""
+
+	def __init__(self):
+		from normcore.ai.providers.mock import MockProvider
+
+		self.inner = MockProvider()
+		self.sources = None
+
+	def complete(self, purpose, template_code, variables, sources, *, system=None, user=None):
+		self.sources = sources
+		return self.inner.complete(purpose, template_code, variables, sources, system=system, user=user)
+
+
+class TestLibraryMappingSources(MappingTestBase):
+	def _draft(self, service):
+		from normcore.ai import gateway
+
+		provider = RecordingProvider()
+		sources = api.get_draft_sources(service)
+		res = gateway.complete(
+			"DRAFT_PROCEDURE", "DRAFT_PROCEDURE", {"service": service}, sources, provider=provider
+		)
+		return provider.sources, frappe.get_doc("NC AI Log", res.log_name).source_sections
+
+	def test_TC_SVC_02_chi_muc_da_xac_nhan_vao_nguon_ai(self):
+		doc = self.make_doc("MAP/20")
+		s2 = section_by_no(doc, "2")
+		self.assertEqual(s2.service_mappings[0].mapping_status, "Đề xuất")
+		sent, logged = self._draft(self.name_svc)
+		self.assertEqual(sent, [])
+		self.assertNotIn(s2.name, logged)
+		self.assertNotIn("SIÊU ÂM BỤNG MẪU", logged)
+		# sau khi xác nhận ánh xạ
+		api.confirm_mappings(doc.name, [s2.service_mappings[0].name])
+		sent, logged = self._draft(self.name_svc)
+		self.assertEqual([x["name"] for x in sent], [s2.name])
+		self.assertIn(s2.name, logged)
+
+	def test_FR_SVC_007_nguon_chi_truong_cho_phep(self):
+		from normcore.ai import guard
+
+		doc = self.make_doc("MAP/21")
+		api.confirm_exact(doc.name)
+		s1 = section_by_no(doc, "1")
+		out = api.get_draft_sources(self.code_svc)
+		self.assertEqual([x["name"] for x in out], [s1.name])
+		allowed = guard.ALLOWED_SOURCES["NC Legal Section"]
+		for x in out:
+			self.assertTrue(set(x) <= allowed)
+		self.assertIn("plain_text", out[0])
+		# mục hết hiệu lực dù đã xác nhận: bỏ khi valid_only
+		s1.db_set("validity_status", "Hết hiệu lực")
+		self.assertEqual(api.get_draft_sources(self.code_svc), [])
+		self.assertEqual(len(api.get_draft_sources(self.code_svc, valid_only=False)), 1)
+
+	def test_FR_SVC_007_sap_theo_van_ban_roi_so_muc_va_khong_trung(self):
+		d1, d2 = self.make_doc("MAP/22"), self.make_doc("MAP/23")
+		for d in (d1, d2):
+			s = section_by_no(d, "3")
+			s.append("service_mappings", {"technical_service": self.other_svc, "mapping_status": "Đã xác nhận"})
+			s.save()
+			s = section_by_no(d, "1")
+			s.append("service_mappings", {"technical_service": self.other_svc, "mapping_status": "Đã xác nhận"})
+			s.save()
+		out = api.get_draft_sources(self.other_svc)
+		keys = [(frappe.db.get_value("NC Legal Section", x["name"], "legal_document"), x["section_no"]) for x in out]
+		self.assertEqual(len(keys), 4)
+		self.assertEqual(len(set(keys)), 4)
+		self.assertEqual([k[1] for k in keys if k[0] == d1.name], ["1", "3"])
+		self.assertEqual(keys, sorted(keys, key=lambda k: (frappe.db.get_value("NC Legal Document", k[0], "doc_number"), int(k[1]))))

@@ -593,3 +593,26 @@ def remove_mapping(row):
 	sec.set("service_mappings", [r for r in sec.service_mappings if r.name != row])
 	sec.save()
 	return {"removed": 1}
+
+
+def get_draft_sources(technical_service, valid_only=True):
+	"""Cửa duy nhất dựng nguồn gửi AI cho một dịch vụ (FR-SVC-007; FEAT-024 gọi hàm này).
+
+	Chỉ mục có ánh xạ "Đã xác nhận" với dịch vụ, mặc định chỉ mục còn hiệu lực (ASM-022-07);
+	qua `guard.build_source` nên chỉ mang các trường được phép gửi AI.
+	"""
+	from normcore.ai import guard
+
+	validity_sql = " AND s.validity_status = 'Còn hiệu lực'" if valid_only else ""
+	rows = frappe.db.sql(
+		"SELECT DISTINCT s.name, s.section_no, s.heading, s.plain_text, d.doc_number"
+		" FROM `tabNC Legal Section` s"
+		" JOIN `tabNC Legal Document` d ON d.name = s.legal_document"
+		" JOIN `tabNC Section Service Map` m ON m.parent = s.name AND m.parenttype = 'NC Legal Section'"
+		" AND m.parentfield = 'service_mappings'"
+		f" WHERE m.technical_service = %s AND m.mapping_status = %s{validity_sql}",
+		(technical_service, mapping.CONFIRMED),
+		as_dict=True,
+	)
+	rows.sort(key=lambda r: (normalize_doc_number(r.doc_number), natural_key(r.section_no)))
+	return [guard.build_source("NC Legal Section", r) for r in rows]
