@@ -48,8 +48,8 @@
    "label": "Phiên bản quy trình",
    "fieldtype": "Link",
    "options": "NC Clinical Procedure",
-   "reqd": 1,
-   "set_only_once": 1
+   "set_only_once": 1,
+   "description": "Tự điền khi lưu: quy trình đã ban hành mới nhất của dịch vụ và khoa."
   },
   {
    "fieldname": "observed_on",

@@ -8,6 +8,7 @@ frappe.dom.set_style(`
 .nc-ts-cell { display: flex; flex-direction: column; margin: 0; }
 .nc-ts-input { min-height: 44px; min-width: 88px; max-width: 100%; }
 .nc-ts-panel .btn { min-height: 44px; min-width: 44px; }
+@media (max-width: 1199px) { .form-layout [data-fieldname="lines"] { display: none; } }
 `);
 
 function nc_ts_render(frm, data) {

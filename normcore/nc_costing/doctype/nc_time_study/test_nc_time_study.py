@@ -85,6 +85,22 @@ class TestNCTimeStudy(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, self._new().insert)
 		self.assertRaises(frappe.ValidationError, self._new(procedure=self.proc.name).insert)
 
+	def test_luu_phieu_moi_khi_chua_chon_procedure(self):
+		"""QA: Desk chặn khi procedure bắt buộc; nay trường không bắt buộc, controller tự điền khi lưu."""
+		self.assertFalse(frappe.get_meta("NC Time Study").get_field("procedure").reqd)
+		doc = frappe.get_doc(
+			{"doctype": "NC Time Study", "technical_service": self.service, "department": self.dept}
+		)
+		doc.insert()
+		self.assertEqual(doc.procedure, self.proc.name)
+		self.assertEqual(len(doc.lines), 6)
+
+	def test_luu_phieu_moi_thieu_quy_trinh_bao_loi_tieng_viet(self):
+		frappe.db.set_value("NC Clinical Procedure", self.proc.name, "workflow_state", "Nháp")
+		with self.assertRaises(frappe.ValidationError) as cm:
+			self._new().insert()
+		self.assertIn("chưa có quy trình đã ban hành", str(cm.exception))
+
 	def test_quy_trinh_khong_khop_khoa_bi_tu_choi(self):
 		make_base("DV-BG", "K02")
 		self.assertRaises(

@@ -24,7 +24,7 @@ class TestTimeStudyUi(unittest.TestCase):
 		self.assertRegex(self.js, r"\.nc-ts-panel \.btn \{[^}]*min-height: 44px[^}]*min-width: 44px")
 
 	def test_khong_chieu_rong_co_dinh_lon_hon_768(self):
-		for px in re.findall(r"(?:min-)?width:\s*(\d+)px", self.js):
+		for px in re.findall(r"(?<!max-)(?:min-)?width:\s*(\d+)px", self.js):
 			self.assertLessEqual(int(px), 768)
 		self.assertIn("flex-wrap: wrap", self.js)
 
@@ -118,3 +118,23 @@ class TestTimeStudyReportUi(unittest.TestCase):
 		self.assertTrue(used)
 		self.assertEqual(sorted(used - vi), [])
 		self.assertIsNone(HEX.search(self.js))
+
+
+class TestTimeStudyFormFixes(unittest.TestCase):
+	"""Sửa theo QA (verdict rework 90cb6b0): bảng con lines ẩn dưới 1200 px; procedure không bắt buộc ở form."""
+
+	def test_bang_con_lines_an_duoi_1200px(self):
+		js = (DIR / "nc_time_study.js").read_text(encoding="utf-8")
+		self.assertRegex(
+			js, r"@media \(max-width: 1199px\) \{[^}]*\[data-fieldname=\"lines\"\][^}]*display: none"
+		)
+
+	def test_procedure_khong_reqd_de_luu_phieu_moi(self):
+		import json
+
+		fields = {
+			f["fieldname"]: f
+			for f in json.loads((DIR / "nc_time_study.json").read_text(encoding="utf-8"))["fields"]
+		}
+		self.assertFalse(fields["procedure"].get("reqd"))
+		self.assertEqual(fields["procedure"]["fieldtype"], "Link")
