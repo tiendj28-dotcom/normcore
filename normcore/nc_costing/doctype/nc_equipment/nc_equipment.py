@@ -50,7 +50,9 @@ class NCEquipment(Document):
 				)
 		return errors
 
-	def indicative(self, on: date | None = None, expired_mode: str | None = resources.ZERO) -> dict:
+	def indicative(
+		self, on: date | None = None, expired_mode: str | None = resources.ZERO, include_depr: bool = True
+	) -> dict:
 		"""FR-RES-006, 007: khấu hao năm và đơn giá giờ máy tại `on`; không lưu (data-model 3.5)."""
 		on = getdate(on) if on else getdate()
 		mode = self.acquisition_mode
@@ -63,6 +65,7 @@ class NCEquipment(Document):
 			self.annual_contract_cost,
 			on,
 			expired_mode,
+			include_depr,
 		)
 		share = Decimal(1)
 		if self.department_allocations:

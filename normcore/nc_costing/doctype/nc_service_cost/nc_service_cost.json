@@ -10,7 +10,23 @@
   "norm_set",
   "calc_status",
   "calc_message",
+  "volume",
   "direct_labor",
+  "direct_drug",
+  "direct_supply",
+  "direct_equipment",
+  "direct_infra",
+  "direct_utility",
+  "alloc_labor",
+  "alloc_drug_supply",
+  "alloc_depreciation",
+  "alloc_utility",
+  "alloc_management",
+  "full_cost",
+  "accumulation",
+  "obligation",
+  "calculated_price",
+  "rounded_price",
   "lines"
  ],
  "fields": [
@@ -20,50 +36,169 @@
    "fieldtype": "Link",
    "reqd": 1,
    "options": "NC Costing Run",
-   "in_list_view": 1
+   "in_list_view": 1,
+   "read_only": 1
   },
   {
    "fieldname": "technical_service",
    "label": "Dịch vụ",
    "fieldtype": "Link",
    "options": "NC Technical Service",
-   "in_list_view": 1
+   "in_list_view": 1,
+   "read_only": 1
   },
   {
    "fieldname": "department",
    "label": "Khoa",
    "fieldtype": "Link",
-   "options": "NC Department"
+   "options": "NC Department",
+   "read_only": 1
   },
   {
    "fieldname": "norm_set",
    "label": "Bộ định mức",
    "fieldtype": "Link",
-   "options": "NC Norm Set"
+   "options": "NC Norm Set",
+   "read_only": 1
   },
   {
    "fieldname": "calc_status",
    "label": "Kết quả",
    "fieldtype": "Select",
    "options": "Thành công\nLỗi\nCảnh báo",
-   "in_list_view": 1
+   "in_list_view": 1,
+   "read_only": 1
   },
   {
    "fieldname": "calc_message",
    "label": "Thông báo",
-   "fieldtype": "Small Text"
+   "fieldtype": "Small Text",
+   "read_only": 1
   },
   {
    "fieldname": "direct_labor",
    "label": "Chi phí nhân công trực tiếp",
    "fieldtype": "Currency",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "lines",
    "label": "Dòng chi phí",
    "fieldtype": "Table",
-   "options": "NC Service Cost Line"
+   "options": "NC Service Cost Line",
+   "read_only": 1
+  },
+  {
+   "fieldname": "volume",
+   "label": "Sản lượng",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "direct_drug",
+   "label": "Chi phí trực tiếp: thuốc",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "direct_supply",
+   "label": "Chi phí trực tiếp: vật tư",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "direct_equipment",
+   "label": "Chi phí trực tiếp: thiết bị",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "direct_infra",
+   "label": "Chi phí trực tiếp: hạ tầng",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "direct_utility",
+   "label": "Chi phí trực tiếp: tiện ích",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alloc_labor",
+   "label": "Phân bổ: nhân công",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alloc_drug_supply",
+   "label": "Phân bổ: thuốc và vật tư",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alloc_depreciation",
+   "label": "Phân bổ: khấu hao",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alloc_utility",
+   "label": "Phân bổ: tiện ích",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alloc_management",
+   "label": "Phân bổ: quản lý",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "full_cost",
+   "label": "Giá thành toàn bộ",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accumulation",
+   "label": "Tích lũy",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "obligation",
+   "label": "Nghĩa vụ tài chính",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "calculated_price",
+   "label": "Giá tính toán",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rounded_price",
+   "label": "Giá làm tròn",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,

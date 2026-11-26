@@ -151,3 +151,74 @@ class TestNCCostingRun(FrappeTestCase):
 		run.reload()
 		self.assertEqual(run.status, "Tính lỗi")
 		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 0)
+
+
+from normcore.tests import accounting_fixtures as af  # noqa: E402
+
+
+class TestNCCostingRunInputs(FrappeTestCase):
+	"""FR-COST-001, TC-COST-19."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		make_base()
+		self.params = make_param_set()
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def _doc(self, **over):
+		from normcore.tests.utils import costing_run_inputs
+
+		data = {
+			"doctype": "NC Costing Run",
+			"title": "Lần tính đầu vào",
+			"fiscal_year": 2026,
+			"costing_date": "2026-12-31",
+			"parameter_set": self.params.name,
+			**costing_run_inputs(),
+		}
+		data.update(over)
+		return frappe.get_doc({k: v for k, v in data.items() if v is not None})
+
+	def test_TC_COST_19_tao_lan_tinh_thieu_dau_vao_bi_tu_choi(self):
+		with self.assertRaises(frappe.MandatoryError):
+			self._doc(parameter_set=None).insert(ignore_permissions=True)
+		for field in ("accounting_import", "price_category"):
+			with self.subTest(thieu=field), self.assertRaises(frappe.MandatoryError):
+				self._doc(**{field: None}).insert(ignore_permissions=True)
+		draft = frappe.get_doc(
+			{
+				"doctype": "NC Accounting Import",
+				"fiscal_year": 2027,
+				"accounting_regime": "Hành chính sự nghiệp",
+				"source_file": af.make_file(af.make_xlsx(af.GOLDEN_ROWS)),
+			}
+		).insert(ignore_permissions=True)
+		self.assertEqual(draft.status, "Nháp")
+		with self.assertRaisesRegex(frappe.ValidationError, "chưa chốt"):
+			self._doc(accounting_import=draft.name).insert(ignore_permissions=True)
+		ok = self._doc().insert(ignore_permissions=True)
+		self.assertEqual(ok.status, "Nháp")
+
+	def test_khoa_dau_vao_khi_da_tinh(self):
+		run = self._doc().insert(ignore_permissions=True)
+		run.db_set("status", "Đã tính")
+		run.reload()
+		run.fiscal_year = 2030
+		with self.assertRaisesRegex(frappe.ValidationError, "không sửa được đầu vào"):
+			run.save(ignore_permissions=True)
+		with self.assertRaisesRegex(frappe.ValidationError, "không sửa được đầu vào"):
+			frappe.client.set_value("NC Costing Run", run.name, "fiscal_year", 2031)
+		run.reload()
+		run.append("scope_services", {"technical_service": make_base()[0]})
+		with self.assertRaisesRegex(frappe.ValidationError, "không sửa được đầu vào"):
+			run.save(ignore_permissions=True)
+		run.reload()
+		run.title = "Đổi tên vẫn được"
+		run.save(ignore_permissions=True)
+		run.db_set("status", "Tính lỗi")
+		run.reload()
+		run.fiscal_year = 2032
+		run.save(ignore_permissions=True)
