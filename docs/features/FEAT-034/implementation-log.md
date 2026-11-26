@@ -8,3 +8,4 @@
 | T04 | `with_bench.sh 'migrate && run-tests --module normcore.api.test_norm_cls && ... normcore.api.test_norm'` | OK (5 + 32 test). Phần 'bộ thiếu hệ thống không xác nhận được' của TC-CLS-29 làm ở T06 (cần set_blockers trong confirm_set) | 19d6366 |
 | T05 | `with_bench.sh 'migrate && run-tests --module normcore.api.test_norm_cls && normcore.api.test_norm'`; `pytest normcore/tests/golden/test_norm_golden.py` | OK (10 + 32); golden 4 passed. Lệch thiết kế: `export_norm_set` không đưa vào `actions` (test cũ test_quyen_norm_set_auditor_chi_doc đòi `actions` của Auditor rỗng, không sửa test): ASM-034-24, giao diện luôn hiện nút Xuất | 3376f65 |
 | T06 | cùng lệnh T05 | OK (14 + 32) | 631147b |
+| T07 | cùng lệnh T05 | OK (18 + 32) | 9f9a81a |
