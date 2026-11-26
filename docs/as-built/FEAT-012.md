@@ -1,7 +1,7 @@
 # As-Built FEAT-012 — Bộ định mức theo bước: khởi tạo, sửa, xác nhận, khóa
 
 Issue NORM-39. FR: FR-NORM-001..014, FR-NORM-016. UC-009, SCR-DSK-013, SCR-DSK-014. TC-NORM-01..07, 09..12.
-Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica), 2026-11-26. Giới hạn: giao diện chưa kiểm bằng trình duyệt (chỉ kiểm tĩnh và `bench build`); QA chưa kiểm bằng trình duyệt (Playwright). Test `test_FR_AUD_001_khoa_bo_dinh_muc` đã đổi vế theo Quyết định Lead (ASM-012-17) và đạt.
+Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica), 2026-11-26. Giao diện đã kiểm bằng Playwright (xem acceptance.md). Test `test_FR_AUD_001_khoa_bo_dinh_muc` đã đổi vế theo Quyết định Lead (ASM-012-17) và đạt.
 
 ## Đã làm
 - **Logic thuần** `normcore/norm/` (khởi tạo từ quy trình, `line_errors`, `duplicates`, `confirm_blockers`, `effective_parameter_set`, `TRANSITIONS`) và `normcore/costing/provisional.py` (chi phí tạm tính; lượng áp dụng qua `engine.applied_qty`, 11 dòng DV-TEST-A khớp `golden_engine.direct_lines`).
@@ -17,7 +17,7 @@ Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica), 2026
 ## Nợ kỹ thuật, ghi chú
 - Các trường [1.1] (FEAT-034), FR-NORM-015 (FEAT-013), đề xuất AI (FEAT-025), cờ `needs_update` (FEAT-008) chưa làm; trường đã có để mở rộng.
 - ASM-012-17: `test_FR_AUD_001_khoa_bo_dinh_muc` đổi vế từ-trạng-thái thành "Đã xác nhận chuyên môn" theo Quyết định Lead.
-- Chưa kiểm giao diện bằng mắt.
+- Giao diện đã được QA kiểm bằng Playwright (site cục bộ, 1366×768); xem acceptance.md.
 
 ## ASM
 ASM-012-01..17 (`docs/decisions/assumptions/FEAT-012.md`); AMD-012-01, CF-012-01. ASM-012-03, 04 theo Quyết định Lead trên NORM-39; ASM-012-17 theo Quyết định Lead.

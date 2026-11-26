@@ -15,18 +15,31 @@
 | Hai lỗ đi vòng FR-NORM-010/011 của Code review lần 1 | test mới `test_TC_NORM_02_insert_truc_tiep...`, `test_khoa_tu_nhap_bi_tu_choi_va_bo_khoa_khong_sua_qua_client` đạt | Đạt |
 | Giao diện bằng trình duyệt (SCR-DSK-013/014, 1366×768) | **Chưa kiểm** bằng Playwright; chỉ có test tĩnh `test_norm_grid_ui.py` và `bench build` | Giới hạn, ghi ở As-Built |
 
-Kết luận: accepted.
+## Kiểm lại ở commit 75f4942561fd11ae39bbb93d775fd2e75607caeb (sau sửa giao diện)
 
-## Kiểm giao diện bằng Playwright (site cục bộ từ nhánh PR, 1366×768, dữ liệu dựng bằng fixture, đã xóa site)
+| Hạng mục | Bằng chứng | Kết quả |
+| :-- | :-- | :-- |
+| Site sạch `normcore-verify.test`, toàn bộ test | Ran 1118 tests, OK, rc=0; site đã xóa | Đạt |
+| pytest unit + golden, độ phủ | 567 passed, phủ 99% | Đạt |
+| check_conventions, build_rtm | không lỗi mới | Đạt |
+| Diff test từ `b06a8ed` | chỉ thêm test (test_norm.py, test_norm_grid_ui.py), không xóa/nới | Đạt |
 
-Kết luận cập nhật: **rework**. Phần mã/test đạt như trên, nhưng giao diện có 2 lỗi (ảnh đính ở bình luận NORM-39).
+### Giao diện bằng Playwright (site cục bộ từ nhánh PR, 1366×768, dữ liệu dựng bằng fixture, đã xóa site)
 
 | Màn hình / TC | Vai trò | Kết quả |
 | :-- | :-- | :-- |
-| SCR-DSK-013 `/app/nc-norm-set` danh sách | Clinician | KHÔNG ĐẠT: cột Mã số hiện chuỗi `<a href=...>` thô (`nc_norm_set_list.js:10-13`); nút "Khởi tạo bộ định mức" hiện |
-| SCR-DSK-014 `/app/norm-grid/<bộ>` mở lưới | Clinician | KHÔNG ĐẠT: hộp thoại lỗi "Bạn không có quyền Đọc hoặc Chọn đối với NC Job Title" (`NormGrid.vue:151`, `ncLink` 279-298; `frappe.client.validate_link` 403); ô nguồn lực dòng Nhân lực trống. Lưới, cảnh báo "Còn 6 dòng chưa đủ điều kiện", chi phí tạm tính vẫn hiện |
-| TC-NORM-12 xác nhận dòng L004 | Clinician | Đạt: dòng hiện "✓ clin.ui", các dòng khác vẫn "Xác nhận" |
-| Bộ ở "Đã xác nhận chuyên môn", nút theo vai trò | Finance | Đạt: có "Khóa", "Trả lại"; thông báo "Không sửa được" |
-| TC-NORM-06 khóa, sửa bị từ chối | Finance | Đạt: bộ chuyển "Đã khóa", banner "Tạo phiên bản mới"; `save_line` sau khóa trả 403 |
-| Auditor mở lưới | Auditor | Đạt: không có nút "Thêm dòng"; không hộp thoại lỗi |
-| TC-NORM-04, 05, 07, 09, 10, 11 trên giao diện | — | Chưa kiểm (dừng vì lỗi ở trên); đã có test API/unit đạt |
+| SCR-DSK-013 danh sách, cột Mã số, nút "Khởi tạo bộ định mức" | Clinician | Đạt (lỗi cũ đã sửa; ảnh 11) |
+| SCR-DSK-014 mở lưới, nhãn nguồn lực nhân lực, không hộp thoại lỗi | Clinician, Dept Head | Đạt (lỗi cũ đã sửa; ảnh 12, 21) |
+| TC-NORM-10 xóa đơn vị | Clinician | Đạt: "Dòng L004 thiếu: Đơn vị" |
+| TC-NORM-07 đánh dấu loại trừ không lý do | Clinician | Đạt: yêu cầu chọn Lý do loại trừ thuộc danh sách |
+| TC-NORM-04 hao hụt vượt trần 5% (nhập 9) | Clinician | Đạt: "hao hụt 9% vượt trần, cần nhập Lý do vượt trần"; nhập lý do thì lưu |
+| TC-NORM-11 căn cứ "Định mức ban hành" + tham chiếu | Clinician | Đạt: API trả basis và basis_ref đã lưu |
+| TC-NORM-12 xác nhận dòng | Clinician | Đạt: chỉ L004 hiện người xác nhận |
+| TC-NORM-05 xác nhận bộ còn dòng chưa đủ | Dept Head | Đạt: từ chối, liệt kê "L005: Chưa xác nhận", "L006: Chưa xác nhận, Chưa liên kết danh mục", bộ vẫn Nháp |
+| TC-NORM-09 thêm dòng điện không chọn bước | Dept Head | Đạt: bắt buộc chọn bước hoặc "Chung cho cả dịch vụ"; chọn chung thì thêm L007 |
+| TC-NORM-06 khóa, sửa bị từ chối | Finance | Đạt (lần kiểm trước): "Đã khóa", `save_line` 403 |
+| Auditor chỉ đọc | Auditor | Đạt (lần kiểm trước): không có nút Thêm dòng |
+
+Ghi chú nhỏ (không chặn): ô "Gắn với" báo "Please select an item in the list." bằng tiếng Anh (thông báo gốc của trình duyệt); lưu căn cứ trên dòng chưa liên kết nguồn lực (L003) không có phản hồi nào trên giao diện, dòng đã liên kết thì lưu bình thường.
+
+Kết luận: accepted.
