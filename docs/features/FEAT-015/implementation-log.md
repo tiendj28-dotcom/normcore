@@ -10,3 +10,5 @@
 | T06 | `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` | OK, 13 test, có test_FR_COST_015 (enqueue queue="long", Đang tính, progress 100, sự kiện realtime 50→100) | 4dde533 |
 | T07 | `with_bench.sh migrate && run-tests --module normcore.api.test_costing` | OK, 6 test (TC_COST_15 get_explanation, TC_COST_17 check_scope, TC_COST_06 ghi chú, quyền Clinician, Auditor chỉ đọc) | 3599e5d |
 | T08 | `check_conventions.py` 0; `pytest test_permission_matrix test_scope_registry` 20 passed; `with_bench.sh migrate && run-tests test_permissions` OK (3), `test_feat_001` OK (20), `api.test_costing` OK (7, có test_quyen_bang_giai_trinh_truong_khoa_theo_khoa) | xanh; ASM-015-22 | 38855a4 |
+| T09 | `pytest test_form_buttons_i18n test_ui_conventions test_vi_csv_order test_costing_ui` | 29 passed; check_conventions 0 | 69bdcad |
+| T10 | pytest T09 xanh; `with_bench.sh migrate && bench build --app normcore` | build DONE (exit 0) | SHA |
