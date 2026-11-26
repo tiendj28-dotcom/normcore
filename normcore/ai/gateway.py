@@ -158,7 +158,9 @@ def ping(settings=None) -> AIResult:
 	return res
 
 
-def _write_log(purpose, ref_doctype, ref_name, sources, request_hash, response, res, prompt_template=None):
+def _write_log(
+	purpose, ref_doctype, ref_name, sources, request_hash, response, res, prompt_template=None, rejected_citations=0
+):
 	log = frappe.get_doc(
 		{
 			"doctype": "NC AI Log",
@@ -174,7 +176,7 @@ def _write_log(purpose, ref_doctype, ref_name, sources, request_hash, response, 
 			"tokens_out": res.tokens_out,
 			"duration_ms": res.duration_ms,
 			"status": res.status,
-			"rejected_citations": 0,
+			"rejected_citations": rejected_citations,
 		}
 	)
 	log.insert(ignore_permissions=True)  # bản ghi do mã máy chủ tạo; không vai trò nào có quyền tạo
@@ -212,10 +214,20 @@ def _active_template(code):
 	return frappe.get_doc(TEMPLATE, name) if name else None
 
 
-def complete(purpose, template_code, variables, sources, ref_doctype=None, ref_name=None, provider=None):
+def complete(
+	purpose,
+	template_code,
+	variables,
+	sources,
+	ref_doctype=None,
+	ref_name=None,
+	provider=None,
+	postprocess=None,
+):
 	"""Gọi AI qua provider đang cấu hình. Luôn trả AIResult và luôn ghi một NC AI Log, kể cả khi lỗi.
 
-	Thứ tự: hạn mức, mẫu lệnh, gọi, kiểm lược đồ, ghi nhật ký. Không ghi gì ngoài NC AI Log và Notification Log
+	Thứ tự: hạn mức, mẫu lệnh, gọi, kiểm lược đồ, `postprocess`, ghi nhật ký. `postprocess(data) -> (data, rejected)`
+	chạy trước khi ghi log (NC AI Log bất biến) để số trích dẫn bị loại vào log; lỗi trong đó → status "Lỗi". Không ghi gì ngoài NC AI Log và Notification Log
 	(FR-AI-010: không bản nháp dở).
 	"""
 	variables = variables or {}
@@ -230,6 +242,7 @@ def complete(purpose, template_code, variables, sources, ref_doctype=None, ref_n
 	res = AIResult(ok=False, status=ERROR)
 	response_text = ""
 	template_name = None
+	rejected = 0
 
 	used = monthly_usage()
 	if guard.budget_exceeded(used, settings.monthly_token_budget):
@@ -257,6 +270,8 @@ def complete(purpose, template_code, variables, sources, ref_doctype=None, ref_n
 			if errors:
 				res.data = None
 				raise ProviderError("Kết quả AI không đúng lược đồ: " + "; ".join(errors))
+			if postprocess is not None:
+				res.data, rejected = postprocess(res.data)
 			res.ok, res.status = True, OK
 		except ProviderTimeout:
 			res.status = TIMEOUT
@@ -274,6 +289,6 @@ def complete(purpose, template_code, variables, sources, ref_doctype=None, ref_n
 	response_text = _redact(response_text, settings.api_key)
 	res.duration_ms = int((time.monotonic() - start) * 1000)
 	res.log_name = _write_log(
-		purpose, ref_doctype, ref_name, sources, request_hash, response_text, res, template_name
+		purpose, ref_doctype, ref_name, sources, request_hash, response_text, res, template_name, rejected
 	)
 	return res
