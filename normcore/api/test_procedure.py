@@ -3,6 +3,8 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import access
 from normcore.api import procedure as api
+from normcore.nc_library.doctype.nc_legal_document.library_fixtures import make_legal_document
+from normcore.nc_library.doctype.nc_section_service_map.test_nc_section_service_map import make_section
 from normcore.tests.utils import make_base, make_procedure, make_user, publish_procedure
 
 STEP = {"phase": "Thực hiện", "step_title": "Bước mới", "description": "Mô tả bước mới"}
@@ -71,6 +73,11 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self.auditor = make_user("auditor.edit@normcore.test", "NC Auditor")
 		self.finance = make_user("fin.edit@normcore.test", "NC Finance")
 		access.assign_department(self.clin, self.dept)  # FEAT-001: Clinician chỉ ghi được ở khoa được gán
+		# NORM-65: legal_document, legal_section là Link; dùng bản ghi thật thay cho chuỗi tự do
+		self.ld1 = make_legal_document("43/2013/TT-BYT")
+		self.ls1 = {n: make_section(self.ld1, n).name for n in ("5", "6")}
+		self.ld2 = make_legal_document("15/2023/QH15")
+		self.ls2 = make_section(self.ld2, "7").name
 		frappe.set_user(self.clin)
 
 	def tearDown(self):
@@ -243,16 +250,16 @@ class TestProcedureEditorAPI(FrappeTestCase):
 			name,
 			target_step_id="S001",
 			relation="Theo hướng dẫn",
-			legal_document="Thông tư 43/2013/TT-BYT",
-			legal_section="Điều 5",
+			legal_document=self.ld1.name,
+			legal_section=self.ls1["5"],
 			quote="đoạn trích",
 		)
 		b = api.add_citation(
 			name,
 			target_section="Chỉ định",
 			relation="Khác biệt",
-			legal_document="Luật Khám bệnh, chữa bệnh 15/2023/QH15",
-			legal_section="Điều 7",
+			legal_document=self.ld2.name,
+			legal_section=self.ls2,
 			quote="q",
 			deviation_reason="Lý do",
 		)
@@ -260,18 +267,20 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		cits = {x["name"]: x for x in api.get_procedure(name)["citations"]}
 		self.assertEqual(cits[a["name"]]["relation"], "Theo hướng dẫn")
 		self.assertEqual(cits[a["name"]]["quote"], "đoạn trích")
-		self.assertEqual(cits[a["name"]]["legal_document"], "Thông tư 43/2013/TT-BYT")
-		self.assertEqual(cits[a["name"]]["legal_section"], "Điều 5")
-		api.update_citation(name, a["name"], legal_section="Điều 6")
-		self.assertEqual(api.get_procedure(name, step_id="S001")["citations"][0]["legal_section"], "Điều 6")
+		self.assertEqual(cits[a["name"]]["legal_document"], self.ld1.name)
+		self.assertEqual(cits[a["name"]]["legal_section"], self.ls1["5"])
+		api.update_citation(name, a["name"], legal_section=self.ls1["6"])
+		self.assertEqual(
+			api.get_procedure(name, step_id="S001")["citations"][0]["legal_section"], self.ls1["6"]
+		)
 		self.assertEqual(
 			api.get_procedure(name, step_id="S001")["citations"][0]["legal_document"],
-			"Thông tư 43/2013/TT-BYT",
+			self.ld1.name,
 		)
 		self.assertEqual(cits[b["name"]]["deviation_reason"], "Lý do")
 		self.assertEqual(cits[b["name"]]["relation"], "Khác biệt")
-		self.assertEqual(cits[b["name"]]["legal_document"], "Luật Khám bệnh, chữa bệnh 15/2023/QH15")
-		self.assertEqual(cits[b["name"]]["legal_section"], "Điều 7")
+		self.assertEqual(cits[b["name"]]["legal_document"], self.ld2.name)
+		self.assertEqual(cits[b["name"]]["legal_section"], self.ls2)
 		self.assertEqual(cits[b["name"]]["quote"], "q")
 		self.assertEqual(cits[c["name"]]["relation"], "Chưa có căn cứ")
 		# lọc theo bước hoặc phần đang chọn
@@ -291,6 +300,40 @@ class TestProcedureEditorAPI(FrappeTestCase):
 			frappe.ValidationError, api.add_citation, name, target_step_id="S001", target_section="Chỉ định"
 		)
 
+	def test_NORM_65_trich_dan_link_van_ban_muc(self):
+		name = self._draft()
+		self._steps(name, 1)
+		# chọn mục: văn bản lấy từ mục
+		a = api.add_citation(name, target_step_id="S001", legal_section=self.ls1["5"])
+		self.assertEqual(a["legal_document"], self.ld1.name)
+		# chỉ văn bản (trích dẫn cấp văn bản) vẫn được
+		b = api.add_citation(name, target_step_id="S001", legal_document=self.ld2.name)
+		self.assertEqual((b["legal_document"], b["legal_section"]), (self.ld2.name, None))
+		# mục không thuộc văn bản đã chọn: từ chối
+		self.assertRaises(
+			frappe.ValidationError,
+			api.add_citation,
+			name,
+			target_step_id="S001",
+			legal_document=self.ld2.name,
+			legal_section=self.ls1["5"],
+		)
+		# giá trị không phải tên bản ghi: từ chối
+		self.assertRaises(
+			frappe.LinkValidationError, api.add_citation, name, target_step_id="S001", legal_section="Điều 5"
+		)
+		self.assertRaises(
+			frappe.LinkValidationError,
+			api.add_citation,
+			name,
+			target_step_id="S001",
+			legal_document="Thông tư 43/2013/TT-BYT",
+		)
+		self.assertTrue({self.ld1.name, self.ld2.name} <= {d["name"] for d in api.list_legal_documents()})
+		self.assertEqual(
+			sorted(s["name"] for s in api.list_legal_sections(self.ld1.name)), sorted(self.ls1.values())
+		)
+
 	def test_FR_PROC_013_sao_chep(self):
 		src = self._draft()
 		self._steps(src, 3)
@@ -301,8 +344,8 @@ class TestProcedureEditorAPI(FrappeTestCase):
 			target_step_id="S003",
 			relation="Khác biệt",
 			deviation_reason="x",
-			legal_document="Thông tư 43/2013/TT-BYT",
-			legal_section="Điều 5",
+			legal_document=self.ld1.name,
+			legal_section=self.ls1["5"],
 		)
 		api.save_sections(src, {"overview": "<p>Đại cương</p>"})
 		frappe.set_user("Administrator")
@@ -314,8 +357,8 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self.assertEqual(new["resources"][0]["step_id"], "S002")  # S003 cũ
 		self.assertEqual(new["resources"][0]["resource_row_id"], "R001")
 		self.assertEqual(new["citations"][0]["target_step_id"], "S002")
-		self.assertEqual(new["citations"][0]["legal_document"], "Thông tư 43/2013/TT-BYT")
-		self.assertEqual(new["citations"][0]["legal_section"], "Điều 5")
+		self.assertEqual(new["citations"][0]["legal_document"], self.ld1.name)
+		self.assertEqual(new["citations"][0]["legal_section"], self.ls1["5"])
 		self.assertEqual(new["copied_from"], src)
 		self.assertEqual(new["sections"][0]["value"], "<p>Đại cương</p>")
 		self.assertEqual(new["workflow_state"], "Nháp")
