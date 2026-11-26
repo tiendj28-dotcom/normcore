@@ -1,6 +1,6 @@
+A draft already exists: {0},Đã có bản đang soạn: {0}
 AI call timeout is set in AI settings.,Thời hạn gọi AI đặt ở Cấu hình AI.
 AI settings,Cấu hình AI
-A draft already exists: {0},Đã có bản đang soạn: {0}
 Account,Tài khoản
 Actions,Thao tác
 Active,Đang dùng,NC Technical Service
@@ -196,8 +196,8 @@ NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
 Needs update,Cần cập nhật
-"New values apply to the next operation, no restart needed.","Giá trị mới áp dụng cho thao tác kế tiếp, không cần khởi động lại."
 Needs update: the procedure has a new version - {0}.,Cần cập nhật: quy trình có phiên bản mới - {0}.
+"New values apply to the next operation, no restart needed.","Giá trị mới áp dụng cho thao tác kế tiếp, không cần khởi động lại."
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -329,16 +329,16 @@ Step code,Mã bước
 Step title,Tên bước
 Steps,Các bước
 Suggested,Đề xuất
-Task,Việc
 Summary of differences,Tóm tắt khác biệt
 Swap direction,Đổi chiều so sánh
+Task,Việc
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
 The procedure will move to,Quy trình sẽ chuyển sang
+"The two versions do not differ in sections, steps or resources.","Hai phiên bản không khác nhau về phần, bước, nguồn lực."
 There are no technical services yet.,Chưa có dịch vụ kỹ thuật nào.
 This department is outside your scope,Khoa này ngoài phạm vi của bạn
-"The two versions do not differ in sections, steps or resources.","Hai phiên bản không khác nhau về phần, bước, nguồn lực."
 This norm set has no lines yet.,Bộ định mức chưa có dòng nào.
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
