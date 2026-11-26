@@ -142,10 +142,46 @@ function load_systems(frm) {
 	});
 }
 
+// FEAT-024: SCR-DSK-006 nút "Soạn quy trình" (UC-004). AI tắt → tạo bản nháp trống (1a), không có chữ AI.
+function add_draft_button(frm) {
+	if (frm.is_new() || !frappe.model.can_create("NC Clinical Procedure")) return;
+	frm.add_custom_button(__("Draft procedure"), () => {
+		if (normcore.ai.enabled()) {
+			normcore.procedure.open_ai_draft_dialog({
+				technical_service: frm.doc.name,
+				service_name: frm.doc.service_name,
+			});
+			return;
+		}
+		frappe.prompt(
+			[{ fieldname: "department", fieldtype: "Link", options: "NC Department", label: __("Department"), reqd: 1 }],
+			(values) =>
+				frappe.call({
+					method: "normcore.api.procedure.create_procedure",
+					args: { technical_service: frm.doc.name, department: values.department },
+					callback(r) {
+						frappe.set_route("procedure-editor", { name: r.message.name });
+					},
+					error() {
+						const existing = frappe.last_response && frappe.last_response.existing_procedure;
+						if (existing) {
+							frm.add_custom_button(__("Open existing procedure"), () =>
+								frappe.set_route("procedure-editor", { name: existing })
+							);
+						}
+					},
+				}),
+			__("Draft procedure"),
+			__("Create")
+		);
+	});
+}
+
 frappe.ui.form.on("NC Technical Service", {
 	refresh(frm) {
 		load_chain(frm);
 		load_systems(frm);
+		add_draft_button(frm);
 	},
 	is_paraclinical(frm) {
 		load_systems(frm);
