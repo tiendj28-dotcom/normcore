@@ -17,4 +17,4 @@ Giới hạn: giao diện (norm-grid, hộp thoại sao chép, form mẫu địn
 - `scripts/check_conventions.py` thêm hàng ma trận quyền "Mẫu định mức" cho DocType mới.
 
 ## Test đã chạy
-Site sạch: 1338 test OK. pytest 708 passed, độ phủ `normcore/costing` + `benchmark` 99%. TC-CLS-29..33 đạt (xem `acceptance.md`).
+Site sạch sau merge develop: 1390 test OK. pytest 743 passed, độ phủ `normcore/costing` + `benchmark` 99%. TC-CLS-29..33 đạt (xem `acceptance.md`).
