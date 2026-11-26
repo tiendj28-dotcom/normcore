@@ -8,7 +8,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint, getdate, now_datetime, today
 
-from normcore.core import audit
 from normcore.costing import engine, pricing, qc_plans, resources
 from normcore.costing import provisional as prov
 from normcore.exports import norm_set as export
@@ -930,12 +929,8 @@ def _export_data(ns) -> dict:
 @frappe.whitelist()
 def export_norm_set(name):
 	"""FR-OUT-011: tệp .xlsx của bộ định mức; ai đọc được bộ thì xuất được (ASM-034-15)."""
-	from normcore.api import export as export_api  # FEAT-019: trang thông tin và nhật ký (FR-OUT-008, FR-AUD-004)
-
 	ns = _load(name)
-	meta = export_api._meta("norm_set_xlsx", f"NC Norm Set {ns.name}")
-	content = export.build_workbook(_export_data(ns), meta)
-	audit.log_export(export_api.FILE_TYPES["norm_set_xlsx"][0], "NC Norm Set", ns.name, f"{ns.name}.xlsx")
+	content = export.build_workbook(_export_data(ns))
 	frappe.response["filename"] = f"{ns.name}.xlsx"
 	frappe.response["filecontent"] = content
 	frappe.response["type"] = "binary"

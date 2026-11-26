@@ -13,7 +13,6 @@ FORMS = {
 	"nc_service_cost": ROOT / "nc_costing" / "doctype" / "nc_service_cost" / "nc_service_cost.js",
 	"nc_norm_set": ROOT / "nc_costing" / "doctype" / "nc_norm_set" / "nc_norm_set.js",
 }
-GRID = ROOT / "public" / "js" / "norm_grid" / "NormGrid.vue"
 I18N = re.compile(r"__\(\s*(\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*')")
 
 
@@ -44,13 +43,6 @@ class TestExportUi(unittest.TestCase):
 		self.assertIn("service_cost: frm.doc.name", text(FORMS["nc_service_cost"]))
 		self.assertIn("norm_set: frm.doc.name", text(FORMS["nc_norm_set"]))
 
-	def test_luoi_dinh_muc_xuat_pdf(self):
-		vue = text(GRID)
-		self.assertIn("Export PDF", vue)
-		self.assertIn("normcore.api.export.export_file", vue)
-		self.assertIn("norm_set_pdf", vue)
-		self.assertIn("Export Excel", vue)  # đường FEAT-034 giữ nguyên
-
 	def test_hook_registry_khai_bao_tep(self):
 		reg = json.loads(text(ROOT / "hook_registry" / "FEAT-019.json"))
 		self.assertEqual(reg["app_include_js"], ["/assets/normcore/js/export_dialog.js"])
@@ -61,9 +53,6 @@ class TestExportUi(unittest.TestCase):
 		used = set()
 		for p in (DIALOG, *FORMS.values()):
 			used |= strings(p)
-		vue = {m for m in re.findall(r'__\("([^"]+)"\)', text(GRID))}
-		for needed in ("Export PDF",):
-			self.assertIn(needed, vue)
-		for s in ("Export documents", "Export explanation PDF", "Export norm set", "Export PDF") + tuple(strings(DIALOG)):
+		for s in ("Export documents", "Export explanation PDF", "Export norm set") + tuple(strings(DIALOG)):
 			self.assertIn(s, vi)
 		self.assertTrue(vi["Export documents"])

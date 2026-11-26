@@ -10,7 +10,6 @@ Download Excel,Tải Excel
 Download PDF,Tải PDF
 Download archive,Tải tệp nén
 "Each file records the costing run, parameter set, time and exporter; the export is written to the audit log.","Mỗi tệp ghi mã lần tính giá, bộ tham số, thời điểm và người xuất; việc xuất được ghi vào nhật ký."
-Export PDF,Xuất PDF
 Export documents,Xuất hồ sơ
 Export error,Lỗi xuất
 Export explanation PDF,Xuất PDF giải trình

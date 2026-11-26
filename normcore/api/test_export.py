@@ -201,13 +201,6 @@ class TestExportApi(FrappeTestCase):
 			self.assertEqual(html.count(f"<td>L{i:02d}</td>"), 1)
 		for s in ("Bước 1", "Bước 3", "Chung cho cả dịch vụ", "Căn cứ", "Người xác nhận", HEAD):
 			self.assertIn(s, html)
-		# đường FEAT-034
-		frappe.set_user(FIN)
-		norm_api.export_norm_set(ns.name)
-		frappe.set_user("Administrator")
-		wb = wb_of(frappe.response["filecontent"])
-		self.assertEqual(self._info(wb)["Mã lần tính giá"], meta_mod.NO_RUN)
-		self.assertEqual(self._events(ns.name)[-1]["detail"].split(":")[0], "Bộ định mức (Excel)")
 
 	# ---- nén ----
 	def test_ho_so_nen_chay_nen_va_loi(self):
