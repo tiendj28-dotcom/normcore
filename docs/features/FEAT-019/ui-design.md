@@ -7,7 +7,7 @@
 
 ## Chiến lược hiện thực
 - SCR-DSK-028 là **một hộp thoại `frappe.ui.Dialog` dùng chung** trong `normcore/public/js/export_dialog.js`, gọi bằng `normcore.export.open({run})`, `normcore.export.open({service_cost})`, `normcore.export.open({norm_set, run?})`. Nạp toàn cục qua `normcore/hook_registry/FEAT-019.json` (`app_include_js`), không sửa `hooks.py`. Không làm trang Vue.
-- Nút mở hộp thoại thêm vào form có sẵn: `nc_costing_run.js` (FEAT-015/017/018), `nc_service_cost.js` (SCR-DSK-023), `nc_norm_set.js`, `NormGrid.vue` (lưới định mức, FEAT-012/034).
+- Nút mở hộp thoại thêm vào form có sẵn: `nc_costing_run.js` (FEAT-015/017/018), `nc_service_cost.js` (SCR-DSK-023), `nc_norm_set.js`.
 - Chuỗi nguồn tiếng Anh qua `__()` như các form hiện có; bản dịch tiếng Việt ở `normcore/translations/vi.d/FEAT-019.csv` (nhãn dưới đây là bản tiếng Việt hiển thị). Nhãn loại tệp lấy từ `get_export_options` (máy chủ đã dịch bằng `_()`).
 - Tải tệp: `open_url_post("/api/method/normcore.api.export.export_file", {file_type, run, service_cost, norm_set})` — trình duyệt tải trực tiếp, hộp thoại giữ mở để xuất tiếp.
 
@@ -19,9 +19,8 @@
 | Form NC Costing Run | — | trạng thái khác | Không hiện nút. Dải "Đã tính" có sẵn không đổi |
 | NC Service Cost (SCR-DSK-023) | "Xuất PDF giải trình" (`btn-default`) | lần tính cha "Đã khóa" (`run_status` của `get_explanation`) | `normcore.export.open({service_cost: frm.doc.name})` |
 | Form NC Norm Set | "Xuất bộ định mức" (`btn-default`, nhóm "Xuất") | luôn (ai đọc được bộ) | `normcore.export.open({norm_set: frm.doc.name})` |
-| Lưới định mức (`NormGrid.vue`) | "Xuất PDF" (`btn-default btn-sm`) cạnh "Xuất Excel" có sẵn | luôn | `open_url_post(... {file_type: "norm_set_pdf", norm_set})` — không mở hộp thoại (một loại tệp) |
 
-"Xuất Excel" có sẵn ở lưới giữ nguyên đường `api.norm.export_norm_set` (FEAT-034); máy chủ nay thêm trang thông tin và ghi nhật ký.
+Lưới định mức (`NormGrid.vue`) **không đổi** (AMD-019-01): không có nút "Xuất PDF" ở lưới; nút "Xuất Excel" có sẵn giữ đường `api.norm.export_norm_set` của FEAT-034 (không có trang thông tin, không ghi nhật ký — giới hạn đã biết, DEF-019-01). Xuất bộ định mức có truy vết bằng hộp thoại từ form NC Norm Set.
 
 ## SCR-DSK-028 Xuất hồ sơ (hộp thoại)
 
@@ -64,4 +63,4 @@ Không hiện Phụ lục I và bảng so sánh giá (ASM-019-14). Lựa chọn 
 
 ## Kiểm
 - 1366 × 768: hộp thoại `large` không tràn ngang; section dài cuộn trong thân hộp thoại.
-- `tests/unit/test_export_ui.py` (tĩnh): `export_dialog.js` gọi đúng `normcore.api.export.get_export_options`, `export_file`, `export_bundle`; lắng nghe `nc_export_bundle`; mọi chuỗi `__()` có dòng trong `vi.d/FEAT-019.csv`; `nc_costing_run.js`, `nc_service_cost.js`, `nc_norm_set.js` gọi `normcore.export.open`; `NormGrid.vue` có "Export PDF" gọi `export_file` với `norm_set_pdf`; `hook_registry/FEAT-019.json` khai báo `export_dialog.js`. Không sửa test UI cũ; các test cũ (`test_costing_ui.py`, `test_costing_lock_ui.py`, `test_norm_cls_ui.py`, `test_form_buttons_i18n.py`) phải vẫn xanh — nếu một test cũ so khớp đúng tập nút/API của form, thêm nút theo cách không đổi tập đó (như ASM-018-15: gọi bằng tên phương thức đầy đủ trong `export_dialog.js`, không thêm vào hằng `API` của form).
+- `tests/unit/test_export_ui.py` (tĩnh): `export_dialog.js` gọi đúng `normcore.api.export.get_export_options`, `export_file`, `export_bundle`; lắng nghe `nc_export_bundle`; mọi chuỗi `__()` có dòng trong `vi.d/FEAT-019.csv`; `nc_costing_run.js`, `nc_service_cost.js`, `nc_norm_set.js` gọi `normcore.export.open`; `NormGrid.vue` và `api/norm.py` không đổi (guard FEAT-014 `test_luoi_va_api_norm_khong_doi` đạt); `hook_registry/FEAT-019.json` khai báo `export_dialog.js`. Không sửa test UI cũ; các test cũ (`test_costing_ui.py`, `test_costing_lock_ui.py`, `test_norm_cls_ui.py`, `test_form_buttons_i18n.py`) phải vẫn xanh — nếu một test cũ so khớp đúng tập nút/API của form, thêm nút theo cách không đổi tập đó (như ASM-018-15: gọi bằng tên phương thức đầy đủ trong `export_dialog.js`, không thêm vào hằng `API` của form).
