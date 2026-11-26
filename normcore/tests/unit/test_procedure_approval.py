@@ -74,3 +74,18 @@ class TestApproval(unittest.TestCase):
 		got = ap.overdue(pend, date(2026, 1, 8), 7)
 		self.assertEqual([p["name"] for p in got], ["a"])
 		self.assertEqual(ap.overdue(pend, date(2026, 1, 7), 7), [])
+
+
+class TestWithdraw(unittest.TestCase):
+	def test_thu_hoi_next_state(self):
+		self.assertEqual(ap.next_state("Đã ban hành", "Thu hồi"), "Đã thu hồi")
+
+	def test_thu_hoi_khong_vao_transitions(self):
+		self.assertEqual(len(ap.TRANSITIONS), 7)
+		self.assertIn(ap.WITHDRAW, ap.ACTIONS)
+		self.assertNotIn(ap.WITHDRAW, ap.TRANSITIONS)
+
+	def test_thu_hoi_sai_trang_thai(self):
+		for st in ("Nháp", "Đã thay thế", "Đã thu hồi"):
+			with self.assertRaises(ValueError):
+				ap.next_state(st, "Thu hồi")
