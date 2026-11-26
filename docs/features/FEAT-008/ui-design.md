@@ -53,7 +53,7 @@ Màu chỉ qua indicator pill của Desk và `var(--green-…)`/`var(--red-…)`
 - Bảng có `<th scope>`; nhãn trạng thái có chữ, không chỉ màu.
 - 1366 × 768: hai cột của khối "Phần" mỗi cột ≥ 520 px; bảng bước và nguồn lực cuộn ngang trong khung nếu thiếu chỗ, không cuộn cả trang theo chiều ngang.
 
-## 4. NC Norm Set — form và danh sách (chờ Q1, theo PA1)
+## 4. NC Norm Set — form và danh sách (PA1, ASM-008-14)
 
 Loại: Form/List DocType chuẩn (SCR-DSK-013 là danh sách, FEAT-012 làm đầy đủ; FEAT-008 chỉ phần cờ).
 - Form (`nc_norm_set.js`): khi `needs_update` = 1, `frm.dashboard.set_headline_alert` dải `yellow`: "Cần cập nhật: quy trình có phiên bản mới — {step_change_note}." kèm liên kết "So sánh phiên bản" → `procedure-editor/<procedure>/compare/<bản ban hành mới nhất>`. Hai trường hiển thị chỉ đọc.

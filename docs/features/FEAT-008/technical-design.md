@@ -2,7 +2,7 @@
 
 Issue NORM-50. Nguồn: `srs.md` FR-WF-009, FR-WF-010, FR-WF-011, FR-WF-012; `use-cases.md` UC-007; `data-model.md` 3.3 (NC Clinical Procedure và bảng con), 3.5 (NC Norm Set: `needs_update`, `step_change_note`), mục 4 (dòng "Quy trình", "Bộ định mức"), 5.1 (dòng "Thu hồi"), 5.2, DI-01, DI-02, DI-07; `architecture.md` ADR-002, ADR-010, ADR-011, ADR-014; `ux-foundations.md` SCR-DSK-011; `design.md` mục 3, 5; TC-WF-05, TC-WF-06, TC-WF-07. Phụ thuộc FEAT-007 (DONE; As-Built `docs/as-built/FEAT-007.md`).
 
-Giả định: `docs/decisions/assumptions/FEAT-008.md` (ASM-008-01..13). Câu hỏi mở cho Lead: **Q1** (mục 9, cờ "Cần cập nhật" trên NC Norm Set khi FEAT-012 chưa DONE). Không có AMD.
+Giả định: `docs/decisions/assumptions/FEAT-008.md` (ASM-008-01..14). Q1 (mục 9) đã có Quyết định Lead: PA1 (ASM-008-14). Không có AMD.
 
 ## 1. Phạm vi
 
@@ -10,7 +10,7 @@ Giả định: `docs/decisions/assumptions/FEAT-008.md` (ASM-008-01..13). Câu h
 | :-- | :-- |
 | FR-WF-009 (Must) | "Sửa đổi" trên quy trình "Đã ban hành" mới nhất của (dịch vụ, khoa) → bản nháp `version_no` kế tiếp, sao chép toàn bộ nội dung (8 phần, `doctor_request`, bước, nguồn lực, trích dẫn), **giữ nguyên** `step_id`, `resource_row_id`, `next_step_seq`, `next_resource_seq`; `previous_version` = bản nguồn. Đã có bản đang soạn/duyệt của (dịch vụ, khoa) → trả bản đó, không tạo mới (UC-007 1d). Bản nháp đi qua đúng luồng FEAT-007 (UC-007 bước 3) |
 | FR-WF-010 (Should) | So sánh hai phiên bản cùng (dịch vụ, khoa): khác biệt theo phần (8 phần cố định), theo bước (`step_id`), theo dòng nguồn lực (`resource_row_id`); mỗi mục mang trạng thái thêm / bỏ / đổi / giữ nguyên; màn hình SCR-DSK-011 |
-| FR-WF-011 (Must) | Khi một phiên bản được "Ban hành": mọi NC Norm Set đang dựa trên một phiên bản cũ hơn của cùng (dịch vụ, khoa), trạng thái khác "Đã thay thế", được đặt `needs_update = 1` và `step_change_note` liệt kê mã bước thêm, bỏ, đổi. **Phụ thuộc Q1** (mục 9) |
+| FR-WF-011 (Must) | Khi một phiên bản được "Ban hành": mọi NC Norm Set đang dựa trên một phiên bản cũ hơn của cùng (dịch vụ, khoa), trạng thái khác "Đã thay thế", được đặt `needs_update = 1` và `step_change_note` liệt kê mã bước thêm, bỏ, đổi. Theo PA1 (ASM-008-14) |
 | FR-WF-012 (Should) | NC Director "Thu hồi" quy trình "Đã ban hành": bắt buộc lý do; trạng thái "Đã thu hồi"; lý do ghi vào sổ sự kiện và Comment "Workflow"; thông báo người soạn. Không có TC riêng; vẫn có test (mục 7) |
 
 Không làm:
@@ -29,7 +29,7 @@ Mọi trường cần đã có (`version_no`, `previous_version`, `workflow_stat
 
 Trạng thái "Đã thu hồi" đã có trong fixture Workflow State và Workflow (danh sách state) từ FEAT-007. **Không thêm transition "Thu hồi" vào fixture Workflow** (ASM-008-02): test cũ `test_feat_007_workflow::test_workflow_fixture_khop_transitions` (fixture = `approval.TRANSITIONS`) và `tests/unit/test_procedure_approval::test_transitions_la_du_lieu` (`len == 7`) khóa luồng duyệt 7 transition; luật cứng 1 không cho sửa. Thu hồi đi đường hệ thống giống "Đã thay thế" của FEAT-007 (`db_set` + sổ sự kiện), kiểm vai trò trong `apply_action`.
 
-### 2.2 NC Norm Set — thêm hai trường (chờ Q1, phương án đề xuất PA1)
+### 2.2 NC Norm Set — thêm hai trường (PA1, ASM-008-14)
 DocType đã có từ FEAT-000 (khung, chưa có hai trường dưới). `data-model.md` 3.5 đã định nghĩa cả hai; FEAT-008 **mở rộng, không tạo DocType**.
 
 | Trường | Nhãn | Kiểu | BB | Ghi chú |
@@ -76,7 +76,7 @@ Mở rộng hàm có sẵn, không thêm endpoint:
 - `get_review` trả thêm `last_withdraw` (`{by, at, reason}` từ sự kiện "Chuyển trạng thái" tới "Đã thu hồi" mới nhất; None nếu không có) cho dải lý do ở giao diện.
 - NC Auditor, NC Finance, NC Department Head, NC Council Member: PermissionError (qua `_actor_error`). Trạng thái khác "Đã ban hành" (kể cả "Đã thay thế"): ValidationError "Hành động Thu hồi không áp dụng ở trạng thái {0}" (đã có sẵn trong `apply_action`).
 
-### 3.5 Mở rộng "Ban hành" — FR-WF-011 (chờ Q1)
+### 3.5 Mở rộng "Ban hành" — FR-WF-011 (PA1, ASM-008-14)
 Trong `_after_action` nhánh "Ban hành", sau `supersede_due`: gọi `_flag_norm_sets(doc)`:
 1. Lấy NC Norm Set có `technical_service`, `department` của `doc`, `status != "Đã thay thế"`, `procedure` ≠ `doc.name` và `procedure.version_no < doc.version_no` (ASM-008-07).
 2. Với mỗi `procedure` cũ khác nhau: `diff.step_changes(old, new)` → `diff.format_step_note(...)`.
@@ -107,7 +107,7 @@ Thêm `WITHDRAW`, `ACTIONS`; `next_state` tìm trong `ACTIONS`. `TRANSITIONS`, `
 ## 5. Giao diện (chi tiết ở `ui-design.md`)
 - Form Desk NC Clinical Procedure: nút "Sửa đổi" (Đã ban hành, người có quyền ghi), "So sánh phiên bản" (có ≥ 2 phiên bản đọc được), "Thu hồi" (Đã ban hành, NC Director; hộp thoại lý do).
 - `procedure-editor`: cùng ba nút ở thanh trên khi chỉ đọc; chế độ so sánh SCR-DSK-011 trong cùng trang (route `procedure-editor/<name>/compare/<other>`; ADR-010 chỉ ba trang Vue, ASM-008-12).
-- NC Norm Set: form có dải `yellow` "Cần cập nhật: <ghi chú>" khi `needs_update`; danh sách có cột và bộ lọc "Cần cập nhật" (chờ Q1).
+- NC Norm Set: form có dải `yellow` "Cần cập nhật: <ghi chú>" khi `needs_update`; danh sách có cột và bộ lọc "Cần cập nhật".
 
 ## 6. Quyền
 | Thao tác | Được | Không được (có test) |
@@ -145,4 +145,4 @@ Hiện trạng: NC Norm Set **đã có trên develop** từ FEAT-000 (khung walk
 - **PA1 (đề xuất):** FEAT-008 thêm hai trường `needs_update`, `step_change_note` vào NC Norm Set đã có (mở rộng, không tạo DocType; không cần patch), gắn cờ khi ban hành (mục 3.5). TC-WF-06 test đủ ngay ở FEAT-008 bằng bộ định mức tạo qua `make_norm_set` của FEAT-000. FEAT-012 giữ hai trường này.
 - **PA2:** FEAT-008 chỉ làm logic thuần `diff.step_changes`/`format_step_note` và hàm `_flag_norm_sets` có test đơn vị; không đổi NC Norm Set; TC-WF-06 (tích hợp) chuyển sang FEAT-012. FEAT-008 khi đó không đủ DoD cho FR-WF-011 (Must) và TC-WF-06 → cần Lead ghi nhận ngoại lệ.
 
-Task T06 (tasks.md) viết theo PA1; Lead chọn PA2 thì BA sửa T06 và dòng 4 mục 7.
+**Quyết định Lead:** PA1 (bình luận `01a215c3-0642-7c84-890a-45607e456bdb` trên NORM-50). PA2 bị loại vì để FR Must thiếu DoD. FEAT-008 không gỡ cờ, không làm UC-007 1c. Ghi ở ASM-008-14; T06 theo PA1.
