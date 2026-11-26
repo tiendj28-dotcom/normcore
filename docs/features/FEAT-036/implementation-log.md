@@ -10,3 +10,4 @@
 | T06 | `scripts/with_bench.sh 'bench --site normcore.test migrate && bench --site normcore.test run-tests --module normcore.api.test_costing'` | Ran 11 OK | 570268c |
 | T07 | `pytest normcore/tests/unit/test_form_buttons_i18n.py … test_costing_cls_ui.py` | 37 passed | fbf7fa1 |
 | T08 | pytest T07; `scripts/with_bench.sh 'bench --site normcore.test migrate && bench build --app normcore && … run-tests --module normcore.api.test_costing'` | pytest xanh; build thoát 0; api.test_costing Ran 11 OK | cb3c544 |
+| T09 | `python3 docs/tools/build_rtm.py docs` | VAN DE: 0; có `docs/as-built/FEAT-036.md`, `docs/rtm-testref/FEAT-036.md` | (T09) |
