@@ -321,3 +321,6 @@ scheduler_events = {
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
+
+# FR-NOTI-003: nguồn việc chờ xử lý; mỗi nguồn là hàm (user) -> list[dict] theo hợp đồng core/notify.py
+normcore_pending_sources = ["normcore.api.procedure_workflow.pending_for"]
