@@ -48,3 +48,38 @@ class TestTimeStudyUi(unittest.TestCase):
 
 	def test_cuon_vao_giua_khi_focus(self):
 		self.assertIn('scrollIntoView({ block: "center" })', self.js)
+
+
+class TestNormSetFormButton(unittest.TestCase):
+	"""AMD-014-01: nút trên form NC Norm Set chỉ điều hướng, không gọi API."""
+
+	@classmethod
+	def setUpClass(cls):
+		cls.js = (ROOT / "nc_costing" / "doctype" / "nc_norm_set" / "nc_norm_set.js").read_text(
+			encoding="utf-8"
+		)
+		cls.block = cls.js.split("FEAT-014, AMD-014-01", 1)[1].split("NC Finance", 1)[0]
+
+	def test_chi_hien_o_nhap_va_co_quyen_ghi(self):
+		self.assertIn('frm.doc.status === "Nháp"', self.block)
+		self.assertIn('frappe.model.can_write("NC Norm Set")', self.block)
+
+	def test_dieu_huong_toi_report_voi_bo_loc(self):
+		self.assertIn('frappe.set_route("query-report", "NC Time Study Result"', self.block)
+		for key in ("technical_service", "department", "procedure", "norm_set"):
+			self.assertIn(key, self.block)
+
+	def test_khong_goi_api(self):
+		self.assertNotIn("frappe.call", self.block)
+
+	def test_luoi_va_api_norm_khong_doi(self):
+		import subprocess
+
+		root = ROOT.parent
+		out = subprocess.run(
+			["git", "diff", "origin/develop", "--", "normcore/public/js/norm_grid/", "normcore/api/norm.py"],
+			cwd=root,
+			capture_output=True,
+			text=True,
+		)
+		self.assertEqual(out.stdout, "")

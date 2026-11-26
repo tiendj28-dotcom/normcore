@@ -74,7 +74,9 @@ class TestNCTimeStudy(FrappeTestCase):
 		doc.insert()
 		self.assertEqual(doc.procedure, self.proc.name)
 		ids = [ln.step_id for ln in doc.lines]
-		self.assertEqual(ids, [self.steps[0], self.steps[0], self.steps[1], self.steps[1], self.steps[2], self.steps[3]])
+		self.assertEqual(
+			ids, [self.steps[0], self.steps[0], self.steps[1], self.steps[1], self.steps[2], self.steps[3]]
+		)
 		self.assertEqual(list(dict.fromkeys(ids)), self.steps)
 		self.assertEqual(doc.observer, "Administrator")
 
@@ -108,7 +110,10 @@ class TestNCTimeStudy(FrappeTestCase):
 		)
 		doc.insert()
 		doc = frappe.get_doc("NC Time Study", doc.name)
-		got = [(ln.step_id, ln.job_title, ln.headcount, ln.labor_minutes, ln.equipment, ln.machine_minutes) for ln in doc.lines]
+		got = [
+			(ln.step_id, ln.job_title, ln.headcount, ln.labor_minutes, ln.equipment, ln.machine_minutes)
+			for ln in doc.lines
+		]
 		self.assertEqual(
 			got,
 			[(s2, "BS", 1, 20, None, 0), (s2, "DD", 1, 20, None, 0), (s2, None, 0, 0, "EQ1", 20)],
@@ -154,7 +159,9 @@ class TestNCTimeStudy(FrappeTestCase):
 		council = make_user("council.ts@normcore.test", "NC Council Member")
 		frappe.set_user(council)
 		self.assertFalse(frappe.has_permission("NC Time Study", "read", doc))
-		self.assertRaises(frappe.PermissionError, frappe.get_doc("NC Time Study", doc.name).check_permission, "read")
+		self.assertRaises(
+			frappe.PermissionError, frappe.get_doc("NC Time Study", doc.name).check_permission, "read"
+		)
 		self.assertRaises(frappe.PermissionError, self._new().insert)
 
 	def test_quyen_time_study_auditor_chi_doc(self):

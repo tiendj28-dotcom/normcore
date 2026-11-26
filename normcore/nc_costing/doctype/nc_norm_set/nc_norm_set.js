@@ -31,6 +31,17 @@ frappe.ui.form.on("NC Norm Set", {
 		frm.add_custom_button(__("Open norm grid"), () => frappe.set_route("norm-grid", frm.doc.name)).addClass(
 			"btn-primary"
 		);
+		// FEAT-014, AMD-014-01: chỉ điều hướng tới báo cáo; mọi lệnh ghi đi qua normcore.api.time_study.
+		if (frm.doc.status === "Nháp" && frappe.model.can_write("NC Norm Set")) {
+			frm.add_custom_button(__("Apply time study result"), () =>
+				frappe.set_route("query-report", "NC Time Study Result", {
+					technical_service: frm.doc.technical_service,
+					department: frm.doc.department,
+					procedure: frm.doc.procedure,
+					norm_set: frm.doc.name,
+				})
+			);
+		}
 		if (frm.doc.status === "Đã xác nhận chuyên môn" && frappe.user.has_role("NC Finance")) {
 			frm.add_custom_button(__("Lock"), () => {
 				frappe.confirm(__("After locking, the norm set can no longer be edited."), () => {

@@ -6,7 +6,10 @@ from normcore.norm import time_study as ts
 
 
 def _case(d, minutes, step="S002", job="BS"):
-	return {"observed_on": d, "lines": [{"step_id": step, "job_title": job, "headcount": 1, "labor_minutes": minutes}]}
+	return {
+		"observed_on": d,
+		"lines": [{"step_id": step, "job_title": job, "headcount": 1, "labor_minutes": minutes}],
+	}
 
 
 def test_TC_TS_01_trung_vi_5_ca_va_6_ca():
@@ -14,13 +17,15 @@ def test_TC_TS_01_trung_vi_5_ca_va_6_ca():
 	r = ts.summarize(cases, 5, {"S002": 2})
 	assert r["rows"][0]["median_minutes"] == 20 and r["rows"][0]["n"] == 5
 	assert r["sufficient"] and r["n_cases"] == 5
-	r6 = ts.summarize(cases + [_case(date(2026, 11, 6), 21)], 5, {"S002": 2})
+	r6 = ts.summarize([*cases, _case(date(2026, 11, 6), 21)], 5, {"S002": 2})
 	assert r6["rows"][0]["median_minutes"] == 20.5 and r6["n_cases"] == 6
 
 
 def test_thieu_ca_va_ngay():
 	r = ts.summarize([_case(date(2026, 11, 3), 10), _case(date(2026, 11, 1), 12)], 5, {})
-	assert not r["sufficient"] and r["first_date"] == date(2026, 11, 1) and r["last_date"] == date(2026, 11, 3)
+	assert (
+		not r["sufficient"] and r["first_date"] == date(2026, 11, 1) and r["last_date"] == date(2026, 11, 3)
+	)
 	empty = ts.summarize([], 5, {})
 	assert empty["first_date"] is None and empty["rows"] == []
 
@@ -40,7 +45,11 @@ def test_sap_xep_hang():
 		]
 	}
 	rows = ts.summarize([case], 1, {"S1": 1, "S2": 2})["rows"]
-	assert [(r["step_id"], r["kind"]) for r in rows] == [("S1", "labor"), ("S2", "labor"), ("S2", "equipment")]
+	assert [(r["step_id"], r["kind"]) for r in rows] == [
+		("S1", "labor"),
+		("S2", "labor"),
+		("S2", "equipment"),
+	]
 
 
 def test_lines_from_procedure():
@@ -87,7 +96,7 @@ def test_line_errors_trung_va_hop_le():
 
 
 def test_basis_ref():
-	assert ts.basis_ref(6, date(2026, 11, 1), date(2026, 11, 20)) == "6 ca bấm giờ, 01/11/2026–20/11/2026"
+	assert ts.basis_ref(6, date(2026, 11, 1), date(2026, 11, 20)) == "6 ca bấm giờ, 01/11/2026–20/11/2026"  # noqa: RUF001
 	assert ts.basis_ref(6, "2026-11-01", "2026-11-20").endswith("20/11/2026")
 	assert ts.basis_ref(3, None, None) == "3 ca bấm giờ"
 
@@ -97,7 +106,13 @@ def test_plan_apply():
 		{"line_id": "L1", "step_id": "S002", "resource_doctype": "NC Job Title", "resource": "BS"},
 		{"line_id": "L2", "step_id": "S002", "resource_doctype": "NC Equipment", "resource": "EQ1"},
 		{"line_id": "L3", "step_id": "S002", "resource_doctype": "NC Job Title", "resource": "DD"},
-		{"line_id": "L4", "step_id": "S002", "resource_doctype": "NC Job Title", "resource": "BS", "service_level": 1},
+		{
+			"line_id": "L4",
+			"step_id": "S002",
+			"resource_doctype": "NC Job Title",
+			"resource": "BS",
+			"service_level": 1,
+		},
 	]
 	rows = [
 		{"step_id": "S002", "kind": "labor", "resource": "BS", "median_minutes": 20, "n": 5},

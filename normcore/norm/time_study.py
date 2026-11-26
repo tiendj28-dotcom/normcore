@@ -114,7 +114,7 @@ def _fmt(d) -> str:
 def basis_ref(n_cases: int, first_date, last_date) -> str:
 	if not first_date or not last_date:
 		return f"{n_cases} ca bấm giờ"
-	return f"{n_cases} ca bấm giờ, {_fmt(first_date)}–{_fmt(last_date)}"
+	return f"{n_cases} ca bấm giờ, {_fmt(first_date)}–{_fmt(last_date)}"  # noqa: RUF001
 
 
 def plan_apply(norm_lines: list[dict], rows: list[dict], ref: str) -> tuple[list[dict], list[dict]]:

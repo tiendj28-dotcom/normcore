@@ -24,7 +24,10 @@ class TestTimeStudyApi(FrappeTestCase):
 		self.assertEqual(len(r["steps"]), 4)
 		self.assertEqual([s["step_title"] for s in r["steps"]], ["B1", "B2", "B3", "B4"])
 		self.assertEqual(r["doc"]["procedure"], self.proc.name)
-		labels = {(ln["job_title"], ln["equipment"]): (ln["job_title_label"], ln["equipment_label"]) for ln in r["lines"]}
+		labels = {
+			(ln["job_title"], ln["equipment"]): (ln["job_title_label"], ln["equipment_label"])
+			for ln in r["lines"]
+		}
 		self.assertEqual(labels[("BS", None)][0], "Bác sĩ")
 		self.assertEqual(labels[(None, "EQ1")][1], "Thiết bị thử")
 		self.assertTrue(r["can_write"])
