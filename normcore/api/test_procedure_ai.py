@@ -483,3 +483,45 @@ class TestAISuggestions(AIDraftBase):
 		frappe.cache().set_value(api.AI_JOB_KEY.format(st_job), {"status": "done", "user": "Administrator"})
 		call(api.get_ai_draft_status, st_job)
 		self.assertEqual(api.get_ai_draft_status("khong-co")["status"], "unknown")
+
+	def _reset(self):
+		for name in frappe.get_all("NC Prompt Template", {"template_code": "DRAFT_PROCEDURE"}, pluck="name"):
+			frappe.db.sql("delete from `tabNC Prompt Template` where name=%s", name)
+
+	def _new(self, system="Admin tự soạn"):
+		return frappe.get_doc(
+			{
+				"doctype": "NC Prompt Template",
+				"template_code": "DRAFT_PROCEDURE",
+				"is_active": 1,
+				"system_prompt": system,
+				"user_prompt": "{{ variables | tojson }}",
+				"output_schema": '{"type": "object"}',
+			}
+		).insert(ignore_permissions=True)
+
+	def _names(self):
+		return frappe.get_all(
+			"NC Prompt Template", {"template_code": "DRAFT_PROCEDURE"}, pluck="name", order_by="name"
+		)
+
+	def test_mau_lenh_v1_da_sua_khong_de(self):
+		self._reset()
+		v1 = self._new()  # v1 khác mặc định (Admin đã sửa nội dung)
+		self.assertEqual(v1.name, "DRAFT_PROCEDURE-v1")
+		self.assertEqual(prompts_install.ensure_draft_procedure_v2(), "DRAFT_PROCEDURE-v1")
+		self.assertEqual(self._names(), ["DRAFT_PROCEDURE-v1"])
+		self.assertEqual(
+			frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v1", "system_prompt"), "Admin tự soạn"
+		)
+
+	def test_mau_lenh_admin_da_co_v2_khong_tao_v3(self):
+		self._reset()
+		prompts_install.ensure_default_templates()
+		v2 = self._new()
+		self.assertEqual(v2.name, "DRAFT_PROCEDURE-v2")
+		self.assertEqual(prompts_install.ensure_draft_procedure_v2(), "DRAFT_PROCEDURE-v2")
+		self.assertEqual(self._names(), ["DRAFT_PROCEDURE-v1", "DRAFT_PROCEDURE-v2"])
+		self.assertEqual(
+			frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v2", "system_prompt"), "Admin tự soạn"
+		)
