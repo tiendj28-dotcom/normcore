@@ -4,7 +4,7 @@ from frappe.model.document import Document
 from frappe.utils import cint, getdate, now_datetime, today
 
 from normcore.costing import parameters
-from normcore.norm import validation, workflow
+from normcore.norm import templates, validation, workflow
 from normcore.norm.init_from_procedure import RESOURCE_DOCTYPE_BY_COMPONENT, lines_from_resources
 
 DRAFT = workflow.DRAFT
@@ -35,8 +35,13 @@ LINE_INPUTS = (
 	"is_excluded",
 	"exclude_reason",
 	"ai_suggested",
+	"cost_level",  # FEAT-034
+	"apply_k",
+	"attach_to",
+	"attach_equipment",
+	"template_item",
 )
-HEAD_FIELDS = ("technical_service", "department", "procedure", "version_no")
+HEAD_FIELDS = ("technical_service", "department", "procedure", "version_no", "test_system", "tests_per_tube")
 CONFIRM_FIELDS = ("confirmed_by", "confirmed_on")
 
 
@@ -65,11 +70,61 @@ def effective_wastage_cap(on=None):
 	return float(chosen["wastage_cap"] or 0), chosen["name"]
 
 
+def qc_items_of(test_system) -> set:
+	"""ASM-034-10: mặt hàng của kế hoạch chất lượng của hệ thống (nội kiểm, chuẩn máy)."""
+	if not test_system:
+		return set()
+	plans = frappe.get_all("NC QC Plan", {"test_system": test_system}, pluck="name")
+	items = set()
+	for name in plans:
+		plan = frappe.get_doc("NC QC Plan", name)
+		items |= {r.qc_material for r in plan.iqc_lines if r.qc_material}
+		items |= {r.calibrator for r in plan.calibration_lines if r.calibrator}
+	return items
+
+
+def template_items_of(template) -> list[dict]:
+	if not template:
+		return []
+	return [
+		{
+			"item_name": r.item_name,
+			"component": r.component,
+			"default_cost_level": r.default_cost_level,
+			"is_mandatory": r.is_mandatory,
+		}
+		for r in frappe.get_doc("NC Norm Template", template).items
+	]
+
+
+def cls_ctx(ns) -> dict:
+	"""Ngữ cảnh cận lâm sàng cho norm.validation (dùng chung controller và API)."""
+	svc = frappe.db.get_value(
+		"NC Technical Service", ns.technical_service, ["is_paraclinical", "cls_group"], as_dict=True
+	)
+	return {
+		"paraclinical": bool(svc and svc.is_paraclinical),
+		"cls_group": svc.cls_group if svc else None,
+		"has_test_system": bool(ns.test_system),
+		"qc_items": qc_items_of(ns.test_system),
+		"mandatory_items": template_items_of(ns.norm_template),
+		"template_items": {i["item_name"] for i in template_items_of(ns.norm_template)},
+	}
+
+
 class NCNormSet(Document):
+	def autoname(self):
+		"""ASM-034-02: bộ có hệ thống mang mã hệ thống trong tên; không có thì dùng `autoname` của JSON."""
+		if self.test_system:
+			self.name = (
+				f"DM-{self.technical_service}-{self.department}-{self.test_system}-v{self.version_no}"
+			)
+
 	def validate(self):
 		prev = self.get_doc_before_save()
 		self.validate_frozen(prev)
 		self.validate_status_change(prev)
+		self.validate_test_system(prev)
 		if (
 			self.is_new()
 			and frappe.db.get_value("NC Clinical Procedure", self.procedure, "workflow_state") != PUBLISHED
@@ -79,6 +134,20 @@ class NCNormSet(Document):
 		self.assign_line_ids()
 		if not prev or prev.status == DRAFT:
 			self.validate_lines(prev)
+
+	def validate_test_system(self, prev):
+		"""DI-15 (ASM-034-01): hệ thống phải cùng dịch vụ, cùng khoa; khi tạo mới phải "Đang dùng"."""
+		if not self.test_system:
+			return
+		ts = frappe.db.get_value(
+			"NC Test System", self.test_system, ["technical_service", "department", "status"], as_dict=True
+		)
+		if not ts or ts.technical_service != self.technical_service or ts.department != self.department:
+			frappe.throw(
+				_("Hệ thống xét nghiệm {0} không thuộc dịch vụ/khoa của bộ định mức").format(self.test_system)
+			)
+		if not prev and ts.status != "Đang dùng":
+			frappe.throw(_("Hệ thống xét nghiệm {0} đã ngừng dùng").format(self.test_system))
 
 	# --- khóa nội dung (FR-NORM-012, ASM-012-05) ---
 	def validate_frozen(self, prev):
@@ -140,14 +209,17 @@ class NCNormSet(Document):
 		step_ids = {s.step_id for s in frappe.get_doc("NC Clinical Procedure", self.procedure).steps}
 		cap, _source = effective_wastage_cap()
 		old = {r.name: r for r in prev.lines} if prev else {}
+		base = cls_ctx(self)
+		for r in self.lines:  # ASM-034-07, 08, 09: đặt lại trường phụ thuộc trước khi so dòng cũ
+			r.update(validation.normalize_line(r.as_dict(), base))
 		errors = []
 		for r in self.lines:
 			before = old.get(r.name)
 			if prev:
 				changed = before is None or _inputs(before) != _inputs(r)
 			else:  # khởi tạo từ quy trình: dòng chưa liên kết được lưu (AMD-012-01); dòng thêm tay phải đủ
-				changed = not r.procedure_resource_row
-			ctx = {"step_ids": step_ids, "wastage_cap": cap, "changed": changed}
+				changed = not r.procedure_resource_row and not (self.flags.from_procedure and r.template_item)
+			ctx = {"step_ids": step_ids, "wastage_cap": cap, "changed": changed, **base}
 			errors += validation.line_errors(r.as_dict(), ctx)
 			confirming = self.flags.norm_action == "confirm_line"
 			if confirming:
@@ -181,6 +253,7 @@ def lock_norm_set(ns):
 			"department": ns.department,
 			"status": LOCKED,
 			"name": ["!=", ns.name],
+			"test_system": ns.test_system or ["is", "not set"],  # DI-03 theo hệ thống (ASM-034-14)
 		},
 		pluck="name",
 	):
@@ -197,8 +270,25 @@ def lock_norm_set(ns):
 	return ns.status
 
 
-def create_from_procedure(procedure):
-	"""FR-NORM-001/002: bộ "Nháp" từ quy trình "Đã ban hành", mỗi dòng nguồn lực một dòng định mức."""
+def next_version(service, department, test_system=None) -> int:
+	"""ASM-034-02: version_no lớn nhất + 1 theo (dịch vụ, khoa, hệ thống)."""
+	return (
+		frappe.db.get_value(
+			"NC Norm Set",
+			{
+				"technical_service": service,
+				"department": department,
+				"test_system": test_system or ["is", "not set"],
+			},
+			"max(version_no)",
+		)
+		or 0
+	) + 1
+
+
+def create_from_procedure(procedure, test_system=None):
+	"""FR-NORM-001/002: bộ "Nháp" từ quy trình "Đã ban hành", mỗi dòng nguồn lực một dòng định mức.
+	FEAT-034: gắn hệ thống, áp mẫu đang dùng của nhóm chuyên ngành, đặt nhân k mặc định (ASM-034-03, 04, 06)."""
 	frappe.has_permission("NC Norm Set", "create", throw=True)
 	proc = frappe.get_doc("NC Clinical Procedure", procedure)
 	if proc.workflow_state != PUBLISHED:
@@ -206,21 +296,27 @@ def create_from_procedure(procedure):
 	lines, errors = lines_from_resources([r.as_dict() for r in proc.resources])
 	if errors:
 		frappe.throw("<br>".join(errors))
-	version = (
-		frappe.db.get_value(
-			"NC Norm Set",
-			{"technical_service": proc.technical_service, "department": proc.department},
-			"max(version_no)",
-		)
-		or 0
-	) + 1
+	svc = frappe.db.get_value(
+		"NC Technical Service", proc.technical_service, ["is_paraclinical", "cls_group"], as_dict=True
+	)
+	paraclinical = bool(svc and svc.is_paraclinical)
+	template = None
+	if paraclinical:
+		rows = frappe.get_all("NC Norm Template", fields=["name", "cls_group", "is_active"])
+		template = templates.pick_template(rows, svc.cls_group)
+		if template:
+			lines = templates.apply_template(lines, template_items_of(template), paraclinical)
+	if test_system and paraclinical:
+		lines = templates.default_apply_k(lines)
 	ns = frappe.new_doc("NC Norm Set")
 	ns.update(
 		{
 			"technical_service": proc.technical_service,
 			"department": proc.department,
 			"procedure": proc.name,
-			"version_no": version,
+			"test_system": test_system,
+			"norm_template": template,
+			"version_no": next_version(proc.technical_service, proc.department, test_system),
 			"status": DRAFT,
 		}
 	)
@@ -228,6 +324,7 @@ def create_from_procedure(procedure):
 		frappe.throw(_("Bạn không có quyền tạo bộ định mức cho khoa này"), frappe.PermissionError)
 	for ln in lines:
 		ns.append("lines", ln)
+	ns.flags.from_procedure = True
 	ns.insert()
 	return ns.name
 
