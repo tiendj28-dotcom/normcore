@@ -439,13 +439,13 @@ export default {
 				title: __("Withdraw"),
 				fields: [
 					{ fieldname: "reason", fieldtype: "Small Text", label: __("Withdrawal reason"), reqd: 1 },
-					{ fieldname: "note", fieldtype: "HTML", options: "<p>" + frappe.utils.escape_html(__("After withdrawing, the procedure moves to 'Withdrawn' and can no longer be used as a basis.")) + "</p>" },
+					{ fieldname: "note", fieldtype: "HTML", options: "<p>" + frappe.utils.escape_html(__("After withdrawing, the procedure moves to Withdrawn and can no longer be used as a basis.")) + "</p>" },
 					{ fieldname: "errors", fieldtype: "HTML" },
 				],
 				primary_action_label: __("Withdraw"),
 				primary_action: (values) => {
 					if (!(values.reason || "").trim()) {
-						frappe.msgprint(__("Withdrawal reason is required"));
+						dialog.fields_dict.errors.$wrapper.html('<div role="alert">' + frappe.utils.escape_html(__("Withdrawal reason is required")) + "</div>");
 						return;
 					}
 					this.callWf("apply_action", { procedure: this.doc.name, action: this.withdrawAction, reason: values.reason })

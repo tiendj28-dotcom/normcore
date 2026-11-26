@@ -10,3 +10,4 @@
 | T06 | `scripts/with_bench.sh 'bench --site normcore.test migrate && ... --module normcore.api.test_procedure_norm_flag'`; `python3 scripts/check_conventions.py` | 3 OK; quy ước xanh | 07ca37a |
 | T07 | `scripts/with_bench.sh '... --module normcore.api.test_procedure_compare'` | 2 OK | 3661180 |
 | T08 | `pytest normcore/tests/unit/test_feat_008_ui.py`; `scripts/with_bench.sh 'bench build --app normcore'` | 5 passed; build không lỗi | ec68e4e |
+| T09 | `pytest normcore/tests/unit/test_feat_008_ui.py test_feat_007_ui.py test_procedure_editor_behavior.py`; `scripts/with_bench.sh 'bench build --app normcore'` | 29 passed; build không lỗi, bundle chứa ProcedureCompare. **Chưa** mở trang ở 1366 × 768 bằng trình duyệt (không có trình duyệt trong run này): bố cục dựa trên CSS (bảng cuộn ngang trong khung `nc-cmp__scroll`); để QA kiểm bằng Playwright theo ui-design mục 6 | 8e1c8cb |

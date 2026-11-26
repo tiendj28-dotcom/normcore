@@ -83,7 +83,7 @@ function nc_withdraw(frm) {
 		title: __("Withdraw"),
 		fields: [
 			{ fieldname: "reason", fieldtype: "Small Text", label: __("Withdrawal reason"), reqd: 1 },
-			{ fieldname: "note", fieldtype: "HTML", options: "<p>" + frappe.utils.escape_html(__("After withdrawing, the procedure moves to 'Withdrawn' and can no longer be used as a basis.")) + "</p>" },
+			{ fieldname: "note", fieldtype: "HTML", options: "<p>" + frappe.utils.escape_html(__("After withdrawing, the procedure moves to Withdrawn and can no longer be used as a basis.")) + "</p>" },
 			{ fieldname: "errors", fieldtype: "HTML" },
 		],
 		primary_action_label: __("Withdraw"),
