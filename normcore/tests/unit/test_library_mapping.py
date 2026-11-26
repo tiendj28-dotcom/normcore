@@ -1,8 +1,7 @@
 """FEAT-022 T01: hàm thuần ánh xạ mục hướng dẫn với dịch vụ (FR-SVC-005, FR-SVC-006)."""
 
 import time
-
-import pytest
+import unittest
 
 from normcore.library import mapping as m
 
@@ -118,7 +117,7 @@ def test_stamp_de_xuat_xoa_dau_va_giu_confidence():
 
 
 def test_stamp_trung_dich_vu():
-	with pytest.raises(m.MappingError):
+	with unittest.TestCase().assertRaises(m.MappingError):
 		m.stamp_rows([row(), row(name="r2")], [], "u", "T")
 
 
