@@ -138,6 +138,10 @@ class TestCostingGolden(unittest.TestCase):
 		self.assertEqual(a.direct_total, gres["DV-TEST-A"]["direct"])
 		self.assertEqual(a.price.full_cost, gres["DV-TEST-A"]["full"])
 		self.assertEqual(a.price.rounded_price, gres["DV-TEST-A"]["rounded"])
+		# Số liệu văn bản test-cases.md mục 2.3 (V1): tích lũy và giá tính toán
+		self.assertEqual(a.price.accumulation, D("11205.46"))
+		self.assertEqual(a.price.calculated_price, D("235314.56"))
+		self.assertEqual(a.price.rounded_price, D("235300"))
 
 	def test_TC_COST_07_V4_thieu_don_gia_THUOCX(self):
 		_rate_for.missing_thuocx = True
