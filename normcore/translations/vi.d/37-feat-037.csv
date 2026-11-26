@@ -1,0 +1,37 @@
+Actual stock issue,Xuất kho thực tế
+Calculated quantity,Lượng tính được
+"Calculated quantity = norm quantity × k × results (plus per-tube, per-batch, per-day, per-period and internal quality control lines). Stock issue is converted to the norm unit.","Lượng tính được = định mức × k × số kết quả (và các dòng theo ống mẫu, theo mẻ, theo ngày-máy, theo kỳ, nội kiểm). Xuất kho đổi về đơn vị định mức."
+Confirm not reconciled: {0},Xác nhận chưa đối soát: {0}
+Costing date,Ngày tính giá
+Detail,Chi tiết
+Fiscal year,Năm tài chính
+HIS volume,Sản lượng HIS
+Material and volume reconciliation,Đối soát vật chất và sản lượng
+Material and volume reconciliation is only prepared for the Actual 12 months scenario. This costing run uses the scenario {0}.,Đối soát vật chất và sản lượng chỉ lập cho kịch bản Thực tế 12 tháng. Lần tính này dùng kịch bản {0}.
+Material reconciliation is not prepared for this volume scenario.,Không lập đối soát vật chất cho kịch bản sản lượng này.
+Material reconciliation pending,Chưa đối soát vật chất
+"Material reconciliation: {0} lines over tolerance, {1} departments not reconciled need an explanation · Volume: {2} warnings","Đối soát vật chất: {0} dòng vượt ngưỡng, {1} khoa chưa đối soát cần giải trình · Sản lượng: {2} cảnh báo"
+Material tolerance,Ngưỡng vật chất
+Missing data,Thiếu số liệu
+Missing data report,Báo cáo thiếu dữ liệu
+Not permitted,Không có quyền
+Not reconciled · confirmed,Chưa đối soát · đã xác nhận
+Not reconciled · needs explanation,Chưa đối soát · cần giải trình
+Nothing is missing in this scope ({0} service-department pairs checked).,"Không thiếu gì. Mọi dịch vụ trong phạm vi đủ dữ liệu để tính giá ({0} cặp dịch vụ, khoa đã kiểm)."
+Open material and volume reconciliation,Mở đối soát vật chất và sản lượng
+Parameter set,Bộ tham số
+Price category,Loại giá
+Results returned,Số kết quả trả
+Select a costing run to see the material and volume reconciliation.,Chọn một lần tính giá để xem đối soát vật chất và sản lượng.
+Table,Bảng
+This costing run has no paraclinical service to reconcile.,Lần tính không có dịch vụ cận lâm sàng để đối soát.
+Volume deviation warning,Cảnh báo lệch sản lượng
+Volume scenario,Kịch bản sản lượng
+Volume tolerance,Ngưỡng sản lượng
+no stock issue data for the fiscal year. NC Finance confirms with a reason to lock.,chưa có số liệu xuất kho của năm tài chính. NC Finance xác nhận kèm lý do để khóa.
+{0} departments have no stock issue data. NC Finance must confirm with a reason before the costing run can be locked.,{0} khoa chưa có số liệu xuất kho. Cần NC Finance xác nhận kèm lý do trước khi khóa lần tính.
+{0} lines over tolerance or not reconciled have no explanation. The costing run cannot be locked yet.,Còn {0} dòng vượt ngưỡng hoặc chưa đối soát chưa có giải trình. Lần tính chưa khóa được.
+{0} reconciliation lines (financial and material) have no explanation. The costing run cannot be locked yet.,Còn {0} dòng đối soát (tài chính và vật chất) chưa có giải trình. Lần tính chưa khóa được.
+{0} reconciliation lines are over tolerance or not reconciled and have no explanation.,Còn {0} dòng đối soát vượt ngưỡng hoặc chưa đối soát chưa có giải trình.
+{0} service-department pairs have no locked norm set and are not checked.,"{0} cặp dịch vụ, khoa chưa có bộ định mức Đã khóa, không kiểm được dữ liệu."
+{0} services deviate in volume beyond the tolerance. Warning only; it does not block locking.,"{0} dịch vụ lệch sản lượng quá ngưỡng. Chỉ cảnh báo, không chặn khóa."
