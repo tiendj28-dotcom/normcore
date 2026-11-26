@@ -4,7 +4,7 @@ from frappe.tests.utils import FrappeTestCase
 from normcore.ai import gateway
 from normcore.api import ai
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import make_base, make_procedure, make_user, publish_procedure
+from normcore.tests.utils import confirm_norm_set, make_base, make_procedure, make_user, publish_procedure
 
 
 def _set(**kw):
@@ -37,6 +37,7 @@ class TestAIApi(FrappeTestCase):
 		ns = frappe.get_doc("NC Norm Set", make_norm_set(proc.name))
 		fin = make_user("fin.ai7@normcore.test", "NC Finance")
 		frappe.set_user(fin)
+		confirm_norm_set(ns)
 		self.assertEqual(ns.lock(), "Đã khóa")
 		frappe.set_user("Administrator")
 		# bật lại

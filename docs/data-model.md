@@ -567,7 +567,7 @@ Form hiển thị (không lưu): bộ định mức hiện hành, kế hoạch c
 | service_level | Chung cho cả dịch vụ | Check | | [FR-NORM-005] |
 | procedure_resource_row | Dòng nguồn lực gốc | Data | | `resource_row_id` của quy trình; trống với dòng thêm |
 | component | Cấu phần | Select | Có | LABOR / DRUG / SUPPLY / EQUIPMENT / INFRA / UTILITY |
-| resource_doctype, resource | Nguồn lực | Link DocType, Dynamic Link | Có | Theo cấu phần |
+| resource_doctype, resource | Nguồn lực | Link DocType, Dynamic Link | `resource_doctype`: Có; `resource`: khi sửa dòng và trước xác nhận chuyên môn **[AMD-012-01]** | Theo cấu phần. Trống = chưa liên kết danh mục [FR-NORM-010] |
 | cost_level **[1.1]** | Cấp phát sinh | Select | Có | RESULT (Theo kết quả) / TUBE (Theo ống mẫu) / BATCH (Theo mẻ) / DAY (Theo ngày-máy) / PERIOD (Theo kỳ); mặc định RESULT. Dịch vụ không thuộc khối cận lâm sàng: luôn RESULT [FR-NORM-018] |
 | apply_k **[1.1]** | Nhân hệ số tiêu hao k | Check | | Chỉ bật được khi `cost_level` = RESULT và cấu phần là DRUG hoặc SUPPLY; bật thì `wastage_rate` phải bằng 0 (DI-17) [FR-NORM-019] |
 | attach_to **[1.1]** | Gắn với | Select | Có điều kiện | Hệ thống xét nghiệm / Thiết bị. BB khi DAY hoặc PERIOD [BR-CLS-005] |

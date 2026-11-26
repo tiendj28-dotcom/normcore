@@ -14,8 +14,17 @@
   "headcount",
   "hospital_qty",
   "authority_qty",
+  "authority_ref",
   "uom",
-  "basis"
+  "wastage_rate",
+  "wastage_reason",
+  "basis",
+  "basis_ref",
+  "is_excluded",
+  "exclude_reason",
+  "ai_suggested",
+  "confirmed_by",
+  "confirmed_on"
  ],
  "fields": [
   {
@@ -61,7 +70,6 @@
    "fieldname": "resource",
    "label": "Nguồn lực",
    "fieldtype": "Dynamic Link",
-   "reqd": 1,
    "options": "resource_doctype",
    "in_list_view": 1
   },
@@ -83,10 +91,25 @@
    "fieldtype": "Float"
   },
   {
+   "fieldname": "authority_ref",
+   "label": "Văn bản ban hành định mức",
+   "fieldtype": "Data"
+  },
+  {
    "fieldname": "uom",
    "label": "Đơn vị",
    "fieldtype": "Data",
    "reqd": 1
+  },
+  {
+   "fieldname": "wastage_rate",
+   "label": "Hao hụt (%)",
+   "fieldtype": "Percent"
+  },
+  {
+   "fieldname": "wastage_reason",
+   "label": "Lý do vượt trần",
+   "fieldtype": "Small Text"
   },
   {
    "fieldname": "basis",
@@ -94,6 +117,41 @@
    "fieldtype": "Select",
    "reqd": 1,
    "options": "Quy trình\nBấm giờ\nTiêu hao thực tế\nĐịnh mức ban hành\nƯớc tính"
+  },
+  {
+   "fieldname": "basis_ref",
+   "label": "Tham chiếu căn cứ",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "is_excluded",
+   "label": "Loại trừ",
+   "fieldtype": "Check"
+  },
+  {
+   "fieldname": "exclude_reason",
+   "label": "Lý do loại trừ",
+   "fieldtype": "Select",
+   "options": "\nThanh toán riêng\nNgân sách nhà nước bảo đảm\nĐã tính trong dịch vụ khác\nKhông áp dụng\nKhác"
+  },
+  {
+   "fieldname": "ai_suggested",
+   "label": "Đề xuất của AI chưa xử lý",
+   "fieldtype": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "confirmed_by",
+   "label": "Người xác nhận",
+   "fieldtype": "Link",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "confirmed_on",
+   "label": "Thời điểm xác nhận",
+   "fieldtype": "Datetime",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,
