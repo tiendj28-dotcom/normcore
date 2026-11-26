@@ -1,11 +1,33 @@
+Acquisition mode,Hình thức có máy
 Actual stock issue,Xuất kho thực tế
+Annual contract cost,Chi phí năm theo hợp đồng
+Assumed Qbn,Qbn giả định
+Assumed mode,Hình thức giả định
+Assumed price,Giá giả định
+Assumed price must not be negative,Đơn giá giả định không được âm
+Assumed volume,Sản lượng giả định
+Assumed volume must be greater than 0,Sản lượng giả định phải lớn hơn 0
+Assumptions,Giả định
+By test system,Theo hệ thống xét nghiệm
+Calculate trial,Tính thử
 Calculated quantity,Lượng tính được
 "Calculated quantity = norm quantity × k × results (plus per-tube, per-batch, per-day, per-period and internal quality control lines). Stock issue is converted to the norm unit.","Lượng tính được = định mức × k × số kết quả (và các dòng theo ống mẫu, theo mẻ, theo ngày-máy, theo kỳ, nội kiểm). Xuất kho đổi về đơn vị định mức."
+Calculating...,Đang tính...
+Cannot open the sensitivity analysis.,Không mở được phân tích độ nhạy.
+Changes here are not written to the costing run.,Thay đổi ở đây không ghi vào lần tính giá.
+Comparison,So sánh
 Confirm not reconciled: {0},Xác nhận chưa đối soát: {0}
 Costing date,Ngày tính giá
 Detail,Chi tiết
+Drug and chemical,Thuốc và hóa chất
+Empty cell keeps the original value. Ctrl+Enter calculates.,Ô trống giữ giá trị gốc. Ctrl+Enter để tính thử.
+"Enter assumptions, then press Calculate trial.",Nhập giả định rồi bấm Tính thử.
+Enter at least one assumption,Nhập ít nhất một giả định
+Enter the annual contract cost,Nhập chi phí năm theo hợp đồng
 Fiscal year,Năm tài chính
 HIS volume,Sản lượng HIS
+Infrastructure,Hạ tầng
+Keep original,Giữ nguyên
 Material and volume reconciliation,Đối soát vật chất và sản lượng
 Material and volume reconciliation is only prepared for the Actual 12 months scenario. This costing run uses the scenario {0}.,Đối soát vật chất và sản lượng chỉ lập cho kịch bản Thực tế 12 tháng. Lần tính này dùng kịch bản {0}.
 Material reconciliation is not prepared for this volume scenario.,Không lập đối soát vật chất cho kịch bản sản lượng này.
@@ -19,12 +41,32 @@ Not reconciled · confirmed,Chưa đối soát · đã xác nhận
 Not reconciled · needs explanation,Chưa đối soát · cần giải trình
 Nothing is missing in this scope ({0} service-department pairs checked).,"Không thiếu gì. Mọi dịch vụ trong phạm vi đủ dữ liệu để tính giá ({0} cặp dịch vụ, khoa đã kiểm)."
 Open material and volume reconciliation,Mở đối soát vật chất và sản lượng
+Open this page from the cost explanation of a service (Sensitivity analysis button).,Mở trang này từ bảng giải trình của một dịch vụ (nút Phân tích độ nhạy).
+Original,Gốc
+Original Qbn,Qbn gốc
+Original direct cost per result,Chi phí trực tiếp một kết quả (gốc)
+Original k,k gốc
+Original mode,Hình thức gốc
+Original price per purchase unit,Giá gốc một đơn vị mua
+Original volume,Sản lượng gốc
 Parameter set,Bộ tham số
 Price category,Loại giá
+Purchase unit,Đơn vị mua
+Reset,Đặt lại
 Results returned,Số kết quả trả
+Search item,Tìm mặt hàng
 Select a costing run to see the material and volume reconciliation.,Chọn một lần tính giá để xem đối soát vật chất và sản lượng.
+Sensitivity analysis,Phân tích độ nhạy
+Supply,Vật tư
 Table,Bảng
+The trial calculation failed.,Tính thử không thành công.
 This costing run has no paraclinical service to reconcile.,Lần tính không có dịch vụ cận lâm sàng để đối soát.
+Trial,Thử
+Trial direct cost per result,Chi phí trực tiếp một kết quả (thử)
+Trial k,k thử
+"Trial result, not saved","Kết quả thử, không lưu"
+Utility,Tiện ích
+Volume,Sản lượng
 Volume deviation warning,Cảnh báo lệch sản lượng
 Volume scenario,Kịch bản sản lượng
 Volume tolerance,Ngưỡng sản lượng
