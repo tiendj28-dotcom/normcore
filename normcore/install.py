@@ -60,6 +60,10 @@ def ensure_sample_price_categories():
 
 
 def before_install():
+	# NORM-60: sinh vi.csv, normcore.json từ mảnh trước khi Frappe nhập Workspace và bản dịch
+	from normcore import generated
+
+	generated.before_migrate()
 	ensure_roles()
 
 
