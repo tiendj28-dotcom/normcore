@@ -24,12 +24,13 @@
 					<a v-if="data.doc.previous_version" href="#" @click.prevent="open(data.doc.previous_version)">{{ __("Previous version") }}: {{ data.doc.previous_version }}</a>
 					<span ref="state" tabindex="-1" class="indicator-pill" :class="stateColor(data.doc.status)">{{ __(data.doc.status) }}</span>
 					<span v-if="data.doc.needs_update" class="indicator-pill yellow">{{ __("Needs update") }}</span>
+					<a v-if="data.doc.newer_procedure" :href="'/app/nc-clinical-procedure/' + encodeURIComponent(data.doc.newer_procedure)">{{ __("New procedure: {0}", [data.doc.newer_procedure]) }}</a>
 					<span v-if="data.doc.needs_update && data.doc.step_change_note" class="text-muted">{{ data.doc.step_change_note }}</span>
 				</div>
 				<div class="nc-ng__actions" role="toolbar" :aria-label="__('Norm set actions')">
 					<button v-if="can('confirm_set')" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="startAction('confirm_set')">{{ __("Confirm professionally") }}</button>
 					<button v-if="can('lock_set')" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="startAction('lock_set')">{{ __("Lock") }}</button>
-					<button v-if="can('new_version')" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="startAction('new_version')">{{ __("Create new version") }}</button>
+					<button v-if="can('new_version')" type="button" class="btn btn-sm" :class="data.doc.status === 'Nháp' ? 'btn-default' : 'btn-primary'" :disabled="busy" @click="startAction('new_version')">{{ data.doc.newer_procedure ? __("Create version from new procedure") : __("Create new version") }}</button>
 					<button v-if="can('return_set')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="startAction('return_set')">{{ __("Return to draft") }}</button>
 					<button v-if="can('save_line')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openAdd">{{ __("Add line") }}</button>
 					<button v-if="can('copy_norm_set')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openCopy">{{ __("Copy to another system") }}</button>
@@ -40,6 +41,21 @@
 			<div v-if="data.doc.status === 'Đã xác nhận chuyên môn'" class="nc-ng__notice" role="note">{{ __("Confirmed professionally, waiting for Finance to lock. It cannot be edited.") }}</div>
 			<div v-else-if="closed" class="nc-ng__notice" role="note">{{ __("This record is {0} and cannot be edited. Create a new version.", [__(data.doc.status)]) }}</div>
 			<div v-else-if="!canEdit" class="nc-ng__notice" role="note">{{ __("You can only view this norm set.") }}</div>
+			<section v-if="changeStrip" class="nc-ng__warn" role="status" :aria-label="__('Changes from new procedure')">
+				<strong>{{ __("Changes from new procedure") }}</strong>
+				<div v-if="removedCount">
+					{{ __("Removed step: {0} lines", [removedCount]) }} <span class="indicator-pill red">{{ __("Removed step") }}</span>
+					<button type="button" class="btn btn-default btn-xs" @click="focusRemoved">{{ __("View these lines") }}</button>
+					<div class="text-muted nc-ng__small">{{ __("Assign another step, move to whole service, or delete before professional confirmation.") }}</div>
+				</div>
+				<div v-if="data.steps_without_lines.length">
+					{{ __("Steps without lines") }}:
+					<template v-for="m in data.steps_without_lines" :key="m.step_id">
+						<button v-if="canEdit" type="button" class="indicator-pill orange nc-ng__link" :aria-label="__('Add line for step {0}', [m.step_id])" @click="openAddFor(m.step_id)">{{ m.step_id }} · {{ m.step_title }}</button>
+						<span v-else class="indicator-pill orange">{{ m.step_id }} · {{ m.step_title }}</span>
+					</template>
+				</div>
+			</section>
 			<div v-if="blockers.length && data.doc.status === 'Nháp'" class="nc-ng__warn" role="note">
 				{{ __("{0} lines are not ready for professional confirmation", [blockers.length]) }}
 				<button type="button" class="btn btn-default btn-xs" @click="onlyAttention = !onlyAttention">{{ onlyAttention ? __("Show all lines") : __("Filter these lines") }}</button>
@@ -194,7 +210,7 @@
 						<tr class="nc-ng__group">
 							<td :colspan="11 + colExtra">
 								<button type="button" class="nc-ng__link" :aria-expanded="!collapsed[g.key]" @click="collapsed[g.key] = !collapsed[g.key]">
-									<strong>{{ g.step_id || "" }}</strong> {{ g.title }} <span v-if="g.phase" class="text-muted">· {{ __(g.phase) }}</span>
+									<strong>{{ g.step_id || "" }}</strong> {{ g.title }} <span v-if="g.removed" class="indicator-pill red">{{ __("Removed step") }}</span> <span v-if="g.phase" class="text-muted">· {{ __(g.phase) }}</span>
 									<span class="text-muted">({{ g.lines.length }})</span>
 								</button>
 							</td>
@@ -207,6 +223,7 @@
 									<th scope="row">
 										<button type="button" class="nc-ng__link" :aria-label="__('Line details') + ' ' + l.line_id" @click="detail = detail === l.line_id ? '' : l.line_id">{{ l.line_id }}</button>
 										<span v-if="l.procedure_resource_row" class="text-muted nc-ng__small" :title="__('Source resource row') + ' ' + l.procedure_resource_row">·{{ l.procedure_resource_row }}</span>
+										<span v-if="l.step_removed" class="indicator-pill red">{{ __("Removed step: {0}", [l.step_id]) }}</span>
 										<span v-if="l.duplicate_of.length" class="indicator-pill orange" :title="__('Duplicate of {0}', [l.duplicate_of.join(', ')])">{{ __("Duplicate") }}</span>
 										<span v-if="l.qc_conflict" class="indicator-pill red" role="img" :aria-label="__('Item is already in the quality plan')" :title="__('Item is already in the quality plan of the system; mark it excluded or change the resource')">{{ __("In quality plan") }}</span>
 									</th>
@@ -275,6 +292,7 @@
 									</td>
 									<td>
 										<span v-if="l.confirmed_by" :title="l.confirmed_by + ' ' + (l.confirmed_on || '')">✓ {{ l.confirmed_by.split("@")[0] }}</span>
+										<span v-else-if="l.step_removed" class="text-muted">{{ __("Needs a step") }}</span>
 										<button v-else-if="can('confirm_line')" type="button" class="btn btn-default btn-xs" :disabled="busy" @click="confirmLine(l)">{{ __("Confirm") }}</button>
 									</td>
 									<td>
@@ -308,7 +326,14 @@
 												<option v-for="r in data.options.exclude_reason" :key="r" :value="r">{{ r }}</option>
 											</select>
 										</label>
-										<button v-if="can('delete_line') && !l.procedure_resource_row" type="button" class="btn btn-default btn-xs" :disabled="busy" @click="deleteLine(l)">{{ __("Delete line") }}</button>
+										<label v-if="canEdit && l.step_removed">{{ __("Attach to") }}
+											<select class="form-control" required @change="reassign(l, $event.target.value)">
+												<option value="">{{ __("Choose a step") }}</option>
+												<option v-for="s in data.steps" :key="s.step_id" :value="s.step_id">{{ s.step_id }} · {{ s.step_title }}</option>
+												<option value="__service__">{{ __("Whole service") }}</option>
+											</select>
+										</label>
+										<button v-if="can('delete_line') && (!l.procedure_resource_row || l.step_removed)" type="button" class="btn btn-default btn-xs" :disabled="busy" @click="deleteLine(l)">{{ __("Delete line") }}</button>
 									</td>
 								</tr>
 							</template>
@@ -357,7 +382,9 @@
 					</thead>
 					<tbody>
 						<tr v-for="(comps, key) in data.summary.by_step_component" :key="key">
-							<th scope="row">{{ key === "service" ? __("Whole service") : key }}</th>
+							<th v-if="key === 'service'" scope="row">{{ __("Whole service") }}</th>
+							<th v-else-if="!data.steps.some((s) => s.step_id === key)" scope="row" class="text-muted">{{ __("{0} (removed)", [key]) }}</th>
+							<th v-else scope="row">{{ key }}</th>
 							<td v-for="c in data.options.component" :key="c" class="num">{{ comps[c] && Number(comps[c]) ? money(comps[c]) : "–" }}</td>
 							<td class="num">{{ money(rowTotal(comps)) }}</td>
 						</tr>
@@ -451,6 +478,12 @@ onlyAttention: false,
 			closed() {
 			return this.data && ["Đã khóa", "Đã thay thế"].includes(this.data.doc.status);
 		},
+		removedCount() {
+			return this.data ? this.data.groups.filter((g) => g.removed).reduce((n, g) => n + g.lines.length, 0) : 0;
+		},
+		changeStrip() {
+			return !!(this.data && this.data.doc.status === "Nháp" && this.data.doc.previous_version && (this.removedCount || this.data.steps_without_lines.length));
+		},
 		blockers() {
 			return this.data ? this.data.blockers : [];
 		},
@@ -473,7 +506,7 @@ onlyAttention: false,
 					if (text && !(l.line_id.toLowerCase().includes(text) || (l.resource || "").toLowerCase().includes(text))) return false;
 					return true;
 				});
-				return { key: g.step_id || "service", step_id: g.step_id, title: g.title, phase: step ? step.phase : "", lines, total: g.total };
+				return { key: g.removed ? "removed" : g.step_id || "service", step_id: g.step_id, removed: !!g.removed, title: g.title, phase: step ? step.phase : "", lines, total: g.total };
 			});
 		},
 	},
@@ -702,6 +735,32 @@ onlyAttention: false,
 				if (value !== (line.resource || "")) return this.commit(line, "resource", value);
 			});
 		},
+		openAddFor(step) {
+			this.openAdd();
+			this.add.target = step;
+		},
+		focusRemoved() {
+			this.collapsed = { ...this.collapsed, removed: false };
+			this.$nextTick(() => {
+				const g = this.groups.find((x) => x.removed);
+				if (g && g.lines.length) this.focusLine(g.lines[0].line_id);
+			});
+		},
+		reassign(line, target) {
+			if (!target) return;
+			const values = target === "__service__" ? { service_level: 1, step_id: null } : { step_id: target, service_level: 0 };
+			return this.run(() =>
+				this.call("save_line", { norm_set: this.name, values, line_id: line.line_id, allow_duplicate: 1 })
+					.then((r) => {
+						this.show(r.norm_set);
+						frappe.show_alert({ message: __("Moved {0} to {1}", [line.line_id, target === "__service__" ? __("Whole service") : target]), indicator: "green" });
+					})
+					.catch((e) => {
+						this.rowError = { [line.line_id]: e.lines.join(" ") || e.message };
+						return this.reloadKeepingError();
+					})
+			);
+		},
 		openAdd() {
 			this.add = { component: "SUPPLY", resourceText: "", target: "", headcount: 1, hospital_qty: null, uom: "", basis: "Ước tính", cost_level: "RESULT", apply_k: false, attach_to: "", attach_equipment: "", error: "" };
 		},
@@ -755,7 +814,9 @@ onlyAttention: false,
 			const msg = {
 				confirm_set: __("After confirming, the set cannot be edited until Finance returns it."),
 				lock_set: __("After locking, the norm set can no longer be edited and is used for costing."),
-				new_version: __("Create a draft of version {0} from this set?", [this.data.doc.version_no + 1]),
+				new_version: this.data.doc.newer_procedure
+					? __("Create a draft of version {0} from procedure {1}? Lines of existing steps are carried over; lines of removed steps are flagged.", [this.data.doc.version_no + 1, this.data.doc.newer_procedure])
+					: __("Create a draft of version {0} from this set?", [this.data.doc.version_no + 1]),
 			};
 			this.pending = { action: a, message: msg[a], needsReason: a === "return_set" };
 			this.reason = "";
@@ -768,7 +829,20 @@ onlyAttention: false,
 				this.call(p.action, args)
 					.then((d) => {
 						this.pending = null;
-						if (p.action === "new_version") return this.open(d.name);
+						if (p.action === "new_version") {
+							if (d.existing) frappe.msgprint(d.message);
+							else if (d.procedure) {
+								frappe.msgprint(
+									[
+										__("Carried over: {0} lines ({1})", [d.carried.length, d.carried.join(", ")]),
+										__("Removed step: {0} lines", [d.removed.length]) + " (" + d.removed_steps.join(", ") + ")",
+										__("Steps without lines") + ": " + (d.steps_without_lines.join(", ") || "-"),
+									].join("<br>"),
+									__("Created {0}", [d.name])
+								);
+							}
+							return this.open(d.name);
+						}
 						this.show(d);
 						frappe.show_alert({ message: __("Moved to {0}", [__(d.doc.status)]), indicator: "green" });
 						this.$nextTick(() => this.$refs.state && this.$refs.state.focus());

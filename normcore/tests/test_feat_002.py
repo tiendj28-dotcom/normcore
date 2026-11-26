@@ -147,3 +147,68 @@ class TestChainStageRoute(FrappeTestCase):
 			self.assertEqual(v["url"], "/app/nc-technical-service")
 		# ô chọn mức bị loại khỏi bộ lọc chuẩn, khoa vẫn giữ
 		self.assertEqual([f[1] for f in r["std"]], ["department"])
+
+	def test_FR_OUT_010_doi_khoa_bang_tay_tinh_lai_bo_loc_muc(self):
+		"""NORM-58: chọn mức rồi đổi khoa K01 → K02 → tất cả: bộ lọc `name` tính lại theo khoa mới."""
+		import shutil
+		import subprocess
+		import textwrap
+
+		src = open(self.JS).read()
+		body = src[src.index("const NC_MAX_FILTER") : src.index('// Cột "Tình trạng chuỗi"')]
+		script = (
+			textwrap.dedent(
+				"""
+			const __ = (s) => s;
+			const tick = () => new Promise((r) => setTimeout(r, 5));
+			const frappe = {
+				route_options: null,
+				xcall: async (m, args) => {
+					if (m.endsWith("get_home")) return {stages: [{stage: "a", label: "A"}]};
+					return ["S-" + args.stage + "-" + args.department];
+				},
+			};
+			const window = {location: {search: "", pathname: "/", hash: ""}, history: {state: null, replaceState() {}}};
+			const mk = (df) => ({df, v: "",
+				get_value() { return this.v; },
+				async set_value(v, force) {
+					if (this.v === v && !force) return;
+					this.v = v;
+					if (this.df.onchange) this.df.onchange();
+				},
+				refresh() {}});
+			// onchange gốc của khoa (trong onload) chỉ làm mới danh sách: đây là nguyên nhân lỗi
+			const dept = mk({fieldname: "department", onchange() {}});
+			let stage_field = null;
+			let names = null;
+			const listview = {
+				doctype: "NC Technical Service",
+				page: {fields_dict: {department: dept}, add_field(df) { return (stage_field = mk(df)); }},
+				filter_area: {get_standard_filters: () => [], remove() { names = null; }, add(f) { names = f[0][3]; }, debounced_refresh_list_view() {}},
+				before_refresh() { return Promise.resolve(); },
+			};
+			%s
+			(async () => {
+				normcore_chain_filter(listview);
+				await tick();
+				const r = {};
+				await dept.set_value("K01"); await tick();
+				await stage_field.set_value("a"); await tick();
+				r.k01 = names;
+				await dept.set_value("K02"); await tick();
+				r.k02 = names;
+				await dept.set_value(""); await tick();
+				r.tat_ca = names;
+				console.log(JSON.stringify(r));
+			})();
+			"""
+			)
+			% body
+		)
+		out = subprocess.run(
+			[shutil.which("node"), "-e", script], capture_output=True, text=True, check=True
+		).stdout
+		r = json.loads(out)
+		self.assertEqual(r["k01"], ["S-a-K01"])
+		self.assertEqual(r["k02"], ["S-a-K02"])
+		self.assertEqual(r["tat_ca"], ["S-a-null"])  # "tất cả": department = null

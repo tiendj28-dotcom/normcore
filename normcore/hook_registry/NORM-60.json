@@ -1,0 +1,3 @@
+{
+ "before_migrate": ["normcore.generated.before_migrate"]
+}

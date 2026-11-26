@@ -15,6 +15,7 @@ Actual figures,Có số thực tế
 Add,Thêm
 Add citation,Thêm trích dẫn
 Add line,Thêm dòng
+Add line for step {0},Thêm dòng cho bước {0}
 Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
 Add service,Thêm dịch vụ
@@ -48,6 +49,7 @@ Approved price,Giá đã duyệt
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
 Assign,Gán
+"Assign another step, move to whole service, or delete before professional confirmation.","Gán bước khác, chuyển Chung cho cả dịch vụ hoặc xóa trước khi xác nhận chuyên môn."
 Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
@@ -73,12 +75,14 @@ Cannot confirm professionally yet:,Chưa xác nhận chuyên môn được:
 Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Cannot load the original file,Không tải được tệp gốc
+Carried over: {0} lines ({1}),Mang sang: {0} dòng ({1})
 Catalog,Danh mục
 Chain status,Tình trạng chuỗi
 Change,Sửa
 Change service,Sửa dịch vụ
 Changed,Đổi
 Changed fields,Trường đổi
+Changes from new procedure,Thay đổi theo quy trình mới
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
@@ -139,10 +143,13 @@ Could not load the home page. Try again.,Không tải được trang chủ. Th�
 Could not load the status.,Không tải được tình trạng.
 Create,Tạo
 Create a draft of the next version from version {0}. Step codes are kept; the draft goes through the approval flow like the first version.,Tạo bản nháp phiên bản kế tiếp từ phiên bản {0}. Mã bước giữ nguyên; bản nháp đi qua luồng duyệt như bản đầu.
+Create a draft of version {0} from procedure {1}? Lines of existing steps are carried over; lines of removed steps are flagged.,Tạo bộ nháp phiên bản {0} theo quy trình {1}? Dòng của bước còn tồn tại được mang sang; dòng của bước đã bỏ được đánh dấu để xử lý.
 Create a draft of version {0} from this set?,Tạo bộ nháp phiên bản {0} từ bộ này?
+Create a version from the new procedure in the norm grid.,Tạo phiên bản theo quy trình mới trên lưới định mức.
 Create new version,Tạo phiên bản mới
 Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
+Create version from new procedure,Tạo phiên bản theo quy trình mới
 Created,Tạo mới,Import Excel
 Created {0},Đã tạo {0}
 Creates a new draft for the target system with the lines whose step still exists; confirmations must be redone.,"Tạo bộ nháp mới cho hệ thống đích, mang các dòng có mã bước còn trong quy trình; phải xác nhận lại các dòng."
@@ -277,14 +284,17 @@ Move step up,Chuyển bước lên
 Moved,Đổi vị trí
 Moved to,Đã chuyển sang
 Moved to {0},Đã chuyển sang {0}
+Moved {0} to {1},Đã chuyển {0} sang {1}
 NC Clinical Procedure,Quy trình kỹ thuật
 NC Procedure Citation,Trích dẫn quy trình
 NC Procedure Resource,Nguồn lực của bước
 NC Procedure Step,Bước quy trình
 Name,Tên
+Needs a step,Cần gán bước
 Needs review,Cần rà soát
 Needs update,Cần cập nhật
 Needs update: the procedure has a new version - {0}.,Cần cập nhật: quy trình có phiên bản mới - {0}.
+New procedure: {0},Quy trình mới: {0}
 "New values apply to the next operation, no restart needed.","Giá trị mới áp dụng cho thao tác kế tiếp, không cần khởi động lại."
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No costing runs yet.,Chưa có lần tính giá.
@@ -325,6 +335,7 @@ Only {0} eligible services will be costed.,Chỉ tính {0} dịch vụ đủ đi
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
+Open grid,Mở lưới
 Open new norm set,Mở bộ định mức mới
 Open norm grid,Mở lưới định mức
 Open procedure list,Mở danh sách quy trình
@@ -385,6 +396,9 @@ Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệ
 Remove,Bỏ
 Remove this mapping?,Bỏ ánh xạ này?
 Removed,Bỏ
+Removed step,Bước đã bỏ
+Removed step: {0},Bước đã bỏ: {0}
+Removed step: {0} lines,Bước đã bỏ: {0} dòng
 Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
 Required before professional confirmation (a line is per tube),Bắt buộc trước khi xác nhận chuyên môn (có dòng Theo ống mẫu)
 "Required item, no quantity yet","Khoản mục bắt buộc, chưa có lượng"
@@ -454,6 +468,7 @@ Step ID,Mã bước
 Step code,Mã bước
 Step title,Tên bước
 Steps,Các bước
+Steps without lines,Bước chưa có dòng
 Suggest again,Đề xuất lại
 Suggested,Đề xuất
 Summary of differences,Tóm tắt khác biệt
@@ -529,6 +544,7 @@ Version,Phiên bản
 View,Xem
 View all,Xem tất cả
 View costing results,Xem kết quả tính giá
+View these lines,Xem các dòng này
 Waiting since,Chờ từ
 Warning,Cảnh báo
 Wastage %,Hao hụt %
@@ -559,6 +575,7 @@ open comments,ý kiến chưa xử lý
 service code,mã dịch vụ
 tests,test
 total share,tổng tỷ trọng
+{0} (removed),{0} (đã bỏ)
 {0} lines are not ready for professional confirmation,Còn {0} dòng chưa đủ điều kiện xác nhận chuyên môn
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
 {0} results — searched by {1},{0} kết quả — tìm theo {1}

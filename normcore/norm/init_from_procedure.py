@@ -45,3 +45,73 @@ def lines_from_resources(resources) -> tuple[list[dict], list[str]]:
 			}
 		)
 	return lines, errors
+
+
+# FEAT-013, FR-NORM-015: mang dòng sang phiên bản theo quy trình mới (TC-NORM-08, AMD-013-01).
+_NOT_CARRIED = ("confirmed_by", "confirmed_on")
+
+
+def carry_lines(old_lines, step_ids) -> dict:
+	"""Giữ thứ tự dòng nguồn. Dòng Chung hoặc có bước còn trong quy trình mới: mang sang;
+	dòng có bước đã bỏ: mang sang kèm step_removed = 1. Không mang xác nhận. Không đổi đầu vào."""
+	valid = set(step_ids)
+	lines, carried, removed, removed_steps = [], [], [], []
+	for old in old_lines:
+		line = {k: v for k, v in old.items() if k not in _NOT_CARRIED}
+		step = line.get("step_id")
+		if line.get("service_level") or step in valid or not step:
+			line["step_removed"] = 0
+			carried.append(line.get("line_id"))
+		else:
+			line["step_removed"] = 1
+			removed.append(line.get("line_id"))
+			if step not in removed_steps:
+				removed_steps.append(step)
+		lines.append(line)
+	return {
+		"lines": lines,
+		"carried": carried,
+		"removed": removed,
+		"removed_steps": removed_steps,
+		"step_order": list(step_ids),
+	}
+
+
+def steps_without_lines(step_ids, lines) -> list[str]:
+	"""Bước của quy trình chưa có dòng nào (dòng loại trừ vẫn là có dòng; dòng Chung, dòng cờ bước đã bỏ không tính)."""
+	have = {
+		ln.get("step_id")
+		for ln in lines
+		if ln.get("step_id") and not ln.get("service_level") and not ln.get("step_removed")
+	}
+	return [s for s in step_ids if s not in have]
+
+
+def removed_flag(row, before, step_ids, creating_version) -> int:
+	"""Chuẩn hóa step_removed (technical-design 2.3): giữ 1 chỉ khi bước không còn, không Chung,
+	và dòng cũ đã có cờ hoặc bộ đang được tạo bởi new_version."""
+	step = row.get("step_id")
+	if not step or row.get("service_level") or step in step_ids:
+		return 0
+	return 1 if (creating_version or (before or {}).get("step_removed")) else 0
+
+
+def format_note(res, missing) -> str:
+	"""Ghi chú Comment cho bộ mới theo quy trình mới."""
+
+	def part(items):
+		return ", ".join(items) if items else "không có"
+
+	removed_by_line = {ln.get("line_id"): ln.get("step_id") for ln in res["lines"] if ln.get("step_removed")}
+	carried_steps = {
+		ln.get("step_id")
+		for ln in res["lines"]
+		if not ln.get("step_removed") and not ln.get("service_level") and ln.get("step_id")
+	}
+	order = [s for s in res.get("step_order", []) if s in carried_steps]
+	order += sorted(carried_steps - set(order))
+	removed_txt = [f"{removed_by_line[lid]} ({lid})" for lid in res["removed"] if lid in removed_by_line]
+	return (
+		f"Theo quy trình mới: mang sang {part(order)}; "
+		f"đánh dấu bước đã bỏ {part(removed_txt)}; bước chưa có dòng {part(list(missing))}"
+	)
