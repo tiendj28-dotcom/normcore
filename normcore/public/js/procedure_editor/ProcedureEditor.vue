@@ -632,10 +632,7 @@ export default {
 					this.consistency = r;
 					this.consistencyStale = false;
 				})
-				.catch((e) => {
-					const m = this.error;
-					if (m) frappe.msgprint(m);
-				})
+				.catch(() => {}) // lỗi máy chủ đã hiện ở dải role="alert" (call)
 				.finally(() => (this.checking = false));
 		},
 		closeConsistency() {
