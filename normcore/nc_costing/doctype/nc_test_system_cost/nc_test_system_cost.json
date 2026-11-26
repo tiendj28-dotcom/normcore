@@ -1,0 +1,120 @@
+{
+ "actions": [],
+ "creation": "2026-11-26 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_system",
+  "norm_set",
+  "patient_results",
+  "share_pct",
+  "q_iqc",
+  "q_calibration",
+  "q_rerun",
+  "q_eqa",
+  "wastage_rate",
+  "k_factor",
+  "k_estimated",
+  "direct_cost",
+  "low_volume_warning"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_system",
+   "label": "Hệ thống xét nghiệm",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "options": "NC Test System",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "norm_set",
+   "label": "Bộ định mức",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "options": "NC Norm Set"
+  },
+  {
+   "fieldname": "patient_results",
+   "label": "Số kết quả trả",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "share_pct",
+   "label": "Tỷ trọng đã dùng (%)",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "precision": "6",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "q_iqc",
+   "label": "Số test nội kiểm",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "q_calibration",
+   "label": "Số test chuẩn máy",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "q_rerun",
+   "label": "Số test chạy lại",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "q_eqa",
+   "label": "Số test ngoại kiểm",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wastage_rate",
+   "label": "Hao hụt đã dùng (%)",
+   "fieldtype": "Percent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "k_factor",
+   "label": "Hệ số k",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "precision": "6",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "k_estimated",
+   "label": "Ước tính từ kế hoạch",
+   "fieldtype": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "direct_cost",
+   "label": "Chi phí trực tiếp một kết quả",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "precision": "2",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "low_volume_warning",
+   "label": "Cảnh báo sản lượng thấp",
+   "fieldtype": "Check",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Test System Cost",
+ "owner": "Administrator",
+ "states": []
+}
