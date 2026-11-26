@@ -148,17 +148,38 @@ def _group(rows):
 	return grouped.items()
 
 
-def _stage_by_service(department=None):
+def _flags_by_service(department=None):
 	readable = readable_stages()
 	out = {}
 	for svc, p, n, c, price in _service_flags(department):
-		out[svc] = chain.stage_of(
+		out[svc] = (
 			p and "procedure" in readable,
 			n and "norm_locked" in readable,
 			c and "costed" in readable,
 			price and "price_approved" in readable,
 		)
 	return out
+
+
+def _stage_by_service(department=None):
+	return {svc: chain.stage_of(*flags) for svc, flags in _flags_by_service(department).items()}
+
+
+def _dots(flags, readable):
+	"""Bốn chấm quy trình → định mức → giá thành → giá duyệt (thành phần Thẻ tình trạng chuỗi)."""
+	spec = (
+		("procedure", "procedure", "green"),
+		("norm_set", "norm_locked", "green"),
+		("cost", "costed", "blue"),
+		("price", "price_approved", "green"),
+	)
+	dots = []
+	for (key, stage, color), has in zip(spec, flags, strict=True):
+		if stage not in readable:
+			dots.append({"key": key, "state": "no_permission", "indicator": "gray"})
+		else:
+			dots.append({"key": key, "state": "ok" if has else "empty", "indicator": color if has else "gray"})
+	return dots
 
 
 @frappe.whitelist()
@@ -191,11 +212,17 @@ def get_service_stages(services):
 	codes = json.loads(services) if isinstance(services, str) else list(services or [])
 	if len(codes) > MAX_SERVICES:
 		frappe.throw(_("Tối đa {0} dịch vụ mỗi lần").format(MAX_SERVICES), frappe.ValidationError)
-	stages = _stage_by_service()
+	flags = _flags_by_service()
+	readable = readable_stages()
 	out = {}
 	for code in codes:
-		if code in stages:
-			out[code] = {"stage": stages[code], "label": chain.STAGE_LABELS[stages[code]]}
+		if code in flags:
+			stage = chain.stage_of(*flags[code])
+			out[code] = {
+				"stage": stage,
+				"label": chain.STAGE_LABELS[stage],
+				"dots": _dots(flags[code], readable),
+			}
 	return out
 
 

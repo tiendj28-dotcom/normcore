@@ -30,7 +30,7 @@ BASE = {
 	"is_hidden": 0,
 	"label": "Normcore",
 	"links": [],
-	"modified": "2026-11-23 12:00:00.000000",
+	"modified": "2026-11-26 10:00:00.000000",
 	"modified_by": "Administrator",
 	"module": "NC Core",
 	"name": "Normcore",
@@ -73,7 +73,15 @@ def read_shortcuts(path: Path) -> list:
 def render(rows: list) -> str:
 	blocks = [HEADER]
 	shortcuts = []
+	custom_blocks = []
+	# Custom HTML Block (loại CustomBlock, link_to trống): đặt ngay sau tiêu đề, trước các lối tắt (FEAT-002)
+	for sid, label, _link, typ, _view in rows:
+		if typ == "CustomBlock":
+			blocks.append({"id": sid, "type": "custom_block", "data": {"custom_block_name": label, "col": 12}})
+			custom_blocks.append({"custom_block_name": label, "label": label})
 	for sid, label, link_to, typ, view in rows:
+		if typ == "CustomBlock":
+			continue
 		blocks.append({"id": sid, "type": "shortcut", "data": {"shortcut_name": label, "col": 4}})
 		s = {"label": label, "link_to": link_to, "type": typ}
 		if view:
@@ -82,6 +90,8 @@ def render(rows: list) -> str:
 	doc = dict(BASE)
 	doc["content"] = json.dumps(blocks, ensure_ascii=False, separators=(",", ":"))
 	doc["shortcuts"] = shortcuts
+	if custom_blocks:
+		doc["custom_blocks"] = custom_blocks
 	return json.dumps(doc, ensure_ascii=False, indent=1, sort_keys=True) + "\n"
 
 

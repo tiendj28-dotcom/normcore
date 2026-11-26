@@ -178,6 +178,12 @@ class TestStages(HomeBase):
 		got = home.get_service_stages(json.dumps([self.s[1], self.s[4], "KHONG-CO"]))
 		self.assertEqual(list(got), [self.s[1]])
 		self.assertEqual(got[self.s[1]]["stage"], "procedure")
+		self.assertEqual(
+			[(d["key"], d["state"]) for d in got[self.s[1]]["dots"]],
+			[("procedure", "ok"), ("norm_set", "empty"), ("cost", "empty"), ("price", "empty")],
+		)
+		clin = _as(self.clin, home.get_service_stages, json.dumps([self.s[1]]))
+		self.assertEqual(clin[self.s[1]]["dots"][2]["state"], "no_permission")
 		with self.assertRaises(frappe.ValidationError):
 			home.get_service_stages(json.dumps([f"S{i}" for i in range(501)]))
 

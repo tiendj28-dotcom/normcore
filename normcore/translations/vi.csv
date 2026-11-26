@@ -1,3 +1,5 @@
+AI call timeout is set in AI settings.,Thời hạn gọi AI đặt ở Cấu hình AI.
+AI settings,Cấu hình AI
 Account,Tài khoản
 Actions,Thao tác
 Active,Đang dùng,NC Technical Service
@@ -12,17 +14,21 @@ Add test system,Thêm hệ thống xét nghiệm
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 "After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
+All departments in scope,Tất cả khoa trong phạm vi
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
+Approved price,Giá đã duyệt
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
 Assign,Gán
 Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
+Assumption — pending confirmation,Giả định — chờ xác nhận
 Attach to,Gắn với
+Available,Có
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
 Calculating…,Đang tính…
 Calibration,Chuẩn máy
@@ -32,6 +38,7 @@ Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Cannot load the original file,Không tải được tệp gốc
 Catalog,Danh mục
+Chain status,Tình trạng chuỗi
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
@@ -56,6 +63,7 @@ Could not complete the request. See the message from the server.,Không thực h
 Could not complete this action,Chưa thực hiện được thao tác này
 Could not load chain status.,Không tải được tình trạng chuỗi.
 Could not load test systems.,Không tải được hệ thống xét nghiệm.
+Could not load the home page. Try again.,Không tải được trang chủ. Thử lại.
 Could not load the status.,Không tải được tình trạng.
 Create,Tạo
 Create norm set,Khởi tạo bộ định mức
@@ -81,6 +89,7 @@ Download template,Tải tệp mẫu
 Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
 EQA tests,Số test ngoại kiểm
+Each service is counted at the highest stage it has reached.,Mỗi dịch vụ tính ở mức cao nhất đã đạt.
 Edit,Sửa
 Edit cost category,Sửa loại chi phí
 Edit cost category of a line,Sửa loại chi phí của một dòng
@@ -97,6 +106,7 @@ Expired {0} days ago,Đã hết hạn {0} ngày trước
 Expires in {0} days,Còn {0} ngày đến hạn
 Export,Xuất
 File errors,Dòng lỗi khi đọc tệp
+Filter by department,Lọc theo khoa
 Finalize,Chốt
 Finalized: the figures can be used in a costing run.,Đã chốt: số liệu dùng được cho lần tính giá.
 "Fix the file, attach it again in Source file and click Reload file, or create a new import.","Sửa tệp, đính kèm lại ở ô Tệp nguồn rồi bấm Đọc lại tệp, hoặc tạo lần nhập mới."
@@ -125,6 +135,7 @@ Loading status…,Đang tải tình trạng…
 Loading summary…,Đang tải tóm tắt…
 Loading test systems…,Đang tải hệ thống xét nghiệm…
 Loading...,Đang tải...
+Loading…,Đang tải…
 Loading…,Đang tải…,NC Equipment
 Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
@@ -143,6 +154,7 @@ NC Procedure Resource,Nguồn lực của bước
 NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
+"New values apply to the next operation, no restart needed.","Giá trị mới áp dụng cho thao tác kế tiếp, không cần khởi động lại."
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -158,18 +170,25 @@ No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None,Không có
 None yet,Chưa có
+Norm set,Bộ định mức
+Normcore home,Trang chủ Normcore
+Not available,Chưa có
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Only unresolved,Chỉ chưa xử lý
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
+Open procedure list,Mở danh sách quy trình
+Open service list,Mở danh sách dịch vụ
 Original page,Trang gốc
 Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
+Overdue,Quá hạn
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
 Pages,Trang
 Pages {0}–{1} of {2},Trang {0}–{1} của {2}
 Paraclinical,Cận lâm sàng
 Past useful life,Hết thời gian sử dụng,NC Equipment
+Pending tasks,Việc chờ xử lý
 Performing department,Khoa thực hiện
 Phase,Giai đoạn
 Pick a procedure to see its steps.,Chọn một quy trình để xem các bước.
@@ -178,6 +197,7 @@ Price code,Mã đơn giá,NC Item
 Price in use today,Đơn giá đang dùng hôm nay,NC Item
 Price per norm unit,Đơn giá một đơn vị định mức,NC Item
 Print PDF,In PDF
+Procedure,Quy trình
 Procedure editor,Trình soạn quy trình
 Publish,Ban hành
 Quality plan,Kế hoạch chất lượng
@@ -191,6 +211,7 @@ Reactivate,Dùng lại
 Reapplied {0} lines; manual edits are kept,Đã gán lại {0} dòng; các dòng sửa tay giữ nguyên
 Reapply account mapping,Gán lại theo bảng ánh xạ
 Reason,Lý do
+Record,Bản ghi
 Rejected by,Bị từ chối bởi
 Rejection reason,Lý do từ chối
 Relation,Quan hệ
@@ -215,6 +236,7 @@ Save to add test systems,Lưu để thêm hệ thống xét nghiệm
 Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
 Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
+Saved. New values apply to the next operation.,Đã lưu. Giá trị mới áp dụng cho thao tác kế tiếp.
 Search,Tìm
 Search in content,Tìm trong nội dung
 Searching…,Đang tìm…
@@ -223,7 +245,9 @@ Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
 Select only one line to edit.,Chỉ chọn một dòng để sửa.
+Service cost,Giá thành
 Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
+Services by chain status,Dịch vụ theo tình trạng chuỗi
 Share (%),Tỷ trọng (%)
 Snippet,Đoạn trích
 Some lines are missing figures,Chưa đủ số liệu ở một số dòng
@@ -232,16 +256,20 @@ Split equally across {0} services ({1}% each),Chia đều cho {0} dịch vụ (m
 Status,Trạng thái
 Step ID,Mã bước
 Step title,Tên bước
+Task,Việc
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
 The procedure will move to,Quy trình sẽ chuyển sang
+There are no technical services yet.,Chưa có dịch vụ kỹ thuật nào.
+This department is outside your scope,Khoa này ngoài phạm vi của bạn
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
 This procedure is awaiting approval and cannot be edited.,"Quy trình đang chờ duyệt, không sửa được."
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This procedure is issued or closed and cannot be edited. Create a new version in the revision function.,"Quy trình đã ban hành, không sửa được. Tạo phiên bản mới ở chức năng Sửa đổi."
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
+"Too many services, filter by department first","Quá nhiều dịch vụ, hãy lọc theo khoa trước"
 Total,Tổng
 Total share differs from 100%,Tổng tỷ trọng khác 100%
 Totals by cost center and category,Tổng theo trung tâm và loại chi phí
@@ -270,11 +298,14 @@ Verified,Đã xác minh,NC Item
 Verified,Đã xác minh,NC Item Price
 Verify,Xác minh,NC Item Price
 View,Xem
+View all,Xem tất cả
 View costing results,Xem kết quả tính giá
+Waiting since,Chờ từ
 Will be estimated from the plan,Sẽ ước tính từ kế hoạch
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
 You do not have permission to view this procedure,Bạn không có quyền xem quy trình này
+You have no pending tasks. Tasks waiting for your approval will appear here.,Bạn không có việc nào đang chờ xử lý. Các việc cần bạn duyệt sẽ hiện ở đây.
 and {0} more errors,và {0} lỗi khác
 content,nội dung
 document number,số hiệu
