@@ -69,7 +69,6 @@ Calculated price,Giá tính toán
 Calculating…,Đang tính…
 Calibration,Chuẩn máy
 Calibration tests,Số test chuẩn máy
-Calibrator,Chất chuẩn
 Cancel,Hủy
 Cannot confirm professionally yet:,Chưa xác nhận chuyên môn được:
 Cannot load the import summary.,Không tải được tóm tắt lần nhập.
@@ -121,7 +120,6 @@ Cost center,Trung tâm chi phí
 Cost eligible services only,Chỉ tính dịch vụ đủ điều kiện
 Cost explanation,Bảng giải trình giá
 Cost level,Cấp phát sinh
-Cost per result,Chi phí một kết quả
 Cost pool,Quỹ chi phí
 Cost type,Loại chi phí
 Cost {0} services?,Tính giá cho {0} dịch vụ?
@@ -169,12 +167,7 @@ Depreciation,Khấu hao
 Description,Mô tả
 Deviations summary,Tóm tắt khác biệt
 Direct cost,Chi phí trực tiếp
-Direct cost by test system,Chi phí trực tiếp theo hệ thống xét nghiệm
-Direct cost of the service,Chi phí trực tiếp của dịch vụ
-Direct cost per result,Chi phí trực tiếp một kết quả
 Direct costs,Chi phí trực tiếp
-Divisor,Mẫu số
-Divisor source,Nguồn mẫu số
 Document no.,Số chứng từ,NC Item
 Document number,Số hiệu
 Down,Xuống
@@ -187,20 +180,16 @@ Duplicate,Nhân bản,NC Costing Parameter Set
 Duplicate of {0},Trùng nguồn lực với {0} trong cùng bước
 EQA tests,Số test ngoại kiểm
 EQUIPMENT,Thiết bị
-Each amount is the cost of one result of the system. The direct cost of the service is the weighted average by share plus external quality assessment.,"Thành tiền mỗi dòng là chi phí cho một kết quả của hệ thống. Chi phí trực tiếp của dịch vụ là bình quân gia quyền theo tỷ trọng, cộng ngoại kiểm."
 Each service is counted at the highest stage it has reached.,Mỗi dịch vụ tính ở mức cao nhất đã đạt.
 Edit,Sửa
 Edit cost category,Sửa loại chi phí
 Edit cost category of a line,Sửa loại chi phí của một dòng
 "Edit cost category: line {0}, account {1}","Sửa loại chi phí: dòng {0}, tài khoản {1}"
 Effective date,Ngày hiệu lực
-Equipment,Thiết bị
-Equipment electricity,Điện của thiết bị
 Equipment is allocated by machine minutes,Thiết bị chia theo phút chiếm máy
 Error,Lỗi
 Errors,Lỗi,Import Excel
 Errors by line,Lỗi theo dòng
-Estimated from plan,Ước tính từ kế hoạch
 Excel row,Dòng Excel
 Excluded,Loại trừ
 Excluded from price,Không tính vào giá
@@ -209,8 +198,6 @@ Expired {0} days ago,Đã hết hạn {0} ngày trước
 Expires in {0} days,Còn {0} ngày đến hạn
 Export,Xuất
 Export Excel,Xuất Excel
-External quality assessment,Ngoại kiểm
-External quality assessment per result,Ngoại kiểm một kết quả
 File errors,Dòng lỗi khi đọc tệp
 Filter by department,Lọc theo khoa
 Filter placeholder lines,Lọc dòng giữ chỗ
@@ -226,7 +213,6 @@ Has error lines,Có dòng lỗi
 Headcount,Số người
 Heading,Tiêu đề
 Hospital norm,Định mức bệnh viện
-How k is calculated,k được tính thế nào
 INFRA,Hạ tầng
 IQC tests,Số test nội kiểm
 Import data from Excel,Nhập dữ liệu từ Excel
@@ -238,7 +224,6 @@ Incomplete: some lines have no price or are not linked,Chưa đủ: có dòng ch
 Indexing failed: {0},Lập chỉ mục thất bại: {0}
 Indexing in progress. Sections will appear when it finishes.,Đang lập chỉ mục. Các mục sẽ hiện khi hoàn tất.
 Internal QC,Nội kiểm
-Internal QC material,Vật liệu nội kiểm
 Item,Khoản mục
 Item is already in the quality plan,Mặt hàng đã có trong kế hoạch chất lượng
 Item is already in the quality plan of the system; mark it excluded or change the resource,Mặt hàng đã có trong kế hoạch chất lượng của hệ thống; đánh dấu Loại trừ hoặc đổi nguồn lực
@@ -251,7 +236,6 @@ Legal text links are provided by the document library.,Liên kết tới mục v
 Line,Dòng
 Line code,Mã dòng
 Line details,Chi tiết dòng
-Line origin,Nguồn của dòng
 Lines / Total amount,Số dòng / Tổng tiền
 Lines not copied,Các dòng không sao chép
 Lines without cost category,Dòng chưa gán loại chi phí
@@ -265,7 +249,6 @@ Loading...,Đang tải...
 Loading…,Đang tải…
 Loading…,Đang tải…,NC Equipment
 Lock,Khóa
-Low volume,Sản lượng thấp
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
 Main equipment,Thiết bị chính
 Management,Quản lý
@@ -350,9 +333,7 @@ PERIOD,Theo kỳ
 Pages,Trang
 Pages {0}–{1} of {2},Trang {0}–{1} của {2}
 Paraclinical,Cận lâm sàng
-Parts per result,Linh kiện theo số kết quả
 Past useful life,Hết thời gian sử dụng,NC Equipment
-Patient results,Số kết quả trả
 Pending tasks,Việc chờ xử lý
 Performing department,Khoa thực hiện
 Phase,Giai đoạn
@@ -409,7 +390,6 @@ Resource lines,Dòng nguồn lực
 Resource not found: {0},Không tìm thấy nguồn lực: {0}
 Resources,Nguồn lực
 Result,Kết quả
-Results by test system,Kết quả theo hệ thống xét nghiệm
 Retry,Thử lại
 Return reason,Lý do trả lại
 Return to draft,Trả lại
@@ -447,16 +427,12 @@ Select only one line to edit.,Chỉ chọn một dòng để sửa.
 Service,Dịch vụ
 Service code,Mã dịch vụ
 Service cost,Giá thành
-Service level,Cấp dịch vụ
 Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
 Services by chain status,Dịch vụ theo tình trạng chuỗi
-Share,Tỷ trọng
 Share (%),Tỷ trọng (%)
-Share source,Nguồn tỷ trọng
 Show all lines,Hiện mọi dòng
 Show differences only,Chỉ hiện chỗ khác
 Show excluded lines,Hiện dòng loại trừ
-Show more,Xem thêm
 Snippet,Đoạn trích
 Some lines are missing figures,Chưa đủ số liệu ở một số dòng
 Source,Nguồn giá,NC Item
@@ -483,7 +459,6 @@ Template item,Khoản mục của mẫu
 Template items,Khoản mục của mẫu
 Test system,Hệ thống xét nghiệm
 The costing run failed. See Error Log or run it again.,Lần tính lỗi. Xem Error Log hoặc chạy lại.
-The costing run has {0} warnings and was still costed,"Lần tính có {0} cảnh báo, vẫn tính"
 The costing run is running in the background.,Lần tính giá đang chạy nền.
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The old results of this run will be replaced.,Kết quả cũ của lần tính này sẽ được thay.
@@ -511,7 +486,6 @@ This service already has a procedure for the department:,Dịch vụ đã có qu
 Total,Tổng
 Total driver,Tổng tiêu chí
 Total share differs from 100%,Tổng tỷ trọng khác 100%
-Total tests,Tổng số test
 Totals by cost center and category,Tổng theo trung tâm và loại chi phí
 Type,Loại
 UTILITY,Tiện ích
@@ -551,8 +525,6 @@ Wastage %,Hao hụt %
 "Wastage cap {0}% (Assumption, to be confirmed: no effective parameter set)",Trần hao hụt {0}% (Giả định — chờ xác nhận: chưa có bộ tham số hiệu lực)
 Wastage is already in the k factor,Hao hụt đã nằm trong hệ số k
 Wastage reason,Lý do vượt trần
-Weighted average,Bình quân gia quyền
-Weighted average + external quality assessment = direct cost of the service,Bình quân gia quyền + ngoại kiểm = chi phí trực tiếp dịch vụ
 Whole service,Chung cho cả dịch vụ
 Will add the mandatory items of template {0}.,Sẽ thêm khoản mục bắt buộc của mẫu {0}.
 Will be estimated from the plan,Sẽ ước tính từ kế hoạch
@@ -569,8 +541,6 @@ You have no pending tasks. Tasks waiting for your approval will appear here.,B�
 and {0} more errors,và {0} lỗi khác
 content,nội dung
 document number,số hiệu
-k factor,Hệ số k
-one result of the system,một kết quả của hệ thống
 open comments,ý kiến chưa xử lý
 service code,mã dịch vụ
 tests,test
