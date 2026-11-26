@@ -41,6 +41,31 @@ def _line_values(ln: engine.CostLine) -> dict:
 		"driver_value": _f(ln.driver_value),
 		"driver_total": _f(ln.driver_total),
 		"pool_amount": _f(ln.pool_amount),
+		"test_system": ln.test_system or None,
+		"line_origin": ln.line_origin or None,
+		"cost_level": ln.cost_level or None,
+		"k_factor": _f(ln.k_factor),
+		"divisor_label": ln.divisor_label or None,
+		"divisor_value": _f(ln.divisor_value),
+		"divisor_source": ln.divisor_source or None,
+	}
+
+
+def _system_values(t) -> dict:
+	return {
+		"test_system": t.test_system,
+		"norm_set": t.norm_set,
+		"patient_results": _f(t.patient_results),
+		"share_pct": _f(t.share_pct),
+		"q_iqc": _f(t.q_iqc),
+		"q_calibration": _f(t.q_calibration),
+		"q_rerun": _f(t.q_rerun),
+		"q_eqa": _f(t.q_eqa),
+		"wastage_rate": _f(t.wastage_rate),
+		"k_factor": _f(t.k_factor),
+		"k_estimated": 1 if t.k_estimated else 0,
+		"direct_cost": _f(t.direct_cost),
+		"low_volume_warning": 1 if t.low_volume_warning else 0,
 	}
 
 
@@ -54,12 +79,16 @@ def write_results(run, results) -> list[str]:
 				"costing_run": run.name,
 				"technical_service": r.service,
 				"department": r.department,
-				"norm_set": r.norm_set,
+				"norm_set": r.norm_set or None,
 				"calc_status": r.status,
 				"calc_message": r.message or None,
 				"volume": _f(r.volume),
+				"is_paraclinical": 1 if r.is_paraclinical else 0,
+				"eqa_cost": _f(r.eqa_cost),
 			}
 		)
+		for t in r.test_system_costs:
+			sc.append("test_system_costs", _system_values(t))
 		for comp, field in DIRECT_FIELD.items():
 			sc.set(field, float(r.direct_by_component.get(comp, 0)))
 		for cat, field in ALLOC_FIELD.items():

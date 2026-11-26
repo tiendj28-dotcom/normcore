@@ -93,6 +93,7 @@ class NCCostingRun(Document):
 	def _run(self, eligible, progress=None):
 		"""Pha tính (chỉ đọc): nạp dữ liệu và tính từng dịch vụ; trả danh sách `ServiceResult`."""
 		ctx = loader.load_context(self, eligible)
+		self.flags.run_warnings = loader.run_warnings(ctx, eligible)
 		return runner.run(
 			eligible,
 			lambda e: loader.load_service(ctx, e),
@@ -141,6 +142,7 @@ def execute_costing(run, eligible, background=True):
 		for name in frappe.get_all("NC Service Cost", {"costing_run": run}, pluck="name"):
 			frappe.delete_doc("NC Service Cost", name, force=True, ignore_permissions=True)
 		writer.write_results(doc, results)
+		doc.db_set("run_warnings", "\n".join(doc.flags.run_warnings or []) or None, update_modified=False)
 	except Exception:
 		frappe.db.rollback(save_point="nc_costing_run")
 		return _fail(doc)
