@@ -5,7 +5,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.costing import engine
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import make_base, make_param_set, make_procedure, make_user, publish_procedure
+from normcore.tests.utils import confirm_norm_set, make_base, make_param_set, make_procedure, make_user, publish_procedure
 
 
 def _published_norm_set(service, dept, minutes=10):
@@ -46,6 +46,7 @@ class TestNCCostingRun(FrappeTestCase):
 		ns = _published_norm_set(self.service, self.dept)
 		fin = make_user("fin.run@normcore.test", "NC Finance")
 		frappe.set_user(fin)
+		confirm_norm_set(ns)
 		ns.lock()
 		run = _run(self.params)
 		self.assertEqual(run.status, "Nháp")
@@ -87,6 +88,7 @@ class TestNCCostingRun(FrappeTestCase):
 
 	def test_G5_chuc_danh_thieu_don_gia_ghi_loi_khong_bia_so(self):
 		ns = _published_norm_set(self.service, self.dept)
+		confirm_norm_set(ns)
 		ns.lock()
 		frappe.get_doc(
 			{
@@ -120,6 +122,7 @@ class TestNCCostingRun(FrappeTestCase):
 
 	def test_chay_lai_khong_nhan_doi_ket_qua(self):
 		ns = _published_norm_set(self.service, self.dept)
+		confirm_norm_set(ns)
 		ns.lock()
 		run = _run(self.params)
 		run.run_costing()
@@ -130,6 +133,7 @@ class TestNCCostingRun(FrappeTestCase):
 
 	def test_tinh_loi_duoc_luu_trang_thai(self):
 		ns = _published_norm_set(self.service, self.dept)
+		confirm_norm_set(ns)
 		ns.lock()
 		# hospital_qty âm làm engine ném lỗi; ghi thẳng DB vì validate không cho sửa bộ đã khóa
 		frappe.db.set_value("NC Norm Line", ns.lines[0].name, "hospital_qty", -5)

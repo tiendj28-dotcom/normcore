@@ -4,7 +4,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import access
-from normcore.tests.utils import ensure, make_base, make_cls_data, make_test_system, make_user
+from normcore.tests.utils import confirm_norm_set, ensure, make_base, make_cls_data, make_test_system, make_user
 
 SYS = dict(est_rerun_rate=2, est_wastage_rate=3)
 
@@ -203,6 +203,7 @@ class TestNCTestSystem(FrappeTestCase):
 
 		make_param_set()
 		ns = _published_norm_set(self.service, self.dept)
+		confirm_norm_set(ns)
 		ns.lock()
 		run = _run(frappe.get_doc("NC Costing Parameter Set", {"title": "Bộ tham số vàng"}))
 		run.run_costing()
@@ -241,6 +242,7 @@ class TestNCTestSystem(FrappeTestCase):
 
 		params = make_param_set()
 		ns = _published_norm_set(self.service, self.dept)
+		confirm_norm_set(ns)
 		ns.lock()
 		frappe.db.set_value("NC Technical Service", self.service, {"is_send_out": 1, "send_out_price": 90000})
 		run = _run(params)
@@ -258,6 +260,7 @@ class TestNCTestSystem(FrappeTestCase):
 
 		params = make_param_set()
 		ns = _published_norm_set(self.service, self.dept)
+		confirm_norm_set(ns)
 		ns.lock()
 		frappe.db.set_value(
 			"NC Technical Service",

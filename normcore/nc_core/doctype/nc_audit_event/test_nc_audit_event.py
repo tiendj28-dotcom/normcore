@@ -5,7 +5,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import audit as audit_api
 from normcore.core import audit
-from normcore.tests.utils import make_base, make_procedure, make_user, publish_procedure
+from normcore.tests.utils import confirm_norm_set, make_base, make_procedure, make_user, publish_procedure
 
 
 def _publish(proc):
@@ -65,6 +65,7 @@ class TestNCAuditEvent(FrappeTestCase):
 		ns = frappe.get_doc("NC Norm Set", make_norm_set(proc.name))
 		fin = make_user("fin.aud@normcore.test", "NC Finance")
 		frappe.set_user(fin)
+		confirm_norm_set(ns)
 		ns.lock()
 		events = self._events_of("NC Norm Set", ns.name)
 		self.assertEqual(events[-1].event_type, "Khóa")

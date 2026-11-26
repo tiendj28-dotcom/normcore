@@ -2,7 +2,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import make_base, make_procedure, make_user, publish_procedure
+from normcore.tests.utils import confirm_norm_set, make_base, make_procedure, make_user, publish_procedure
 
 
 def _published(service, dept, **kw):
@@ -49,6 +49,7 @@ class TestNCNormSet(FrappeTestCase):
 		frappe.set_user(clin)
 		self.assertRaises(frappe.PermissionError, ns.lock)
 		frappe.set_user(fin)
+		confirm_norm_set(ns)
 		ns.lock()
 		ns.reload()
 		self.assertEqual((ns.status, ns.locked_by), ("Đã khóa", fin))
@@ -73,9 +74,11 @@ class TestNCNormSet(FrappeTestCase):
 	def test_DI03_bo_khoa_moi_thay_the_bo_cu(self):
 		p1 = _published(self.service, self.dept, version=1)
 		ns1 = frappe.get_doc("NC Norm Set", make_norm_set(p1.name))
+		confirm_norm_set(ns1)
 		ns1.lock()
 		p2 = _published(self.service, self.dept, version=2)
 		ns2 = frappe.get_doc("NC Norm Set", make_norm_set(p2.name))
+		confirm_norm_set(ns2)
 		ns2.lock()
 		self.assertEqual(frappe.db.get_value("NC Norm Set", ns1.name, "status"), "Đã thay thế")
 		self.assertEqual(frappe.db.get_value("NC Norm Set", ns2.name, "status"), "Đã khóa")
