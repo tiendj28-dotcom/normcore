@@ -1,0 +1,2 @@
+| FR-ACC-007 (NORM-67) | `TestServiceCostPermission` (api/test_service_cost_permission.py: NC Auditor, NC Director, NC Finance đọc được NC Service Cost, Auditor không ghi; đường request thật `set_user` + `check_permission` + `frappe.client.has_permission` + `get_explanation`) |
+| FR-ACC-003 (NORM-67) | `TestServiceCostPermission.test_truong_khoa_chi_doc_khoa_minh`, `test_clinician_khong_co_quyen_doc_bang_giai_trinh`, `test_auditor_kem_vai_tro_theo_khoa_van_doc_moi_khoa` (api/test_service_cost_permission.py) |
