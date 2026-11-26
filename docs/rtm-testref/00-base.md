@@ -242,7 +242,7 @@
 | FR-TS-004 | `api/test_time_study.py::test_TC_TS_02_ap_ket_qua_vao_bo_nhap`, `test_ap_chi_vao_bo_nhap`, `test_ap_mat_xac_nhan_dong_bi_doi`, `test_ap_khoa_khong_khop_di_vao_unmatched`; `unit/test_time_study.py::test_plan_apply`, `test_basis_ref` |
 | FR-TS-005 | `api/test_time_study.py::test_TC_TS_03_thieu_ca_canh_bao_xac_nhan`; `unit/test_time_study_ui.py::TestTimeStudyReportUi` |
 | FR-ADM-003 (phần bấm giờ) | `api/test_time_study.py::test_TC_ADM_03_ket_qua_bam_gio_3_ca` |
-| NFR-USE-003 | `unit/test_time_study_ui.py::TestTimeStudyUi` (tĩnh); TC-NFR-05 kiểm tay chưa thực hiện (xem implementation-log) |
+| NFR-USE-003 | `unit/test_time_study_ui.py::TestTimeStudyUi` (tĩnh); TC-NFR-05 kiểm tay Playwright (QA, preview, `faa65ca`/`d8ca627`): 768 px scrollWidth 753, ≤ 3 lần chạm/bước (xem acceptance.md) |
 | Quyền (FR-ACC-003, FR-ACC-007) | `test_quyen_time_study_council_khong_quyen`, `test_quyen_time_study_auditor_chi_doc`, `test_quyen_time_study_clinician_theo_khoa`, `test_quyen_time_study_consultant_tao_duoc`, `test_docperm_khop_bang` (nc_time_study); `api/test_time_study.py::test_quyen_apply_va_result`, `test_get_entry_council_bi_tu_choi`, `test_get_entry_auditor_khong_ghi_duoc`; `test_nc_time_study_result.py::test_council_bi_tu_choi`, `test_vai_tro_doc_khop_bang` |
 ## FEAT-013 (NORM-51, Dev ghi, QA xác nhận)
 

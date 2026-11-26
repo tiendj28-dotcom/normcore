@@ -1,7 +1,7 @@
 # As-Built FEAT-014 — Khảo sát bấm giờ
 
 Issue NORM-49. FR: FR-TS-001..005, NFR-USE-003, phần bấm giờ của FR-ADM-003. UC-010, SCR-DSK-015, SCR-DSK-016. TC-TS-01..05, TC-NFR-05, TC-ADM-03 (phần bấm giờ).
-Người hiện thực: Dev (Multica). Chưa qua QA.
+Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica), commit kiểm `d8ca627`.
 
 ## Đã làm
 - **Logic thuần** `normcore/norm/time_study.py` (`lines_from_procedure`, `line_errors`, `median`, `collect`, `summarize`, `plan_apply`, `basis_ref`); không import frappe, phủ 100%.
@@ -16,7 +16,7 @@ Người hiện thực: Dev (Multica). Chưa qua QA.
 - ASM-014-11: thêm `NC Time Study` vào tập `SCOPED` của `test_scope_registry.py` theo Quyết định Lead.
 
 ## Nợ kỹ thuật, ghi chú
-- **TC-NFR-05 (kiểm tay 768 px, ca 6 bước) và kiểm giao diện 1366 × 768 chưa thực hiện**: site preview (`~/preview-bench`) chưa được tạo nên `multica env start preview` không chạy. Mới có kiểm tĩnh (`unit/test_time_study_ui.py`: vùng chạm ≥ 44 px, `inputmode="decimal"`, `flex-wrap`, không chiều rộng > 768 px).
+- TC-NFR-05 và giao diện 1366 × 768 đã kiểm tay bằng Playwright trên preview (QA): 768 px `scrollWidth` 753, ca 6 bước 1/3/2/3/2/2 lần chạm, không cuộn ngang; 1366 × 768 SCR-DSK-015/016 hiển thị đúng. Ghi chú: Enter đi qua ô "Số người" trước ô phút (khác chữ ui-design 1.2, vẫn ≤ 3). Auditor thấy report nhưng không có nút "Áp vào bộ định mức"; nút "Ghi ca mới" vẫn hiện với Auditor (chặn ở máy chủ). Bộ ba vai trò Clinician khoa khác, Council, Resource Mgr chưa kiểm tay (có test tự động).
 - Không lưu ngoại tuyến, không xóa phiếu (ASM-014-09).
 
 ## ASM
