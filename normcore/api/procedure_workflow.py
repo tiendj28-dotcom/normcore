@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate
 
-from normcore.core import audit
+from normcore.core import audit, notify, settings
 from normcore.core import permissions as scope
 from normcore.procedure import approval, diff, printing, validation
 
@@ -96,28 +96,53 @@ def _available_actions(doc, user):
 
 
 def _notify(users, subject, doc):
-	"""Notification Log cho từng người; bỏ Administrator, Guest, người bị tắt; không gửi trùng (ASM-007-01)."""
-	created = 0
-	for user in dict.fromkeys(users):
-		if not user or user in SKIP_USERS or not frappe.db.get_value("User", user, "enabled"):
+	"""Lớp mỏng gọi core.notify.notify (FR-NOTI-001); giữ người nhận, tiêu đề, chống trùng (ASM-007-01)."""
+	return notify.notify(users, subject, DT, doc.name)
+
+
+# ---- việc chờ (FR-NOTI-003) ------------------------------------------------------------------------------
+
+_FORWARD = {
+	approval.WAIT_HEAD: ("Đồng ý", "Duyệt cấp trưởng khoa", ROLE_HEAD),
+	approval.WAIT_COUNCIL: ("Thông qua", "Thẩm định cấp hội đồng", ROLE_COUNCIL),
+	approval.WAIT_PUBLISH: ("Ban hành", "Ban hành", ROLE_DIRECTOR),
+}
+
+
+def pending_for(user):
+	"""Quy trình chờ `user` làm hành động tiến (ASM-002-03, 04). Nguồn của `normcore_pending_sources`."""
+	if not user or user == "Guest":
+		return []
+	roles = set(frappe.get_roles(user))
+	states = [st for st, (_a, _t, role) in _FORWARD.items() if role in roles]
+	if not states:
+		return []
+	filters = {"workflow_state": ["in", states]}
+	if user != "Administrator" and ROLE_HEAD in roles and ROLE_COUNCIL not in roles:
+		filters["department"] = ["in", list(scope.get_user_departments(user)) or [""]]
+	days = int(settings.get("approval_reminder_days"))
+	today = getdate(nowdate())
+	out = []
+	for row in frappe.get_all(DT, filters, ["name", "modified"]):
+		doc = frappe.get_doc(DT, row.name)
+		action, task, _role = _FORWARD[doc.workflow_state]
+		if _actor_error(doc, action, user) is not None:
 			continue
-		if frappe.db.exists(
-			"Notification Log", {"for_user": user, "document_name": doc.name, "subject": subject}
-		):
-			continue
-		frappe.get_doc(
+		since = _entered_on(doc.name, doc.workflow_state, row.modified)
+		out.append(
 			{
-				"doctype": "Notification Log",
-				"type": "Alert",
-				"document_type": DT,
-				"document_name": doc.name,
-				"subject": subject,
-				"for_user": user,
-				"from_user": frappe.session.user,
+				"doctype": DT,
+				"name": doc.name,
+				"title": f"{doc.technical_service} — {doc.department}",
+				"task": task,
+				"state": doc.workflow_state,
+				"department": doc.department,
+				"since": since.isoformat(),
+				"overdue": (today - since).days >= days,
+				"route": f"/app/procedure-editor/{doc.name}",
 			}
-		).insert(ignore_permissions=True)
-		created += 1
-	return created
+		)
+	return out
 
 
 # ---- hành động -------------------------------------------------------------------------------------------

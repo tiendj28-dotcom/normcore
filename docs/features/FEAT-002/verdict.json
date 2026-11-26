@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["1226 test bench trên site sạch OK; 631 pytest pass, độ phủ 99%", "TC-NOTI-01 đạt; TC-ADM-03 đạt phần tham số (PA1, ASM-002-13), phần trung vị thuộc FEAT-014", "Không test bị xóa/skip/nới; không sửa tài liệu chỉ đọc; CI PR #54 xanh"], "commit": "d0a4f8129cc2d48d4d19a0bc7f65993dcce796f8"}
