@@ -2,20 +2,26 @@ Account,Tài khoản
 Actions,Thao tác
 Active,Đang dùng,NC Technical Service
 Actual figures,Có số thực tế
+Add,Thêm
 Add citation,Thêm trích dẫn
+Add line,Thêm dòng
 Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
 Add step,Thêm bước
 Add test system,Thêm hệ thống xét nghiệm
+"After confirming, the set cannot be edited until Finance returns it.","Sau khi xác nhận, bộ không sửa được cho đến khi Tài chính trả lại."
 "After finalizing, lines are locked and cannot be reopened. Finalize this import?","Sau khi chốt, các dòng bị khóa và không mở lại được. Chốt lần nhập này?"
 "After issuing, the content of this version cannot be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
+"After locking, the norm set can no longer be edited and is used for costing.","Sau khi khóa, bộ định mức không sửa được và được dùng để tính giá."
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 "After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
+All components,Mọi cấu phần
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
+Applied qty,Lượng áp dụng
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
 Assign,Gán
@@ -23,6 +29,10 @@ Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
 Attach to,Gắn với
+Authority document,Văn bản ban hành định mức
+Authority norm,Định mức ban hành
+Basis,Căn cứ
+Basis reference,Tham chiếu căn cứ
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
 Calculating…,Đang tính…
 Calibration,Chuẩn máy
@@ -35,14 +45,22 @@ Catalog,Danh mục
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
+Choose a step,Chọn một bước
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
 Clinical volume and stock issues,Sản lượng cận lâm sàng và xuất kho
 Code,Mã
+Collapse or expand all steps,Thu gọn hoặc mở tất cả bước
 Column,Cột,Import Excel
 Comment,Ý kiến
 Comments,Ý kiến
+Component,Cấu phần
+Confirm,Xác nhận
 Confirm import,Xác nhận ghi
+Confirm professionally,Xác nhận chuyên môn
+Confirmation,Xác nhận
+"Confirmed professionally, waiting for Finance to lock. It cannot be edited.","Bộ đã xác nhận chuyên môn, chờ Tài chính khóa. Không sửa được."
+Confirmed {0},Đã xác nhận {0}
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
 Cost category,Loại chi phí
@@ -58,6 +76,8 @@ Could not load chain status.,Không tải được tình trạng chuỗi.
 Could not load test systems.,Không tải được hệ thống xét nghiệm.
 Could not load the status.,Không tải được tình trạng.
 Create,Tạo
+Create a draft of version {0} from this set?,Tạo bộ nháp phiên bản {0} từ bộ này?
+Create new version,Tạo phiên bản mới
 Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
 Created,Tạo mới,Import Excel
@@ -65,6 +85,7 @@ Deactivate,Ngừng dùng
 Deactivate test system {0}? It will not enter new costing runs; existing runs stay unchanged.,Ngừng dùng hệ thống {0}? Hệ thống sẽ không vào các lần tính giá mới; các lần tính đã có giữ nguyên.
 Decision number,Số quyết định
 Delete,Xóa
+Delete line,Xóa dòng
 Delete this citation?,Xóa trích dẫn này?
 Delete this resource?,Xóa nguồn lực này?
 Delete this step?,Xóa bước này?
@@ -80,6 +101,7 @@ Download file,Tải tệp
 Download template,Tải tệp mẫu
 Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
+Duplicate of {0},Trùng nguồn lực với {0} trong cùng bước
 EQA tests,Số test ngoại kiểm
 Edit,Sửa
 Edit cost category,Sửa loại chi phí
@@ -93,22 +115,27 @@ Errors by line,Lỗi theo dòng
 Excel row,Dòng Excel
 Excluded,Loại trừ
 Excluded from price,Không tính vào giá
+Exclusion reason,Lý do loại trừ
 Expired {0} days ago,Đã hết hạn {0} ngày trước
 Expires in {0} days,Còn {0} ngày đến hạn
 Export,Xuất
 File errors,Dòng lỗi khi đọc tệp
+Filter these lines,Lọc các dòng này
 Finalize,Chốt
 Finalized: the figures can be used in a costing run.,Đã chốt: số liệu dùng được cho lần tính giá.
 "Fix the file, attach it again in Source file and click Reload file, or create a new import.","Sửa tệp, đính kèm lại ở ô Tệp nguồn rồi bấm Đọc lại tệp, hoặc tạo lần nhập mới."
+For reference only; the official cost is calculated in the costing run.,Chỉ để tham khảo; giá thành chính thức tính ở lần tính giá.
 General comment,Ý kiến chung
 Has error lines,Có dòng lỗi
 Headcount,Số người
 Heading,Tiêu đề
+Hospital norm,Định mức bệnh viện
 IQC tests,Số test nội kiểm
 Import data from Excel,Nhập dữ liệu từ Excel
 Import from Excel,Nhập từ Excel
 Import result,Kết quả nhập
 Inactive,Ngừng dùng,NC Technical Service
+Incomplete: some lines have no price or are not linked,Chưa đủ: có dòng chưa có đơn giá hoặc chưa liên kết
 Indexing failed: {0},Lập chỉ mục thất bại: {0}
 Indexing in progress. Sections will appear when it finishes.,Đang lập chỉ mục. Các mục sẽ hiện khi hoàn tất.
 Internal QC,Nội kiểm
@@ -118,6 +145,7 @@ Legal document,Văn bản
 Legal section,Mục văn bản
 Legal text links are provided by the document library.,Liên kết tới mục văn bản do thư viện văn bản cung cấp.
 Line,Dòng
+Line details,Chi tiết dòng
 Lines / Total amount,Số dòng / Tổng tiền
 Lines without cost category,Dòng chưa gán loại chi phí
 Loading chain status…,Đang tải tình trạng chuỗi…
@@ -137,12 +165,14 @@ More,Xem thêm
 Move step down,Chuyển bước xuống
 Move step up,Chuyển bước lên
 Moved to,Đã chuyển sang
+Moved to {0},Đã chuyển sang {0}
 NC Clinical Procedure,Quy trình kỹ thuật
 NC Procedure Citation,Trích dẫn quy trình
 NC Procedure Resource,Nguồn lực của bước
 NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
+Needs update,Cần cập nhật
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -158,13 +188,20 @@ No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None,Không có
 None yet,Chưa có
+Norm grid,Lưới định mức
+Norm set actions,Thao tác bộ định mức
+Norm sets,Bộ định mức
+Not linked,Chưa liên kết
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
+Only lines needing attention,Chỉ dòng cần xử lý
 Only unresolved,Chỉ chưa xử lý
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
+Open norm grid,Mở lưới định mức
 Original page,Trang gốc
 Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
+Over cap,Vượt trần
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
 Pages,Trang
 Pages {0}–{1} of {2},Trang {0}–{1} của {2}
@@ -172,14 +209,19 @@ Paraclinical,Cận lâm sàng
 Past useful life,Hết thời gian sử dụng,NC Equipment
 Performing department,Khoa thực hiện
 Phase,Giai đoạn
+Pick a norm set from the list.,Chọn một bộ định mức ở danh sách.
 Pick a procedure to see its steps.,Chọn một quy trình để xem các bước.
 Preview: written on finalize,Xem trước — ghi khi chốt
+Previous version,Phiên bản trước
 Price code,Mã đơn giá,NC Item
 Price in use today,Đơn giá đang dùng hôm nay,NC Item
 Price per norm unit,Đơn giá một đơn vị định mức,NC Item
 Print PDF,In PDF
 Procedure editor,Trình soạn quy trình
+Provisional amount,Thành tiền tạm tính
+Provisional direct cost,Chi phí trực tiếp tạm tính
 Publish,Ban hành
+Published procedure,Quy trình đã ban hành
 Quality plan,Kế hoạch chất lượng
 Quantity,Số lượng
 Query,Nội dung tìm
@@ -199,7 +241,11 @@ Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệ
 Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
 Rerun tests,Số test chạy lại
 Resolved,Đã xử lý
+Resource,Nguồn lực
+Resource not found: {0},Không tìm thấy nguồn lực: {0}
 Retry,Thử lại
+Return reason,Lý do trả lại
+Return to draft,Trả lại
 Review actions,Thao tác duyệt
 Review comments,Ý kiến thẩm định
 Room hourly rate,Đơn giá giờ phòng,NC Room
@@ -217,6 +263,7 @@ Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
 Search,Tìm
 Search in content,Tìm trong nội dung
+Search line or resource,Tìm mã dòng hoặc nguồn lực
 Searching…,Đang tìm…
 Section,Mục
 Select a procedure,Chọn quy trình
@@ -225,22 +272,31 @@ Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng 
 Select only one line to edit.,Chỉ chọn một dòng để sửa.
 Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
 Share (%),Tỷ trọng (%)
+Show all lines,Hiện mọi dòng
+Show excluded lines,Hiện dòng loại trừ
 Snippet,Đoạn trích
 Some lines are missing figures,Chưa đủ số liệu ở một số dòng
 Source,Nguồn giá,NC Item
+Source resource row,Dòng nguồn lực gốc
 Split equally across {0} services ({1}% each),Chia đều cho {0} dịch vụ (mỗi dịch vụ {1}%)
 Status,Trạng thái
+Step,Bước
 Step ID,Mã bước
 Step title,Tên bước
+Suggested,Đề xuất
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
 The procedure will move to,Quy trình sẽ chuyển sang
+This norm set has no lines yet.,Bộ định mức chưa có dòng nào.
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
 This procedure is awaiting approval and cannot be edited.,"Quy trình đang chờ duyệt, không sửa được."
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This procedure is issued or closed and cannot be edited. Create a new version in the revision function.,"Quy trình đã ban hành, không sửa được. Tạo phiên bản mới ở chức năng Sửa đổi."
+This record is {0} and cannot be edited. Create a new version in the norm grid.,"Bản ghi {0}, không sửa được. Tạo phiên bản mới trên lưới định mức."
+This record is {0} and cannot be edited. Create a new version.,"Bản ghi {0}, không sửa được. Tạo phiên bản mới."
+This resource is already in {0} of the same step. Save anyway?,Nguồn lực này đã có ở dòng {0} của cùng bước. Vẫn lưu?
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
 Total,Tổng
 Total share differs from 100%,Tổng tỷ trọng khác 100%
@@ -269,11 +325,19 @@ Verification,Xác minh,NC Item
 Verified,Đã xác minh,NC Item
 Verified,Đã xác minh,NC Item Price
 Verify,Xác minh,NC Item Price
+Version,Phiên bản
 View,Xem
 View costing results,Xem kết quả tính giá
+Wastage %,Hao hụt %
+"Wastage cap {0}% (Assumption, to be confirmed: no effective parameter set)",Trần hao hụt {0}% (Giả định — chờ xác nhận: chưa có bộ tham số hiệu lực)
+Wastage reason,Lý do vượt trần
+Whole service,Chung cho cả dịch vụ
 Will be estimated from the plan,Sẽ ước tính từ kế hoạch
+Yes,Có
+You can only view this norm set.,Bạn chỉ xem được bộ định mức này.
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
+You do not have permission to view this norm set.,Bạn không có quyền xem bộ định mức này.
 You do not have permission to view this procedure,Bạn không có quyền xem quy trình này
 and {0} more errors,và {0} lỗi khác
 content,nội dung
@@ -282,5 +346,6 @@ open comments,ý kiến chưa xử lý
 service code,mã dịch vụ
 tests,test
 total share,tổng tỷ trọng
+{0} lines are not ready for professional confirmation,Còn {0} dòng chưa đủ điều kiện xác nhận chuyên môn
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
 {0} results — searched by {1},{0} kết quả — tìm theo {1}
