@@ -126,6 +126,7 @@ def make_chain_data(service, department, job="DD"):
 			"fiscal_year": 2026,
 			"costing_date": "2026-10-01",
 			"parameter_set": make_param_set(job=job).name,
+			**costing_run_inputs(),
 			"status": "Đã tính",
 		}
 	)
@@ -297,3 +298,27 @@ def confirm_norm_set(ns):
 	ASM-012-04, Quyết định Lead Q1). Không đi qua luồng xác nhận; luồng thật có test ở api/test_norm.py."""
 	ns.db_set("status", "Đã xác nhận chuyên môn")
 	return ns
+
+
+def costing_run_inputs(year=2026, price_category="GIA-BV"):
+	"""Đầu vào bắt buộc của NC Costing Run (FR-COST-001, ASM-015-18/21): lần nhập kế toán "Đã chốt" và loại giá.
+	Dùng lại lần nhập đã chốt của năm nếu có."""
+	from normcore.install import ensure_sample_price_categories
+	from normcore.tests import accounting_fixtures as af
+
+	ensure_sample_price_categories()
+	name = frappe.db.get_value("NC Accounting Import", {"fiscal_year": year, "status": "Đã chốt"}, "name")
+	if not name:
+		user = frappe.session.user
+		frappe.set_user("Administrator")
+		try:
+			af.make_centers()
+			af.ensure_default_mapping()
+			doc = af.make_import(year=year)
+			from normcore.api import accounting as api
+
+			api.finalize(doc.name)
+			name = doc.name
+		finally:
+			frappe.set_user(user)
+	return {"accounting_import": name, "price_category": price_category}

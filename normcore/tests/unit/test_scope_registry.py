@@ -22,6 +22,7 @@ SCOPED = {
 	"NC Stock Issue Actual",
 	"NC QC Plan",  # FEAT-032, ASM-032-11
 	"NC EQA Program",  # FEAT-032, ASM-032-11
+	"NC Service Cost",  # FEAT-015, ASM-015-22 (Quyết định Lead Q2)
 }
 
 

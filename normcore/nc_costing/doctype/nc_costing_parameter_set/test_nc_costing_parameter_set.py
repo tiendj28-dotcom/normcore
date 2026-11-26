@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from normcore.tests.utils import GOLDEN_PARAM, ensure, make_base, make_user
+from normcore.tests.utils import GOLDEN_PARAM, costing_run_inputs, ensure, make_base, make_user
 
 
 def _new(**over):
@@ -29,6 +29,7 @@ def _lock_run(ps_name):
 			"fiscal_year": 2026,
 			"costing_date": "2026-12-31",
 			"parameter_set": ps_name,
+			**costing_run_inputs(),
 			"status": "Đã khóa",
 		}
 	).insert(ignore_permissions=True)
