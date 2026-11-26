@@ -1,7 +1,7 @@
 # As-Built FEAT-015 — Tính chi phí trực tiếp, giá và bảng giải trình
 
 Issue NORM-41. FR: FR-COST-001, 002, 003, 006, 007, 010, 015 (Should), 016. UC-012 (bước 1–4, 6). SCR-DSK-022, SCR-DSK-023. TC-COST-01, 04, 06, 07, 12, 13, 15, 17, 19.
-Người hiện thực: Dev (Multica). Giao diện chưa được kiểm trong trình duyệt ở bước Dev (chỉ kiểm tĩnh); QA kiểm ở bước acceptance.
+Người hiện thực: Dev (Multica). Giao diện chưa được kiểm trong trình duyệt ở bước Dev (chỉ kiểm tĩnh); QA (Multica) nghiệm thu 2026-11-26; giao diện vẫn chưa kiểm bằng trình duyệt (không có tài khoản test theo vai trò).
 
 ## Đã làm
 - **Logic thuần** (`normcore/costing/`, không import `frappe`): `engine.py` mở rộng (không đổi hàm cũ): `NormLine`, `LineRate`, `CostLine`, `ServiceInput`, `PricingParams`, `direct_line`, `round_price` (BR-COST-014), `price_service` (BR-COST-012, 013), `cost_service` (có điểm cắm `extension`, ADR-017), `finish_service`, `group_explanation`; `rates.py` (đơn giá LABOR, vật chất, tiện ích, thiết bị, phòng; khấu hao bị loại theo BR-COST-016); `runner.py` (phạm vi, đủ điều kiện, ngưỡng chạy nền 50, vòng tính tất định, điểm cắm `allocate`).
@@ -26,3 +26,4 @@ Người hiện thực: Dev (Multica). Giao diện chưa được kiểm trong t
 
 ## ASM
 ASM-015-01..23 (`docs/decisions/assumptions/FEAT-015.md`); AMD-015-01, AMD-015-02 (CF-015-01). ASM-015-21, 22 theo Quyết định Lead (bình luận trên NORM-41).
+- Giao diện chưa kiểm bằng trình duyệt ở bước QA (không có tài khoản test theo vai trò trên staging); đã kiểm bằng test tĩnh và test API theo vai trò.
