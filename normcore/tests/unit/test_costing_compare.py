@@ -48,7 +48,9 @@ class TestCompare(unittest.TestCase):
 		self.assertEqual(c["alloc_labor"].diff, D("-5.75"))
 		self.assertEqual(c["direct_labor"].diff, D("0.00"))
 		self.assertTrue(compare.changed(d))
-		direct_alloc = sum(x.diff for x in d.components if x.diff is not None and x.group in ("Trực tiếp", "Phân bổ"))
+		direct_alloc = sum(
+			x.diff for x in d.components if x.diff is not None and x.group in ("Trực tiếp", "Phân bổ")
+		)
 		self.assertEqual(direct_alloc, d.full_cost.diff)
 
 	def test_base_bang_0_pct_none(self):
@@ -59,7 +61,9 @@ class TestCompare(unittest.TestCase):
 
 	def test_chi_co_o_mot_ben(self):
 		out = compare.compare([row("A"), row("B")], [row("B"), row("C")])
-		self.assertEqual([(d.service, d.presence) for d in out], [("A", "base_only"), ("B", "both"), ("C", "other_only")])
+		self.assertEqual(
+			[(d.service, d.presence) for d in out], [("A", "base_only"), ("B", "both"), ("C", "other_only")]
+		)
 		a, c = out[0], out[2]
 		self.assertIsNone(a.full_cost.other)
 		self.assertIsNone(a.full_cost.diff)
@@ -83,7 +87,9 @@ class TestCompare(unittest.TestCase):
 
 	def test_khac_khoa_la_hai_dong(self):
 		out = compare.compare([row(dept="K1")], [row(dept="K2")])
-		self.assertEqual([(d.department, d.presence) for d in out], [("K1", "base_only"), ("K2", "other_only")])
+		self.assertEqual(
+			[(d.department, d.presence) for d in out], [("K1", "base_only"), ("K2", "other_only")]
+		)
 
 	def test_cau_phan_eqa_chi_hien_khi_co(self):
 		d = compare.compare([row()], [row()])[0]
@@ -100,16 +106,35 @@ class TestCompare(unittest.TestCase):
 		self.assertTrue(compare.changed(d))
 
 	def test_summary(self):
-		out = compare.compare([row("A"), row("B", full=100), row("D")], [row("B", full=90), row("C"), row("D")])
+		out = compare.compare(
+			[row("A"), row("B", full=100), row("D")], [row("B", full=90), row("C"), row("D")]
+		)
 		s = compare.summary(out)
-		self.assertEqual(s, {"services": 4, "changed": 3, "base_only": 1, "other_only": 1, "total_diff": D("-10.00")})
+		self.assertEqual(
+			s, {"services": 4, "changed": 3, "base_only": 1, "other_only": 1, "total_diff": D("-10.00")}
+		)
 
 	def test_summary_rong(self):
-		self.assertEqual(compare.summary([]), {"services": 0, "changed": 0, "base_only": 0, "other_only": 0, "total_diff": D("0.00")})
+		self.assertEqual(
+			compare.summary([]),
+			{"services": 0, "changed": 0, "base_only": 0, "other_only": 0, "total_diff": D("0.00")},
+		)
 
 	def test_input_changes(self):
-		a = {"fiscal_year": "2026", "price_category": "PC1", "scope_departments": ["K2", "K1"], "scope_services": [], "parameter_set": "P"}
-		b = {"fiscal_year": "2026", "price_category": "PC2", "scope_departments": ["K1", "K2"], "scope_services": ["S"], "parameter_set": "P"}
+		a = {
+			"fiscal_year": "2026",
+			"price_category": "PC1",
+			"scope_departments": ["K2", "K1"],
+			"scope_services": [],
+			"parameter_set": "P",
+		}
+		b = {
+			"fiscal_year": "2026",
+			"price_category": "PC2",
+			"scope_departments": ["K1", "K2"],
+			"scope_services": ["S"],
+			"parameter_set": "P",
+		}
 		self.assertEqual(
 			compare.input_changes(a, b),
 			[("Loại giá", "PC1", "PC2"), ("Phạm vi dịch vụ", "", "S")],

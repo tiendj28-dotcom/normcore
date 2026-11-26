@@ -1,7 +1,7 @@
 """So sánh hai lần tính giá (FEAT-018; FR-COST-013). Hàm thuần Python.
 
 Đầu vào là bản ghi phẳng của NC Service Cost (dict cùng tên trường với DocType). Chênh lệch = lần so sánh
-− lần gốc. Giá thành = trực tiếp + phân bổ (BR-COST-012) nên Σ chênh lệch hai nhóm đó = chênh giá thành.
+- lần gốc. Giá thành = trực tiếp + phân bổ (BR-COST-012) nên Σ chênh lệch hai nhóm đó = chênh giá thành.
 """
 
 from __future__ import annotations

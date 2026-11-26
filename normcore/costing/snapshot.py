@@ -59,7 +59,12 @@ def to_plain(obj):
 		return [to_plain(x) for x in obj]
 	if isinstance(obj, dict) or hasattr(obj, "items"):
 		pairs = [(k if isinstance(k, str) else to_plain(k), to_plain(v)) for k, v in obj.items()]
-		pairs.sort(key=lambda kv: (not isinstance(kv[0], str), kv[0] if isinstance(kv[0], str) else dumps(kv[0]).decode()))
+		pairs.sort(
+			key=lambda kv: (
+				not isinstance(kv[0], str),
+				kv[0] if isinstance(kv[0], str) else dumps(kv[0]).decode(),
+			)
+		)
 		return {"__map__": [[k, v] for k, v in pairs]}
 	if obj is None or isinstance(obj, (bool, int, str)):
 		return obj
@@ -194,7 +199,12 @@ def _label(key) -> str:
 	return f"{key[1]} · {key[2]} dòng {key[3]}"
 
 
-_KIND_NAME = {"cost": "kết quả", "line": "dòng chi phí", "system": "dòng hệ thống xét nghiệm", "recon": "dòng đối soát"}
+_KIND_NAME = {
+	"cost": "kết quả",
+	"line": "dòng chi phí",
+	"system": "dòng hệ thống xét nghiệm",
+	"recon": "dòng đối soát",
+}
 
 
 def diff_rows(expected, actual, places=6) -> list[str]:

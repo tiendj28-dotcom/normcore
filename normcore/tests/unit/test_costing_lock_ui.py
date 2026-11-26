@@ -33,7 +33,11 @@ class TestCostingLockUI(unittest.TestCase):
 		for f in JS:
 			used = set(re.findall(r"__\(\s*\"((?:[^\"\\]|\\.)*)\"", _t(f)))
 			self.assertEqual(sorted(used - vi), [], f.name)
-		used = set(re.findall(r"\b_\(\s*[\"']((?:[^\"'\\]|\\.)*)[\"']\s*\)", _t(REPORT / "nc_costing_run_comparison.py")))
+		used = set(
+			re.findall(
+				r"\b_\(\s*[\"']((?:[^\"'\\]|\\.)*)[\"']\s*\)", _t(REPORT / "nc_costing_run_comparison.py")
+			)
+		)
 		self.assertEqual(sorted(used - vi), [])
 
 	def test_chi_goi_api_costing(self):
@@ -47,7 +51,14 @@ class TestCostingLockUI(unittest.TestCase):
 
 	def test_form_nut_va_trang_thai(self):
 		t = _t(FORM)
-		for s in ('__("Duplicate")', '__("Check reproduction")', '__("Compare with another run")', "COMPARE_REPORT", "disable_form", "snapshot_hash"):
+		for s in (
+			'__("Duplicate")',
+			'__("Check reproduction")',
+			'__("Compare with another run")',
+			"COMPARE_REPORT",
+			"disable_form",
+			"snapshot_hash",
+		):
 			self.assertIn(s, t)
 		self.assertIn('role="alert"', t)
 		self.assertIn("escape_html", t)

@@ -90,7 +90,10 @@ class TestRecompute(unittest.TestCase):
 		for s in g.NORMS:
 			self.assertEqual(by[s].price.full_cost, g_res[s]["full"])
 		self.assertEqual(
-			[(r.cost_category, r.costed, r.accounting, r.variance_pct, r.over_tolerance) for r in out.recon_rows],
+			[
+				(r.cost_category, r.costed, r.accounting, r.variance_pct, r.over_tolerance)
+				for r in out.recon_rows
+			],
 			[(c, cost, acc, pct, over) for c, cost, acc, _rem, pct, over in g_recon if c != "MANAGEMENT"],
 		)
 		self.assertEqual(out.warnings, [])
@@ -146,7 +149,10 @@ def _cost(**kw):
 class TestDiffRows(unittest.TestCase):
 	def test_trung_thi_rong(self):
 		rows = [_cost(), {"key": ("recon", "K01", "LABOR"), "values": {"variance": 1.0, "over": 1}}]
-		same = [_cost(calc_message="", full_cost=10.123456), {"key": ("recon", "K01", "LABOR"), "values": {"variance": 1.0, "over": True}}]
+		same = [
+			_cost(calc_message="", full_cost=10.123456),
+			{"key": ("recon", "K01", "LABOR"), "values": {"variance": 1.0, "over": True}},
+		]
 		self.assertEqual(snapshot.diff_rows(rows, same), [])
 
 	def test_khac_so(self):
@@ -173,7 +179,9 @@ class TestDiffRows(unittest.TestCase):
 	def test_cau_dong_dich_vu(self):
 		exp = {"key": ("line", "DV-TEST-A", "K01", 2), "values": {"amount": 6000.0}}
 		act = {"key": ("line", "DV-TEST-A", "K01", 2), "values": {"amount": 10000.0}}
-		self.assertEqual(snapshot.diff_rows([exp], [act]), ["DV-TEST-A · K01 dòng 2 · amount: 6000.0 ≠ 10000.0"])
+		self.assertEqual(
+			snapshot.diff_rows([exp], [act]), ["DV-TEST-A · K01 dòng 2 · amount: 6000.0 ≠ 10000.0"]
+		)
 
 	def test_chuoi_va_truong_vang(self):
 		out = snapshot.diff_rows([_cost(calc_message="a")], [_cost(calc_message="b")])
@@ -185,8 +193,17 @@ class TestDiffRows(unittest.TestCase):
 class TestDepreciationCenters(unittest.TestCase):
 	def test_trung_tam_co_so_khau_hao_trong_pools(self):
 		P = allocation.Pool
-		pools = [P("K02", "DEPRECIATION", D(0), D(0), D(0), D(0), D(0)), P("K01", "DEPRECIATION", D(0), D(0), D(0), D(0), D(0))]
-		acc = {("K01", "DEPRECIATION"): D(5), ("K02", "DEPRECIATION"): D(3), ("K03", "DEPRECIATION"): D(9), ("K01", "LABOR"): D(1), ("K02", "UTILITY"): D(0)}
+		pools = [
+			P("K02", "DEPRECIATION", D(0), D(0), D(0), D(0), D(0)),
+			P("K01", "DEPRECIATION", D(0), D(0), D(0), D(0), D(0)),
+		]
+		acc = {
+			("K01", "DEPRECIATION"): D(5),
+			("K02", "DEPRECIATION"): D(3),
+			("K03", "DEPRECIATION"): D(9),
+			("K01", "LABOR"): D(1),
+			("K02", "UTILITY"): D(0),
+		}
 		self.assertEqual(reconcile.depreciation_centers(acc, pools), ["K01", "K02"])
 		acc[("K02", "DEPRECIATION")] = D(0)
 		self.assertEqual(reconcile.depreciation_centers(acc, pools), ["K01"])

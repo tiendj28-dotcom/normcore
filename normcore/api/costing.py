@@ -562,5 +562,5 @@ def build_comparison(base_run, other_run, only_changed=0) -> dict:
 
 @frappe.whitelist()
 def compare_runs(base_run, other_run, only_changed=0):
-	"""FR-COST-013 (SCR-DSK-022): chênh lệch = lần so sánh − lần gốc, theo dịch vụ và cấu phần."""
+	"""FR-COST-013 (SCR-DSK-022): chênh lệch = lần so sánh - lần gốc, theo dịch vụ và cấu phần."""
 	return build_comparison(base_run, other_run, only_changed)

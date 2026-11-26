@@ -1,7 +1,7 @@
 """Script Report "So sánh hai lần tính giá" (FEAT-018; FR-COST-013, SCR-DSK-022).
 
 Dữ liệu lấy từ `normcore.api.costing.build_comparison` (kiểm quyền đọc cả hai lần tính). Chênh lệch = lần so
-sánh − lần gốc."""
+sánh - lần gốc."""
 
 import frappe
 from frappe import _
@@ -83,19 +83,26 @@ def execute(filters=None):
 	b, o = info["base"], info["other"]
 	message = (
 		f"{_('Base run')} {escape_html(b['name'])} ({escape_html(b['status'])}) · {_('Compared run')} "
-		f"{escape_html(o['name'])} ({escape_html(o['status'])}). {_('Difference = compared run − base run.')}"
+		f"{escape_html(o['name'])} ({escape_html(o['status'])}). {_('Difference = compared run - base run.')}"
 	)
 	if info["input_changes"]:
 		items = "".join(
-			f"<li>{escape_html(a)}: {escape_html(x)} → {escape_html(y)}</li>" for a, x, y in info["input_changes"]
+			f"<li>{escape_html(a)}: {escape_html(x)} → {escape_html(y)}</li>"
+			for a, x, y in info["input_changes"]
 		)
-		message += f'<div class="alert alert-info" role="status"><b>{_("Inputs differ")}</b><ul>{items}</ul></div>'
+		message += (
+			f'<div class="alert alert-info" role="status"><b>{_("Inputs differ")}</b><ul>{items}</ul></div>'
+		)
 	if not rows:
 		message += f"<div>{_('The two costing runs give the same result for every service.')}</div>"
 	s = info["summary"]
 	summary = [
 		{"label": _("Services"), "value": s["services"], "indicator": "gray"},
-		{"label": _("With difference"), "value": s["changed"], "indicator": "red" if s["changed"] else "green"},
+		{
+			"label": _("With difference"),
+			"value": s["changed"],
+			"indicator": "red" if s["changed"] else "green",
+		},
 		{"label": _("Only in base run"), "value": s["base_only"], "indicator": "gray"},
 		{"label": _("Only in compared run"), "value": s["other_only"], "indicator": "gray"},
 		{

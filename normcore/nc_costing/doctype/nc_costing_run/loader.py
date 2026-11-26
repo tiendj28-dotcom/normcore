@@ -734,7 +734,9 @@ def eligible_from_results(run) -> list[dict]:
 			["parent", "test_system", "norm_set"],
 			order_by="parent, idx",
 		):
-			systems.setdefault(t.parent, []).append({"test_system": t.test_system, "norm_set": t.norm_set or ""})
+			systems.setdefault(t.parent, []).append(
+				{"test_system": t.test_system, "norm_set": t.norm_set or ""}
+			)
 	out = []
 	for r in rows:
 		e = {"service": r.technical_service, "department": r.department, "norm_set": r.norm_set or ""}
@@ -747,7 +749,7 @@ def eligible_from_results(run) -> list[dict]:
 
 def stored_rows(run) -> list[dict]:
 	"""Bản ghi phẳng của kết quả và đối soát đã lưu, cùng dạng `writer.expected_rows`."""
-	costs = frappe.get_all("NC Service Cost", {"costing_run": run.name}, list(writer.HEADER_FIELDS) + ["name"])
+	costs = frappe.get_all("NC Service Cost", {"costing_run": run.name}, [*writer.HEADER_FIELDS, "name"])
 	by_name = {c.name: c for c in costs}
 	rows = []
 	for c in costs:

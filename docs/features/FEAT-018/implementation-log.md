@@ -11,3 +11,4 @@
 | T07 | `with_bench.sh 'migrate; bench build --app normcore; run-tests --module normcore.nc_costing.report.nc_costing_run_comparison.test_nc_costing_run_comparison'` | Ran 1 test, OK (`test_bao_cao_so_sanh_cot_cay_va_quyen`) | dbba1a9 |
 | T08 | `python3 docs/tools/build_rtm.py docs` | VAN DE: 0 | 72b5d15 |
 | T09 | golden_engine + golden_cls thoát 0; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90`; `with_bench.sh 'migrate; run-tests --app normcore'`; `check_conventions.py`; `git diff origin/develop -- '*test*.py'` | 993 passed, độ phủ 99,08%; bench Ran 1722 tests OK (435 s); check_conventions thoát 0; chỉ thêm tệp test mới (và một hàm fixture), không dòng test cũ bị xóa; đã merge origin/develop (Already up to date) | 596a337 |
+| CI-fix | `ruff check/format normcore scripts` (lint CI đỏ: RUF001/002/005 + format) | ruff sạch; pytest 993 passed; check_conventions 0 | 9d8b394+ |

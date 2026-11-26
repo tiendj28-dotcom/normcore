@@ -108,9 +108,20 @@ class TestSnapshotCompareGolden(unittest.TestCase):
 		self.assertEqual(c["direct_equipment"], D("-47348.48"))
 		self.assertEqual(c["direct_infra"], D("-12500.00"))
 		self.assertEqual(c["alloc_depreciation"], D("-3787.88"))
-		for f in ("direct_labor", "direct_drug", "direct_supply", "direct_utility", "alloc_labor", "alloc_drug_supply", "alloc_utility", "alloc_management"):
+		for f in (
+			"direct_labor",
+			"direct_drug",
+			"direct_supply",
+			"direct_utility",
+			"alloc_labor",
+			"alloc_drug_supply",
+			"alloc_utility",
+			"alloc_management",
+		):
 			self.assertEqual(c[f], D("0.00"), f)
-		self.assertEqual(sum(x.diff for x in a.components if x.group in ("Trực tiếp", "Phân bổ")), a.full_cost.diff)
+		self.assertEqual(
+			sum(x.diff for x in a.components if x.group in ("Trực tiếp", "Phân bổ")), a.full_cost.diff
+		)
 		b = out["DV-TEST-B"]
 		self.assertEqual(b.full_cost.diff, D("0.00"))
 		self.assertEqual(b.full_cost.base, D("88169.70"))

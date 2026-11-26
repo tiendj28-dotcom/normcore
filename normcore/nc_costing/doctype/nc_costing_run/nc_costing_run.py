@@ -36,7 +36,9 @@ class NCCostingRun(Document):
 			self.snapshot_file = self.snapshot_hash = None  # chỉ thao tác Khóa ghi (FR-COST-011)
 		elif prev.status == LOCKED and self._changed_since(prev):
 			frappe.throw(
-				_("Lần tính giá {0} đã khóa, không sửa được. Dùng Nhân bản để tạo lần tính mới.").format(self.name)
+				_("Lần tính giá {0} đã khóa, không sửa được. Dùng Nhân bản để tạo lần tính mới.").format(
+					self.name
+				)
 			)
 		elif (self.snapshot_file, self.snapshot_hash) != (prev.snapshot_file, prev.snapshot_hash):
 			frappe.throw(_("Ảnh chụp chỉ do thao tác Khóa ghi"))
@@ -203,7 +205,12 @@ class NCCostingRun(Document):
 		try:
 			content = frappe.get_doc("File", {"file_url": self.snapshot_file}).get_content()
 		except Exception:
-			return {"ok": False, "diffs": [_("Không tìm thấy tệp ảnh chụp")], "diff_count": 1, "hash": self.snapshot_hash}
+			return {
+				"ok": False,
+				"diffs": [_("Không tìm thấy tệp ảnh chụp")],
+				"diff_count": 1,
+				"hash": self.snapshot_hash,
+			}
 		blob = content.encode() if isinstance(content, str) else content
 		try:
 			snap = snapshot.unpack(blob, self.snapshot_hash)

@@ -8,7 +8,7 @@ Costing run to compare,Lần tính để so sánh
 "Create a new costing run in Draft with the same inputs and scope? Results, reconciliation and the snapshot are not copied.","Tạo lần tính giá mới ở trạng thái Nháp với cùng đầu vào và phạm vi? Kết quả, đối soát và ảnh chụp không được chép."
 Difference,Chênh lệch
 Difference (%),Chênh lệch (%)
-Difference = compared run − base run.,Chênh lệch = lần so sánh − lần gốc.
+Difference = compared run - base run.,Chênh lệch = lần so sánh − lần gốc.
 Different,Khác
 Inputs differ,Đầu vào khác nhau
 Locked (no input snapshot). It cannot be recalculated or edited; duplicate it to create a new costing run.,"Đã khóa (không có ảnh chụp đầu vào). Không tính lại, không sửa được; dùng Nhân bản để tạo lần tính mới."

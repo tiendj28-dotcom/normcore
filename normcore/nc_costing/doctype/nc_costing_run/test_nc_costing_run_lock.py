@@ -50,7 +50,9 @@ class TestCostingRunLock(FrappeTestCase):
 	def _unpack(self, run):
 		file = frappe.get_doc("File", {"file_url": run.snapshot_file})
 		content = file.get_content()
-		return file, snapshot.unpack(content.encode() if isinstance(content, str) else content, run.snapshot_hash)
+		return file, snapshot.unpack(
+			content.encode() if isinstance(content, str) else content, run.snapshot_hash
+		)
 
 	def _l02(self, run):
 		sc = frappe.get_doc("NC Service Cost", {"costing_run": run.name, "technical_service": "DV-TEST-A"})
@@ -142,7 +144,12 @@ class TestCostingRunLock(FrappeTestCase):
 		self.assertEqual(frappe.db.count("NC Reconciliation Line", {"costing_run": new.name}), 0)
 		self.assertTrue(
 			frappe.db.exists(
-				"Comment", {"reference_doctype": "NC Costing Run", "reference_name": new.name, "content": ["like", f"%{run.name}%"]}
+				"Comment",
+				{
+					"reference_doctype": "NC Costing Run",
+					"reference_name": new.name,
+					"content": ["like", f"%{run.name}%"],
+				},
 			)
 		)
 		run.reload()
@@ -160,7 +167,14 @@ class TestCostingRunLock(FrappeTestCase):
 			frappe.delete_doc("NC Costing Run", run.name)
 		self.assertTrue(frappe.db.exists("NC Costing Run", run.name))
 		new = frappe.get_doc(
-			{**run.as_dict(), "name": None, "status": LOCKED, "title": "Chèn thẳng", "snapshot_file": "x", "snapshot_hash": "y"}
+			{
+				**run.as_dict(),
+				"name": None,
+				"status": LOCKED,
+				"title": "Chèn thẳng",
+				"snapshot_file": "x",
+				"snapshot_hash": "y",
+			}
 		)
 		new.insert(ignore_permissions=True)
 		self.assertEqual(new.status, LOCKED)

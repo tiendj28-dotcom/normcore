@@ -100,8 +100,44 @@ def _system_values(t) -> dict:
 	}
 
 
-LINE_FIELDS = ('line_type', 'component', 'step_id', 'norm_line_id', 'resource_label', 'applied_qty', 'unit_rate', 'amount', 'rate_source', 'warning', 'allocation_rule', 'driver_value', 'driver_total', 'pool_amount', 'test_system', 'line_origin', 'cost_level', 'k_factor', 'divisor_label', 'divisor_value', 'divisor_source')
-SYSTEM_FIELDS = ('test_system', 'norm_set', 'patient_results', 'share_pct', 'q_iqc', 'q_calibration', 'q_rerun', 'q_eqa', 'wastage_rate', 'k_factor', 'k_estimated', 'direct_cost', 'low_volume_warning')
+LINE_FIELDS = (
+	"line_type",
+	"component",
+	"step_id",
+	"norm_line_id",
+	"resource_label",
+	"applied_qty",
+	"unit_rate",
+	"amount",
+	"rate_source",
+	"warning",
+	"allocation_rule",
+	"driver_value",
+	"driver_total",
+	"pool_amount",
+	"test_system",
+	"line_origin",
+	"cost_level",
+	"k_factor",
+	"divisor_label",
+	"divisor_value",
+	"divisor_source",
+)
+SYSTEM_FIELDS = (
+	"test_system",
+	"norm_set",
+	"patient_results",
+	"share_pct",
+	"q_iqc",
+	"q_calibration",
+	"q_rerun",
+	"q_eqa",
+	"wastage_rate",
+	"k_factor",
+	"k_estimated",
+	"direct_cost",
+	"low_volume_warning",
+)
 
 
 def service_cost_values(run_name, r) -> tuple[dict, list[dict], list[dict]]:
@@ -164,7 +200,9 @@ def expected_rows(run_name, results, recon_rows) -> list[dict]:
 	rows = []
 	for r in results:
 		header, lines, systems = service_cost_values(run_name, r)
-		rows.append({"key": ("cost", r.service, r.department), "values": canonical("NC Service Cost", header)})
+		rows.append(
+			{"key": ("cost", r.service, r.department), "values": canonical("NC Service Cost", header)}
+		)
 		for i, v in enumerate(lines, 1):
 			rows.append({"key": ("line", r.service, r.department, i), "values": canonical(LINE_DT, v)})
 		for i, v in enumerate(systems, 1):

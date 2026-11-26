@@ -22,7 +22,12 @@ class TestCostingLockApi(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
 		self.addCleanup(frappe.db.rollback)
-		for email, role in ((FIN, "NC Finance"), (AUD, "NC Auditor"), (CLIN, "NC Clinician"), (DIR, "NC Director")):
+		for email, role in (
+			(FIN, "NC Finance"),
+			(AUD, "NC Auditor"),
+			(CLIN, "NC Clinician"),
+			(DIR, "NC Director"),
+		):
 			make_user(email, role)
 		self.params, self.dept, _ = cf.make_golden_world()
 		self.imp = cf.make_golden_allocation(self.dept)
@@ -57,14 +62,29 @@ class TestCostingLockApi(FrappeTestCase):
 		rows = {r["service"]: r for r in out["rows"]}
 		a = rows["DV-TEST-A"]
 		g_base, g_v1 = g.run()[0], g.run(False)[0]
-		self.assertEqual(a["full_cost"]["diff"], float(g_v1["DV-TEST-A"]["full"] - g_base["DV-TEST-A"]["full"]))
+		self.assertEqual(
+			a["full_cost"]["diff"], float(g_v1["DV-TEST-A"]["full"] - g_base["DV-TEST-A"]["full"])
+		)
 		self.assertEqual(a["full_cost"]["diff"], -63636.36)
 		c = {x["field"]: x["diff"] for x in a["components"]}
-		self.assertEqual((c["direct_equipment"], c["direct_infra"], c["alloc_depreciation"]), (-47348.48, -12500.0, -3787.88))
-		for f in ("direct_labor", "direct_drug", "direct_supply", "direct_utility", "alloc_labor", "alloc_drug_supply", "alloc_utility", "alloc_management"):
+		self.assertEqual(
+			(c["direct_equipment"], c["direct_infra"], c["alloc_depreciation"]),
+			(-47348.48, -12500.0, -3787.88),
+		)
+		for f in (
+			"direct_labor",
+			"direct_drug",
+			"direct_supply",
+			"direct_utility",
+			"alloc_labor",
+			"alloc_drug_supply",
+			"alloc_utility",
+			"alloc_management",
+		):
 			self.assertEqual(c[f], 0, f)
 		self.assertEqual(
-			round(sum(x["diff"] for x in a["components"] if x["group"] in ("Trực tiếp", "Phân bổ")), 2), -63636.36
+			round(sum(x["diff"] for x in a["components"] if x["group"] in ("Trực tiếp", "Phân bổ")), 2),
+			-63636.36,
 		)
 		self.assertEqual(rows["DV-TEST-B"]["full_cost"]["diff"], 0)
 		self.assertIn("Loại giá", [x[0] for x in out["input_changes"]])
@@ -110,7 +130,9 @@ class TestCostingLockApi(FrappeTestCase):
 			api.duplicate_run(run.name)
 		with self.assertRaises(frappe.PermissionError):
 			api.lock_run(other.name)
-		file = frappe.get_doc("File", {"file_url": frappe.db.get_value("NC Costing Run", run.name, "snapshot_file")})
+		file = frappe.get_doc(
+			"File", {"file_url": frappe.db.get_value("NC Costing Run", run.name, "snapshot_file")}
+		)
 		self.assertTrue(frappe.has_permission("File", doc=file))
 		frappe.set_user(DIR)
 		self.assertEqual(api.compare_runs(run.name, other.name)["summary"]["services"], 2)
