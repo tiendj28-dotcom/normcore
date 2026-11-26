@@ -7,3 +7,4 @@
 | T03 | `pytest normcore/tests/unit/test_procedure_approval.py` | xanh; test cũ không sửa, 3 test mới | d309bf6 |
 | T04 | `scripts/with_bench.sh 'bench --site normcore.test run-tests --app normcore --module normcore.api.test_procedure_revision'` | Ran 9 tests OK | bc786c7 |
 | T05 | `scripts/with_bench.sh '... --module normcore.api.test_procedure_withdraw'` + `normcore.tests.test_feat_007_workflow` + `normcore.api.test_procedure_workflow` | 3 OK; 6 OK; 9 OK | cdfa7fc |
+| T06 | `scripts/with_bench.sh 'bench --site normcore.test migrate && ... --module normcore.api.test_procedure_norm_flag'`; `python3 scripts/check_conventions.py` | 3 OK; quy ước xanh | 07ca37a |

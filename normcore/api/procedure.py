@@ -7,7 +7,7 @@ tại chỗ để lịch sử có giá trị trước và sau.
 import frappe
 from frappe import _
 
-from normcore.procedure import versioning
+from normcore.procedure import diff, versioning
 from normcore.procedure.copying import copy_structure
 from normcore.procedure.steps import reorder
 
@@ -205,6 +205,29 @@ def list_versions(procedure):
 		order_by="version_no desc",
 		limit_page_length=0,
 	)
+
+
+def _header(doc):
+	return {k: doc.get(k) for k in ("name", "version_no", "workflow_state", "effective_date")}
+
+
+def _diff_input(doc):
+	data = {f: doc.get(f) for f in TEXT_FIELDS}
+	data["steps"] = [_dump(s, STEP_FIELDS) for s in doc.steps]
+	data["resources"] = [_dump(r, RESOURCE_FIELDS) for r in doc.resources]
+	return data
+
+
+@frappe.whitelist()
+def compare_versions(base, target):
+	"""FR-WF-010: khác biệt theo phần, bước, dòng nguồn lực giữa hai phiên bản cùng (dịch vụ, khoa)."""
+	for name in (base, target):
+		_require("read", doc=name, message=_("Bạn không có quyền xem quy trình này"))
+	a, b = frappe.get_doc(DT, base), frappe.get_doc(DT, target)
+	if a.name == b.name or (a.technical_service, a.department) != (b.technical_service, b.department):
+		frappe.throw(_("Chỉ so sánh hai phiên bản của cùng một quy trình (dịch vụ, khoa)"))
+	result = diff.diff_procedures(_diff_input(a), _diff_input(b), SECTIONS)
+	return {"base": _header(a), "target": _header(b), **result}
 
 
 @frappe.whitelist()
