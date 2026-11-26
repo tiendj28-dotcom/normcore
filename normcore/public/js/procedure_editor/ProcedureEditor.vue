@@ -1,5 +1,7 @@
 <template>
 	<div class="nc-pe">
+		<ProcedureCompare v-if="compare" :base="compare.base" :target="compare.target" @route="routeCompare" @close="closeCompare" />
+		<div v-show="!compare">
 		<div class="nc-pe__bar">
 			<label class="sr-only" for="nc-pe-select">{{ __("Select a procedure") }}</label>
 			<select id="nc-pe-select" v-model="selected" class="form-control nc-pe__select" @change="load(selected)">
@@ -42,6 +44,9 @@
 			<div v-if="review" class="nc-pe__reviewbar" role="toolbar" :aria-label="__('Review actions')">
 				<button v-for="a in primaryActions" :key="a" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="openAction(a)">{{ __(a) }}</button>
 				<button v-if="review.actions.includes(reject)" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openAction(reject)">{{ __(reject) }}</button>
+				<button v-if="canRevise" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="revise">{{ __("Revise") }}</button>
+				<button v-if="doc.version_no > 1 || doc.previous_version" type="button" class="btn btn-default btn-sm" @click="openCompare">{{ __("Compare versions") }}</button>
+				<button v-if="review.actions.includes(withdrawAction)" type="button" class="btn btn-danger btn-sm" :disabled="busy" @click="withdraw">{{ __("Withdraw") }}</button>
 				<button type="button" class="btn btn-default btn-sm" @click="download('download_pdf')">{{ __("Print PDF") }}</button>
 				<button type="button" class="btn btn-default btn-sm" @click="download('download_docx')">{{ __("Download DOCX") }}</button>
 				<span v-if="review.open_comments" class="nc-pe__open" :aria-label="review.open_comments + ' ' + __('open comments')">{{ __("Open comments") }}: {{ review.open_comments }}</span>
@@ -221,6 +226,7 @@
 				<button type="button" class="btn btn-default btn-sm" @click="closeForm">{{ __("Cancel") }}</button>
 			</form>
 		</template>
+		</div>
 	</div>
 </template>
 
@@ -286,6 +292,8 @@ export default {
 			reviewError: "",
 			draft: "Nháp",
 			reject: "Từ chối",
+			withdrawAction: "Thu hồi",
+			compare: null,
 			onlyOpen: false,
 			commentForm: { target: "", text: "" },
 		};
@@ -297,6 +305,9 @@ export default {
 		},
 		isLabor() {
 			return this.form.resource_type === "Nhân lực";
+		},
+		canRevise() {
+			return !!this.doc && this.doc.workflow_state === this.published && frappe.model.can_create("NC Clinical Procedure") && frappe.model.can_write("NC Clinical Procedure");
 		},
 		closed() {
 			return !!this.doc && CLOSED.includes(this.doc.workflow_state);
@@ -397,6 +408,59 @@ export default {
 				})
 				.catch(() => {})
 				.finally(() => (this.loading = false));
+		},
+		// --- sửa đổi, so sánh, thu hồi (FEAT-008) ---
+		show(name, target) {
+			this.compare = target ? { base: name, target } : null;
+			return target ? Promise.resolve() : this.load(name);
+		},
+		routeCompare(base, target) {
+			frappe.set_route("procedure-editor", base, "compare", target);
+		},
+		closeCompare(name) {
+			this.compare = null;
+			frappe.set_route("procedure-editor", name);
+		},
+		openCompare() {
+			frappe.set_route("procedure-editor", this.doc.previous_version || this.doc.name, "compare", this.doc.name);
+		},
+		revise() {
+			frappe.confirm(__("Create a draft of the next version from version {0}. Step codes are kept; the draft goes through the approval flow like the first version.", [this.doc.version_no]), () =>
+				this.run(() =>
+					this.call("create_revision", { procedure: this.doc.name }).then((r) => {
+						if (r.existing) frappe.show_alert({ message: __("A draft already exists: {0}", [r.name]), indicator: "orange" });
+						return this.load(r.name);
+					})
+				)
+			);
+		},
+		withdraw() {
+			const dialog = new frappe.ui.Dialog({
+				title: __("Withdraw"),
+				fields: [
+					{ fieldname: "reason", fieldtype: "Small Text", label: __("Withdrawal reason"), reqd: 1 },
+					{ fieldname: "note", fieldtype: "HTML", options: "<p>" + frappe.utils.escape_html(__("After withdrawing, the procedure moves to Withdrawn and can no longer be used as a basis.")) + "</p>" },
+					{ fieldname: "errors", fieldtype: "HTML" },
+				],
+				primary_action_label: __("Withdraw"),
+				primary_action: (values) => {
+					if (!(values.reason || "").trim()) {
+						dialog.fields_dict.errors.$wrapper.html('<div role="alert">' + frappe.utils.escape_html(__("Withdrawal reason is required")) + "</div>");
+						return;
+					}
+					this.callWf("apply_action", { procedure: this.doc.name, action: this.withdrawAction, reason: values.reason })
+						.then(() => {
+							dialog.hide();
+							return this.reload();
+						})
+						.catch((e) => {
+							const items = ((e.lines && e.lines.length ? e.lines : [__("Could not complete this action")]).map((l) => "<li>" + frappe.utils.escape_html(l) + "</li>"));
+							dialog.fields_dict.errors.$wrapper.html('<div role="alert"><ul>' + items.join("") + "</ul></div>");
+						});
+				},
+			});
+			dialog.get_primary_btn().addClass("btn-danger");
+			dialog.show();
 		},
 		reload() {
 			return this.load(this.doc.name);

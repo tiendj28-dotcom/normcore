@@ -195,6 +195,14 @@
 | FR-NOTI-003 | `test_TC_NOTI_01_gui_duyet_thong_bao_va_trang_chu_truong_khoa`, `test_TC_NOTI_01_viec_cho_dung_nguoi`, `test_TC_NOTI_01_auditor_khong_co_viec`, `test_quyen_get_home_guest` (api/test_home.py), `test_FR_NOTI_003_*` (core/test_notify.py) |
 | FR-OUT-010 | `test_FR_OUT_010_*` (unit/test_chain_stages.py), `test_FR_OUT_010_dem_theo_tinh_trang_chuoi`, `test_FR_OUT_010_loc_khoa_va_pham_vi`, `test_FR_OUT_010_bo_loc_danh_sach_dich_vu`, `test_FR_OUT_010_so_truy_van_get_home` (api/test_home.py), `test_workspace_co_block_trang_chu` (tests/test_feat_002.py) |
 | FR-ADM-003 | `test_TC_ADM_03_doi_so_ca_toi_thieu_ap_ngay` (**một phần** của TC-ADM-03, Lead chọn PA1, ASM-002-13; phần trung vị/cảnh báo thiếu ca là `test_TC_ADM_03_ket_qua_bam_gio_3_ca` của FEAT-014), `test_FR_ADM_003_so_ngay_nhac_ap_ngay`, `test_FR_ADM_003_thoi_han_ai_ap_ngay`, `test_nc_settings_*`, `test_quyen_nc_settings_*` (nc_settings/test_nc_settings.py) |
+# Test ref — FEAT-008 (QA Multica kiểm định, accepted)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-WF-009 | `test_TC_WF_05_sua_doi_giu_ma_buoc`, `test_sua_doi_da_co_ban_nhap_tra_ban_dang_co`, `test_sua_doi_tu_choi_trang_thai_va_quyen`, `test_sua_doi_tu_choi_ban_ban_hanh_cu_hon` (api/test_procedure_revision.py); unit/test_procedure_versioning.py |
+| FR-WF-010 | `test_TC_WF_07_so_sanh_phien_ban`, `test_so_sanh_kiem_quyen_va_cung_quy_trinh` (api/test_procedure_compare.py); `test_TC_WF_07_diff_theo_phan_buoc_nguon_luc` (unit/test_procedure_diff.py); unit/test_feat_008_ui.py. Phần hiển thị loại M: QA kiểm bằng Playwright |
+| FR-WF-011 | `test_TC_WF_06_ban_hanh_gan_co_bo_dinh_muc` (api/test_procedure_norm_flag.py); `test_TC_WF_06_step_changes_them_bo_doi` (unit/test_procedure_diff.py) |
+| FR-WF-012 | `test_FR_WF_012_thu_hoi_co_ly_do`, `test_FR_WF_012_thu_hoi_tu_choi`, `test_FR_WF_012_sai_trang_thai` (api/test_procedure_withdraw.py); `TestWithdraw` (unit/test_procedure_approval.py) |
 ## FEAT-012 (NORM-39, ghi bởi Dev; QA kiểm định lại)
 
 | FR | Test thật |
