@@ -25,4 +25,5 @@ nc-lgd-s|Văn bản pháp lý|NC Legal Document|DocType|List
 nc-lgs-s|Mục văn bản|NC Legal Section|DocType|List
 nc-ais-s|Cấu hình AI|NC AI Settings|DocType|List
 nc-apt-s|Mẫu lệnh AI|NC Prompt Template|DocType|List
+nc-nt-s|Mẫu định mức|NC Norm Template|DocType|List
 nc-home-b|NC Trang chủ||CustomBlock|

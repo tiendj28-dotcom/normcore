@@ -87,6 +87,18 @@ def ensure_default_account_mapping():
 			).insert(ignore_permissions=True)
 
 
+def ensure_norm_templates():
+	"""FR-NORM-021, ASM-034-18: mẫu định mức Hóa sinh và Miễn dịch cài sẵn, chưa bật. Chạy lại không nhân bản,
+	không ghi đè mẫu đã có (kể cả mẫu NC Finance đã sửa hay bật)."""
+	from normcore.norm.templates import DEFAULT_TEMPLATES
+
+	if not frappe.db.exists("DocType", "NC Norm Template"):
+		return
+	for tpl in DEFAULT_TEMPLATES:
+		if not frappe.db.exists("NC Norm Template", tpl["template_code"]):
+			frappe.get_doc({"doctype": "NC Norm Template", **tpl}).insert(ignore_permissions=True)
+
+
 def after_install():
 	from normcore.ai.prompts_install import ensure_default_templates
 
@@ -95,3 +107,4 @@ def after_install():
 	ensure_sample_price_categories()
 	ensure_default_account_mapping()
 	ensure_default_templates()
+	ensure_norm_templates()
