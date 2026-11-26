@@ -127,6 +127,33 @@ class NCClinicalProcedure(Document):
 					)
 				)
 			c.relation = c.relation or "Chưa có căn cứ"
+		self._check_verbatim_quotes()
+
+	def _check_verbatim_quotes(self):
+		"""DI-08 (ASM-024-08): đoạn trích phải có nguyên văn trong mục NC Legal Section được dẫn.
+
+		Chỉ kiểm khi `legal_section` là tên một mục có thật; trích dẫn tay dạng chữ tự do không kiểm được.
+		"""
+		from normcore.ai import citation
+
+		rows = [(i, c) for i, c in enumerate(self.citations, 1) if c.quote and c.legal_section]
+		if not rows:
+			return
+		texts = {
+			r.name: r.plain_text
+			for r in frappe.get_all(
+				"NC Legal Section",
+				filters={"name": ["in", list({c.legal_section for _i, c in rows})]},
+				fields=["name", "plain_text"],
+			)
+		}
+		for i, c in rows:
+			if c.legal_section in texts and not citation.quote_in_text(c.quote, texts[c.legal_section]):
+				frappe.throw(
+					_("Trích dẫn dòng {0}: đoạn trích không có nguyên văn trong mục {1}").format(
+						i, c.legal_section
+					)
+				)
 
 	def validate_resources(self):
 		step_ids = {s.step_id for s in self.steps}
