@@ -8,12 +8,13 @@ import frappe
 from frappe import _
 from frappe.utils import cint, getdate, now_datetime, today
 
+from normcore.ai import gateway, guard
 from normcore.costing import engine, pricing, qc_plans, resources
 from normcore.costing import provisional as prov
 from normcore.exports import norm_set as export
 from normcore.nc_costing.doctype.nc_norm_set import nc_norm_set as ctl
 from normcore.norm import copy as norm_copy
-from normcore.norm import templates, validation, workflow
+from normcore.norm import ai_link, templates, validation, workflow
 from normcore.norm.init_from_procedure import (
 	RESOURCE_DOCTYPE_BY_COMPONENT,
 	carry_lines,
@@ -28,6 +29,8 @@ REPLACED_STATUS = workflow.REPLACED
 SAVE_FIELDS = tuple(
 	f for f in ctl.LINE_INPUTS if f not in ("line_id", "procedure_resource_row", "ai_suggested")
 )
+LINK_JOB_KEY = "normcore:ai_link:{}"
+LINK_JOB_TTL = 3600
 NO_PRICE = "Chưa có đơn giá"
 DEFERRED = "Tính ở lần tính giá"  # ASM-034-22
 # Trường tên hiển thị của từng DocType nguồn lực; đọc ở máy chủ nên người dùng không cần quyền đọc DocType đó
@@ -248,7 +251,9 @@ def _actions(ns):
 	can_write = frappe.has_permission(NS, "write", doc=ns)
 	if ns.status == DRAFT:
 		if can_write:
-			out += ["save_line", "delete_line", "save_head"]
+			out += ["save_line", "delete_line", "save_head", "accept_link"]
+			if gateway.is_enabled():
+				out.append("suggest_links")
 			if frappe.has_permission(NS, "create") and _newer_procedure(ns):
 				out.append("new_version")
 			if roles & set(workflow.ROLE_OF_ACTION["confirm_line"]):
@@ -292,6 +297,7 @@ def get_norm_set(name):
 		cost = None if deferred else _cost(prices, d)
 		d.update(
 			{
+				"ai_confidence": cint(r.get("ai_confidence")),
 				"applied_qty": float(
 					engine.applied_qty(
 						Decimal(str(d["hospital_qty"] or 0)),
@@ -353,6 +359,8 @@ def get_norm_set(name):
 	step_title = {s["step_id"]: s["step_title"] for s in steps}
 	return {
 		"steps_without_lines": [{"step_id": m, "step_title": step_title.get(m)} for m in missing],
+		"ai_pending": sum(1 for x in lines if cint(x.get("ai_suggested"))),
+		"ai_enabled": bool(gateway.is_enabled()),
 		"doc": {
 			"newer_procedure": _newer_procedure(ns) if ns.status != REPLACED_STATUS else None,
 			"name": ns.name,
@@ -540,7 +548,13 @@ def create_norm_set(procedure, test_system=None):
 				", ".join(sy["name"] for sy in systems)
 			)
 		)
-	return {"name": ctl.create_from_procedure(procedure, test_system or None)}
+	name = ctl.create_from_procedure(procedure, test_system or None)
+	out = {"name": name, "link_job": None}
+	if gateway.is_enabled():  # FR-AI-007, ASM-025-12: chỉ bộ mới; AI tắt thì không khởi tác vụ
+		ns = frappe.get_doc(NS, name)
+		if ai_link.pending_lines([_dict(r) for r in ns.lines]):
+			out["link_job"] = _start_link_job(ns)
+	return out
 
 
 @frappe.whitelist()
@@ -553,7 +567,11 @@ def save_line(norm_set, values, line_id=None, allow_duplicate=0):
 		frappe.throw(_("Trường không được nhập: {0}").format(", ".join(sorted(unknown))))
 	if line_id:
 		row = _line(ns, line_id)
+		link_before = (row.resource_doctype, row.resource, row.component)
 		row.update(values)
+		if cint(row.ai_suggested) and link_before != (row.resource_doctype, row.resource, row.component):
+			row.ai_suggested, row.ai_confidence = 0, 0  # UC-009 bước 4: sửa liên kết = đã xử lý (ASM-025-10)
+			ns.flags.ai_link_cleared = {row.line_id}
 	else:
 		row = ns.append("lines", values)
 	proposed = []
@@ -934,3 +952,186 @@ def export_norm_set(name):
 	frappe.response["filename"] = f"{ns.name}.xlsx"
 	frappe.response["filecontent"] = content
 	frappe.response["type"] = "binary"
+
+
+# ---------------------------------------------------------------- đề xuất liên kết (FEAT-025, FR-AI-007)
+
+
+def _link_set(job_id, **state):
+	frappe.cache().set_value(LINK_JOB_KEY.format(job_id), state, expires_in_sec=LINK_JOB_TTL)
+	frappe.publish_realtime(
+		"normcore_ai_link", {"job_id": job_id, "status": state.get("status")}, user=state.get("user")
+	)
+
+
+def _start_link_job(ns):
+	job_id = frappe.generate_hash(length=16)
+	_link_set(job_id, status="queued", user=frappe.session.user)
+	frappe.enqueue(
+		"normcore.api.norm.run_link_suggestion",
+		queue="long",
+		timeout=gateway.get_settings().timeout_seconds + 60,
+		now=bool(frappe.flags.in_test),
+		enqueue_after_commit=True,
+		link_job=job_id,  # `job_id` là tham số của frappe.enqueue, không tới hàm
+		norm_set=ns.name,
+		user=frappe.session.user,
+	)
+	return job_id
+
+
+@frappe.whitelist()
+def start_link_suggestion(norm_set):
+	ns = _load(norm_set, "write")
+	_need_draft(ns)
+	_need_role("confirm_line")  # người soạn: Clinician / Dept Head (data-model mục 4)
+	gateway.ensure_enabled()
+	if not ai_link.pending_lines([_dict(r) for r in ns.lines]):
+		return {"job_id": None, "message": _("Không có dòng nào cần đề xuất")}
+	return {"job_id": _start_link_job(ns)}
+
+
+def _candidates(doctype):
+	"""Ứng viên của một danh mục, dựng ở máy chủ và qua guard (FR-AI-011)."""
+	if doctype == "NC Item":
+		rows = frappe.get_all(
+			"NC Item",
+			filters={"is_active": 1, "item_type": ["not in", ["Chất chuẩn", "Vật liệu nội kiểm"]]},
+			fields=["item_code", "item_name", "uom"],
+			order_by="item_code",
+		)
+		out = []
+		for r in rows:
+			src = guard.build_source("NC Item", r)
+			out.append({"doctype": doctype, "name": src["item_code"], "label": src["item_name"], "uom": src["uom"]})
+		return out
+	rows = frappe.get_all(
+		"NC Equipment", fields=["equipment_code", "equipment_name"], order_by="equipment_code"
+	)
+	out = []
+	for r in rows:
+		src = guard.build_source("NC Equipment", r)
+		out.append(
+			{"doctype": doctype, "name": src["equipment_code"], "label": src["equipment_name"], "uom": None}
+		)
+	return out
+
+
+@frappe.whitelist()
+def run_link_suggestion(link_job, norm_set, user):
+	"""Tác vụ nền (TD 3.5): lọc ứng viên bằng quy tắc, AI chọn trong danh sách, ghi `ai_suggested`. Không ném lỗi."""
+	previous = frappe.session.user
+	frappe.set_user(user)
+	try:
+		_link_set(link_job, status="running", user=user)
+		ns = frappe.get_doc(NS, norm_set)
+		if ns.status != DRAFT:
+			return _link_set(link_job, status="done", user=user, suggested=0, rejected=0)
+		pending = ai_link.pending_lines([_dict(r) for r in ns.lines])
+		proc = frappe.get_doc("NC Clinical Procedure", ns.procedure)
+		by_row = {r.resource_row_id: r.as_dict() for r in proc.resources}
+		pool = {}
+		offered = {}
+		for ln in pending:
+			res = by_row.get(ln["procedure_resource_row"])
+			if not res:
+				continue
+			cands = []
+			for dt in ai_link.pools_for(res.get("resource_type")):
+				if dt not in pool:
+					pool[dt] = _candidates(dt)
+				cands += pool[dt]
+			short = ai_link.shortlist(res.get("resource_text"), cands)
+			if short:
+				offered[ln["procedure_resource_row"]] = short
+		variables = ai_link.request_variables(pending, by_row, offered)
+		if not variables["lines"]:
+			return _link_set(link_job, status="done", user=user, suggested=0, rejected=0)
+		from normcore.ai.prompts_install import ensure_suggest_norm_link_v2
+
+		ensure_suggest_norm_link_v2()
+		holder = {}
+
+		def post(data):
+			holder["accepted"], rejected = ai_link.parse_suggestions(data, offered)
+			return data, rejected
+
+		res = gateway.complete(
+			"SUGGEST_NORM_LINK",
+			"SUGGEST_NORM_LINK",
+			variables,
+			[],
+			ref_doctype=NS,
+			ref_name=ns.name,
+			postprocess=post,
+		)
+		if not res.ok:
+			return _link_set(link_job, status="failed", user=user, error=res.error, log=res.log_name)
+		ns.reload()  # người dùng có thể đã sửa trong lúc chờ
+		done = ai_link.apply_suggestions(ns.lines, holder["accepted"])
+		if done:
+			ns.flags.norm_action = "ai_link"
+			ns.save()
+		rejected = frappe.db.get_value("NC AI Log", res.log_name, "rejected_citations") or 0
+		_link_set(link_job, status="done", user=user, suggested=len(done), rejected=rejected, log=res.log_name)
+	except Exception as e:  # không để tác vụ nền ném lỗi; người gọi đọc trạng thái từ cache
+		_link_set(link_job, status="failed", user=user, error=f"{type(e).__name__}: {e}")
+	finally:
+		frappe.set_user(previous)
+
+
+@frappe.whitelist()
+def get_link_suggestion_status(job_id):
+	state = frappe.cache().get_value(LINK_JOB_KEY.format(job_id))
+	if not state:
+		return {"status": "unknown"}
+	if state.get("user") != frappe.session.user and frappe.session.user != "Administrator":
+		frappe.throw(_("Bạn không có quyền xem tiến độ này"), frappe.PermissionError)
+	out = {k: state.get(k) for k in ("status", "suggested", "rejected") if k in state}
+	if state.get("error"):
+		out["message"] = state["error"]
+	return out
+
+
+def _link_rows_proc_type(ns, row):
+	return frappe.db.get_value(
+		"NC Procedure Resource",
+		{"parent": ns.procedure, "resource_row_id": row.procedure_resource_row},
+		"resource_type",
+	)
+
+
+@frappe.whitelist()
+def accept_link_suggestions(norm_set, line_ids=None, all=0):
+	ns = _load(norm_set, "write")
+	_need_draft(ns)
+	_need_role("confirm_line")
+	if cint(all):
+		rows = list(ns.lines)
+	else:
+		ids = frappe.parse_json(line_ids) if isinstance(line_ids, str) else (line_ids or [])
+		rows = [_line(ns, i) for i in ids]
+	for row in rows:
+		if cint(row.ai_suggested):
+			row.ai_suggested, row.ai_confidence = 0, 0
+	ns.flags.norm_action = "ai_link"
+	ns.save()
+	return get_norm_set(ns.name)
+
+
+@frappe.whitelist()
+def reject_link_suggestion(norm_set, line_id):
+	ns = _load(norm_set, "write")
+	_need_draft(ns)
+	_need_role("confirm_line")
+	row = _line(ns, line_id)
+	if not cint(row.ai_suggested):
+		frappe.throw(_("Dòng {0} không còn là đề xuất").format(line_id))
+	component = ai_link.original_component(_link_rows_proc_type(ns, row))
+	row.resource = None
+	row.component = component
+	row.resource_doctype = RESOURCE_DOCTYPE_BY_COMPONENT[component]
+	row.ai_suggested, row.ai_confidence = 0, 0
+	ns.flags.norm_action = "ai_link"
+	ns.save()
+	return get_norm_set(ns.name)

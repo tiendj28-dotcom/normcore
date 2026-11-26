@@ -120,8 +120,7 @@ def apply_suggestions(lines, accepted):
 	for ln in lines:
 		s = accepted.get(ln.get("procedure_resource_row"))
 		if s and id(ln) in todo:
-			ln.update(s)
-			ln["ai_suggested"] = 1
+			ln.update({**s, "ai_suggested": 1})
 			done.append(ln.get("line_id"))
 	return done
 
