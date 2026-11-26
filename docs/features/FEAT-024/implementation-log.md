@@ -11,3 +11,4 @@ Python dùng để chạy pytest: `~/frappe-bench/env/bin/python -m pytest` (pyt
 | T05 | with_bench run-tests --module normcore.api.test_procedure_ai | 12 tests OK (đủ TC-AI-01..04, 1a, 1b x2, 4a, nguồn chọn thêm). Lưu ý: tham số `job_id` của frappe.enqueue không tới hàm, dùng `draft_job` |
 | T06 | with_bench run-tests test_procedure_ai + test_procedure + test_procedure_workflow | 16 OK + 21 OK + 9 OK (TC-AI-10, quyền Auditor/Finance/khoa khác/job người khác) |
 | T07 | check_conventions.py; with_bench 'migrate && bench build --app normcore'; pytest test_vi_csv_order test_procedure_editor_behavior test_feat_024_ui test_feat_007_ui | conventions exit 0; build exit 0; 26 passed. Nút Soạn quy trình, ai_draft_dialog.js (doctype_js), ProcedureEditor.vue, vi.d/FEAT-024.csv |
+| T08 | python3 docs/tools/build_rtm.py docs | VAN DE: 0; thêm docs/as-built/FEAT-024.md, docs/rtm-testref/FEAT-024.md |
