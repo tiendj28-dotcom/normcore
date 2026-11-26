@@ -5,7 +5,11 @@ from frappe.utils import cint, getdate, now_datetime, today
 
 from normcore.costing import parameters
 from normcore.norm import templates, validation, workflow
-from normcore.norm.init_from_procedure import RESOURCE_DOCTYPE_BY_COMPONENT, lines_from_resources
+from normcore.norm.init_from_procedure import (
+	RESOURCE_DOCTYPE_BY_COMPONENT,
+	lines_from_resources,
+	removed_flag,
+)
 
 DRAFT = workflow.DRAFT
 CONFIRMED = workflow.CONFIRMED
@@ -211,8 +215,13 @@ class NCNormSet(Document):
 		for r in self.lines:  # ASM-034-07, 08, 09: đặt lại trường phụ thuộc trước khi so dòng cũ
 			r.update(validation.normalize_line(r.as_dict(), base))
 		errors = []
+		creating_version = self.is_new() and self.flags.norm_action == "new_version"
 		for r in self.lines:
 			before = old.get(r.name)
+			# FR-NORM-015, AMD-013-01: cờ chỉ do new_version đặt; mọi đường ghi khác chuẩn hóa lại
+			r.step_removed = removed_flag(
+				r.as_dict(), before and before.as_dict(), step_ids, creating_version
+			)
 			if prev:
 				changed = before is None or _inputs(before) != _inputs(r)
 			else:  # khởi tạo từ quy trình: dòng chưa liên kết được lưu (AMD-012-01); dòng thêm tay phải đủ
