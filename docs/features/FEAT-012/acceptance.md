@@ -16,3 +16,17 @@
 | Giao diện bằng trình duyệt (SCR-DSK-013/014, 1366×768) | **Chưa kiểm** bằng Playwright; chỉ có test tĩnh `test_norm_grid_ui.py` và `bench build` | Giới hạn, ghi ở As-Built |
 
 Kết luận: accepted.
+
+## Kiểm giao diện bằng Playwright (site cục bộ từ nhánh PR, 1366×768, dữ liệu dựng bằng fixture, đã xóa site)
+
+Kết luận cập nhật: **rework**. Phần mã/test đạt như trên, nhưng giao diện có 2 lỗi (ảnh đính ở bình luận NORM-39).
+
+| Màn hình / TC | Vai trò | Kết quả |
+| :-- | :-- | :-- |
+| SCR-DSK-013 `/app/nc-norm-set` danh sách | Clinician | KHÔNG ĐẠT: cột Mã số hiện chuỗi `<a href=...>` thô (`nc_norm_set_list.js:10-13`); nút "Khởi tạo bộ định mức" hiện |
+| SCR-DSK-014 `/app/norm-grid/<bộ>` mở lưới | Clinician | KHÔNG ĐẠT: hộp thoại lỗi "Bạn không có quyền Đọc hoặc Chọn đối với NC Job Title" (`NormGrid.vue:151`, `ncLink` 279-298; `frappe.client.validate_link` 403); ô nguồn lực dòng Nhân lực trống. Lưới, cảnh báo "Còn 6 dòng chưa đủ điều kiện", chi phí tạm tính vẫn hiện |
+| TC-NORM-12 xác nhận dòng L004 | Clinician | Đạt: dòng hiện "✓ clin.ui", các dòng khác vẫn "Xác nhận" |
+| Bộ ở "Đã xác nhận chuyên môn", nút theo vai trò | Finance | Đạt: có "Khóa", "Trả lại"; thông báo "Không sửa được" |
+| TC-NORM-06 khóa, sửa bị từ chối | Finance | Đạt: bộ chuyển "Đã khóa", banner "Tạo phiên bản mới"; `save_line` sau khóa trả 403 |
+| Auditor mở lưới | Auditor | Đạt: không có nút "Thêm dòng"; không hộp thoại lỗi |
+| TC-NORM-04, 05, 07, 09, 10, 11 trên giao diện | — | Chưa kiểm (dừng vì lỗi ở trên); đã có test API/unit đạt |
