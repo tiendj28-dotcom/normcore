@@ -1,5 +1,5 @@
 # As-Built: FEAT-008 Sửa đổi, so sánh phiên bản, thu hồi
-- Phiên bản app 0.0.1; Dev: NORM-50; Người nghiệm thu: QA (Multica), verify accepted tại b28e6f5b93db0a9bea193c1db75a7ffb0098c90e
+- Phiên bản app 0.0.1; Dev: NORM-50; Người nghiệm thu: QA (Multica), verify accepted tại 97e58922d804ad244fe353b61be3407ea8b7e256
 
 ## 1. Luồng nghiệp vụ đã xây
 - **Sửa đổi (FR-WF-009):** từ quy trình "Đã ban hành" mới nhất của (dịch vụ, khoa), `create_revision` tạo bản nháp `version_no` kế tiếp, sao chép 7 phần văn bản, `doctor_request`, bước, nguồn lực, trích dẫn; giữ nguyên `step_id`, `resource_row_id`, `next_step_seq`, `next_resource_seq` nên bước mới không tái dùng mã đã bỏ. Không sao chép `decision_no`, `effective_date`, `copied_from`, `ai_log`; `ai_suggested` = 0. Đã có bản đang soạn/duyệt thì trả bản đó (`existing = 1`). Bản nháp đi qua luồng duyệt FEAT-007.

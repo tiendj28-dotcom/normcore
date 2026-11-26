@@ -1,12 +1,12 @@
 # Acceptance FEAT-008 — Sửa đổi, so sánh phiên bản, thu hồi (NORM-50)
 
-Kết luận: **accepted.** Kiểm độc lập trên HEAD `b28e6f5b93db0a9bea193c1db75a7ffb0098c90e` của nhánh PR #53. QA không viết FEAT này.
+Kết luận: **accepted.** Kiểm độc lập trên HEAD `97e58922d804ad244fe353b61be3407ea8b7e256` của nhánh PR #53 (sau khi Dev gộp develop/FEAT-012, kiểm lại: site sạch 1169 test OK, pytest 601 passed độ phủ 99%, CI xanh). QA không viết FEAT này.
 
 ## Phần A — chạy lại từ đầu
 | Lệnh | Kết quả | Đạt |
 | :-- | :-- | :-: |
-| `with_bench.sh`: `new-site normcore-verify.test` + install-app + `run-tests --app normcore` + drop-site (một lần gọi) | Site sạch tạo được; Ran 1074 tests, OK; site đã xóa | Đạt |
-| `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark` | 546 passed, 146 subtests; độ phủ 99% | Đạt |
+| `with_bench.sh`: `new-site normcore-verify.test` + install-app + `run-tests --app normcore` + drop-site (một lần gọi) | Site sạch tạo được; Ran 1169 tests, OK; site đã xóa | Đạt |
+| `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark` | 601 passed, 146 subtests; độ phủ 99% | Đạt |
 | `golden_engine.py`, `golden_cls.py` | thoát 0 | Đạt |
 | `check_conventions.py` | thoát 0 | Đạt |
 | `build_rtm.py docs` | Must chưa có TC: 0, không vấn đề mới (đã hoàn tác rtm.md, verification-report.md do script sinh) | Đạt |
