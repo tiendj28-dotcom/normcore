@@ -184,6 +184,14 @@
 | FR-AI-015 | `test_TC_AI_07_tat_ai_an_nut_van_chay_thu_cong` (api/test_ai.py; phần "giá tham chiếu" chưa kiểm được vì NC Benchmark Price chưa có trên develop, ASM-023-16), unit/test_ai_ui_conventions.py |
 | NFR-SEC-004 | `test_TC_NFR_04_khoa_khong_lo` (nc_ai_settings), `test_loi_khong_lo_khoa` (unit/test_ai_providers_openai.py) |
 
+# Test ref — FEAT-022 (Dev NORM-54 ghi)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-SVC-005 | `test_FR_SVC_005_de_xuat_sau_lap_chi_muc`, `test_FR_SVC_005_lap_lai_giu_da_xac_nhan`, `test_FR_SVC_005_loi_de_xuat_khong_lam_van_ban_loi`, `test_FR_SVC_005_de_xuat_lai_va_quyen`, `test_SCR_DSK_004_loc_chua_xac_nhan` (api/test_library_mapping.py), unit/test_library_mapping.py |
+| FR-SVC-006 | `test_FR_SVC_006_xac_nhan_luu_nguoi_va_thoi_diem`, `test_FR_SVC_006_quyen_anh_xa` (api/test_library_mapping.py), `test_FR_SVC_006_validate_dong_dau` (nc_section_service_map) |
+| FR-SVC-007 | `test_TC_SVC_02_chi_muc_da_xac_nhan_vao_nguon_ai`, `test_FR_SVC_007_nguon_chi_truong_cho_phep` (api/test_library_mapping.py) |
+| TC-SVC-02 | `test_TC_SVC_02_chi_muc_da_xac_nhan_vao_nguon_ai` |
 # Test ref — FEAT-008 (QA Multica kiểm định, accepted)
 
 | FR | Test thật |
