@@ -50,6 +50,12 @@ class TestNCEquipment(FrappeTestCase):
 		cont = eq.indicative(on="2026-12-31", expired_mode="CONTINUE")
 		self.assertEqual(cont["annual_depreciation"], 150000000)
 
+	def test_TC_COST_06_loai_gia_khong_khau_hao_don_gia_gio_may(self):
+		"""BR-COST-016: include_depr=False → khấu hao 0, đơn giá giờ máy chỉ còn bảo trì, kiểm định (golden V1)."""
+		r = _eq().insert().indicative(on="2026-12-31", include_depr=False)
+		self.assertEqual(r["annual_depreciation"], 0)
+		self.assertEqual(Decimal(str(r["hourly_rate"])), Decimal("34090.9091"))
+
 	def test_TC_CLS_48_thue_thieu_chi_phi_hop_dong_bi_tu_choi(self):
 		bad = _eq(acquisition_mode="Thuê", original_cost=None, useful_life_years=None)
 		self.assertRaises(frappe.ValidationError, bad.insert)

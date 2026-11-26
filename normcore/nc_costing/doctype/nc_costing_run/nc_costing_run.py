@@ -1,111 +1,140 @@
-from decimal import Decimal
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from normcore.costing import engine, test_systems
+from normcore.costing import runner, test_systems
+from normcore.nc_costing.doctype.nc_costing_run import loader, writer
 
-DRAFT, CALCULATED, FAILED = "Nháp", "Đã tính", "Tính lỗi"
-LOCKED_NORM = "Đã khóa"
-
-
-def _d(x):
-	return Decimal(str(x or 0))
+DRAFT, CALCULATING, CALCULATED, FAILED, LOCKED = "Nháp", "Đang tính", "Đã tính", "Tính lỗi", "Đã khóa"
+IMPORT_FINAL = "Đã chốt"
+RUNNABLE = (DRAFT, FAILED, CALCULATED)
+EDITABLE_INPUTS = (DRAFT, FAILED)
+INPUT_FIELDS = ("fiscal_year", "costing_date", "parameter_set", "accounting_import", "price_category")
+EXECUTE = "normcore.nc_costing.doctype.nc_costing_run.nc_costing_run.execute_costing"
+PROGRESS_EVENT = "normcore_costing_progress"
 
 
 class NCCostingRun(Document):
+	def validate(self):
+		"""FR-COST-001: đầu vào bắt buộc (reqd), lần nhập "Đã chốt", khóa đầu vào ngoài Nháp, Tính lỗi."""
+		if not self.status:
+			self.status = DRAFT
+		if self.accounting_import:
+			status = frappe.db.get_value("NC Accounting Import", self.accounting_import, "status")
+			if status != IMPORT_FINAL:
+				frappe.throw(_("Lần nhập kế toán {0} chưa chốt").format(self.accounting_import))
+		prev = None if self.is_new() else self.get_doc_before_save()
+		if prev is not None and prev.status not in EDITABLE_INPUTS and self._inputs_changed(prev):
+			frappe.throw(_("Lần tính giá ở trạng thái {0}, không sửa được đầu vào").format(prev.status))
+
+	def _inputs_changed(self, prev) -> bool:
+		if any(self.get(f) != prev.get(f) for f in INPUT_FIELDS):
+			return True
+		same = lambda a, b: sorted(a) == sorted(b)  # noqa: E731
+		return not (
+			same(
+				[r.department for r in self.scope_departments], [r.department for r in prev.scope_departments]
+			)
+			and same(
+				[r.technical_service for r in self.scope_services],
+				[r.technical_service for r in prev.scope_services],
+			)
+		)
+
+	def scope(self) -> dict:
+		"""FR-COST-002: {"eligible": [...], "ineligible": [(dịch vụ, khoa)], "background": bool}."""
+		info = loader.scope_info(self)
+		info["background"] = runner.needs_background(len(info["eligible"]))
+		return info
+
 	@frappe.whitelist()
-	def run_costing(self):
-		"""FR-COST-003: tính cho mọi bộ định mức "Đã khóa" (DI-06). Việc tính nằm ở normcore.costing.engine."""
+	def run_costing(self, confirm_ineligible=0):
+		"""FR-COST-003: tính cho mọi bộ định mức "Đã khóa" trong phạm vi (DI-06). Việc tính nằm ở normcore.costing."""
 		frappe.has_permission("NC Costing Run", "write", doc=self, throw=True)
-		if self.status not in (DRAFT, FAILED):
-			frappe.throw(_("Chỉ chạy được lần tính giá ở trạng thái Nháp hoặc Tính lỗi"))
-		frappe.db.savepoint("nc_costing_run")
-		try:
-			self._run()
-		except Exception:
-			# Không raise: lỗi sẽ rollback cả request và trạng thái "Tính lỗi" không được lưu (data-model 5.4).
-			frappe.db.rollback(save_point="nc_costing_run")  # bỏ kết quả dở dang, giữ bản ghi lần tính
-			frappe.log_error(title=f"Tính giá lỗi: {self.name}")
-			self.db_set("status", FAILED)
-			frappe.msgprint(_("Lần tính giá lỗi, xem Error Log"), indicator="red", alert=True)
+		if self.status not in RUNNABLE:
+			frappe.throw(_("Chỉ chạy được lần tính giá ở trạng thái Nháp, Tính lỗi hoặc Đã tính"))
+		info = self.scope()
+		eligible, ineligible = info["eligible"], info["ineligible"]
+		listed = "; ".join(f"{s} ({d or '—'})" for s, d in ineligible)
+		if ineligible and not frappe.utils.cint(confirm_ineligible):
+			frappe.throw(
+				_(
+					"Có {0} dịch vụ chưa có bộ định mức Đã khóa: {1}. Xác nhận để chỉ tính các dịch vụ còn lại."
+				).format(len(ineligible), listed)
+			)
+		if ineligible:
+			self.add_comment(
+				"Comment",
+				_("Bỏ qua {0} dịch vụ chưa có bộ định mức Đã khóa: {1}").format(len(ineligible), listed),
+			)
+		if info["background"]:
+			self.db_set({"status": CALCULATING, "progress": 0})
+			frappe.enqueue(
+				EXECUTE,
+				queue="long",
+				timeout=1500,
+				run=self.name,
+				eligible=eligible,
+				enqueue_after_commit=True,
+			)
 			return self.status
-		self.db_set("status", CALCULATED)
+		execute_costing(self.name, eligible, background=False)
+		self.reload()
 		return self.status
 
-	def _run(self):
-		for name in frappe.get_all("NC Service Cost", {"costing_run": self.name}, pluck="name"):
-			frappe.delete_doc("NC Service Cost", name, force=True, ignore_permissions=True)
-		params = frappe.get_doc("NC Costing Parameter Set", self.parameter_set)
-		rates = {r.job_title: r for r in params.job_title_rates}
-		fields = ["name", "technical_service"]
-		if frappe.get_meta("NC Norm Set").has_field("test_system"):  # trường do FEAT-034 thêm
-			fields.append("test_system")
-		norm_sets = frappe.get_all("NC Norm Set", {"status": LOCKED_NORM}, fields, order_by="name")
-		send_out = frappe.get_all(
-			"NC Technical Service", {"is_send_out": 1, "is_paraclinical": 1}, pluck="name"
+	def _run(self, eligible, progress=None):
+		"""Pha tính (chỉ đọc): nạp dữ liệu và tính từng dịch vụ; trả danh sách `ServiceResult`."""
+		ctx = loader.load_context(self, eligible)
+		return runner.run(
+			eligible,
+			lambda e: loader.load_service(ctx, e),
+			ctx.pricing,
+			progress=progress,
+			allocate=lambda rs: allocate_pools(rs),
 		)
-		for ns in test_systems.norm_sets_to_cost(norm_sets, self.test_systems_in_scope(), send_out):
-			self._cost_norm_set(frappe.get_doc("NC Norm Set", ns["name"]), params, rates)
 
 	def test_systems_in_scope(self):
 		"""FR-CLS-006, DI-06 [1.1]: mã các hệ thống xét nghiệm "Đang dùng" cho lần tính mới."""
 		systems = frappe.get_all("NC Test System", fields=["name", "status"])
 		return test_systems.in_costing_scope(systems)
 
-	def _cost_norm_set(self, ns, params, rates):
-		priced, missing = [], []
-		for line in ns.lines:
-			if line.component != "LABOR":
-				continue
-			rate = rates.get(line.resource)
-			if rate is None:  # G5: không bịa đơn giá
-				missing.append(f"{line.line_id} ({line.resource})")
-				continue
-			authority = (
-				line.authority_qty or None
-			)  # Frappe lưu Float trống thành 0: 0 = chưa có định mức ban hành (ASM-013)
-			priced.append(
-				(
-					line,
-					engine.LaborLine(
-						line.line_id,
-						_d(line.hospital_qty),
-						int(line.headcount or 1),
-						_d(rate.rate_per_hour),
-						_d(authority) if authority is not None else None,
-					),
-				)
-			)
-		results = engine.compute_direct_lines([p[1] for p in priced])
-		sc = frappe.new_doc("NC Service Cost")
-		sc.update(
-			{
-				"costing_run": self.name,
-				"technical_service": ns.technical_service,
-				"department": ns.department,
-				"norm_set": ns.name,
-				"calc_status": "Lỗi" if missing else "Thành công",
-				"calc_message": (_("Dòng thiếu đơn giá: ") + ", ".join(missing)) if missing else None,
-			}
-		)
-		total = Decimal(0)
-		for (line, _ll), res in zip(priced, results, strict=True):
-			total += res.amount
-			sc.append(
-				"lines",
-				{
-					"line_type": "Trực tiếp",
-					"component": "LABOR",
-					"step_id": line.step_id,
-					"norm_line_id": line.line_id,
-					"resource_label": line.resource,
-					"applied_qty": float(res.applied_qty),
-					"unit_rate": float(res.unit_rate),
-					"amount": float(res.amount),
-					"rate_source": params.name,
-				},
-			)
-		sc.direct_labor = float(total)
-		sc.insert(ignore_permissions=True)  # kết quả do mã máy chủ ghi; quyền chạy đã kiểm ở run_costing
+
+def allocate_pools(results):
+	"""Điểm cắm phân bổ cấp 1, cấp 2 của FEAT-017: trả {(dịch vụ, khoa): [CostLine "Phân bổ"]}.
+	FEAT-015 chưa phân bổ nên giá thành = chi phí trực tiếp (ASM-015-02)."""
+	return {}
+
+
+def _fail(doc):
+	frappe.log_error(title=f"Tính giá lỗi: {doc.name}")
+	doc.db_set("status", FAILED)
+	frappe.msgprint(_("Lần tính giá lỗi, xem Error Log"), indicator="red", alert=True)
+	return FAILED
+
+
+def execute_costing(run, eligible, background=True):
+	"""Pha tính (chỉ đọc) rồi pha ghi trong savepoint. Lỗi → bỏ kết quả dở, "Tính lỗi" (data-model 5.4).
+	Không raise: lỗi sẽ rollback cả request và trạng thái "Tính lỗi" không được lưu."""
+	doc = frappe.get_doc("NC Costing Run", run)
+
+	def progress(i, n):
+		pct = int(i * 100 / n)
+		doc.db_set("progress", pct, update_modified=False)
+		frappe.publish_realtime(PROGRESS_EVENT, {"run": run, "progress": pct}, after_commit=not background)
+		if background:
+			frappe.db.commit()  # pha tính chỉ đọc: commit tiến độ không commit kết quả dở
+
+	try:
+		results = doc._run(eligible, progress)
+	except Exception:
+		return _fail(doc)
+	frappe.db.savepoint("nc_costing_run")
+	try:
+		for name in frappe.get_all("NC Service Cost", {"costing_run": run}, pluck="name"):
+			frappe.delete_doc("NC Service Cost", name, force=True, ignore_permissions=True)
+		writer.write_results(doc, results)
+	except Exception:
+		frappe.db.rollback(save_point="nc_costing_run")
+		return _fail(doc)
+	doc.db_set({"status": CALCULATED, "progress": 100})
+	return CALCULATED

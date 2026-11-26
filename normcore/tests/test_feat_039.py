@@ -95,7 +95,14 @@ from normcore.core import audit
 from normcore.core import import_sets as _import_sets
 from normcore.core import importer as importer_core
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import ensure, make_base, make_chain_data, make_param_set, make_user
+from normcore.tests.utils import (
+	costing_run_inputs,
+	ensure,
+	make_base,
+	make_chain_data,
+	make_param_set,
+	make_user,
+)
 
 AUDITOR = "NC Auditor"
 PRICE_SOURCE = "Hóa đơn"
@@ -185,6 +192,7 @@ class TestTCCLS44(FrappeTestCase):
 				"fiscal_year": 2026,
 				"costing_date": "2026-10-02",
 				"parameter_set": param.name,
+				**costing_run_inputs(),
 			}
 		).insert(ignore_permissions=True)
 		ensure("NC Item", "item_code", "F39-ITEM", item_name="Mặt hàng f39", item_type="Thuốc", uom="viên")
@@ -220,7 +228,13 @@ class TestTCCLS44(FrappeTestCase):
 				"NC Norm Set", self.chain.norm_set, "status", "Nháp"
 			),
 			"client.insert": lambda: frappe.client.insert(
-				{"doctype": "NC Costing Run", "title": "x", "fiscal_year": 2026, "parameter_set": param.name}
+				{
+					"doctype": "NC Costing Run",
+					"title": "x",
+					"fiscal_year": 2026,
+					"parameter_set": param.name,
+					**costing_run_inputs(),
+				}
 			),
 			"client.delete": lambda: frappe.client.delete("NC Costing Run", run.name),
 			"client.delete_event": lambda: frappe.client.delete(

@@ -12,7 +12,12 @@
   "applied_qty",
   "unit_rate",
   "amount",
-  "rate_source"
+  "rate_source",
+  "allocation_rule",
+  "driver_value",
+  "driver_total",
+  "pool_amount",
+  "warning"
  ],
  "fields": [
   {
@@ -65,6 +70,33 @@
   {
    "fieldname": "rate_source",
    "label": "Nguồn đơn giá",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "allocation_rule",
+   "label": "Quy tắc phân bổ",
+   "fieldtype": "Link",
+   "options": "NC Allocation Rule"
+  },
+  {
+   "fieldname": "driver_value",
+   "label": "Tiêu chí của dịch vụ",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "driver_total",
+   "label": "Tổng tiêu chí",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "pool_amount",
+   "label": "Quỹ chi phí",
+   "fieldtype": "Currency",
+   "precision": "2"
+  },
+  {
+   "fieldname": "warning",
+   "label": "Cảnh báo",
    "fieldtype": "Data"
   }
  ],
