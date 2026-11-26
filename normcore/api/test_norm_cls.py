@@ -1,7 +1,10 @@
 """FEAT-034: API bộ định mức theo hệ thống xét nghiệm (UC-021; TC-CLS-26, 29..33; FR-NORM-017..025)."""
 
+import io
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from openpyxl import load_workbook
 
 from normcore.api import access
 from normcore.api import norm as api
@@ -10,6 +13,7 @@ from normcore.tests.utils import (
 	confirm_norm_set,
 	make_base,
 	make_cls_data,
+	make_eqa_program,
 	make_procedure,
 	make_qc_items,
 	make_qc_plan,
@@ -370,6 +374,28 @@ class TestCopyVersion(ClsBase):
 		api.lock_set(new.name)
 		self.assertEqual(frappe.db.get_value("NC Norm Set", src, "status"), "Đã khóa")
 		self.assertEqual(frappe.db.get_value("NC Norm Set", new.name, "status"), "Đã khóa")
+		# xuất: hai tệp, có cấp phát sinh, kế hoạch chất lượng, k
+		make_qc_plan("GLU-A")
+		make_eqa_program(department=self.dept)
+		for name, system in ((src, "GLU-A"), (new.name, "GLU-B")):
+			api.export_norm_set(name)
+			self.assertEqual(frappe.response["filename"], f"{name}.xlsx")
+			wb = load_workbook(io.BytesIO(frappe.response["filecontent"]))
+			rows = list(wb["Bộ định mức"].iter_rows(values_only=True))
+			header = next(r for r in rows if r[0] == "Bước")
+			body = rows[rows.index(header) + 1 :]
+			levels = {r[header.index("Cấp phát sinh")] for r in body}
+			self.assertEqual(levels, {"Theo kết quả", "Theo ống mẫu", "Theo kỳ"})
+			if system == "GLU-A":
+				self.assertEqual(wb["Nội kiểm"].cell(2, 1).value, "QC_L")
+			else:
+				self.assertEqual(wb["Nội kiểm"].cell(1, 1).value, "Chưa có kế hoạch chất lượng")
+			self.assertEqual(wb["Ngoại kiểm"].cell(2, 1).value, "EQA-HS")
+			self.assertEqual(wb["Hệ số k"].cell(2, 1).value, system)
+			self.assertEqual(wb["Hệ số k"].cell(2, 4).value, "Chưa có lần tính giá")  # ASM-034-16
+		frappe.set_user(self.aud)  # Auditor đọc được thì xuất được
+		api.export_norm_set(src)
+		self.assertTrue(frappe.response["filecontent"])
 
 	def test_sao_chep_bo_cac_dong_thuoc_ke_hoach_chat_luong(self):
 		ns = self.create("GLU-A")

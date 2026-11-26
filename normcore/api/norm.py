@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils import cint, getdate, now_datetime, today
 
 from normcore.costing import engine, pricing, qc_plans, resources
+from normcore.exports import norm_set as export
 from normcore.costing import provisional as prov
 from normcore.nc_costing.doctype.nc_norm_set import nc_norm_set as ctl
 from normcore.norm import copy as norm_copy
@@ -708,3 +709,96 @@ def copy_norm_set(source, test_system):
 	new.flags.from_procedure = True  # dòng giữ chỗ chưa sửa không bị kiểm đầy đủ
 	new.insert()
 	return {"name": new.name, "skipped": skipped}
+
+
+# ---------------------------------------------------------------- xuất Excel (FR-OUT-011)
+
+
+def _latest_k(test_system):
+	"""ASM-034-16: k của lần tính giá gần nhất; NC Test System Cost do FEAT-036 tạo, chưa có thì None."""
+	if not test_system or not frappe.db.exists("DocType", "NC Test System Cost"):
+		return None
+	rows = []
+	for r in frappe.get_all(
+		"NC Test System Cost",
+		{"test_system": test_system, "parenttype": "NC Service Cost"},
+		["parent", "k_factor", "k_estimated"],
+	):
+		run = frappe.db.get_value("NC Service Cost", r.parent, "costing_run")
+		info = frappe.db.get_value("NC Costing Run", run, ["costing_date", "status"], as_dict=True) if run else None
+		if info:
+			rows.append({"run": run, **info, "k_factor": r.k_factor, "k_estimated": r.k_estimated})
+	return export.latest_k(rows)
+
+
+def _export_data(ns) -> dict:
+	"""Gom dữ liệu cho exports.norm_set.build_workbook (đọc ở máy chủ, người gọi cần quyền đọc bộ)."""
+	steps = {s.step_id: s.step_title for s in frappe.get_doc("NC Clinical Procedure", ns.procedure).steps}
+	order = list(steps)
+	labels = {}
+	lines = []
+	for r in sorted(ns.lines, key=lambda r: (order.index(r.step_id) if r.step_id in order else len(order))):
+		d = _dict(r)
+		d["step_title"] = steps.get(r.step_id) or ("Chung cho cả dịch vụ" if r.service_level else "")
+		d["resource_label"] = _label(r.resource_doctype, r.resource, labels)
+		d["cost_level_label"] = validation.COST_LEVEL_LABELS.get(r.cost_level or "RESULT")
+		d["apply_k_label"] = "Có" if cint(r.apply_k) else ""
+		d["attach_label"] = r.attach_equipment and f"Thiết bị {r.attach_equipment}" or r.attach_to or ""
+		d["applied_qty"] = float(
+			engine.applied_qty(
+				Decimal(str(r.hospital_qty or 0)), Decimal(str(r.authority_qty)) if r.authority_qty else None
+			)
+		)
+		d["excluded_label"] = "Có" if cint(r.is_excluded) else ""
+		d["confirmed_on"] = str(r.confirmed_on) if r.confirmed_on else ""
+		lines.append(d)
+	service_name = frappe.db.get_value("NC Technical Service", ns.technical_service, "service_name")
+	data = {
+		"head": {
+			"name": ns.name,
+			"technical_service_label": f"{ns.technical_service} — {service_name}"
+			if service_name
+			else ns.technical_service,
+			"department": ns.department,
+			"version_no": ns.version_no,
+			"status": ns.status,
+			"procedure": ns.procedure,
+			"test_system": ns.test_system,
+			"tests_per_tube": ns.tests_per_tube,
+			"locked_by": ns.locked_by,
+			"locked_on": str(ns.locked_on) if ns.locked_on else "",
+		},
+		"has_test_system": bool(ns.test_system),
+		"lines": lines,
+	}
+	if ns.test_system:
+		plans = frappe.get_all("NC QC Plan", {"test_system": ns.test_system}, pluck="name")
+		if plans:
+			plan = frappe.get_doc("NC QC Plan", plans[0])
+			data["qc_plan"] = {
+				"run_days_per_year": plan.run_days_per_year,
+				"iqc_lines": [r.as_dict() for r in plan.iqc_lines],
+				"calibration_lines": [r.as_dict() for r in plan.calibration_lines],
+			}
+		eqa = []
+		for row in frappe.get_all(
+			"NC EQA Service",
+			{"technical_service": ns.technical_service, "parenttype": "NC EQA Program"},
+			["parent", "share_pct"],
+			order_by="parent",
+		):
+			prog = frappe.get_doc("NC EQA Program", row.parent)
+			eqa.append({**prog.as_dict(), "share_pct": row.share_pct})
+		data["eqa"] = eqa
+		data["k"] = _latest_k(ns.test_system)
+	return data
+
+
+@frappe.whitelist()
+def export_norm_set(name):
+	"""FR-OUT-011: tệp .xlsx của bộ định mức; ai đọc được bộ thì xuất được (ASM-034-15)."""
+	ns = _load(name)
+	content = export.build_workbook(_export_data(ns))
+	frappe.response["filename"] = f"{ns.name}.xlsx"
+	frappe.response["filecontent"] = content
+	frappe.response["type"] = "binary"
