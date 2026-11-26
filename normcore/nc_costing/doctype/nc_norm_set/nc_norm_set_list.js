@@ -1,4 +1,4 @@
-// SCR-DSK-013: danh sách bộ định mức (FEAT-012). Bấm tên mở trang norm-grid.
+// SCR-DSK-013: danh sách bộ định mức (FEAT-012). Cột tên hiện chữ thường; nút "Mở lưới" ở mỗi dòng mở trang norm-grid.
 frappe.listview_settings["NC Norm Set"] = {
 	add_fields: ["status", "needs_update"],
 	hide_name_column: false,
@@ -6,11 +6,13 @@ frappe.listview_settings["NC Norm Set"] = {
 		const color = { "Nháp": "gray", "Đã xác nhận chuyên môn": "blue", "Đã khóa": "green", "Đã thay thế": "darkgrey" };
 		return [__(doc.status), color[doc.status] || "gray", "status,=," + doc.status];
 	},
+	button: {
+		show: () => true,
+		get_label: () => __("Open norm grid"),
+		get_description: (doc) => __("Open norm grid") + " " + doc.name,
+		action: (doc) => frappe.set_route("norm-grid", doc.name),
+	},
 	formatters: {
-		name(value) {
-			const href = "/app/norm-grid/" + encodeURIComponent(value);
-			return '<a href="' + href + '">' + frappe.utils.escape_html(value) + "</a>";
-		},
 		needs_update(value) {
 			return value ? '<span class="indicator-pill yellow">' + __("Needs update") + "</span>" : "";
 		},

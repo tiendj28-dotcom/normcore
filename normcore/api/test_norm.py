@@ -518,3 +518,29 @@ class TestDiVongCong(NormBase):
 		doc.flags.norm_action = "lock_set"
 		doc.status = "Đã khóa"
 		self.assertRaises(frappe.ValidationError, doc.save, ignore_permissions=True)
+
+
+class TestNhanNguonLuc(NormBase):
+	"""QA giao diện: NC Clinician không có quyền đọc NC Job Title nhưng lưới vẫn hiện nhãn nguồn lực (đọc ở máy chủ)."""
+
+	def test_clinician_nhan_nguon_luc_do_api_tra_ve(self):
+		name = self.make_set()  # Clinician
+		self.assertFalse(frappe.has_permission("NC Job Title", "read", user=self.clin))
+		data = api.get_norm_set(name)
+		lines = [x for g in data["groups"] for x in g["lines"]]
+		labor = next(x for x in lines if x["component"] == "LABOR")
+		self.assertEqual(labor["resource_label"], "DD — Điều dưỡng")
+		unlinked = next(x for x in lines if x["unlinked"])
+		self.assertEqual(unlinked["resource_label"], "")
+
+	def test_search_resources_cho_clinician_va_auditor(self):
+		name = self.make_set()
+		out = api.search_resources(name, "LABOR", "bác")
+		self.assertIn({"value": "BS", "label": "BS — Bác sĩ"}, out)
+		self.assertTrue(api.search_resources(name, "SUPPLY", "VT-N12"))
+		frappe.set_user(self.aud)
+		self.assertTrue(api.search_resources(name, "LABOR"))
+		frappe.set_user(self.council)
+		self.assertRaises(frappe.PermissionError, api.search_resources, name, "LABOR")
+		frappe.set_user(self.clin)
+		self.assertRaises(frappe.ValidationError, api.search_resources, name, "KHONG")

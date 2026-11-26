@@ -242,6 +242,7 @@ Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại ch�
 Rerun tests,Số test chạy lại
 Resolved,Đã xử lý
 Resource,Nguồn lực
+Resource not found: {0},Không tìm thấy nguồn lực: {0}
 Retry,Thử lại
 Return reason,Lý do trả lại
 Return to draft,Trả lại

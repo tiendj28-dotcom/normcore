@@ -63,12 +63,12 @@
 
 			<form v-if="add" class="nc-ng__form nc-ng__add" @submit.prevent="submitAdd" @keydown.esc="add = null">
 				<label>{{ __("Component") }}
-					<select v-model="add.component" class="form-control" @change="add.resource = ''">
+					<select v-model="add.component" class="form-control" @change="add.resourceText = ''">
 						<option v-for="c in data.options.component" :key="c" :value="c">{{ compLabel(c) }}</option>
 					</select>
 				</label>
 				<label>{{ __("Resource") }}
-					<span :key="add.component" v-nc-link="{ doctype: doctypeOf(add.component), value: add.resource, set: (v) => (add.resource = v) }"></span>
+					<input v-model="add.resourceText" class="form-control" :list="'nc-ng-dl-' + add.component" :aria-label="__('Resource')" @focus="loadOptions(add.component, '')" @input="loadOptions(add.component, add.resourceText)" />
 				</label>
 				<label>{{ __("Attach to") }}
 					<select v-model="add.target" class="form-control" required>
@@ -100,6 +100,10 @@
 				<label><input v-model="showExcluded" type="checkbox" /> {{ __("Show excluded lines") }}</label>
 				<button type="button" class="btn btn-default btn-xs" @click="toggleAll">{{ __("Collapse or expand all steps") }}</button>
 			</div>
+
+			<datalist v-for="c in data.options.component" :id="'nc-ng-dl-' + c" :key="c">
+				<option v-for="o in resourceOptions[c] || []" :key="o.value" :value="o.label"></option>
+			</datalist>
 
 			<div v-if="!totalLines" class="text-muted" role="note">{{ __("This norm set has no lines yet.") }}</div>
 			<div class="nc-ng__scroll">
@@ -148,8 +152,8 @@
 										<span v-else>{{ compLabel(l.component) }}</span>
 									</td>
 									<td>
-										<span v-if="canEdit" :key="l.line_id + l.resource_doctype + (l.resource || '')" v-nc-link="{ doctype: l.resource_doctype, value: l.resource, set: (v) => commit(l, 'resource', v) }"></span>
-										<span v-else>{{ l.resource }}</span>
+										<input v-if="canEdit" :key="l.line_id + (l.resource || '') + l.component" :value="l.resource_label" class="form-control nc-ng__cell" :list="'nc-ng-dl-' + l.component" :aria-label="__('Resource')" @focus="loadOptions(l.component, '')" @input="loadOptions(l.component, $event.target.value)" @change="commitResource(l, $event.target.value)" />
+										<span v-else>{{ l.resource_label }}</span>
 										<span v-if="l.unlinked" class="indicator-pill orange">{{ __("Not linked") }}</span>
 										<span v-if="l.ai_suggested" class="indicator-pill purple">{{ __("Suggested") }}</span>
 									</td>
@@ -274,30 +278,6 @@ function messageLines(r) {
 export default {
 	name: "NormGrid",
 	props: { initialName: { type: String, default: "" } },
-	directives: {
-		// Ô Link của Desk (frappe.ui.form.make_control) cho nguồn lực, theo DocType của cấu phần
-		ncLink: {
-			mounted(el, binding) {
-				const o = binding.value;
-				if (!o || !o.doctype) return;
-				const ctl = frappe.ui.form.make_control({
-					parent: el,
-					df: {
-						fieldtype: "Link",
-						options: o.doctype,
-						placeholder: __("Resource"),
-						change() {
-							const v = ctl.get_value() || "";
-							if (v !== (o.value || "")) o.set(v);
-						},
-					},
-					only_input: true,
-					render_input: true,
-				});
-				ctl.set_value(o.value || "");
-			},
-		},
-	},
 	data() {
 		return {
 			name: this.initialName,
@@ -314,6 +294,7 @@ export default {
 			collapsed: {},
 			detail: "",
 			add: null,
+			resourceOptions: {},
 			pending: null,
 			reason: "",
 		};
@@ -462,15 +443,49 @@ export default {
 					.catch((e) => (this.rowError = { [line.line_id]: e.message }))
 			);
 		},
+		// Gợi ý nguồn lực lấy từ máy chủ (search_resources), không kiểm liên kết ở trình duyệt trên DocType người dùng không được đọc.
+		loadOptions(component, txt) {
+			return this.call("search_resources", { norm_set: this.name, component, txt: txt || "" })
+				.then((rows) => (this.resourceOptions = { ...this.resourceOptions, [component]: rows }))
+				.catch(() => {});
+		},
+		// Chữ người dùng nhập/chọn (nhãn hoặc mã) → mã nguồn lực; trống = bỏ liên kết.
+		resolveResource(component, text) {
+			const t = (text || "").trim().toLowerCase();
+			if (!t) return Promise.resolve("");
+			return this.loadOptions(component, text).then(() => {
+				const rows = this.resourceOptions[component] || [];
+				const hit = rows.find((o) => o.label.toLowerCase() === t || o.value.toLowerCase() === t);
+				return hit ? hit.value : null;
+			});
+		},
+		commitResource(line, text) {
+			return this.resolveResource(line.component, text).then((value) => {
+				if (value === null) {
+					this.rowError = { [line.line_id]: __("Resource not found: {0}", [text]) };
+					return this.reloadKeepingError();
+				}
+				if (value !== (line.resource || "")) return this.commit(line, "resource", value);
+			});
+		},
 		openAdd() {
-			this.add = { component: "SUPPLY", resource: "", target: "", headcount: 1, hospital_qty: null, uom: "", basis: "Ước tính", error: "" };
+			this.add = { component: "SUPPLY", resourceText: "", target: "", headcount: 1, hospital_qty: null, uom: "", basis: "Ước tính", error: "" };
 		},
 		submitAdd() {
 			const f = this.add;
+			return this.resolveResource(f.component, f.resourceText).then((resource) => {
+				if (resource === null) {
+					f.error = __("Resource not found: {0}", [f.resourceText]);
+					return;
+				}
+				return this.sendAdd(f, resource || null);
+			});
+		},
+		sendAdd(f, resource) {
 			const values = {
 				component: f.component,
 				resource_doctype: this.doctypeOf(f.component),
-				resource: f.resource || null,
+				resource,
 				hospital_qty: f.hospital_qty,
 				uom: f.uom,
 				basis: f.basis,

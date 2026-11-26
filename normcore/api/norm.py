@@ -21,6 +21,13 @@ SAVE_FIELDS = tuple(
 	f for f in ctl.LINE_INPUTS if f not in ("line_id", "procedure_resource_row", "ai_suggested")
 )
 NO_PRICE = "Chưa có đơn giá"
+# Trường tên hiển thị của từng DocType nguồn lực; đọc ở máy chủ nên người dùng không cần quyền đọc DocType đó
+NAME_FIELD = {
+	"NC Job Title": "job_title_name",
+	"NC Item": "item_name",
+	"NC Equipment": "equipment_name",
+	"NC Room": "room_name",
+}
 
 
 # ---------------------------------------------------------------- tiện ích
@@ -56,6 +63,18 @@ def _values(values):
 	if not isinstance(values, dict):
 		frappe.throw(_("Giá trị dòng không hợp lệ"))
 	return dict(values)  # bản sao: Document.append thêm khóa vào dict truyền vào
+
+
+def _label(doctype, name, cache):
+	"""Nhãn "<mã> — <tên>" của nguồn lực, đọc ở máy chủ (không đòi quyền đọc DocType nguồn lực)."""
+	if not name:
+		return ""
+	key = (doctype, name)
+	if key not in cache:
+		field = NAME_FIELD.get(doctype)
+		title = frappe.db.get_value(doctype, name, field) if field and doctype else None
+		cache[key] = f"{name} — {title}" if title else name
+	return cache[key]
 
 
 def _dict(row):
@@ -213,6 +232,7 @@ def get_norm_set(name):
 	blockers = validation.confirm_blockers(rows) if ns.status == DRAFT else []
 	cap, cap_src = ctl.effective_wastage_cap()
 	prices = _Prices()
+	labels = {}
 	lines, summary_rows = [], []
 	for r in ns.lines:
 		d = _dict(r)
@@ -225,7 +245,7 @@ def get_norm_set(name):
 						Decimal(str(d["authority_qty"])) if d["authority_qty"] else None,
 					)
 				),
-				"resource_label": d["resource"] or "",
+				"resource_label": _label(d["resource_doctype"], d["resource"], labels),
 				"unlinked": not d["resource"],
 				"duplicate_of": dups.get(d["line_id"], []),
 				"cost": cost if cost is not None else {"missing": _(NO_PRICE)},
@@ -294,6 +314,28 @@ def get_norm_set(name):
 def _total(lines):
 	amounts = [x["cost"].get("amount") for x in lines if "amount" in x["cost"]]
 	return str(sum((Decimal(a) for a in amounts), Decimal("0"))) if amounts else None
+
+
+@frappe.whitelist()
+def search_resources(norm_set, component, txt=None):
+	"""Gợi ý nguồn lực cho ô chọn của lưới: [{"value", "label"}], tối đa 30. Đọc ở máy chủ; người gọi cần quyền
+	đọc bộ định mức (không cần quyền đọc DocType nguồn lực, ma trận data-model mục 4)."""
+	_load(norm_set)
+	doctype = RESOURCE_DOCTYPE_BY_COMPONENT.get(component)
+	if not doctype:
+		frappe.throw(_("Cấu phần không hợp lệ: {0}").format(component))
+	field = NAME_FIELD[doctype]
+	txt = (txt or "").strip()
+	rows = frappe.get_all(
+		doctype,
+		or_filters=[["name", "like", f"%{txt}%"], [field, "like", f"%{txt}%"]] if txt else None,
+		fields=["name", field],
+		order_by="name",
+		limit_page_length=30,
+	)
+	return [
+		{"value": r["name"], "label": f"{r['name']} — {r[field]}" if r[field] else r["name"]} for r in rows
+	]
 
 
 # ---------------------------------------------------------------- ghi

@@ -20,6 +20,7 @@ API_FUNCS = {
 	"return_set",
 	"lock_set",
 	"new_version",
+	"search_resources",
 }
 
 
@@ -54,7 +55,14 @@ class TestNormGridUI(unittest.TestCase):
 		self.assertTrue(methods)
 		self.assertLessEqual(methods, API_FUNCS)
 		# không ghi thẳng DocType từ trình duyệt (ADR-010)
-		for banned in ("frappe.client", "frappe.db", "frappe.desk.form", "run_doc_method"):
+		for banned in (
+			"frappe.client",
+			"frappe.db",
+			"frappe.desk.form",
+			"run_doc_method",
+			"make_control",
+			"validate_link",
+		):
 			self.assertNotIn(banned, VUE)
 		self.assertEqual(re.findall(r"method:\s*([^,]+),", VUE), ["API + method"])  # mọi lệnh gọi qua API
 
@@ -91,3 +99,15 @@ class TestNormGridUI(unittest.TestCase):
 		roles = {r["role"] for r in d["roles"]}
 		self.assertIn("NC Auditor", roles)
 		self.assertNotIn("NC Council Member", roles)
+
+
+class TestNormSetListUI(unittest.TestCase):
+	def test_cot_ten_khong_dung_formatter_html(self):
+		"""QA: formatter `name` trả HTML làm cột tiêu đề hiện nguyên chuỗi thẻ <a>; liên kết đặt qua nút của dòng."""
+		js = (ROOT / "nc_costing" / "doctype" / "nc_norm_set" / "nc_norm_set_list.js").read_text(
+			encoding="utf-8"
+		)
+		self.assertNotRegex(js, r"formatters:\s*\{[^}]*\bname\s*\(")
+		self.assertNotIn("<a href", js)
+		self.assertIn("button:", js)
+		self.assertIn('frappe.set_route("norm-grid"', js)
