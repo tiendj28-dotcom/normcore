@@ -355,3 +355,41 @@ class TestNCCostingRunGolden(FrappeTestCase):
 			("LABOR", rule.name, 10, 40, 100),
 		)
 		self.assertEqual((a.alloc_labor, a.full_cost), (100, 184063.06))
+
+
+class TestNCCostingRunBackground(FrappeTestCase):
+	"""FR-COST-015 (Should): quá ngưỡng thì chạy nền."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_FR_COST_015_tren_50_dich_vu_chay_nen_co_tien_do(self):
+		from unittest import mock
+
+		from normcore.costing import runner
+		from normcore.nc_costing.doctype.nc_costing_run import nc_costing_run as mod
+		from normcore.tests import costing_fixtures as cf
+
+		params, dept, _sets = cf.make_golden_world()
+		run = cf.make_golden_run(params)
+		with mock.patch.object(runner, "BACKGROUND_THRESHOLD", 1), mock.patch("frappe.enqueue") as enq:
+			self.assertEqual(run.run_costing(), "Đang tính")
+		enq.assert_called_once()
+		self.assertEqual(enq.call_args.kwargs["queue"], "long")
+		self.assertEqual(enq.call_args.args[0], mod.EXECUTE)
+		run.reload()
+		self.assertEqual((run.status, run.progress), ("Đang tính", 0))
+		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 0)
+		with mock.patch("frappe.db.commit"), mock.patch("frappe.publish_realtime") as rt:
+			self.assertEqual(mod.execute_costing(run.name, enq.call_args.kwargs["eligible"]), "Đã tính")
+		run.reload()
+		self.assertEqual((run.status, run.progress), ("Đã tính", 100))
+		self.assertEqual(frappe.db.count("NC Service Cost", {"costing_run": run.name}), 2)
+		events = [c.args[1] for c in rt.call_args_list if c.args[0] == mod.PROGRESS_EVENT]
+		self.assertEqual([e["progress"] for e in events], [50, 100])
+		# ngưỡng: đúng 50 thì chạy ngay
+		self.assertFalse(runner.needs_background(50))

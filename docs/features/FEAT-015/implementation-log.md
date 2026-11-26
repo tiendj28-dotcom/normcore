@@ -7,3 +7,4 @@
 | T03 | golden_engine.py (+ --no-depr) thoát 0; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov-fail-under=90` | 594 passed, độ phủ costing 98,9% | 87ea5f3 |
 | T04 | `check_conventions.py` thoát 0; `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` OK (7 test, có TC_COST_19, khoa_dau_vao_khi_da_tinh); `...test_nc_equipment` OK (21) | xanh | e072b97 |
 | T05 | `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` | OK, 12 test (TC_COST_01 site, 06, 07, 15, 17, 19, khóa đầu vào, test cũ G5/DI06/chạy lại/tính lỗi). Ghi chú: LABOR `rate_source` = tên bộ tham số (giữ assert test cũ FEAT-000), lệch ASM-015-16 → ASM-015-23 | c84cee0 |
+| T06 | `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` | OK, 13 test, có test_FR_COST_015 (enqueue queue="long", Đang tính, progress 100, sự kiện realtime 50→100) | SHA |
