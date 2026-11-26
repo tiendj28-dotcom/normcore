@@ -49,7 +49,9 @@ def material_rate(
 	)
 
 
-def utility_rate(uom, electricity_price, water_price, param_name: str, material: LineRate | None) -> LineRate | None:
+def utility_rate(
+	uom, electricity_price, water_price, param_name: str, material: LineRate | None
+) -> LineRate | None:
 	"""BR-COST-006 (ASM-015-05): kWh lấy giá điện, m³ lấy giá nước của bộ tham số; còn lại như vật chất."""
 	if uom in ELECTRICITY_UOM and electricity_price:
 		return LineRate(Decimal(str(electricity_price)), f"{param_name} · Giá điện")

@@ -7,8 +7,14 @@ from normcore.costing import engine as e
 
 
 def _line(**kw):
-	base = dict(line_id="L01", step_id="S1", component="LABOR", resource="DD", resource_label="DD",
-		hospital_qty=D("10"))
+	base = dict(
+		line_id="L01",
+		step_id="S1",
+		component="LABOR",
+		resource="DD",
+		resource_label="DD",
+		hospital_qty=D("10"),
+	)
 	base.update(kw)
 	return e.NormLine(**base)
 
@@ -29,14 +35,18 @@ class TestRound(unittest.TestCase):
 class TestDirectLine(unittest.TestCase):
 	def test_labor(self):
 		r = e.direct_line(_line(), e.LineRate(D("60"), "src"))
-		self.assertEqual((r.applied_qty, r.amount, r.rate_source, r.warning), (D("10"), D("10.00"), "src", ""))
+		self.assertEqual(
+			(r.applied_qty, r.amount, r.rate_source, r.warning), (D("10"), D("10.00"), "src", "")
+		)
 
 	def test_excluded(self):
 		r = e.direct_line(_line(excluded=True, exclude_reason="x"), e.LineRate(D("60"), "src"))
 		self.assertEqual((r.amount, r.rate_source), (D("0"), "Loại trừ: x"))
 
 	def test_billed_separately(self):
-		r = e.direct_line(_line(component="DRUG"), e.LineRate(D("0"), "s", billed_separately=True, warnings=("w",)))
+		r = e.direct_line(
+			_line(component="DRUG"), e.LineRate(D("0"), "s", billed_separately=True, warnings=("w",))
+		)
 		self.assertEqual(r.amount, D("0"))
 		self.assertIn(e.EXCLUDED_REASON, r.warning)
 		self.assertIn("w", r.warning)
@@ -59,12 +69,23 @@ class TestPriceAndCost(unittest.TestCase):
 
 	def test_from_values(self):
 		pa = e.PricingParams.from_values(
-			{"accumulation_mode": "ON_PRICE", "accumulation_rate": 5, "obligation_rate": 2, "rounding_unit": 100},
+			{
+				"accumulation_mode": "ON_PRICE",
+				"accumulation_rate": 5,
+				"obligation_rate": 2,
+				"rounding_unit": 100,
+			},
 			{"include_depreciation": 0, "include_accumulation": 1},
 		)
-		self.assertEqual((pa.accumulation_mode, pa.accumulation_rate, pa.obligation_rate), ("ON_PRICE", D("0.05"), D("0.02")))
+		self.assertEqual(
+			(pa.accumulation_mode, pa.accumulation_rate, pa.obligation_rate),
+			("ON_PRICE", D("0.05"), D("0.02")),
+		)
 		self.assertFalse(pa.include_depreciation)
-		for ps, pc in (({"accumulation_mode": "NONE"}, {}), ({"accumulation_mode": "ON_COST"}, {"include_accumulation": 0})):
+		for ps, pc in (
+			({"accumulation_mode": "NONE"}, {}),
+			({"accumulation_mode": "ON_COST"}, {"include_accumulation": 0}),
+		):
 			self.assertIsNone(e.PricingParams.from_values({**ps, "rounding_unit": 1}, pc).accumulation_mode)
 
 	def _inp(self, rates, lines):
@@ -72,7 +93,10 @@ class TestPriceAndCost(unittest.TestCase):
 
 	def test_cost_service_thanh_cong_va_canh_bao(self):
 		lines = [_line(line_id="L02", component="DRUG"), _line(line_id="L01")]
-		rates = {"L01": e.LineRate(D("60"), "a"), "L02": e.LineRate(D("5"), "b", warnings=("Đơn giá chưa xác minh",))}
+		rates = {
+			"L01": e.LineRate(D("60"), "a"),
+			"L02": e.LineRate(D("5"), "b", warnings=("Đơn giá chưa xác minh",)),
+		}
 		r = e.cost_service(self._inp(rates, lines), PARAMS)
 		self.assertEqual(r.status, "Cảnh báo")
 		self.assertEqual([x.norm_line_id for x in r.lines], ["L01", "L02"])
@@ -91,9 +115,13 @@ class TestPriceAndCost(unittest.TestCase):
 
 	def test_extension(self):
 		cl = e.CostLine("Trực tiếp", "LABOR", D("7"))
-		r = e.cost_service(self._inp({"L01": e.LineRate(D("1"), "a")}, [_line()]), PARAMS, extension=lambda inp: [cl])
+		r = e.cost_service(
+			self._inp({"L01": e.LineRate(D("1"), "a")}, [_line()]), PARAMS, extension=lambda inp: [cl]
+		)
 		self.assertEqual(r.direct_total, D("7"))
-		none = e.cost_service(self._inp({"L01": e.LineRate(D("60"), "a")}, [_line()]), PARAMS, extension=lambda i: None)
+		none = e.cost_service(
+			self._inp({"L01": e.LineRate(D("60"), "a")}, [_line()]), PARAMS, extension=lambda i: None
+		)
 		self.assertEqual(none.direct_total, D("10.00"))
 
 	def test_finish_service_gop_phan_bo(self):

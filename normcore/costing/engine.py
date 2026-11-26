@@ -186,7 +186,9 @@ COMPONENT_CATEGORY = {
 	"UTILITY": "UTILITY",
 }
 DEPR_EXCLUDED_WARNING = "Khấu hao bị loại (loại giá không kết cấu khấu hao)"
-EXCLUDED_REASON = "Thanh toán riêng ngoài giá dịch vụ"  # = pricing.EXCLUDED_REASON (giữ engine không import pricing)
+EXCLUDED_REASON = (
+	"Thanh toán riêng ngoài giá dịch vụ"  # = pricing.EXCLUDED_REASON (giữ engine không import pricing)
+)
 STATUS_OK, STATUS_WARN, STATUS_ERROR = "Thành công", "Cảnh báo", "Lỗi"
 LINE_DIRECT, LINE_ALLOC = "Trực tiếp", "Phân bổ"
 _STALE = "Đơn giá quá hạn tham chiếu"
@@ -333,7 +335,7 @@ def direct_line(line: NormLine, rate: LineRate) -> CostLine:
 			q,
 			_ZERO,
 			rate.source,
-			"; ".join((EXCLUDED_REASON,) + tuple(rate.warnings)),
+			"; ".join((EXCLUDED_REASON, *rate.warnings)),
 		)
 	amount = provisional.line_amount(
 		line.component, q, rate.rate, line.headcount, line.wastage_rate, rate.reuse_count
@@ -386,7 +388,9 @@ def cost_service(
 ) -> ServiceResult:
 	"""Chi phí trực tiếp của một dịch vụ (chưa phân bổ, chưa giá). FR-COST-003, FR-COST-016."""
 	ordered = sorted(inp.lines, key=lambda x: x.line_id)
-	missing = [f"{x.line_id} ({x.resource})" for x in ordered if not x.excluded and inp.rates.get(x.line_id) is None]
+	missing = [
+		f"{x.line_id} ({x.resource})" for x in ordered if not x.excluded and inp.rates.get(x.line_id) is None
+	]
 	if missing:
 		return ServiceResult(
 			inp.service,
@@ -404,9 +408,7 @@ def cost_service(
 		)
 	lines = extension(inp) if extension is not None else None
 	if lines is None:
-		lines = [
-			direct_line(x, inp.rates.get(x.line_id) or LineRate(_ZERO, "")) for x in ordered
-		]
+		lines = [direct_line(x, inp.rates.get(x.line_id) or LineRate(_ZERO, "")) for x in ordered]
 	lines = tuple(lines)
 	by_comp = _sum_by(lines, lambda x: x.component)
 	by_cat = _sum_by(lines, lambda x: COMPONENT_CATEGORY[x.component])
@@ -427,7 +429,9 @@ def cost_service(
 	)
 
 
-def finish_service(result: ServiceResult, alloc_lines: Sequence[CostLine], params: PricingParams) -> ServiceResult:
+def finish_service(
+	result: ServiceResult, alloc_lines: Sequence[CostLine], params: PricingParams
+) -> ServiceResult:
 	"""Gộp dòng "Phân bổ" và tính giá. Dịch vụ "Lỗi" giữ nguyên, không có giá."""
 	if result.status == STATUS_ERROR:
 		return result

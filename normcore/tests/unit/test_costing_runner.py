@@ -31,14 +31,24 @@ class TestRunner(unittest.TestCase):
 
 	def test_run_thu_tu_tien_do_va_phan_bo(self):
 		def load(el):
-			return e.ServiceInput(el["service"], el["department"], el["norm_set"],
-				(e.NormLine("L1", "", "LABOR", "DD", "DD", D("60")),), {"L1": e.LineRate(D("10"), "s")})
+			return e.ServiceInput(
+				el["service"],
+				el["department"],
+				el["norm_set"],
+				(e.NormLine("L1", "", "LABOR", "DD", "DD", D("60")),),
+				{"L1": e.LineRate(D("10"), "s")},
+			)
 
 		seen = []
 		al = e.CostLine("Phân bổ", "LABOR", D("5"))
 		res = runner.run(
-			[{"service": "B", "department": "K1", "norm_set": "n"}, {"service": "A", "department": "K1", "norm_set": "n"}],
-			load, PARAMS, progress=lambda i, n: seen.append((i, n)),
+			[
+				{"service": "B", "department": "K1", "norm_set": "n"},
+				{"service": "A", "department": "K1", "norm_set": "n"},
+			],
+			load,
+			PARAMS,
+			progress=lambda i, n: seen.append((i, n)),
 			allocate=lambda rs: {("A", "K1"): [al]},
 		)
 		self.assertEqual([r.service for r in res], ["A", "B"])
