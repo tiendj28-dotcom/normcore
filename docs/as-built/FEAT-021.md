@@ -1,6 +1,6 @@
 # As-Built: FEAT-021 Thay thế văn bản và hàng đợi rà soát
 
-Issue NORM-64. FR-LIB-007, 008, 009 (và FR-WF-009, FR-NOTI-001 qua UC-002). UC-002 (bước 1–7; nhánh 2a, 5a). SCR-DSK-012 (mới), SCR-DSK-003 (bổ sung), SCR-DSK-007 (bổ sung nhỏ). TC-LIB-05, 06, 07. Người nghiệm thu: QA (chưa làm).
+Issue NORM-64. FR-LIB-007, 008, 009 (và FR-WF-009, FR-NOTI-001 qua UC-002). UC-002 (bước 1–7; nhánh 2a, 5a). SCR-DSK-012 (mới), SCR-DSK-003 (bổ sung), SCR-DSK-007 (bổ sung nhỏ). TC-LIB-05, 06, 07. Người nghiệm thu: QA (Multica).
 
 ## 1. Luồng nghiệp vụ đã xây
 1. Trên văn bản A: nút "Khai báo thay thế" (hoặc bảng "Thay thế") ghi dòng NC Legal Supersession: văn bản B, phạm vi Toàn bộ / Một phần, danh sách mã mục, từ ngày D.
