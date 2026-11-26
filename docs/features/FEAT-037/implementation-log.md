@@ -11,3 +11,4 @@ Pytest chạy bằng `~/frappe-bench/env/bin/python -m pytest` (python3 hệ th�
 | T05 | with_bench migrate + run-tests test_nc_costing_physical, test_nc_costing_run_lock, test_nc_costing_cls, api.test_costing | 6 + 6 + 7 + 11 tests OK; test cũ không sửa; ASM-037-19 (fixture có xuất kho) | 89cc9c2 |
 | T06 | with_bench migrate + run-tests api.test_costing_physical, api.test_costing_reconciliation, report test_nc_reconciliation, api.test_costing_lock | 5 + 4 + 1 + 4 OK | c26d2bd |
 | T07 | with_bench migrate + run-tests api.test_costing_sensitivity | Ran 6 tests OK (TC-CLS-40: trạng thái run, NC Service Cost, dòng, đối soát, số bản ghi không đổi) | 83b845f |
+| T08 | with_bench migrate + run-tests report.nc_missing_data.test_nc_missing_data; check_conventions | Ran 4 tests OK; conventions thoát 0 | ef5c7f6 |
