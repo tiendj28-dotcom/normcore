@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, getdate, today
 
-from normcore.library import validity
+from normcore.library import mapping, validity
 from normcore.library.extract import ExtractionError, available_ocr, extract_pages, file_kind
 from normcore.library.search import (
 	build_fulltext_query,
@@ -117,6 +117,18 @@ def _fail(name, reason, notify_user):
 	_commit()
 
 
+def _suggest_after_index(name):
+	"""FR-SVC-005: lỗi đề xuất không làm văn bản thành "Lỗi" (ASM-022-10)."""
+	sp = "nc_library_suggest"
+	frappe.db.savepoint(sp)
+	try:
+		refresh_suggestions(name)
+		_commit()
+	except Exception:
+		frappe.db.rollback(save_point=sp)
+		frappe.log_error(title=f"Đề xuất ánh xạ văn bản {name}")
+
+
 def index_document(name, notify_user=None):
 	"""Tác vụ nền: tách văn bản, tách mục, ghi mục (FR-LIB-003, 004, 005)."""
 	if not frappe.db.exists("NC Legal Document", name):
@@ -138,6 +150,7 @@ def index_document(name, notify_user=None):
 			"NC Legal Document", name, {"index_status": "Đã lập", "index_error": ""}, update_modified=False
 		)
 		_commit()
+		_suggest_after_index(name)
 	except ExtractionError as e:
 		frappe.db.rollback(save_point=savepoint)
 		_fail(name, str(e), notify_user)
@@ -377,3 +390,114 @@ def search_sections(query, mode="auto", doc_type=None, validity_status=None, sta
 		r.pop("doc_type", None)
 		out.append(r)
 	return {"mode": mode, "total": len(rows), "rows": out}
+
+
+# ---------------------------------------------------------------------------------------------
+# Ánh xạ hướng dẫn với dịch vụ (FEAT-022: FR-SVC-005..007)
+# ---------------------------------------------------------------------------------------------
+
+_MAP_FIELDS = ("name", "technical_service", "mapping_status", "confidence", "confirmed_by", "confirmed_on")
+
+
+def _row_dict(r):
+	return {k: r.get(k) for k in _MAP_FIELDS}
+
+
+def _sig(rows):
+	return sorted((r["technical_service"], r["mapping_status"], r.get("confidence")) for r in rows)
+
+
+def refresh_suggestions(legal_document):
+	"""Tính lại đề xuất cho mọi mục của văn bản hướng dẫn QTKT; giữ dòng "Đã xác nhận" (FR-SVC-005)."""
+	doc = frappe.get_doc("NC Legal Document", legal_document)
+	if not doc.is_procedure_guideline:
+		return {"sections": 0, "suggested": 0}
+	services = [
+		(r.name, r.service_name)
+		for r in frappe.get_all("NC Technical Service", filters={"is_active": 1}, fields=["name", "service_name"])
+	]
+	index = mapping.build_token_index(services)
+	sections = frappe.get_all(
+		"NC Legal Section", filters={"legal_document": legal_document}, fields=["name", "section_no", "heading"]
+	)
+	n_sections = n_suggested = 0
+	for sec in sections:
+		if not mapping.is_mappable_section(sec.section_no):
+			continue
+		n_sections += 1
+		section = frappe.get_doc("NC Legal Section", sec.name)
+		existing = [_row_dict(r) for r in section.service_mappings]
+		merged = mapping.merge_suggestions(
+			existing, mapping.suggest_for_section(sec.heading or "", services, index)
+		)
+		n_suggested += sum(1 for r in merged if r["mapping_status"] == mapping.SUGGESTED)
+		if _sig(merged) != _sig(existing):
+			section.set("service_mappings", merged)
+			section.save(ignore_permissions=True)
+	return {"sections": n_sections, "suggested": n_suggested}
+
+
+def _require_guideline_write(legal_document):
+	doc = frappe.get_doc("NC Legal Document", legal_document)
+	if not frappe.has_permission("NC Legal Section", "write"):
+		frappe.throw(_("Bạn không có quyền chỉnh ánh xạ dịch vụ"), frappe.PermissionError)
+	return doc
+
+
+@frappe.whitelist()
+def suggest_mappings(legal_document):
+	"""Nút "Đề xuất lại" (ASM-022-08)."""
+	doc = _require_guideline_write(legal_document)
+	if not doc.is_procedure_guideline:
+		frappe.throw(_("Văn bản không phải hướng dẫn quy trình kỹ thuật"))
+	if doc.index_status != "Đã lập":
+		frappe.throw(_("Văn bản chưa lập chỉ mục xong"))
+	return refresh_suggestions(legal_document)
+
+
+@frappe.whitelist()
+def get_mappings(legal_document, unconfirmed_only=0, start=0, page_length=100):
+	doc = frappe.get_doc("NC Legal Document", legal_document)
+	if not frappe.has_permission("NC Legal Document", "read", doc=doc):
+		frappe.throw(_("Bạn không có quyền xem văn bản này"), frappe.PermissionError)
+	secs = frappe.get_all(
+		"NC Legal Section",
+		filters={"legal_document": legal_document},
+		fields=["name", "section_no", "heading", "validity_status"],
+	)
+	secs = [s for s in secs if mapping.is_mappable_section(s.section_no)]
+	secs.sort(key=lambda r: natural_key(r.section_no))
+	maps = {}
+	if secs:
+		for m in frappe.db.sql(
+			"SELECT m.name AS row, m.parent, m.technical_service, t.service_name, m.mapping_status, m.confidence,"
+			" m.confirmed_by, m.confirmed_on FROM `tabNC Section Service Map` m"
+			" LEFT JOIN `tabNC Technical Service` t ON t.name = m.technical_service"
+			" WHERE m.parenttype = 'NC Legal Section' AND m.parentfield = 'service_mappings'"
+			" AND m.parent IN %s ORDER BY m.idx",
+			[tuple(s.name for s in secs)],
+			as_dict=True,
+		):
+			maps.setdefault(m.pop("parent"), []).append(m)
+	pending_exact = sum(
+		1
+		for rows in maps.values()
+		for m in rows
+		if m.mapping_status == mapping.SUGGESTED and (m.confidence or 0) == mapping.CODE_CONFIDENCE
+	)
+	out = []
+	for s in secs:
+		rows = maps.get(s.name, [])
+		if cint(unconfirmed_only) and rows and all(m.mapping_status == mapping.CONFIRMED for m in rows):
+			continue
+		out.append(
+			{
+				"section": s.name,
+				"section_no": s.section_no,
+				"heading": s.heading,
+				"validity_status": s.validity_status,
+				"mappings": rows,
+			}
+		)
+	start, page_length = cint(start), min(cint(page_length) or 100, 500)
+	return {"total": len(out), "pending_exact": pending_exact, "rows": out[start : start + page_length]}
