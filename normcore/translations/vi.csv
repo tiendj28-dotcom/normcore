@@ -8,6 +8,7 @@ Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
 Add step,Thêm bước
 Add test system,Thêm hệ thống xét nghiệm
+Added,Thêm
 "After finalizing, lines are locked and cannot be reopened. Finalize this import?","Sau khi chốt, các dòng bị khóa và không mở lại được. Chốt lần nhập này?"
 "After issuing, the content of this version cannot be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
@@ -25,6 +26,7 @@ Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
 Attach to,Gắn với
+Base version,Phiên bản gốc
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
 Calculating…,Đang tính…
 Calibration,Chuẩn máy
@@ -34,17 +36,21 @@ Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Cannot load the original file,Không tải được tệp gốc
 Catalog,Danh mục
+Changed,Đổi
+Changed fields,Trường đổi
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
 Clinical volume and stock issues,Sản lượng cận lâm sàng và xuất kho
+Close comparison,Đóng so sánh
 Code,Mã
 Column,Cột,Import Excel
 Comment,Ý kiến
 Comments,Ý kiến
 Compare versions,So sánh phiên bản
+Compared version,Phiên bản so sánh
 Confirm import,Xác nhận ghi
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
@@ -122,6 +128,7 @@ Legal document,Văn bản
 Legal section,Mục văn bản
 Legal text links are provided by the document library.,Liên kết tới mục văn bản do thư viện văn bản cung cấp.
 Line,Dòng
+Line code,Mã dòng
 Lines / Total amount,Số dòng / Tổng tiền
 Lines without cost category,Dòng chưa gán loại chi phí
 Loading chain status…,Đang tải tình trạng chuỗi…
@@ -140,6 +147,7 @@ Minutes per person,Số phút / người
 More,Xem thêm
 Move step down,Chuyển bước xuống
 Move step up,Chuyển bước lên
+Moved,Đổi vị trí
 Moved to,Đã chuyển sang
 NC Clinical Procedure,Quy trình kỹ thuật
 NC Procedure Citation,Trích dẫn quy trình
@@ -202,9 +210,12 @@ Rejection reason,Lý do từ chối
 Relation,Quan hệ
 Reload file,Đọc lại tệp
 Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệp sẽ thay toàn bộ dòng và bỏ các sửa tay. Tiếp tục?
+Removed,Bỏ
 Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
 Rerun tests,Số test chạy lại
 Resolved,Đã xử lý
+Resource lines,Dòng nguồn lực
+Resources,Nguồn lực
 Retry,Thử lại
 Review actions,Thao tác duyệt
 Review comments,Ý kiến thẩm định
@@ -226,25 +237,33 @@ Search,Tìm
 Search in content,Tìm trong nội dung
 Searching…,Đang tìm…
 Section,Mục
+Sections,Phần
 Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
 Select only one line to edit.,Chỉ chọn một dòng để sửa.
 Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
 Share (%),Tỷ trọng (%)
+Show differences only,Chỉ hiện chỗ khác
 Snippet,Đoạn trích
 Some lines are missing figures,Chưa đủ số liệu ở một số dòng
 Source,Nguồn giá,NC Item
 Split equally across {0} services ({1}% each),Chia đều cho {0} dịch vụ (mỗi dịch vụ {1}%)
 Status,Trạng thái
 Step ID,Mã bước
+Step code,Mã bước
 Step title,Tên bước
+Steps,Các bước
+Summary of differences,Tóm tắt khác biệt
+Swap direction,Đổi chiều so sánh
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
 The procedure will move to,Quy trình sẽ chuyển sang
+"The two versions do not differ in sections, steps or resources.","Hai phiên bản không khác nhau về phần, bước, nguồn lực."
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
+This procedure has only one version. Comparison is available once a revision exists.,Quy trình này mới có một phiên bản. So sánh dùng khi đã có phiên bản sửa đổi.
 This procedure is awaiting approval and cannot be edited.,"Quy trình đang chờ duyệt, không sửa được."
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This procedure is issued or closed and cannot be edited. Create a new version in the revision function.,"Quy trình đã ban hành, không sửa được. Tạo phiên bản mới ở chức năng Sửa đổi."

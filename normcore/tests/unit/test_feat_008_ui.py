@@ -49,3 +49,53 @@ class TestFeat008Ui(unittest.TestCase):
 		hex_ = re.compile(r"#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(")
 		for text in SOURCES:
 			self.assertIsNone(hex_.search(text))
+
+
+CMP = (ROOT / "public/js/procedure_editor/ProcedureCompare.vue").read_text(encoding="utf-8")
+BUNDLE = (ROOT / "public/js/procedure_editor/procedure_editor.bundle.js").read_text(encoding="utf-8")
+
+
+class TestFeat008Compare(unittest.TestCase):
+	def test_route_compare(self):
+		self.assertIn('"compare"', PAGE)
+		self.assertIn("show(", PAGE)
+		self.assertIn("show(", BUNDLE)
+		self.assertIn("<ProcedureCompare", VUE)
+		self.assertIn("ProcedureCompare", BUNDLE)
+		self.assertIn('"compare"', VUE)
+
+	def test_goi_api_so_sanh(self):
+		self.assertIn("compare_versions", CMP)
+		self.assertIn("list_versions", CMP)
+
+	def test_nhan_them_bo_doi_co_chu(self):
+		for label in ("Added", "Removed", "Changed"):
+			self.assertIn(f'__("{label}")', CMP)
+			self.assertIn(label, VI)
+		for cls in ("green", "red", "yellow"):
+			self.assertIn(f'indicator-pill {cls}"', CMP)
+
+	def test_ba_khoi_va_trang_thai(self):
+		for label in ("Sections", "Steps", "Resource lines"):
+			self.assertIn(f'__("{label}")', CMP)
+		self.assertIn("v-else-if=\"error\"", CMP)
+		self.assertIn("versions.length < 2", CMP)
+		self.assertIn("Show differences only", CMP)
+
+	def test_ban_phim_va_tiep_can(self):
+		self.assertIn("@keydown.alt.left", CMP)
+		self.assertIn("@keydown.alt.right", CMP)
+		self.assertIn("@keydown.enter", CMP)
+		self.assertIn('scope="col"', CMP)
+
+	def test_trinh_soan_co_ba_nut_khi_chi_doc(self):
+		for fn in ("create_revision", '"Thu hồi"', "openCompare"):
+			self.assertIn(fn, VUE)
+		self.assertIn("review.actions.includes(withdrawAction)", VUE)
+
+	def test_chuoi_so_sanh_co_trong_vi_csv(self):
+		for s in _strings(CMP):
+			self.assertIn(s, VI, s)
+
+	def test_khong_ma_mau_cung_trong_so_sanh(self):
+		self.assertIsNone(re.search(r"#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(", CMP))

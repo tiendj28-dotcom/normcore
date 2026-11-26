@@ -9,3 +9,4 @@
 | T05 | `scripts/with_bench.sh '... --module normcore.api.test_procedure_withdraw'` + `normcore.tests.test_feat_007_workflow` + `normcore.api.test_procedure_workflow` | 3 OK; 6 OK; 9 OK | cdfa7fc |
 | T06 | `scripts/with_bench.sh 'bench --site normcore.test migrate && ... --module normcore.api.test_procedure_norm_flag'`; `python3 scripts/check_conventions.py` | 3 OK; quy ước xanh | 07ca37a |
 | T07 | `scripts/with_bench.sh '... --module normcore.api.test_procedure_compare'` | 2 OK | 3661180 |
+| T08 | `pytest normcore/tests/unit/test_feat_008_ui.py`; `scripts/with_bench.sh 'bench build --app normcore'` | 5 passed; build không lỗi | ec68e4e |
