@@ -4,3 +4,4 @@
 | :-- | :-- | :-- | :-- |
 | T01 | `pytest normcore/tests/unit/test_exports_meta.py normcore/tests/unit/test_exports_explanation.py` | 9 passed; `grep "import frappe"` không in gì | (xem git log) |
 | T02 | `pytest normcore/tests/unit/test_exports_annex.py`; `git ls-files normcore/exports/templates` | 15 passed; 4 tệp .xlsx | (xem git log) |
+| T03 | golden_engine.py; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/exports --cov-fail-under=90` | 1037 passed, cov 90,89% | (xem git log) |

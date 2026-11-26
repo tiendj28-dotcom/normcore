@@ -1,4 +1,4 @@
-"""Bảng giải trình PDF (FR-OUT-005). Thuần, không import frappe. Không làm tròn lại số đã lưu."""
+"""Bảng giải trình PDF (FR-OUT-005). Thuần, không phụ thuộc frappe. Không làm tròn lại số đã lưu."""
 
 from decimal import Decimal
 

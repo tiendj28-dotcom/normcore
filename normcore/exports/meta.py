@@ -1,4 +1,4 @@
-"""Trang thông tin và chân trang truy vết của mọi tệp xuất (FR-OUT-008). Thuần, không import frappe."""
+"""Trang thông tin và chân trang truy vết của mọi tệp xuất (FR-OUT-008). Thuần, không phụ thuộc frappe."""
 
 from openpyxl.styles import Font
 

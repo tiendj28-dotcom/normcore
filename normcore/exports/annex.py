@@ -1,4 +1,4 @@
-"""Phụ lục II–V Thông tư 21/2024/TT-BYT (FR-OUT-001..004, NFR-CPL-002). Thuần, không import frappe.
+"""Phụ lục II–V Thông tư 21/2024/TT-BYT (FR-OUT-001..004, NFR-CPL-002). Thuần, không phụ thuộc frappe.
 
 Cấu trúc cột nằm ở MỘT chỗ (các hằng `ANNEX_*_COLUMNS`); tệp mẫu `.xlsx` trong `templates/` được sinh từ
 các hằng này và thay được khi có mẫu chính thức (TBD-01, ASM-019-01). Chỉ ghi giá trị đã lưu, không làm tròn lại.
