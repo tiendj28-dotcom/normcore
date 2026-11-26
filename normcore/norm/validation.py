@@ -66,6 +66,7 @@ def line_errors(line: dict, ctx: dict) -> list[str]:
 	if (
 		line.get("step_id")
 		and not line.get("service_level")
+		and not line.get("step_removed")  # AMD-013-01
 		and line["step_id"] not in ctx.get("step_ids", ())
 	):
 		errors.append(f"Dòng {lid}: mã bước {line['step_id']} không tồn tại trong quy trình")  # DI-04
@@ -113,6 +114,8 @@ def confirm_blockers(lines) -> list[dict]:
 			reasons.append("Chưa xác nhận")
 		if not ln.get("resource"):
 			reasons.append("Chưa liên kết danh mục")
+		if ln.get("step_removed"):
+			reasons.append("Thuộc bước đã bỏ")  # FR-NORM-015, AMD-013-01
 		if ln.get("ai_suggested"):
 			reasons.append("Còn đề xuất AI chưa xử lý")
 		if reasons:
