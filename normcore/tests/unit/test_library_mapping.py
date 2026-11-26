@@ -130,7 +130,7 @@ def test_is_draft_source_va_mappable():
 
 
 def test_hieu_nang_5000_dich_vu_300_muc():
-	# tên dịch vụ giả: 4 từ lấy từ bộ 300 từ (giống phân bố từ vựng thực), 5.000 dịch vụ × 300 mục
+	# tên dịch vụ giả: 4 từ lấy từ bộ 300 từ (giống phân bố từ vựng thực), 5.000 dịch vụ x 300 mục
 	vocab = [f"từ{j}" for j in range(300)]
 	services = [
 		(f"{i:05d}", " ".join(vocab[(i * k + k * k) % 300] for k in (1, 7, 13, 29)) + f" số{i}")

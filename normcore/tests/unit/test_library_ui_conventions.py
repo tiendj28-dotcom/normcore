@@ -128,8 +128,12 @@ class TestMappingUI(unittest.TestCase):
 
 	def test_truong_html_va_bang_con_o_dung_cho(self):
 		sec = json.loads(_text(SEC / "nc_legal_section.json"))
-		self.assertLess(sec["field_order"].index("validity_status"), sec["field_order"].index("mapping_section"))
-		self.assertLess(sec["field_order"].index("service_mappings"), sec["field_order"].index("compare_section"))
+		self.assertLess(
+			sec["field_order"].index("validity_status"), sec["field_order"].index("mapping_section")
+		)
+		self.assertLess(
+			sec["field_order"].index("service_mappings"), sec["field_order"].index("compare_section")
+		)
 		doc = json.loads(_text(DOC / "nc_legal_document.json"))
 		f = {x["fieldname"]: x for x in doc["fields"]}
 		self.assertEqual(f["mapping_html"]["fieldtype"], "HTML")

@@ -38,8 +38,9 @@ def make_service(code, name):
 
 
 def index_with_text(doc, text=TEXT):
-	with mock.patch("normcore.api.library.available_ocr", return_value=None), mock.patch(
-		"normcore.api.library.extract_pages", return_value=[Page(1, text)]
+	with (
+		mock.patch("normcore.api.library.available_ocr", return_value=None),
+		mock.patch("normcore.api.library.extract_pages", return_value=[Page(1, text)]),
 	):
 		api.index_document(doc.name)
 	doc.reload()
@@ -47,7 +48,8 @@ def index_with_text(doc, text=TEXT):
 
 def section_by_no(doc, no):
 	return frappe.get_doc(
-		"NC Legal Section", frappe.db.get_value("NC Legal Section", {"legal_document": doc.name, "section_no": no})
+		"NC Legal Section",
+		frappe.db.get_value("NC Legal Section", {"legal_document": doc.name, "section_no": no}),
 	)
 
 
@@ -112,7 +114,9 @@ class TestLibraryMappingSuggest(MappingTestBase):
 		index_with_text(doc)  # lập lại
 		rows = section_by_no(doc, "1").service_mappings
 		self.assertEqual([(r.technical_service, r.mapping_status) for r in rows], [(CODE_SVC, "Đã xác nhận")])
-		self.assertEqual((rows[0].confirmed_by, rows[0].confirmed_on, rows[0].name), (old_by, old_on, old_name))
+		self.assertEqual(
+			(rows[0].confirmed_by, rows[0].confirmed_on, rows[0].name), (old_by, old_on, old_name)
+		)
 		# dòng "Đề xuất" cũ của mục 2 được tính lại, không nhân đôi
 		self.assertEqual(len(section_by_no(doc, "2").service_mappings), 1)
 
@@ -292,14 +296,26 @@ class TestLibraryMappingSources(MappingTestBase):
 		d1, d2 = self.make_doc("MAP/22"), self.make_doc("MAP/23")
 		for d in (d1, d2):
 			s = section_by_no(d, "3")
-			s.append("service_mappings", {"technical_service": self.other_svc, "mapping_status": "Đã xác nhận"})
+			s.append(
+				"service_mappings", {"technical_service": self.other_svc, "mapping_status": "Đã xác nhận"}
+			)
 			s.save()
 			s = section_by_no(d, "1")
-			s.append("service_mappings", {"technical_service": self.other_svc, "mapping_status": "Đã xác nhận"})
+			s.append(
+				"service_mappings", {"technical_service": self.other_svc, "mapping_status": "Đã xác nhận"}
+			)
 			s.save()
 		out = api.get_draft_sources(self.other_svc)
-		keys = [(frappe.db.get_value("NC Legal Section", x["name"], "legal_document"), x["section_no"]) for x in out]
+		keys = [
+			(frappe.db.get_value("NC Legal Section", x["name"], "legal_document"), x["section_no"])
+			for x in out
+		]
 		self.assertEqual(len(keys), 4)
 		self.assertEqual(len(set(keys)), 4)
 		self.assertEqual([k[1] for k in keys if k[0] == d1.name], ["1", "3"])
-		self.assertEqual(keys, sorted(keys, key=lambda k: (frappe.db.get_value("NC Legal Document", k[0], "doc_number"), int(k[1]))))
+		self.assertEqual(
+			keys,
+			sorted(
+				keys, key=lambda k: (frappe.db.get_value("NC Legal Document", k[0], "doc_number"), int(k[1]))
+			),
+		)

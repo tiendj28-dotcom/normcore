@@ -46,7 +46,7 @@ def code_in_heading(heading, code):
 
 
 def _dice_confidence(inter, la, lb):
-	"""round-half-up(95 × 2·inter/(la+lb)) bằng số nguyên."""
+	"""round-half-up(95 x 2·inter/(la+lb)) bằng số nguyên."""
 	if not inter:
 		return 0
 	y = la + lb

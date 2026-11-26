@@ -414,11 +414,15 @@ def refresh_suggestions(legal_document):
 		return {"sections": 0, "suggested": 0}
 	services = [
 		(r.name, r.service_name)
-		for r in frappe.get_all("NC Technical Service", filters={"is_active": 1}, fields=["name", "service_name"])
+		for r in frappe.get_all(
+			"NC Technical Service", filters={"is_active": 1}, fields=["name", "service_name"]
+		)
 	]
 	index = mapping.build_token_index(services)
 	sections = frappe.get_all(
-		"NC Legal Section", filters={"legal_document": legal_document}, fields=["name", "section_no", "heading"]
+		"NC Legal Section",
+		filters={"legal_document": legal_document},
+		fields=["name", "section_no", "heading"],
 	)
 	n_sections = n_suggested = 0
 	for sec in sections:
@@ -584,9 +588,7 @@ def save_mapping(section, technical_service, row=None):
 @frappe.whitelist()
 def remove_mapping(row):
 	"""Bỏ một ánh xạ (đề xuất sai hoặc gỡ ánh xạ, UC-003 4a)."""
-	parent = frappe.db.get_value(
-		"NC Section Service Map", row, ["parent", "parenttype"], as_dict=True
-	)
+	parent = frappe.db.get_value("NC Section Service Map", row, ["parent", "parenttype"], as_dict=True)
 	if not parent or parent.parenttype != "NC Legal Section":
 		frappe.throw(_("Không tìm thấy ánh xạ"), frappe.DoesNotExistError)
 	sec = _writable_section(parent.parent)
