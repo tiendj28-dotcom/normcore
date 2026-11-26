@@ -299,7 +299,7 @@ function render_superseded_by(frm) {
 			const esc = frappe.utils.escape_html;
 			const items = rows
 				.map((x) => {
-					const scope = x.scope === "Một phần" ? `${__("Sections")}: ${esc(x.sections)}` : __("Whole document");
+					const scope = x.scope === "Một phần" ? `${__("Replaced sections")}: ${esc(x.sections)}` : __("Whole document");
 					return (
 						`<li><a href="/app/nc-legal-document/${encodeURIComponent(x.document)}">${esc(x.doc_number || x.document)}</a>` +
 						` — ${esc(x.title || "")}, ${scope}, ${__("from")} ${user_date(x.from_date)}</li>`

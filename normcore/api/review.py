@@ -139,8 +139,8 @@ def get_review_queue(department=None, start=0, page_length=50):
 	if _is_scoped(DT, "read", frappe.session.user):
 		# quy trình "Đã ban hành" đọc công khai; hàng đợi chỉ liệt kê khoa của người dùng (SCR-DSK-012)
 		mine = sorted(get_user_departments())
-		if department and department not in mine:
-			mine = []
+		if department:
+			mine = [department] if department in mine else []
 		filters["department"] = ["in", mine or [""]]
 	names = frappe.get_list(DT, filters=filters, pluck="name", limit_page_length=0)
 	rows = frappe.get_list(

@@ -134,3 +134,21 @@ class TestReviewQueue(FrappeTestCase):
 		frappe.set_user(self.clin)
 		self.assertEqual([r["name"] for r in review.get_review_queue()["rows"]], [self.p.name])
 		self.assertEqual(review.get_review_queue()["rows"][0]["can_act"], 0)
+
+	def test_SCR_DSK_012_loc_khoa_khi_co_hai_khoa(self):
+		"""Trưởng khoa được gán hai khoa: bộ lọc Khoa chỉ ra quy trình của khoa đó."""
+		self.p2 = make_cited(
+			"DV-Q5",
+			"KHOA-Q5",
+			self.head,
+			[{"legal_document": self.b.name, "legal_section": self.secs["2"].name}],
+		)
+		access.assign_department(self.head, "KHOA-Q5")
+		self._expire()
+		frappe.set_user(self.head)
+		names = lambda **kw: sorted(r["name"] for r in review.get_review_queue(**kw)["rows"])  # noqa: E731
+		self.assertEqual(names(), sorted([self.p.name, self.p2.name]))
+		self.assertEqual(names(department="KHOA-Q1"), [self.p.name])
+		self.assertEqual(names(department="KHOA-Q5"), [self.p2.name])
+		self.assertEqual(review.get_review_queue(department="KHOA-Q5")["total"], 1)
+		self.assertEqual(names(department="KHOA-Q2"), [])  # khoa không được gán
