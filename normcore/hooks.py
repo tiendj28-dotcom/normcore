@@ -120,7 +120,11 @@ after_install = [
 
 # Migration
 # ------------
-after_migrate = ["normcore.setup.fix_home_page", "normcore.setup.ensure_list_view_settings"]
+after_migrate = [
+	"normcore.setup.fix_home_page",
+	"normcore.setup.ensure_list_view_settings",
+	"normcore.install.ensure_norm_templates",  # FEAT-034, ASM-034-18
+]
 
 # Uninstallation
 # ------------

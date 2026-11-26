@@ -3,7 +3,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from normcore.install import ROLES
+from normcore.install import ROLES, ensure_norm_templates
+from normcore.norm.templates import DEFAULT_TEMPLATES
 from normcore.tests.utils import make_user
 
 ITEMS = [
@@ -102,3 +103,28 @@ class TestNCNormTemplate(FrappeTestCase):
 	def test_quyen_norm_template_finance_tao_duoc(self):
 		frappe.set_user(make_user("tpl.fin@normcore.test", "NC Finance"))
 		self.assertEqual(frappe.get_doc(values()).insert().name, "MDM-T1")
+
+
+class TestDefaultTemplates(FrappeTestCase):
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_mau_cai_san_hoa_sinh_va_mien_dich_chua_bat(self):
+		ensure_norm_templates()
+		for tpl in DEFAULT_TEMPLATES:
+			doc = frappe.get_doc("NC Norm Template", tpl["template_code"])
+			self.assertEqual((doc.cls_group, doc.is_active, len(doc.items)), (tpl["cls_group"], 0, 8))
+		self.assertGreaterEqual(frappe.db.count("NC Norm Template"), 2)
+
+	def test_chay_hai_lan_khong_nhan_ban_va_khong_ghi_de(self):
+		ensure_norm_templates()
+		before = frappe.db.count("NC Norm Template")
+		doc = frappe.get_doc("NC Norm Template", "MDM-HOA-SINH")
+		doc.items[0].is_mandatory = 0
+		doc.is_active = 1
+		doc.save()
+		ensure_norm_templates()
+		self.assertEqual(frappe.db.count("NC Norm Template"), before)
+		doc.reload()
+		self.assertEqual((doc.is_active, doc.items[0].is_mandatory), (1, 0))
