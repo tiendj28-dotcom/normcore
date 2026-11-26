@@ -6,10 +6,17 @@ from decimal import Decimal
 import frappe
 from frappe import _
 
-from normcore.costing import engine
+from normcore.costing import cls, engine
 
 RUN, COST = "NC Costing Run", "NC Service Cost"
 NOTE_NO_DEPRECIATION = "Khấu hao bị loại (loại giá không kết cấu khấu hao)"
+LEVEL_LABEL = {
+	"RESULT": "Theo kết quả",
+	"TUBE": "Theo ống mẫu",
+	"BATCH": "Theo mẻ",
+	"DAY": "Theo ngày-máy",
+	"PERIOD": "Theo kỳ",
+}
 NOTE_NO_ALLOCATION = "Chưa gồm chi phí phân bổ chung (phân bổ cấp 1, cấp 2 làm ở FEAT-017)"
 
 
@@ -81,7 +88,7 @@ def get_progress(run):
 @frappe.whitelist()
 def get_run_results(run):
 	"""Danh sách NC Service Cost của lần tính mà người dùng đọc được (kể cả phạm vi khoa)."""
-	_run(run, "read")
+	run_doc = _run(run, "read")
 	rows = frappe.get_list(
 		COST,
 		filters={"costing_run": run},
@@ -91,6 +98,8 @@ def get_run_results(run):
 			"department",
 			"calc_status",
 			"calc_message",
+			"is_paraclinical",
+			"eqa_cost",
 			"full_cost",
 			"calculated_price",
 			"rounded_price",
@@ -106,7 +115,27 @@ def get_run_results(run):
 	services = _names("NC Technical Service", "service_name", {r["service"] for r in rows})
 	depts = _names("NC Department", "department_name", {r["department"] for r in rows})
 	counts: dict = {}
+	systems: dict = {}
+	if rows:
+		for t in frappe.get_all(
+			"NC Test System Cost",
+			{"parent": ["in", [r["name"] for r in rows]], "parenttype": COST},
+			[
+				"parent",
+				"test_system",
+				"norm_set",
+				"patient_results",
+				"share_pct",
+				"k_factor",
+				"k_estimated",
+				"direct_cost",
+				"low_volume_warning",
+			],
+			order_by="idx asc",
+		):
+			systems.setdefault(t.pop("parent"), []).append(t)
 	for r in rows:
+		r["test_systems"] = systems.get(r["name"], [])
 		r["service_name"] = services.get(r["service"])
 		r["department_name"] = depts.get(r["department"])
 		r["has_allocation"] = bool(
@@ -122,7 +151,15 @@ def get_run_results(run):
 			)
 		)
 		counts[r["calc_status"]] = counts.get(r["calc_status"], 0) + 1
-	return {"results": rows, "counts": counts}
+	return {
+		"results": rows,
+		"counts": counts,
+		"run": {
+			"volume_scenario": run_doc.get("volume_scenario"),
+			"compliance_allocation_mode": run_doc.get("compliance_allocation_mode"),
+			"run_warnings": [x for x in (run_doc.get("run_warnings") or "").split("\n") if x],
+		},
+	}
 
 
 def _cost_line(ln) -> engine.CostLine:
@@ -142,6 +179,13 @@ def _cost_line(ln) -> engine.CostLine:
 		d(ln.driver_value),
 		d(ln.driver_total),
 		d(ln.pool_amount),
+		ln.test_system or "",
+		ln.line_origin or "",
+		ln.cost_level or "",
+		d(ln.k_factor) or None,  # Float trống đọc ra 0; k luôn > 0
+		ln.divisor_label or "",
+		d(ln.divisor_value),
+		ln.divisor_source or "",
 	)
 
 
@@ -158,6 +202,14 @@ def _line_dict(c: engine.CostLine, step_label=None) -> dict:
 		"amount": float(c.amount),
 		"rate_source": c.rate_source,
 		"warning": c.warning,
+		"test_system": c.test_system,
+		"line_origin": c.line_origin,
+		"cost_level": c.cost_level,
+		"cost_level_label": _(LEVEL_LABEL.get(c.cost_level, c.cost_level)) if c.cost_level else "",
+		"k_factor": None if c.k_factor is None else float(c.k_factor),
+		"divisor_label": c.divisor_label,
+		"divisor_value": None if c.divisor_value is None else float(c.divisor_value),
+		"divisor_source": c.divisor_source,
 	}
 	if c.line_type == engine.LINE_ALLOC:
 		out.update(
@@ -167,6 +219,67 @@ def _line_dict(c: engine.CostLine, step_label=None) -> dict:
 			pool_amount=None if c.pool_amount is None else float(c.pool_amount),
 		)
 	return out
+
+
+def _groups(lines, label) -> list:
+	return [
+		{
+			"component": g["component"],
+			"label": g["label"],
+			"total": float(g["total"]),
+			"steps": [
+				{
+					"step_id": s["step_id"],
+					"step_label": label(s["step_id"]) if s["step_id"] else _("Chung"),
+					"total": float(s["total"]),
+					"lines": [_line_dict(c, label(c.step_id)) for c in s["lines"]],
+				}
+				for s in g["steps"]
+			],
+		}
+		for g in engine.group_explanation(lines)
+	]
+
+
+def _paraclinical(sc, lines, label) -> dict:
+	"""FR-COST-031 (SCR-DSK-023): khối hệ thống xét nghiệm, "k được tính thế nào", dòng cấp dịch vụ."""
+	rows = list(sc.test_system_costs)
+	qsum = sum((Decimal(str(r.patient_results or 0)) for r in rows), Decimal(0))
+	equip = _names("NC Test System", "main_equipment", {r.test_system for r in rows})
+	systems = []
+	for r in rows:
+		qbn = Decimal(str(r.patient_results or 0))
+		by_results = bool(qsum) and abs(Decimal(str(r.share_pct or 0)) - qbn / qsum * 100) < Decimal("0.0001")
+		parts = [r.patient_results, r.q_iqc, r.q_calibration, r.q_rerun, r.q_eqa]
+		systems.append(
+			{
+				"test_system": r.test_system,
+				"norm_set": r.norm_set,
+				"equipment": equip.get(r.test_system),
+				"patient_results": r.patient_results,
+				"share_pct": r.share_pct,
+				"share_source": _("Từ số kết quả trả") if by_results else _("Khai tay"),
+				"q_iqc": r.q_iqc,
+				"q_calibration": r.q_calibration,
+				"q_rerun": r.q_rerun,
+				"q_eqa": r.q_eqa,
+				"total_tests": sum((x or 0) for x in parts),
+				"wastage_rate": r.wastage_rate,
+				"k_factor": r.k_factor,
+				"k_estimated": bool(r.k_estimated),
+				"direct_cost": r.direct_cost,
+				"low_volume_warning": bool(r.low_volume_warning),
+				"groups": _groups([c for c in lines if c.test_system == r.test_system], label),
+			}
+		)
+	weighted = sum((Decimal(str(r.share_pct or 0)) / 100 * Decimal(str(r.direct_cost or 0)) for r in rows), Decimal(0))
+	return {
+		"systems": systems,
+		"service_lines": [_line_dict(c) for c in lines if not c.test_system and c.line_origin],
+		"weighted_direct": float(cls.r2(weighted)),
+		"eqa_cost": sc.eqa_cost,
+		"direct_total": float(cls.r2(weighted) + Decimal(str(sc.eqa_cost or 0))),
+	}
 
 
 @frappe.whitelist()
@@ -187,23 +300,10 @@ def get_explanation(service_cost):
 	label = lambda sid: f"{sid} — {step_titles[sid]}" if sid in step_titles else sid  # noqa: E731
 	direct_total = sum((c.amount for c in lines if c.line_type == engine.LINE_DIRECT), Decimal(0))
 	alloc_total = sum((c.amount for c in lines if c.line_type == engine.LINE_ALLOC), Decimal(0))
-	groups = [
-		{
-			"component": g["component"],
-			"label": g["label"],
-			"total": float(g["total"]),
-			"steps": [
-				{
-					"step_id": s["step_id"],
-					"step_label": label(s["step_id"]) if s["step_id"] else _("Chung"),
-					"total": float(s["total"]),
-					"lines": [_line_dict(c, label(c.step_id)) for c in s["lines"]],
-				}
-				for s in g["steps"]
-			],
-		}
-		for g in engine.group_explanation(lines)
-	]
+	groups = _groups(lines, label)
+	paraclinical = _paraclinical(sc, lines, label) if sc.is_paraclinical else None
+	if paraclinical:  # tổng dịch vụ là bình quân gia quyền các hệ thống (BR-CLS-013), không phải cộng mọi dòng
+		direct_total = Decimal(str(paraclinical["direct_total"]))
 	structure = []
 	for field, name in (
 		("direct_labor", "LABOR"),
@@ -225,6 +325,12 @@ def get_explanation(service_cost):
 			)
 	allocation = [_line_dict(c) for c in lines if c.line_type == engine.LINE_ALLOC]
 	notes = []
+	for marker, text in (
+		(cls.EXPIRED_ZERO_NOTE, "Khấu hao thiết bị hết thời gian sử dụng: ZERO"),
+		(cls.EXPIRED_CONTINUE_NOTE, "Khấu hao thiết bị hết thời gian sử dụng: CONTINUE"),
+	):
+		if any(marker in c.warning for c in lines):
+			notes.append(_(text))
 	if not include_depr:
 		notes.append(_(NOTE_NO_DEPRECIATION))
 	if not allocation and sc.calc_status != "Lỗi":
@@ -254,4 +360,5 @@ def get_explanation(service_cost):
 		"direct_groups": groups,
 		"allocation_lines": allocation,
 		"notes": notes,
+		"paraclinical": paraclinical,
 	}
