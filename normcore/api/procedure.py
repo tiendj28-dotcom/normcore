@@ -516,6 +516,50 @@ def _apply_citation(
 		if value is not None:
 			row.set(key, value or None)
 	row.relation = relation or row.relation or "Chưa có căn cứ"
+	_align_legal(row)
+
+
+def _align_legal(row):
+	"""Mục chọn rồi thì văn bản lấy từ mục; chọn cả hai thì mục phải thuộc văn bản (NORM-65, ASM-065-01).
+	Chỉ văn bản (trích dẫn cấp văn bản) vẫn được phép."""
+	if not row.legal_section:
+		return
+	owner = frappe.db.get_value("NC Legal Section", row.legal_section, "legal_document")
+	if not owner:
+		frappe.throw(
+			_("Không tìm thấy mục văn bản {0}.").format(row.legal_section), frappe.LinkValidationError
+		)
+	if row.legal_document and row.legal_document != owner:
+		frappe.throw(
+			_("Mục {0} không thuộc văn bản {1}.").format(row.legal_section, row.legal_document),
+			frappe.ValidationError,
+		)
+	row.legal_document = owner
+
+
+@frappe.whitelist()
+def list_legal_documents():
+	"""Văn bản để chọn ở bảng trích dẫn (cần quyền đọc NC Legal Document)."""
+	frappe.has_permission("NC Legal Document", "read", throw=True)
+	return frappe.get_list(
+		"NC Legal Document",
+		fields=["name", "doc_number", "title"],
+		order_by="doc_number asc",
+		limit_page_length=2000,
+	)
+
+
+@frappe.whitelist()
+def list_legal_sections(legal_document):
+	"""Mục của một văn bản để chọn ở bảng trích dẫn (cần quyền đọc NC Legal Section)."""
+	frappe.has_permission("NC Legal Section", "read", throw=True)
+	return frappe.get_list(
+		"NC Legal Section",
+		filters={"legal_document": legal_document},
+		fields=["name", "section_no", "heading"],
+		order_by="name asc",
+		limit_page_length=2000,
+	)
 
 
 @frappe.whitelist()

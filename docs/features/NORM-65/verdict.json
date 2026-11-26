@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["Site sạch: 1671 test OK; pytest 967 pass, độ phủ 99%", "Patch có test khớp/không khớp/chạy lại; không mất giá trị cũ", "TC-PROC-09 giữ nguyên assertion; đúng phạm vi; CI xanh"], "commit": "e925d1926f9e6d6075b250183821b70e6cf4ae50"}
