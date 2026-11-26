@@ -1,5 +1,7 @@
 # Acceptance FEAT-015 — Tính chi phí trực tiếp, giá và bảng giải trình
 
+**Kết luận: REWORK.** Sau merge origin/develop vào nhánh, `test_vi_csv_order.py::test_vi_csv_that_dat` và `check_conventions.py` (NC-10: `vi.csv` dòng 453 'Waiting since' sau 'Warning') đỏ. Các dòng bên dưới là kết quả trên 3e158cf trước merge.
+
 Người nghiệm thu: QA (Multica, Tester iu), 2026-11-26. Commit đã kiểm: xem `verdict.json`. PR #57.
 
 | Tiêu chí | Bằng chứng | Kết quả |
