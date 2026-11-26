@@ -1,0 +1,11 @@
+# Giả định của NORM-65 (sửa ASM-046)
+
+Mã mới gắn tiền tố issue (luật chung 2). Áp dụng theo CLAUDE.md mục 6 ("Câu hỏi mở khác": đơn giản nhất, đảo ngược được).
+
+| Mã | Lựa chọn | Chỗ trong mã | Trạng thái |
+| :-- | :-- | :-- | :-- |
+| ASM-NORM65-01 | Khi lưu trích dẫn: chọn mục thì `legal_document` lấy từ mục; chọn cả hai mà mục không thuộc văn bản thì từ chối. Chỉ chọn văn bản (trích dẫn cấp văn bản) vẫn được. Không thêm ràng buộc BB cho `legal_section` khi quan hệ khác "Chưa có căn cứ" (data-model: "BB trừ khi Chưa có căn cứ"): ràng buộc đó thuộc FEAT-021 (DI-08, bộ khớp), issue không giao; dòng cũ không khớp được để trống Link nên bắt BB ở đây sẽ chặn lưu quy trình cũ. | `api/procedure._align_legal` | Áp dụng; Lead xem lại nếu muốn BB ở FEAT-021 |
+| ASM-NORM65-02 | Patch khớp `legal_document` theo thứ tự: tên `LD-…`; số hiệu chuẩn hóa (NFC, bỏ khoảng trắng, casefold, như FR-LIB-002) bằng nhau; số hiệu chuẩn hóa nằm trong giá trị ("Thông tư 43/2013/TT-BYT"). Chỉ nhận khi đúng một văn bản khớp; nhiều văn bản khớp thì coi là không khớp. | `procedure/citation_link.match_document` | Áp dụng |
+| ASM-NORM65-03 | Patch khớp `legal_section` theo tên `LS-…` (văn bản lấy từ mục), hoặc mã mục chuẩn hóa (bỏ tiền tố "Điều"/"Mục") trong văn bản đã khớp, duy nhất. Mục thuộc văn bản khác với văn bản đã khớp: tin mục. | `procedure/citation_link.match_section`, `convert_row` | Áp dụng |
+| ASM-NORM65-04 | Không khớp được: ghi giá trị cũ (chỉ phần không khớp) vào đầu `quote` dạng "[Căn cứ cũ: Văn bản — Mục] …", để trống Link tương ứng. Khớp văn bản mà không khớp mục: giữ Link văn bản. Ghi thẳng CSDL (`update_modified=False`), chạy lại không đổi gì thêm. Không động tới ảnh chụp ở `versioning.py` (sao chép bản sửa đổi lấy giá trị hiện tại của dòng). | `patches/link_procedure_citation_legal.py` | Áp dụng |
+| ASM-NORM65-05 | `test_TC_PROC_09_trich_dan` và `test_FR_PROC_013_sao_chep`: giữ nguyên số và loại assertion, chỉ đổi dữ liệu vào từ chuỗi tự do ("Thông tư 43/2013/TT-BYT", "Điều 5"…) sang tên bản ghi NC Legal Document/Section dựng ở `setUp`, vì Link không nhận chuỗi tự do. Ghi ở đây để Reviewer đối chiếu; đây là hệ quả trực tiếp của yêu cầu issue, không nới. | `api/test_procedure.py` | Áp dụng |

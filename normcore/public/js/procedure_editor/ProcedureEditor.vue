@@ -218,8 +218,14 @@
 				<select v-model="form.relation" class="form-control" :aria-label="__('Relation')">
 					<option v-for="r in relations" :key="r" :value="r">{{ __(r) }}</option>
 				</select>
-				<input v-model="form.legal_document" class="form-control" :aria-label="__('Legal document')" :placeholder="__('Legal document')" />
-				<input v-model="form.legal_section" class="form-control" :aria-label="__('Legal section')" :placeholder="__('Legal section')" />
+				<select v-model="form.legal_document" class="form-control" :aria-label="__('Legal document')" @change="onLegalDocumentChange">
+					<option value="">{{ __("Legal document") }}</option>
+					<option v-for="d in legalDocumentOptions" :key="d.name" :value="d.name">{{ d.doc_number }} — {{ d.title }}</option>
+				</select>
+				<select v-model="form.legal_section" class="form-control" :aria-label="__('Legal section')" :disabled="!form.legal_document">
+					<option value="">{{ __("Legal section") }}</option>
+					<option v-for="x in legalSectionOptions" :key="x.name" :value="x.name">{{ x.section_no }}{{ x.heading ? " — " + x.heading : "" }}</option>
+				</select>
 				<input v-model="form.quote" class="form-control" :aria-label="__('Quote')" :placeholder="__('Quote')" />
 				<input v-model="form.deviation_reason" class="form-control" :aria-label="__('Reason')" :placeholder="__('Reason')" />
 				<button type="submit" class="btn btn-primary btn-sm" :disabled="busy">{{ __("Save") }}</button>
@@ -276,6 +282,8 @@ export default {
 			doc: null,
 			drafts: {},
 			citations: [],
+			legalDocuments: [],
+			legalSections: [],
 			selection: { type: "", key: "" },
 			error: "",
 			existing: "",
@@ -299,6 +307,15 @@ export default {
 		};
 	},
 	computed: {
+		// giữ giá trị đang chọn trong danh sách kể cả khi người dùng không có quyền đọc thư viện văn bản
+		legalDocumentOptions() {
+			const cur = this.form.legal_document;
+			return cur && !this.legalDocuments.some((d) => d.name === cur) ? [{ name: cur, doc_number: cur, title: "" }, ...this.legalDocuments] : this.legalDocuments;
+		},
+		legalSectionOptions() {
+			const cur = this.form.legal_section;
+			return cur && !this.legalSections.some((x) => x.name === cur) ? [{ name: cur, section_no: cur, heading: "" }, ...this.legalSections] : this.legalSections;
+		},
 		canCreate() {
 			// G1: NC Auditor không thấy nút tạo/sao chép (máy chủ vẫn từ chối)
 			return frappe.model.can_create("NC Clinical Procedure");
@@ -343,6 +360,17 @@ export default {
 		if (this.selected) this.load(this.selected);
 	},
 	methods: {
+		loadLegalDocuments() {
+			return this.call("list_legal_documents").then((r) => (this.legalDocuments = r || [])).catch(() => (this.legalDocuments = []));
+		},
+		loadLegalSections(document) {
+			if (!document) return (this.legalSections = []);
+			return this.call("list_legal_sections", { legal_document: document }).then((r) => (this.legalSections = r || [])).catch(() => (this.legalSections = []));
+		},
+		onLegalDocumentChange() {
+			this.form.legal_section = "";
+			return this.loadLegalSections(this.form.legal_document);
+		},
 		call(method, args) {
 			this.error = "";
 			this.existing = "";
@@ -593,6 +621,10 @@ export default {
 					quote: row ? row.quote : "",
 					deviation_reason: row ? row.deviation_reason : "",
 				};
+			if (kind === "citation") {
+				this.loadLegalDocuments();
+				this.loadLegalSections(this.form.legal_document);
+			}
 			this.suggestions = [];
 		},
 		closeForm() {

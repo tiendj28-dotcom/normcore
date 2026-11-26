@@ -12,3 +12,4 @@ normcore.patches.add_default_account_mapping
 normcore.patches.add_default_prompt_templates
 normcore.patches.set_norm_line_cost_level
 normcore.patches.nc_settings_operating_defaults
+normcore.patches.link_procedure_citation_legal
