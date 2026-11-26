@@ -661,6 +661,7 @@ Lần nhập "Nháp" có `error_count` > 0 không chốt được [FR-ACCT-002].
 | based_on_run | Kịch bản của lần tính | Link NC Costing Run | | Có giá trị khi là kịch bản điều chỉnh |
 | scenario_changes | Thay đổi của kịch bản | Table NC Scenario Change | | |
 | progress | Tiến độ (%) | Percent | | |
+| run_warnings | Cảnh báo của lần tính | Small Text | | Chỉ đọc; mỗi cảnh báo một dòng; máy chủ ghi lại mỗi lần tính [FR-CMP-006]. **[AMD-036-01]** |
 | allocation_warnings | Cảnh báo phân bổ | Small Text | | Chỉ đọc; do lần tính ghi [AMD-017-01] |
 | snapshot_file | Ảnh chụp đầu vào | Attach | | [ADR-004]. **[1.1]** Thêm: hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm, hồ sơ tuân thủ, thiết bị và linh kiện, sản lượng cận lâm sàng, phút khai thác, xuất kho [FR-COST-032] |
 | snapshot_hash | Mã băm ảnh chụp | Data | | |
