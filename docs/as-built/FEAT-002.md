@@ -1,5 +1,5 @@
 # As-Built: FEAT-002 Trang chủ, việc chờ xử lý, thông báo, tham số vận hành
-- Phiên bản app 0.0.1; Dev: NORM-52; chờ nghiệm thu độc lập (QA)
+- Phiên bản app 0.0.1; Dev: NORM-52; người nghiệm thu: QA (Multica), accepted ở commit d0a4f8129cc2d48d4d19a0bc7f65993dcce796f8
 
 ## 1. Luồng nghiệp vụ đã xây
 - Thông báo (FR-NOTI-001): `core/notify.py::notify` tạo Notification Log (Alert) kèm liên kết bản ghi; bỏ Administrator, Guest, user tắt; gộp trùng và không tạo lại cùng (người nhận, DocType, bản ghi, tiêu đề). `_notify` của FEAT-007 là lớp mỏng gọi `notify`, test FEAT-007 giữ nguyên và xanh.
@@ -32,7 +32,7 @@ TC-NOTI-01 (hai test), TC-ADM-03 **một phần** (phần tham số; phần trun
 
 ## 7. Giới hạn đã biết và nợ kỹ thuật
 - `get_home` dùng 9 truy vấn dữ liệu (thiết kế ≤ 6), không phụ thuộc số dịch vụ (ASM-002-16). Chưa đo 300 dịch vụ.
-- Giao diện chưa kiểm bằng mắt 1366 × 768 (preview site chưa dựng); chỉ kiểm tĩnh (`node --check`, quy ước màu/chuỗi) và Workspace/fixture bằng test bench.
+- Giao diện chưa kiểm bằng trình duyệt (QA: nhánh chưa lên staging, không có tài khoản test theo vai trò); chỉ kiểm tĩnh và bằng test bench. Chưa đo 1366 × 768.
 - `api/compliance.py`, `api/library.py`, `ai/gateway.py` chưa dùng `notify`.
 - Mã cũ đọc thẳng NC Settings (`send_approval_reminders`, `api/compliance.py`) chưa chuyển sang `settings.get`.
 

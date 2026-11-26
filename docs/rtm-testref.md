@@ -186,7 +186,7 @@
 
 ## FEAT-002
 
-# Test ref — FEAT-002 (Dev ghi; chờ QA kiểm định độc lập)
+# Test ref — FEAT-002 (Dev ghi; QA kiểm định độc lập: accepted)
 
 | FR | Test thật |
 | :-- | :-- |
