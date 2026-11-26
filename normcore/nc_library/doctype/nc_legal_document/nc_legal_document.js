@@ -281,6 +281,169 @@ function set_headline(frm) {
 	}
 }
 
+// SCR-DSK-003 (FEAT-021): khai báo thay thế và khối "Bị thay thế bởi" (FR-LIB-007, FR-LIB-008).
+function user_date(d) {
+	return frappe.datetime.str_to_user(d);
+}
+
+function render_superseded_by(frm) {
+	const $w = frm.fields_dict.superseded_by_html.$wrapper;
+	$w.empty();
+	if (frm.is_new()) return;
+	frappe.call({
+		method: "normcore.api.library.get_supersessions",
+		args: { legal_document: frm.doc.name },
+		callback(r) {
+			const rows = (r.message || {}).superseded_by || [];
+			if (!rows.length) return;
+			const esc = frappe.utils.escape_html;
+			const items = rows
+				.map((x) => {
+					const scope = x.scope === "Một phần" ? `${__("Sections")}: ${esc(x.sections)}` : __("Whole document");
+					return (
+						`<li><a href="/app/nc-legal-document/${encodeURIComponent(x.document)}">${esc(x.doc_number || x.document)}</a>` +
+						` — ${esc(x.title || "")}, ${scope}, ${__("from")} ${user_date(x.from_date)}</li>`
+					);
+				})
+				.join("");
+			$w.html(`<p class="text-muted">${__("Superseded by")}</p><ul>${items}</ul>`);
+		},
+	});
+}
+
+function supersession_dialog(frm) {
+	const state = { indexed: true };
+	const note = (d) => {
+		const v = d.get_values(true) || {};
+		const $n = d.fields_dict.note.$wrapper;
+		if (!v.superseded_document || !v.from_date) {
+			$n.html("");
+			return;
+		}
+		const exp = frappe.datetime.add_days(v.from_date, -1);
+		$n.html(
+			`<p class="text-muted small">${__("{0} will expire from {1} (expiry date {2})", [
+				frappe.utils.escape_html(v.superseded_document),
+				user_date(v.from_date),
+				user_date(exp),
+			])}</p>`
+		);
+	};
+	const load_sections = (d) => {
+		const b = d.get_value("superseded_document");
+		const f = d.fields_dict.sections;
+		if (!b) {
+			f.df.options = [];
+			f.refresh();
+			return;
+		}
+		frappe.call({
+			method: "normcore.api.library.get_sections",
+			args: { legal_document: b, start: 0, page_length: 500 },
+			callback(r) {
+				const rows = (r.message || {}).rows || [];
+				state.indexed = rows.length > 0;
+				f.df.options = rows.map((x) => ({ label: `${x.section_no} — ${x.heading || ""}`, value: x.section_no }));
+				f.refresh();
+				d.fields_dict.no_index.$wrapper.html(
+					state.indexed ? "" : `<p class="text-muted">${__("Document has no sections indexed, sections cannot be chosen")}</p>`
+				);
+				toggle(d);
+			},
+		});
+	};
+	const toggle = (d) => {
+		const part = d.get_value("scope") === "Một phần";
+		d.set_df_property("sections", "hidden", part && state.indexed ? 0 : 1);
+		d.fields_dict.no_index.$wrapper.toggle(part && !state.indexed);
+	};
+	const d = new frappe.ui.Dialog({
+		title: __("Declare supersession"),
+		fields: [
+			{
+				fieldname: "superseded_document",
+				label: __("Superseded document"),
+				fieldtype: "Link",
+				options: "NC Legal Document",
+				reqd: 1,
+				get_query: () => ({ filters: { name: ["!=", frm.doc.name] } }),
+				onchange() {
+					load_sections(d);
+					note(d);
+				},
+			},
+			{
+				fieldname: "scope",
+				label: __("Scope"),
+				fieldtype: "Select",
+				options: ["Toàn bộ", "Một phần"],
+				default: "Toàn bộ",
+				reqd: 1,
+				onchange() {
+					toggle(d);
+				},
+			},
+			{ fieldname: "no_index", fieldtype: "HTML" },
+			{ fieldname: "sections", label: __("Superseded sections"), fieldtype: "MultiCheck", options: [], hidden: 1, columns: 2 },
+			{
+				fieldname: "from_date",
+				label: __("From date"),
+				fieldtype: "Date",
+				reqd: 1,
+				onchange() {
+					note(d);
+				},
+			},
+			{ fieldname: "note", fieldtype: "HTML" },
+		],
+		primary_action_label: __("Declare"),
+		primary_action(v) {
+			const part = v.scope === "Một phần";
+			const sections = part ? d.fields_dict.sections.get_checked_options() : [];
+			if (part && !sections.length) {
+				frappe.msgprint(__("Choose at least one section"));
+				return;
+			}
+			frappe.confirm(
+				__(
+					"After declaring, {0} (or the chosen sections) will expire from {1}; issued procedures that cite it will be flagged for review.",
+					[frappe.utils.escape_html(v.superseded_document), user_date(v.from_date)]
+				),
+				() => {
+					d.disable_primary_action();
+					frappe.call({
+						method: "normcore.api.library.declare_supersession",
+						args: {
+							legal_document: frm.doc.name,
+							superseded_document: v.superseded_document,
+							scope: v.scope,
+							from_date: v.from_date,
+							sections: sections,
+						},
+						freeze: true,
+						callback() {
+							d.hide();
+							frappe.show_alert({ message: __("Supersession declared"), indicator: "green" });
+							frm.reload_doc();
+						},
+						error() {
+							d.enable_primary_action();
+						},
+					});
+				}
+			);
+		},
+	});
+	d.show();
+}
+
+function setup_supersession(frm) {
+	render_superseded_by(frm);
+	if (!frm.is_new() && frm.perm[0] && frm.perm[0].write) {
+		frm.add_custom_button(__("Declare supersession"), () => supersession_dialog(frm));
+	}
+}
+
 frappe.ui.form.on("NC Legal Document", {
 	refresh(frm) {
 		frm.set_intro("");
@@ -290,6 +453,7 @@ frappe.ui.form.on("NC Legal Document", {
 		set_headline(frm);
 		render_sections(frm, 0, 0);
 		render_mappings(frm, 0);
+		setup_supersession(frm);
 		if (!frm.is_new() && frm.perm[0] && frm.perm[0].write && frm.doc.index_status !== "Đang lập") {
 			frm.add_custom_button(
 				__("Re-index"),
