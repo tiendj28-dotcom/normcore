@@ -4,6 +4,12 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "operating_section",
+  "min_time_study_cases",
+  "price_valid_months",
+  "benchmark_window_months",
+  "min_benchmark_facilities",
+  "accounting_regime",
   "approval_section",
   "approval_reminder_days",
   "council_secretary",
@@ -11,6 +17,47 @@
   "compliance_reminder_days"
  ],
  "fields": [
+  {
+   "fieldname": "operating_section",
+   "label": "Tham số vận hành",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "min_time_study_cases",
+   "label": "Số ca bấm giờ tối thiểu",
+   "fieldtype": "Int",
+   "default": "5",
+   "description": "Áp dụng cho lần mở kết quả bấm giờ kế tiếp (FR-ADM-003, FR-TS-*)."
+  },
+  {
+   "fieldname": "price_valid_months",
+   "label": "Hạn tham chiếu đơn giá (tháng)",
+   "fieldtype": "Int",
+   "default": "24",
+   "description": "Số tháng đơn giá còn giá trị tham chiếu (FR-ADM-003)."
+  },
+  {
+   "fieldname": "benchmark_window_months",
+   "label": "Cửa sổ giá tham chiếu (tháng)",
+   "fieldtype": "Int",
+   "default": "24",
+   "description": "Số tháng gần nhất lấy giá tham chiếu (FR-ADM-003)."
+  },
+  {
+   "fieldname": "min_benchmark_facilities",
+   "label": "Số đơn vị tham chiếu tối thiểu",
+   "fieldtype": "Int",
+   "default": "3",
+   "description": "Số đơn vị tối thiểu để dùng giá tham chiếu (FR-ADM-003)."
+  },
+  {
+   "fieldname": "accounting_regime",
+   "label": "Chế độ kế toán",
+   "fieldtype": "Select",
+   "options": "Hành chính sự nghiệp\nDoanh nghiệp",
+   "default": "Hành chính sự nghiệp",
+   "description": "Chế độ kế toán áp dụng cho số liệu kế toán (FR-ADM-003)."
+  },
   {
    "fieldname": "approval_section",
    "label": "Phê duyệt quy trình",
