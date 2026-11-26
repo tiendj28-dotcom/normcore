@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["bench site sạch 1280 test OK", "pytest 666 passed, coverage 98.94%", "check_conventions, build_rtm, golden đạt", "diff test chỉ thêm, phạm vi 3 tệp, CI xanh", "Phần trình duyệt chờ kiểm trên staging sau merge (Lead đã quyết)"], "commit": "21c64ec2ec262447729966a1ded8b32803f60c4a"}
