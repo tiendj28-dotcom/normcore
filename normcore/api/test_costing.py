@@ -177,3 +177,101 @@ class TestServiceCostPermission(FrappeTestCase):
 		self.assertFalse(frappe.has_permission("NC Service Cost", "read", self.name))
 		with self.assertRaises(frappe.PermissionError):
 			api.get_explanation(self.name)
+
+
+class TestCostingClsApi(FrappeTestCase):
+	"""FEAT-036: get_run_results, get_explanation cho dịch vụ cận lâm sàng; quyền NC Test System Cost theo cha."""
+
+	def setUp(self):
+		from normcore.tests import cls_fixtures as fx
+
+		frappe.set_user("Administrator")
+		make_user(FIN, "NC Finance")
+		make_user(AUD, "NC Auditor")
+		make_user(CLIN, "NC Clinician")
+		self.world = fx.make_cls_golden()
+		self.run = fx.make_run(self.world)
+		frappe.set_user(FIN)
+		api.start_costing(self.run.name, 1)
+		self.cost = frappe.get_value(
+			"NC Service Cost", {"costing_run": self.run.name, "technical_service": "GLU"}, "name"
+		)
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_get_run_results_them_truong_can_lam_sang(self):
+		r = api.get_run_results(self.run.name)
+		self.assertEqual(r["run"]["volume_scenario"], "Thực tế 12 tháng")
+		self.assertEqual(r["run"]["compliance_allocation_mode"], "Theo giá trị tài sản")
+		self.assertEqual(r["run"]["run_warnings"], [])
+		glu = next(x for x in r["results"] if x["service"] == "GLU")
+		self.assertTrue(glu["is_paraclinical"])
+		self.assertEqual(glu["eqa_cost"], 75.0)
+		self.assertEqual([t["test_system"] for t in glu["test_systems"]], ["GLU-A", "GLU-B"])
+		self.assertEqual(glu["test_systems"][0]["k_factor"], 1.108247)
+		other = next(x for x in r["results"] if x["service"] == "DV-TEST-A")
+		self.assertFalse(other["is_paraclinical"])
+		self.assertEqual(other["test_systems"], [])
+
+	def test_TC_CLS_38_get_explanation_du_mau_so(self):
+		e = api.get_explanation(self.cost)
+		p = e["paraclinical"]
+		self.assertEqual([s["test_system"] for s in p["systems"]], ["GLU-A", "GLU-B"])
+		a, b = p["systems"]
+		self.assertEqual(
+			(a["patient_results"], a["q_iqc"], a["q_calibration"], a["q_rerun"], a["q_eqa"]),
+			(12000, 600, 48, 240, 12),
+		)
+		self.assertEqual(
+			(a["total_tests"], a["wastage_rate"], a["k_factor"], a["k_estimated"]),
+			(12900, 3, 1.108247, False),
+		)
+		self.assertEqual(
+			(b["k_factor"], b["k_estimated"], b["share_source"]), (1.221649, True, "Từ số kết quả trả")
+		)
+		self.assertEqual((p["weighted_direct"], p["eqa_cost"], p["direct_total"]), (42203.67, 75.0, 42278.67))
+		self.assertEqual(e["header"]["direct_total"], 42278.67)
+		n = 0
+		for s in p["systems"]:
+			for g in s["groups"]:
+				for st in g["steps"]:
+					for ln in st["lines"]:
+						n += 1
+						for f in (
+							"test_system",
+							"cost_level",
+							"divisor_label",
+							"divisor_value",
+							"divisor_source",
+							"line_origin",
+						):
+							self.assertTrue(ln[f] not in (None, ""), (ln["norm_line_id"], f))
+						self.assertEqual(ln["k_factor"] is not None, ln["norm_line_id"] in ("L02", "L03"))
+		self.assertEqual(n, 20)  # GLU-A 11 dòng, GLU-B 9 (không linh kiện, không điện)
+		(eqa,) = p["service_lines"]
+		self.assertEqual((eqa["norm_line_id"], eqa["amount"], eqa["divisor_value"]), ("EQA", 75.0, 16000))
+		self.assertEqual(eqa["divisor_source"], "Thực tế")
+
+	def test_quyen_test_system_cost_clinician_va_auditor(self):
+		frappe.set_user(AUD)
+		doc = frappe.get_doc("NC Service Cost", self.cost)
+		self.assertEqual(len(doc.test_system_costs), 2)
+		self.assertEqual(api.get_explanation(self.cost)["paraclinical"]["systems"][0]["test_system"], "GLU-A")
+		with self.assertRaises(frappe.PermissionError):
+			frappe.get_doc(
+				{
+					"doctype": "NC Service Cost",
+					"costing_run": self.run.name,
+					"technical_service": "GLU",
+					"department": "XN",
+				}
+			).insert()
+		frappe.set_user(CLIN)
+		with self.assertRaises(frappe.PermissionError):
+			api.get_explanation(self.cost)
+		with self.assertRaises(frappe.PermissionError):
+			frappe.get_doc("NC Service Cost", self.cost).check_permission("read")
+		with self.assertRaises(frappe.PermissionError):
+			api.start_costing(self.run.name)
