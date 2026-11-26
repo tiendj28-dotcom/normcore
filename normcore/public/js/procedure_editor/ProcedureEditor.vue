@@ -41,6 +41,16 @@
 				<span class="indicator-pill" :class="stateColor(doc.workflow_state)">{{ __(doc.workflow_state) }}</span>
 				<span v-if="doc.needs_review" class="indicator-pill orange">{{ __("Needs review") }}</span>
 			</div>
+			<div v-if="pendingAi" class="nc-pe__notice nc-pe__ai-notice" role="note">
+				{{ __("{0} AI suggestion(s) not yet handled. Accept or remove them before submitting.", [pendingAi]) }}
+				<button v-if="doc.can_edit" type="button" class="btn btn-default btn-xs" :disabled="busy" @click="acceptAll">{{ __("Accept all") }}</button>
+				<a href="#" @click.prevent="nextSuggestion">{{ __("Next suggestion") }}</a>
+			</div>
+			<div v-if="doc.ai_log && doc.workflow_state === draft" class="text-muted nc-pe__ai-note">
+				{{ __("Drafted by AI. Section text was written by AI; check it before submitting.") }}
+				<a v-if="doc.doctor_request" href="#" :aria-expanded="showRequest ? 'true' : 'false'" @click.prevent="showRequest = !showRequest">{{ __("Request") }}</a>
+				<blockquote v-if="showRequest" class="nc-pe__quote">{{ doc.doctor_request }}</blockquote>
+			</div>
 			<div v-if="review" class="nc-pe__reviewbar" role="toolbar" :aria-label="__('Review actions')">
 				<button v-for="a in primaryActions" :key="a" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="openAction(a)">{{ __(a) }}</button>
 				<button v-if="review.actions.includes(reject)" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openAction(reject)">{{ __(reject) }}</button>
@@ -75,6 +85,7 @@
 					<section v-for="s in doc.sections" :key="s.key" class="nc-pe__section">
 						<h4 class="nc-pe__h" :class="{ 'nc-pe__h--sel': isSelected('section', s.label) }">
 							<button type="button" class="nc-pe__link" @click="select('section', s.label)">{{ __(s.label) }}</button>
+							<span v-for="rel in relationsOf('section', s.label)" :key="rel" class="nc-pe__rel" :class="relClass(rel)">{{ __(rel) }}</span>
 							<span v-if="badge('section', s.label)" class="nc-pe__badge" :aria-label="badge('section', s.label) + ' ' + __('open comments')">{{ __("Comments") }}: {{ badge('section', s.label) }}</span>
 						</h4>
 
@@ -98,18 +109,23 @@
 								v-for="(st, i) in doc.steps"
 								:key="st.step_id"
 								class="nc-pe__card"
-								:class="{ 'nc-pe__card--sel': isSelected('step', st.step_id) }"
+								:class="{ 'nc-pe__card--sel': isSelected('step', st.step_id), 'nc-pe__card--ai': st.ai_suggested }"
+								:data-ai="st.ai_suggested ? '1' : null"
 							>
 								<header class="nc-pe__cardhead">
 									<button type="button" class="nc-pe__link" @click="select('step', st.step_id)">
 										<strong>{{ st.step_id }}</strong> · {{ __(st.phase) }} · {{ st.step_title }}
 									</button>
+									<span v-if="st.ai_suggested" class="indicator-pill purple">{{ __("Suggested") }}</span>
+									<span v-for="rel in relationsOf('step', st.step_id)" :key="rel" class="nc-pe__rel" :class="relClass(rel)">{{ __(rel) }}</span>
 									<span v-if="badge('step', st.step_id)" class="nc-pe__badge" :aria-label="badge('step', st.step_id) + ' ' + __('open comments')">{{ __("Comments") }}: {{ badge('step', st.step_id) }}</span>
 									<span v-if="doc.can_edit" class="nc-pe__actions">
 										<button type="button" class="btn btn-default btn-xs" :disabled="i === 0 || busy" :aria-label="__('Move step up') + ' ' + st.step_id" :data-move="st.step_id + ':up'" @click="move(i, -1, $event)">{{ __("Up") }}</button>
 										<button type="button" class="btn btn-default btn-xs" :disabled="i === doc.steps.length - 1 || busy" :aria-label="__('Move step down') + ' ' + st.step_id" :data-move="st.step_id + ':down'" @click="move(i, 1, $event)">{{ __("Down") }}</button>
+										<button v-if="st.ai_suggested" type="button" class="btn btn-default btn-xs" :disabled="busy" :aria-label="__('Accept') + ' ' + st.step_id" @click="acceptStep(st)">{{ __("Accept") }}</button>
+										<button v-if="st.ai_suggested" type="button" class="btn btn-default btn-xs" :disabled="busy" :aria-label="__('Remove') + ' ' + st.step_id" @click="rejectStep(st)">{{ __("Remove") }}</button>
 										<button type="button" class="btn btn-default btn-xs" @click="openForm('step', st)">{{ __("Edit") }}</button>
-										<button type="button" class="btn btn-default btn-xs" :disabled="busy" @click="deleteStep(st)">{{ __("Delete") }}</button>
+										<button v-if="!st.ai_suggested" type="button" class="btn btn-default btn-xs" :disabled="busy" @click="deleteStep(st)">{{ __("Delete") }}</button>
 									</span>
 								</header>
 								<p class="nc-pe__desc">{{ st.description }}</p>
@@ -127,16 +143,17 @@
 										</tr>
 									</thead>
 									<tbody>
-										<tr v-for="r in resourcesOf(st.step_id)" :key="r.resource_row_id">
-											<td>{{ r.resource_row_id }}</td>
+										<tr v-for="r in resourcesOf(st.step_id)" :key="r.resource_row_id" :class="{ 'nc-pe__row--ai': r.ai_suggested }">
+											<td>{{ r.resource_row_id }}<span v-if="r.ai_suggested" class="indicator-pill purple">{{ __("Suggested") }}</span></td>
 											<td>{{ __(r.resource_type) }}</td>
 											<td>{{ r.resource_text }}<span v-if="r.linked_name" class="text-muted"> ({{ r.linked_name }})</span></td>
 											<td>{{ r.quantity }}</td>
 											<td>{{ r.uom }}</td>
 											<td>{{ r.headcount || "" }}</td>
 											<td v-if="doc.can_edit">
+												<button v-if="r.ai_suggested" type="button" class="btn btn-default btn-xs" :disabled="busy" :aria-label="__('Accept') + ' ' + r.resource_row_id" @click="acceptResource(r)">{{ __("Accept") }}</button>
 												<button type="button" class="btn btn-default btn-xs" @click="openForm('resource', r)">{{ __("Edit") }}</button>
-												<button type="button" class="btn btn-default btn-xs" :disabled="busy" @click="deleteResource(r)">{{ __("Delete") }}</button>
+												<button type="button" class="btn btn-default btn-xs" :disabled="busy" :aria-label="(r.ai_suggested ? __('Remove') : __('Delete')) + ' ' + r.resource_row_id" @click="r.ai_suggested ? rejectResource(r) : deleteResource(r)">{{ r.ai_suggested ? __("Remove") : __("Delete") }}</button>
 											</td>
 										</tr>
 									</tbody>
@@ -156,7 +173,11 @@
 					<div v-if="!citations.length" class="text-muted">{{ __("No citations for this selection.") }}</div>
 					<div v-for="c in citations" :key="c.name" class="nc-pe__cite">
 						<span class="nc-pe__rel" :class="relClass(c.relation)">{{ __(c.relation) }}</span>
-						<div v-if="c.legal_document || c.legal_section" class="nc-pe__legal">{{ [c.legal_document, c.legal_section].filter(Boolean).join(" — ") }}</div>
+						<div v-if="c.section_label" class="nc-pe__legal">
+							{{ c.section_label }}
+							<a href="#" @click.prevent="openSource(c.legal_section)">{{ __("Open source") }}</a>
+						</div>
+						<div v-else-if="c.legal_document || c.legal_section" class="nc-pe__legal">{{ [c.legal_document, c.legal_section].filter(Boolean).join(" — ") }}</div>
 						<blockquote v-if="c.quote" class="nc-pe__quote">{{ c.quote }}</blockquote>
 						<div v-if="c.deviation_reason" class="text-muted">{{ __("Reason") }}: {{ c.deviation_reason }}</div>
 						<span v-if="doc.can_edit">
@@ -288,6 +309,7 @@ export default {
 			error: "",
 			existing: "",
 			busy: false,
+			showRequest: false,
 			loading: false,
 			published: "Đã ban hành",
 			laborUom: "phút",
@@ -325,6 +347,10 @@ export default {
 		},
 		canRevise() {
 			return !!this.doc && this.doc.workflow_state === this.published && frappe.model.can_create("NC Clinical Procedure") && frappe.model.can_write("NC Clinical Procedure");
+		},
+		pendingAi() {
+			if (!this.doc) return 0;
+			return this.doc.steps.filter((s) => s.ai_suggested).length + this.doc.resources.filter((r) => r.ai_suggested).length;
 		},
 		closed() {
 			return !!this.doc && CLOSED.includes(this.doc.workflow_state);
@@ -399,6 +425,48 @@ export default {
 		},
 		resourcesOf(stepId) {
 			return this.doc.resources.filter((r) => r.step_id === stepId);
+		},
+		relationsOf(type, key) {
+			// "Theo hướng dẫn" không hiện ở đầu thẻ (đỡ nhiễu); chỉ Khác biệt, Chưa có căn cứ (FEAT-024)
+			const rels = (this.doc.relations || {})[type + ":" + key] || [];
+			return rels.filter((r) => r !== "Theo hướng dẫn");
+		},
+		acceptSuggestions(args) {
+			return this.run(() => this.call("accept_suggestions", { procedure: this.doc.name, ...args }).then(() => this.reload()));
+		},
+		acceptStep(st) {
+			return this.acceptSuggestions({ step_ids: [st.step_id] });
+		},
+		acceptResource(r) {
+			return this.acceptSuggestions({ resource_row_ids: [r.resource_row_id] });
+		},
+		acceptAll() {
+			frappe.confirm(__("Accept all {0} AI suggestions?", [this.pendingAi]), () => this.acceptSuggestions({ all: 1 }));
+		},
+		rejectStep(st) {
+			frappe.confirm(__("Remove suggested step {0} with its resources and citations?", [st.step_id]), () =>
+				this.run(() => this.call("reject_suggestion", { procedure: this.doc.name, step_id: st.step_id }).then(() => this.reload()))
+			);
+		},
+		rejectResource(r) {
+			frappe.confirm(__("Remove suggested resource {0}?", [r.resource_row_id]), () =>
+				this.run(() => this.call("delete_resource", { procedure: this.doc.name, resource_row_id: r.resource_row_id }).then(() => this.reload()))
+			);
+		},
+		nextSuggestion() {
+			const el = this.$el.querySelector(".nc-pe__card--ai");
+			if (el) {
+				el.scrollIntoView({ block: "nearest" });
+				const btn = el.querySelector("button");
+				if (btn) btn.focus();
+			}
+		},
+		openSource(section) {
+			return Promise.resolve(frappe.call({ method: "normcore.api.library.get_source_view", args: { section } })).then((r) => {
+				const v = r.message || {};
+				const html = "<pre style=\"white-space:pre-wrap\">" + frappe.utils.escape_html(v.plain_text || v.text || "") + "</pre>";
+				new frappe.ui.Dialog({ title: __("Open source"), fields: [{ fieldtype: "HTML", fieldname: "src", options: html }] }).show();
+			});
 		},
 		relClass(rel) {
 			return { "Theo hướng dẫn": "nc-pe__rel--ok", "Khác biệt": "nc-pe__rel--warn", "Chưa có căn cứ": "nc-pe__rel--none" }[rel];
@@ -845,6 +913,10 @@ export default {
 }
 .nc-pe__rel {
 	font-weight: 600;
+}
+.nc-pe__card--ai,
+.nc-pe__row--ai {
+	background: var(--bg-purple, var(--subtle-fg));
 }
 .nc-pe__rel--ok {
 	color: var(--green-800);
