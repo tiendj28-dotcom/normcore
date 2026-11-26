@@ -38,10 +38,10 @@ class TestCompare(unittest.TestCase):
 
 	def test_chenh_la_so_sanh_tru_goc_theo_cau_phan(self):
 		base = row(full=100, direct_equipment=20, alloc_labor=20)
-		other = row(full=75.5, direct_equipment=10.25, alloc_labor=14.25)
+		other = row(full=84.5, direct_equipment=10.25, alloc_labor=14.25)
 		d = compare.compare([base], [other])[0]
-		self.assertEqual(d.full_cost.diff, D("-24.50"))
-		self.assertEqual(d.full_cost.pct, D("-24.50"))
+		self.assertEqual(d.full_cost.diff, D("-15.50"))
+		self.assertEqual(d.full_cost.pct, D("-15.50"))
 		c = comps(d)
 		self.assertEqual(c["direct_equipment"].diff, D("-9.75"))
 		self.assertEqual(c["direct_equipment"].pct, D("-48.75"))
