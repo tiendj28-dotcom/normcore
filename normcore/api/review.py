@@ -1,4 +1,4 @@
-"""Rà soát quy trình khi văn bản hoặc mục hết hiệu lực (FEAT-021: FR-LIB-009, UC-002 bước 5–7).
+"""Rà soát quy trình khi văn bản hoặc mục hết hiệu lực (FEAT-021: FR-LIB-009, UC-002 bước 5-7).
 
 Trích dẫn của quy trình là Data (ASM-021-01): khớp theo tên bản ghi hoặc số hiệu, mã mục chuẩn hóa.
 """
@@ -61,8 +61,15 @@ def flag_affected(expired_docs, expired_sections, on=None):
 	index, numbers, section_nos = _build_index(expired_docs, expired_sections)
 	grouped = {}
 	for c in _published_citations():
-		grouped.setdefault(c.proc_name, {"name": c.proc_name, "workflow_state": c.workflow_state,
-			"department": c.department, "citations": []})["citations"].append(c)
+		grouped.setdefault(
+			c.proc_name,
+			{
+				"name": c.proc_name,
+				"workflow_state": c.workflow_state,
+				"department": c.department,
+				"citations": [],
+			},
+		)["citations"].append(c)
 	count = 0
 	for name, refs in review.to_flag(list(grouped.values()), index, expired_docs, expired_sections):
 		p = grouped[name]
@@ -146,7 +153,7 @@ def get_review_queue(department=None, start=0, page_length=50):
 	)
 	expired_docs = set(frappe.get_all("NC Legal Document", {"validity_status": validity.HET}, pluck="name"))
 	expired_secs = set(frappe.get_all("NC Legal Section", {"validity_status": validity.HET}, pluck="name"))
-	index, numbers, section_nos = _build_index(expired_docs, expired_secs)
+	index, _numbers, _section_nos = _build_index(expired_docs, expired_secs)
 	cits = {}
 	if rows:
 		for c in frappe.db.sql(
@@ -164,7 +171,10 @@ def get_review_queue(department=None, start=0, page_length=50):
 			doc, sec = c["legal_document_name"], c["legal_section_name"]
 			sec_info = (
 				frappe.db.get_value(
-					"NC Legal Section", sec, ["section_no", "heading", "validity_status", "expiry_date"], as_dict=True
+					"NC Legal Section",
+					sec,
+					["section_no", "heading", "validity_status", "expiry_date"],
+					as_dict=True,
 				)
 				if sec
 				else None
@@ -203,7 +213,9 @@ def get_review_queue(department=None, start=0, page_length=50):
 		out.append(
 			{
 				**r,
-				"service_name": frappe.db.get_value("NC Technical Service", r.technical_service, "service_name"),
+				"service_name": frappe.db.get_value(
+					"NC Technical Service", r.technical_service, "service_name"
+				),
 				"pending_revision": pending,
 				"can_act": 1 if _can_act(r.department) else 0,
 				"citations": items,
@@ -215,7 +227,9 @@ def get_review_queue(department=None, start=0, page_length=50):
 @frappe.whitelist()
 def dismiss_review(procedure, reason):
 	"""UC-002 bước 7: trưởng khoa kết luận "Không cần sửa" kèm lý do; gỡ cờ."""
-	state, needs, dept = frappe.db.get_value(DT, procedure, ["workflow_state", "needs_review", "department"]) or (
+	state, needs, dept = frappe.db.get_value(
+		DT, procedure, ["workflow_state", "needs_review", "department"]
+	) or (
 		None,
 		0,
 		None,

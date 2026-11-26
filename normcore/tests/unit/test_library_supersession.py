@@ -49,8 +49,15 @@ def _targets():
 
 
 def test_row_errors_hop_le():
-	rows = [{"idx": 1, "superseded_document": "B", "scope": s.PART, "superseded_sections": "2",
-		"from_date": date(2026, 7, 1)}]
+	rows = [
+		{
+			"idx": 1,
+			"superseded_document": "B",
+			"scope": s.PART,
+			"superseded_sections": "2",
+			"from_date": date(2026, 7, 1),
+		}
+	]
 	assert s.row_errors(rows, "A", _targets()) == []
 	assert s.row_errors([{"idx": 1, "superseded_document": None}], "A", _targets()) == []
 
@@ -65,20 +72,40 @@ def test_row_errors_trung_va_ngay_va_muc():
 	rows = [
 		{**base, "idx": 1, "from_date": date(2026, 1, 2)},
 		{**base, "idx": 2, "from_date": date(2026, 7, 1)},
-		{"idx": 3, "superseded_document": "C", "scope": s.PART, "superseded_sections": "",
-			"from_date": "2026-07-01"},
-		{**base, "idx": 4, "superseded_document": "B", "scope": s.PART, "superseded_sections": "2, 9, 8",
-			"from_date": date(2026, 7, 1)},
+		{
+			"idx": 3,
+			"superseded_document": "C",
+			"scope": s.PART,
+			"superseded_sections": "",
+			"from_date": "2026-07-01",
+		},
+		{
+			**base,
+			"idx": 4,
+			"superseded_document": "B",
+			"scope": s.PART,
+			"superseded_sections": "2, 9, 8",
+			"from_date": date(2026, 7, 1),
+		},
 	]
 	targets = {**_targets(), "C": {}}
 	errs = s.row_errors(rows, "A", targets)
-	assert any("Dòng 1: Ngày bắt đầu thay thế phải sau ngày hiệu lực của 1/QĐ (02/01/2026)" == e for e in errs)
+	assert any(
+		"Dòng 1: Ngày bắt đầu thay thế phải sau ngày hiệu lực của 1/QĐ (02/01/2026)" == e for e in errs
+	)
 	assert "Dòng 2: Văn bản B đã được khai báo thay thế ở dòng 1" in errs
 	assert "Dòng 3: Chọn ít nhất một mục bị thay thế" in errs
 	assert "Dòng 4: Văn bản 1/QĐ không có mục: 8, 9" in errs
 	# B chưa có chỉ mục
-	rows = [{"idx": 1, "superseded_document": "C", "scope": s.PART, "superseded_sections": "1",
-		"from_date": date(2026, 7, 1)}]
+	rows = [
+		{
+			"idx": 1,
+			"superseded_document": "C",
+			"scope": s.PART,
+			"superseded_sections": "1",
+			"from_date": date(2026, 7, 1),
+		}
+	]
 	assert s.row_errors(rows, "A", {"C": {}}) == ["Dòng 1: Văn bản C không có mục: 1"]
 
 

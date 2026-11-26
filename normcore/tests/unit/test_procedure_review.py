@@ -60,7 +60,11 @@ def test_to_flag_chi_da_ban_hanh():
 	procs = [
 		{"name": "P1", "workflow_state": "Đã ban hành", "citations": c},
 		{"name": "P2", "workflow_state": "Nháp", "citations": c},
-		{"name": "P3", "workflow_state": "Đã ban hành", "citations": [{"legal_document": "LD-1", "legal_section": "3"}]},
+		{
+			"name": "P3",
+			"workflow_state": "Đã ban hành",
+			"citations": [{"legal_document": "LD-1", "legal_section": "3"}],
+		},
 		{"name": "P4", "workflow_state": "Đã ban hành"},
 	]
 	out = r.to_flag(procs, i, set(), {"LS-1"})
@@ -69,14 +73,26 @@ def test_to_flag_chi_da_ban_hanh():
 
 def test_notify_subject():
 	refs = [
-		{"doc_number": "123/QĐ", "section_no": "2", "legal_section_name": "LS-1", "legal_document_name": "LD-1"},
-		{"doc_number": "123/QĐ", "section_no": "2", "legal_section_name": "LS-1", "legal_document_name": "LD-1"},
+		{
+			"doc_number": "123/QĐ",
+			"section_no": "2",
+			"legal_section_name": "LS-1",
+			"legal_document_name": "LD-1",
+		},
+		{
+			"doc_number": "123/QĐ",
+			"section_no": "2",
+			"legal_section_name": "LS-1",
+			"legal_document_name": "LD-1",
+		},
 		{"legal_document_name": "LD-2", "legal_document": "9/TT", "legal_section_name": None},
 	]
 	s = r.notify_subject("QT-1", refs, date(2026, 7, 1))
 	assert s == "Cần rà soát quy trình QT-1: 123/QĐ mục 2; LD-2 hết hiệu lực từ 01/07/2026"
 	assert r.notify_subject("QT-1", [{"legal_document": "9/TT"}], "2026-07-01").endswith("2026-07-01")
-	assert r.notify_subject("QT-1", [{"legal_document": "9/TT"}], date(2026, 7, 1)).startswith("Cần rà soát quy trình QT-1: 9/TT")
+	assert r.notify_subject("QT-1", [{"legal_document": "9/TT"}], date(2026, 7, 1)).startswith(
+		"Cần rà soát quy trình QT-1: 9/TT"
+	)
 
 
 def test_dismiss_errors():

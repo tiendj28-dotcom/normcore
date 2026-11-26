@@ -5,8 +5,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, getdate, today
 
-from normcore.library.search import normalize_doc_number
 from normcore.library import supersession
+from normcore.library.search import normalize_doc_number
 from normcore.library.validity import compute_validity
 
 MAX_FILE_BYTES = 100 * 1024 * 1024  # NFR-SCAL-002, ASM-020-09
@@ -79,7 +79,7 @@ class NCLegalDocument(Document):
 		if errors:
 			frappe.throw("<br>".join(errors))
 		supersession.normalize_rows(rows)
-		for r, row in zip(self.supersessions, rows):
+		for r, row in zip(self.supersessions, rows, strict=True):
 			r.superseded_sections = row["superseded_sections"]
 
 	def check_file(self):

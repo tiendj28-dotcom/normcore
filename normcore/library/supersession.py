@@ -70,7 +70,7 @@ def covers(row, section_no):
 
 
 def row_errors(rows, own_name, targets):
-	"""Lỗi từng dòng (2.4.1–2.4.4). targets: tên B -> {effective_date, doc_number, section_nos}."""
+	"""Lỗi từng dòng (2.4.1-2.4.4). targets: tên B -> {effective_date, doc_number, section_nos}."""
 	errors, first_seen = [], {}
 	for row in rows:
 		idx, b = row.get("idx"), row.get("superseded_document")

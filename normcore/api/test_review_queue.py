@@ -4,10 +4,9 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, today
 
-from normcore.api import access, library
+from normcore.api import access, library, review
 from normcore.api import procedure as proc_api
 from normcore.api import procedure_workflow as wf
-from normcore.api import review
 from normcore.api.test_library_supersession import _notified, _pair, make_cited
 from normcore.tests.utils import make_base, make_user, to_state
 
@@ -25,7 +24,10 @@ class TestReviewQueue(FrappeTestCase):
 		self.director = make_user("dr_q21@example.com", "NC Director")
 		self.a, self.b, self.secs = _pair("TT/QA", "TT/QB")
 		self.p = make_cited(
-			"DV-Q1", "KHOA-Q1", self.head, [{"legal_document": self.b.name, "legal_section": self.secs["2"].name}]
+			"DV-Q1",
+			"KHOA-Q1",
+			self.head,
+			[{"legal_document": self.b.name, "legal_section": self.secs["2"].name}],
 		)
 		make_base("DV-Q2", "KHOA-Q2")
 		access.assign_department(self.head, "KHOA-Q1")
@@ -41,9 +43,15 @@ class TestReviewQueue(FrappeTestCase):
 		return library.refresh_validity(today=getdate(day))
 
 	def test_TC_LIB_07_gan_co_thong_bao_hang_doi(self):
-		other = make_cited("DV-Q3", "KHOA-Q3", self.head, [{"legal_document": self.b.name, "legal_section": "3"}])
+		other = make_cited(
+			"DV-Q3", "KHOA-Q3", self.head, [{"legal_document": self.b.name, "legal_section": "3"}]
+		)
 		draft = make_cited(
-			"DV-Q4", "KHOA-Q4", self.head, [{"legal_document": self.b.name, "legal_section": "2"}], state="Nháp"
+			"DV-Q4",
+			"KHOA-Q4",
+			self.head,
+			[{"legal_document": self.b.name, "legal_section": "2"}],
+			state="Nháp",
 		)
 		self._expire()
 		self.assertEqual(frappe.db.get_value(DT, self.p.name, "needs_review"), 1)
@@ -69,13 +77,18 @@ class TestReviewQueue(FrappeTestCase):
 		frappe.set_user(self.head)
 		with self.assertRaises(frappe.ValidationError):
 			review.dismiss_review(self.p.name, "  ")
-		self.assertEqual(review.dismiss_review(self.p.name, "Nội dung mục mới giống mục cũ"), {"needs_review": 0})
+		self.assertEqual(
+			review.dismiss_review(self.p.name, "Nội dung mục mới giống mục cũ"), {"needs_review": 0}
+		)
 		self.assertEqual(frappe.db.get_value(DT, self.p.name, "needs_review"), 0)
 		self.assertTrue(
 			frappe.db.exists(
 				"Comment",
-				{"reference_doctype": DT, "reference_name": self.p.name,
-				"content": ["like", "%Không cần sửa: Nội dung mục mới giống mục cũ%"]},
+				{
+					"reference_doctype": DT,
+					"reference_name": self.p.name,
+					"content": ["like", "%Không cần sửa: Nội dung mục mới giống mục cũ%"],
+				},
 			)
 		)
 		self.assertEqual(review.get_review_queue()["rows"], [])
@@ -93,7 +106,9 @@ class TestReviewQueue(FrappeTestCase):
 		frappe.set_user("Administrator")
 		to_state(frappe.get_doc(DT, rev["name"]), "Chờ ban hành")
 		frappe.set_user(self.director)
-		wf.apply_action(rev["name"], "Ban hành", decision_no="9/QĐ", effective_date=str(add_days(today(), 30)))
+		wf.apply_action(
+			rev["name"], "Ban hành", decision_no="9/QĐ", effective_date=str(add_days(today(), 30))
+		)
 		self.assertEqual(frappe.db.get_value(DT, rev["name"], "needs_review"), 0)
 		frappe.set_user("Administrator")
 		to_state(frappe.get_doc(DT, self.p.name), "Đã thay thế")

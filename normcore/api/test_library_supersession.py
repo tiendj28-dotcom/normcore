@@ -11,7 +11,12 @@ from normcore.tests.utils import make_user
 
 def _section(doc, no):
 	return frappe.get_doc(
-		{"doctype": "NC Legal Section", "legal_document": doc.name, "section_no": no, "plain_text": "nội dung"}
+		{
+			"doctype": "NC Legal Section",
+			"legal_document": doc.name,
+			"section_no": no,
+			"plain_text": "nội dung",
+		}
 	).insert(ignore_permissions=True)
 
 
@@ -50,8 +55,17 @@ class TestLibrarySupersession(FrappeTestCase):
 		api.refresh_validity(today=getdate("2099-07-01"))
 		self.assertEqual(_status("NC Legal Document", b.name), "Hết hiệu lực")
 		self.assertTrue(all(_status("NC Legal Section", s.name) == "Hết hiệu lực" for s in secs.values()))
-		self.assertTrue(frappe.db.exists("Comment", {"reference_doctype": "NC Legal Document",
-			"reference_name": b.name, "comment_type": "Info", "content": ["like", "%Bị thay thế toàn bộ%"]}))
+		self.assertTrue(
+			frappe.db.exists(
+				"Comment",
+				{
+					"reference_doctype": "NC Legal Document",
+					"reference_name": b.name,
+					"comment_type": "Info",
+					"content": ["like", "%Bị thay thế toàn bộ%"],
+				},
+			)
+		)
 
 	def test_TC_LIB_06_thay_mot_phan(self):
 		a, b, secs = _pair()
@@ -66,7 +80,9 @@ class TestLibrarySupersession(FrappeTestCase):
 		api.refresh_validity(today=getdate("2099-07-01"))
 		for no, s in secs.items():
 			self.assertEqual(
-				_status("NC Legal Section", s.name), "Hết hiệu lực" if no in ("2", "5") else "Còn hiệu lực", no
+				_status("NC Legal Section", s.name),
+				"Hết hiệu lực" if no in ("2", "5") else "Còn hiệu lực",
+				no,
 			)
 		self.assertEqual(_status("NC Legal Document", b.name), "Còn hiệu lực")
 
@@ -76,8 +92,15 @@ class TestLibrarySupersession(FrappeTestCase):
 		def attempt(**kw):
 			frappe.db.savepoint("att")
 			with self.assertRaises(frappe.ValidationError) as cm:
-				api.declare_supersession(**{"legal_document": a.name, "superseded_document": b.name,
-					"scope": "Toàn bộ", "from_date": "2099-07-01", **kw})
+				api.declare_supersession(
+					**{
+						"legal_document": a.name,
+						"superseded_document": b.name,
+						"scope": "Toàn bộ",
+						"from_date": "2099-07-01",
+						**kw,
+					}
+				)
 			frappe.db.rollback(save_point="att")
 			return str(cm.exception)
 
@@ -90,7 +113,9 @@ class TestLibrarySupersession(FrappeTestCase):
 		a.reload()
 		self.assertFalse(a.supersessions[0].superseded_sections)
 		# hai dòng cùng B trong một lần lưu
-		a.append("supersessions", {"superseded_document": b.name, "scope": "Toàn bộ", "from_date": "2099-08-01"})
+		a.append(
+			"supersessions", {"superseded_document": b.name, "scope": "Toàn bộ", "from_date": "2099-08-01"}
+		)
 		with self.assertRaises(frappe.ValidationError) as cm:
 			a.save()
 		self.assertIn("đã được khai báo thay thế ở dòng 1", str(cm.exception))
@@ -138,7 +163,9 @@ def make_cited(service, department, head, cites, state="Đã ban hành", version
 	frappe.db.set_value("NC Department", department, "head_user", head)
 	proc = make_procedure(service, department, version=version)
 	for c in cites:
-		proc.append("citations", {"target_section": "Chỉ định", "relation": "Theo hướng dẫn", "quote": "q", **c})
+		proc.append(
+			"citations", {"target_section": "Chỉ định", "relation": "Theo hướng dẫn", "quote": "q", **c}
+		)
 	proc.save(ignore_permissions=True)
 	if state == "Đã ban hành":
 		publish_procedure(proc)
@@ -149,8 +176,10 @@ def make_cited(service, department, head, cites, state="Đã ban hành", version
 
 def _notified(user, doc_name):
 	return frappe.get_all(
-		"Notification Log", filters={"for_user": user, "document_type": "NC Clinical Procedure",
-		"document_name": doc_name}, pluck="subject")
+		"Notification Log",
+		filters={"for_user": user, "document_type": "NC Clinical Procedure", "document_name": doc_name},
+		pluck="subject",
+	)
 
 
 class TestLibraryReviewFlag(FrappeTestCase):
@@ -164,7 +193,9 @@ class TestLibraryReviewFlag(FrappeTestCase):
 
 	def test_FR_LIB_007_ngay_qua_khu_ap_dung_ngay(self):
 		a, b, secs = _pair("TT/A2", "TT/B2")
-		p = make_cited("DV-F1", "KHOA-F1", self.head, [{"legal_document": b.name, "legal_section": secs["2"].name}])
+		p = make_cited(
+			"DV-F1", "KHOA-F1", self.head, [{"legal_document": b.name, "legal_section": secs["2"].name}]
+		)
 		past = str(add_days(getdate(today()), -1))
 		api.declare_supersession(a.name, b.name, "Một phần", past, "2")
 		self.assertEqual(_status("NC Legal Section", secs["2"].name), "Hết hiệu lực")
@@ -176,11 +207,17 @@ class TestLibraryReviewFlag(FrappeTestCase):
 		self.assertEqual(_status("NC Legal Document", d.name), "Hết hiệu lực")
 
 	def test_FR_LIB_009_khop_trich_dan_tu_do(self):
-		a, b, secs = _pair("TT/A3", "TT/B3")
-		p_free = make_cited("DV-F2", "KHOA-F2", self.head, [{"legal_document": "tt/b3", "legal_section": "Mục 2"}])
+		a, b, _secs = _pair("TT/A3", "TT/B3")
+		p_free = make_cited(
+			"DV-F2", "KHOA-F2", self.head, [{"legal_document": "tt/b3", "legal_section": "Mục 2"}]
+		)
 		p_doc = make_cited("DV-F3", "KHOA-F3", self.head, [{"legal_document": b.name}])
-		p_other = make_cited("DV-F4", "KHOA-F4", self.head, [{"legal_document": b.name, "legal_section": "3"}])
-		p_draft = make_cited("DV-F5", "KHOA-F5", self.head, [{"legal_document": b.name, "legal_section": "2"}], state="Nháp")
+		p_other = make_cited(
+			"DV-F4", "KHOA-F4", self.head, [{"legal_document": b.name, "legal_section": "3"}]
+		)
+		p_draft = make_cited(
+			"DV-F5", "KHOA-F5", self.head, [{"legal_document": b.name, "legal_section": "2"}], state="Nháp"
+		)
 		api.declare_supersession(a.name, b.name, "Một phần", "2099-07-01", "2")
 		out = api.refresh_validity(today=getdate("2099-07-01"))
 		flag = lambda p: frappe.db.get_value("NC Clinical Procedure", p.name, "needs_review")  # noqa: E731

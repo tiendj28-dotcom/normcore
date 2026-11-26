@@ -303,7 +303,7 @@ def _sections_info(b, wanted):
 
 @frappe.whitelist()
 def declare_supersession(legal_document, superseded_document, scope, from_date, sections=None):
-	"""UC-002 bước 1–3: văn bản `legal_document` thay thế `superseded_document` từ `from_date`."""
+	"""UC-002 bước 1-3: văn bản `legal_document` thay thế `superseded_document` từ `from_date`."""
 	doc = frappe.get_doc("NC Legal Document", legal_document)
 	if not frappe.has_permission("NC Legal Document", "write", doc=doc):
 		frappe.throw(_("Bạn không có quyền khai báo thay thế cho văn bản này"), frappe.PermissionError)
