@@ -119,7 +119,7 @@
 | FR-CLS-008 | `test_TC_CLS_23_dong_thiet_bi_la_bao_loi_dong_dung_duoc_luu`, `test_cap_nhat_theo_ma_va_loi_nghiep_vu_thanh_loi_dong` |
 | FR-ACC-008 | `test_TC_CLS_22_clinician_khoa_khac_khong_sua_duoc` (nc_test_system), `test_TC_CLS_22_clinician_khoa_khac_bi_tu_choi` (api/test_test_system.py), `test_khoa_khong_duoc_gan_thanh_loi_dong` |
 
-# Test ref — FEAT-007 (ghi bởi Dev NORM-34; chờ kiểm định độc lập)
+# Test ref — FEAT-007 (Dev NORM-34 ghi; QA độc lập NORM-44 kiểm định, accepted)
 
 | FR | Test thật |
 | :-- | :-- |
@@ -146,6 +146,20 @@
 | FR-ACCT-015 | `test_TC_CLS_36_xuat_kho_theo_mat_hang_khoa_nam` (api/test_importer_cls_volume.py), `test_luu_va_trung_nam_khoa_mat_hang`, `test_luong_am` (nc_stock_issue_actual), unit `test_TC_CLS_36_stock_hop_le` |
 | FR-ACC-002, FR-ACC-003, FR-ACC-007 | `test_quyen_theo_ma_tran`, `test_auditor_khong_ghi_duoc`, `test_clinician_khong_doc`, `test_department_head_chi_doc_khoa_minh` (nc_test_system_volume); `test_quyen_auditor_clinician_head` (nc_equipment_usage); `test_quyen` (nc_stock_issue_actual); `test_quyen_auditor_director_va_tep_mau`; `normcore.tests.test_permissions` |
 | FR-CLS-007 (mục sản lượng) | `test_FR_CLS_007_muc_san_luong_uoc_tinh_khi_test_phu_trong` (api/test_test_system.py), `TestVolumeStatus` (unit) |
+
+## FEAT-020 (ghi bởi QA, NORM-53)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-LIB-001 | `test_TC_LIB_01_nap_pdf_tach_3_muc` (api/test_library.py), `test_FR_LIB_001_tao_ban_ghi_chua_lap_va_tinh_hieu_luc`, `test_FR_LIB_001_tep_qua_100mb_bi_tu_choi`, `test_FR_LIB_001_thieu_truong_bat_buoc_bi_tu_choi` (nc_legal_document) |
+| FR-LIB-002 | `test_TC_LIB_02_trung_so_hieu` (nc_legal_document), `test_FR_LIB_002_so_hieu_khong_phan_biet_hoa_thuong_va_khoang_trang` |
+| FR-LIB-003 | `test_TC_LIB_01_nap_pdf_tach_3_muc`, `test_FR_LIB_003_qtkt_moi_quy_trinh_la_mot_muc_cap_1`, `test_FR_LIB_003_pdf_dung_so_trang_va_chu_tieng_viet`, `test_FR_LIB_003_lap_lai_giu_ten_muc_va_go_muc_cu` |
+| FR-LIB-004 | `test_FR_LIB_004_ocr_gia_tra_van_ban_thi_tach_muc_binh_thuong`, `test_FR_LIB_004_pdf_khong_lop_van_ban_khong_ocr_bao_loi`, `test_FR_LIB_004_needs_ocr` |
+| FR-LIB-005 | `test_TC_LIB_03_tep_hong_bao_loi` (api/test_library.py), `test_FR_LIB_005_pdf_hong_bao_loi`, `test_FR_LIB_005_docx_hong_bao_loi` |
+| FR-LIB-006 | `test_TC_LIB_04_hieu_luc_theo_ngay` (api/test_library_validity.py), `test_FR_LIB_006_tac_vu_ngay_chay_duoc`, `test_FR_LIB_006_tac_vu_ngay_dang_ky_trong_hooks` |
+| FR-LIB-010 | `test_TC_LIB_08_tim_theo_cum_tu_va_ma_dich_vu` (api/test_library_search.py), `test_FR_LIB_010_tim_theo_so_hieu`, `test_FR_LIB_010_cum_tu_phai_khop_lien_tiep`, `test_FR_LIB_010_co_chi_muc_fulltext` |
+| FR-LIB-011 | `test_FR_LIB_011_get_source_view_tra_tep_va_trang`, `test_FR_LIB_011_get_source_view_can_quyen_doc`, `test_FR_LIB_011_get_source_view_docx_khong_co_trang` |
+| FR-LIB-012 | `test_FR_LIB_012_sua_van_ban_thuan_luu_ban_truoc` |
 
 # Test ref — FEAT-023 (Dev NORM-55 ghi; QA kiểm định độc lập, accepted)
 

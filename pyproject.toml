@@ -10,6 +10,7 @@ dynamic = ["version"]
 dependencies = [
     "openpyxl",
     "python-docx",
+    "pypdf",
     # "frappe~=15.0.0" # Installed and managed by bench.
 ]
 
@@ -23,7 +24,8 @@ build-backend = "flit_core.buildapi"
 
 # These apt dependencies will be installed from Ubuntu repositories when you host your app on Frappe Cloud
 [deploy.dependencies.apt]
-packages = []
+# tesseract-ocr, tesseract-ocr-vie, poppler-utils: nhận dạng ký tự cho PDF không có lớp văn bản (FR-LIB-004, tùy chọn)
+packages = ["tesseract-ocr", "tesseract-ocr-vie", "poppler-utils"]
 
 [tool.ruff]
 line-length = 110
