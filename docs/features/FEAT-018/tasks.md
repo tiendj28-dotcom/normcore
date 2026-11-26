@@ -6,7 +6,7 @@ Quy ước:
 - **Không sửa tệp test cũ.** Test mới để trong tệp mới, theo technical-design mục 6, 7.
 - **Điều kiện bắt đầu (ASM-018-01):** `git fetch && git merge origin/develop && git cat-file -e origin/develop:normcore/costing/snapshot.py` thành công. Chưa có `snapshot.py` (NORM-42 FEAT-036 chưa merge) thì Blocked "chờ NORM-42", mention Lead.
 
-- [ ] T01 Logic thuần `snapshot.py` (technical-design mục 3.1) và `reconcile.depreciation_centers` (3.2): `VERSION = 2`, khóa map tuple, `build(..., allocation, meta)`, `pack`, `unpack`, `recompute`, `reproduce` gọi `recompute`, `diff_rows`; viết `tests/unit/test_costing_snapshot_lock.py` (mọi nhánh ở tiêu chí #8 phần ảnh chụp) — done-when:
+- [x] T01 Logic thuần `snapshot.py` (technical-design mục 3.1) và `reconcile.depreciation_centers` (3.2): `VERSION = 2`, khóa map tuple, `build(..., allocation, meta)`, `pack`, `unpack`, `recompute`, `reproduce` gọi `recompute`, `diff_rows`; viết `tests/unit/test_costing_snapshot_lock.py` (mọi nhánh ở tiêu chí #8 phần ảnh chụp) — done-when:
   - `pytest normcore/tests/unit/test_costing_snapshot_lock.py normcore/tests/unit/test_costing_snapshot.py normcore/tests/unit/test_reconcile.py` xanh (tệp FEAT-036, FEAT-017 không sửa);
   - `grep -rn "import frappe" normcore/costing/` không in gì.
 - [ ] T02 Logic thuần `costing/compare.py` (mục 3.3); viết `tests/unit/test_costing_compare.py` (tiêu chí #8 phần so sánh) — done-when: `pytest normcore/tests/unit/test_costing_compare.py` xanh.

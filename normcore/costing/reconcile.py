@@ -66,3 +66,9 @@ def lock_blockers(lines: Iterable) -> list[str]:
 		for x in lines
 		if x.get("over_tolerance") and not (x.get("explanation") or "").strip()
 	]
+
+
+def depreciation_centers(accounting, pools) -> list[str]:
+	"""Trung tâm có số kế toán DEPRECIATION khác 0 và nằm trong `pools`, sắp theo tên."""
+	centers = {p.cost_center for p in pools}
+	return sorted(c for (c, cat), v in accounting.items() if cat == DEPRECIATION and v and c in centers)
