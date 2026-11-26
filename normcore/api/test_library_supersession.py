@@ -164,7 +164,8 @@ def make_cited(service, department, head, cites, state="Đã ban hành", version
 	proc = make_procedure(service, department, version=version)
 	for c in cites:
 		proc.append(
-			"citations", {"target_section": "Chỉ định", "relation": "Theo hướng dẫn", "quote": "q", **c}
+			"citations",
+			{"target_section": "Chỉ định", "relation": "Theo hướng dẫn", "quote": "nội dung", **c},
 		)
 	proc.save(ignore_permissions=True)
 	if state == "Đã ban hành":
