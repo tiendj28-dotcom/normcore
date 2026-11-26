@@ -8,3 +8,4 @@
 | T04 | test_quyen_new_version_* (cùng `test_norm_version`); `run-tests --module normcore.tests.test_permissions` | OK: 9 / 3 tests | (xem commit T03+T04) |
 | T05 | `pytest test_norm_grid_ui test_ui_conventions test_vi_csv_order test_form_buttons_i18n`; `with_bench.sh "migrate && bench build --app normcore"` | 36 passed; build exit 0; check_conventions exit 0 | (xem commit T05) |
 | T06 | `python3 docs/tools/build_rtm.py docs` | `VAN DE: 0`; As-Built, Test ref đã ghi | (xem commit T06) |
+| T07 | golden_engine, golden_cls; `pytest unit golden --cov-fail-under=90`; `with_bench.sh "migrate && run-tests --app normcore"`; check_conventions; build_rtm; merge origin/develop | golden OK; 651 passed, cov 98,69%; bench Ran 1231 tests OK; conventions exit 0; VAN DE: 0; develop đã up to date | (xem commit T07) |
