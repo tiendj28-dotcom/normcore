@@ -18,14 +18,14 @@ Add test system,Thêm hệ thống xét nghiệm
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 "After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
-All departments in scope,Tất cả khoa trong phạm vi
 All components,Mọi cấu phần
+All departments in scope,Tất cả khoa trong phạm vi
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
-Approved price,Giá đã duyệt
 Applied qty,Lượng áp dụng
+Approved price,Giá đã duyệt
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
 Assign,Gán
@@ -34,9 +34,9 @@ Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
 Assumption — pending confirmation,Giả định — chờ xác nhận
 Attach to,Gắn với
-Available,Có
 Authority document,Văn bản ban hành định mức
 Authority norm,Định mức ban hành
+Available,Có
 Basis,Căn cứ
 Basis reference,Tham chiếu căn cứ
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
@@ -183,8 +183,8 @@ NC Procedure Resource,Nguồn lực của bước
 NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
-"New values apply to the next operation, no restart needed.","Giá trị mới áp dụng cho thao tác kế tiếp, không cần khởi động lại."
 Needs update,Cần cập nhật
+"New values apply to the next operation, no restart needed.","Giá trị mới áp dụng cho thao tác kế tiếp, không cần khởi động lại."
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -200,12 +200,12 @@ No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None,Không có
 None yet,Chưa có
-Norm set,Bộ định mức
-Normcore home,Trang chủ Normcore
-Not available,Chưa có
 Norm grid,Lưới định mức
+Norm set,Bộ định mức
 Norm set actions,Thao tác bộ định mức
 Norm sets,Bộ định mức
+Normcore home,Trang chủ Normcore
+Not available,Chưa có
 Not linked,Chưa liên kết
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Only lines needing attention,Chỉ dòng cần xử lý
@@ -213,15 +213,13 @@ Only unresolved,Chỉ chưa xử lý
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
+Open norm grid,Mở lưới định mức
 Open procedure list,Mở danh sách quy trình
 Open service list,Mở danh sách dịch vụ
 Original page,Trang gốc
 Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
-Overdue,Quá hạn
-Open norm grid,Mở lưới định mức
-Original page,Trang gốc
-Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
 Over cap,Vượt trần
+Overdue,Quá hạn
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
 Pages,Trang
 Pages {0}–{1} of {2},Trang {0}–{1} của {2}
@@ -309,8 +307,8 @@ Status,Trạng thái
 Step,Bước
 Step ID,Mã bước
 Step title,Tên bước
-Task,Việc
 Suggested,Đề xuất
+Task,Việc
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
