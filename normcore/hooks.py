@@ -332,3 +332,17 @@ scheduler_events = {
 
 # FR-NOTI-003: nguồn việc chờ xử lý; mỗi nguồn là hàm (user) -> list[dict] theo hợp đồng core/notify.py
 normcore_pending_sources = ["normcore.api.procedure_workflow.pending_for"]
+
+# NORM-60: sổ đăng ký hook theo tệp (normcore/hook_registry/*.json). FEAT mới thêm hook dạng danh sách bằng
+# một tệp riêng ở đó, không sửa tệp này.
+from normcore.core import hook_registry as _hook_registry
+
+_reg = _hook_registry.load()
+app_include_js = app_include_js + _reg["app_include_js"]
+after_install = after_install + _reg["after_install"]
+after_migrate = after_migrate + _reg["after_migrate"]
+before_migrate = _reg["before_migrate"]
+fixtures = fixtures + _reg["fixtures"]
+normcore_pending_sources = normcore_pending_sources + _reg["normcore_pending_sources"]
+for _freq, _fns in _reg["scheduler_events"].items():
+	scheduler_events[_freq] = scheduler_events.get(_freq, []) + _fns

@@ -19,3 +19,8 @@ normcore/public/dist/
 
 # Multica ghi vào thư mục làm việc của run
 .multica/project/
+
+# Tệp sinh bởi normcore/generated.py từ mảnh vi.d/, shortcuts.d/ (NORM-60); không commit
+normcore/translations/vi.csv
+normcore/nc_core/workspace/normcore/normcore.json
+normcore/nc_core/workspace/normcore/shortcuts.txt

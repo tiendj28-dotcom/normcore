@@ -8,21 +8,27 @@
 #   PR_SYNC_BASE=develop    nhánh nền
 #   PR_SYNC_LOCAL=1         thử cục bộ: không gọi gh; danh sách nhánh lấy từ PR_SYNC_BRANCHES (cách nhau bởi
 #                           dấu cách), nhãn/bình luận chỉ ghi ra stdout
-# Tệp sinh (normcore.json, vi.csv, RTM) được sửa bằng scripts/pr_sync_fix.py, build_workspace.py,
-# docs/tools/build_rtm.py lấy từ bản develop (bản chạy), không phải bản của nhánh PR.
+# NORM-60: sau khi gộp develop, mọi bước sinh và kiểm (scripts/pr_sync_fix.py, docs/tools/build_rtm.py,
+# scripts/check_conventions.py) chạy bằng script TRONG CÂY ĐÃ GỘP (có thay đổi của cả hai bên), không dùng bản
+# chép từ develop: nhánh vừa sửa phần dựng workspace thì bản develop xóa mất phần đó (0d15f23). Chỉ có
+# chính pr_sync.sh được chép ra ngoài trước khi checkout nhánh PR (git checkout ghi đè tệp đang chạy).
 set -uo pipefail
+
+if [ -z "${PR_SYNC_SELF:-}" ]; then
+	SELF="$(mktemp)"
+	cp "$0" "$SELF"
+	PR_SYNC_SELF="$SELF" exec bash "$SELF" "$@"
+fi
 
 REMOTE="${PR_SYNC_REMOTE:-origin}"
 BASE="${PR_SYNC_BASE:-develop}"
 LABEL="conflict"
 LOCAL="${PR_SYNC_LOCAL:-0}"
 TOOLS="$(mktemp -d)"
-trap 'rm -rf "$TOOLS"' EXIT
+trap 'rm -rf "$TOOLS" "$PR_SYNC_SELF"' EXIT
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
-cp -r scripts "$TOOLS/scripts"
-mkdir -p "$TOOLS/docs" && cp -r docs/tools "$TOOLS/docs/tools"
 
 git config user.name >/dev/null || git config user.name "normcore-pr-sync"
 git config user.email >/dev/null || git config user.email "pr-sync@users.noreply.github.com"
@@ -96,23 +102,14 @@ while IFS=$'\t' read -r PR BRANCH; do
 		say "  gộp sạch"
 	else
 		say "  có conflict, thử tệp sinh"
-		# c) tệp sinh: normcore.json lấy một bên (sẽ sinh lại); vi.csv ghép hai bên rồi sắp lại
-		WS=normcore/nc_core/workspace/normcore/normcore.json
-		if git diff --name-only --diff-filter=U | grep -qx "$WS"; then
-			git checkout --ours -- "$WS" && git add "$WS"
-		fi
-		VI=normcore/translations/vi.csv
-		if git diff --name-only --diff-filter=U | grep -qx "$VI"; then
-			{ git show ":2:$VI"; git show ":3:$VI"; } >"$VI" && git add "$VI"
-		fi
 	fi
-	# c) sinh lại tệp sinh bằng công cụ của develop (chạy cả khi gộp sạch: union có thể để lại dòng trùng)
-	python3 "$TOOLS/scripts/pr_sync_fix.py" "$REPO_ROOT" >"$TOOLS/fixed.txt" 2>"$TOOLS/fix.err" || {
+	# c) sinh và sửa tệp sinh bằng script của cây đã gộp (chạy cả khi gộp sạch)
+	python3 scripts/pr_sync_fix.py "$REPO_ROOT" >"$TOOLS/fixed.txt" 2>"$TOOLS/fix.err" || {
 		fail_pr "$PR" "$BRANCH" "không sinh lại được tệp sinh ($(head -c 300 "$TOOLS/fix.err"))" "(xem log chạy)"
 		continue
 	}
-	if [ -f docs/tools/build_rtm.py ] || [ -f "$TOOLS/docs/tools/build_rtm.py" ]; then
-		python3 "$TOOLS/docs/tools/build_rtm.py" docs >"$TOOLS/rtm.log" 2>&1 || true
+	if [ -f docs/tools/build_rtm.py ]; then
+		python3 docs/tools/build_rtm.py docs >"$TOOLS/rtm.log" 2>&1 || true
 	fi
 	UNRESOLVED="$(git diff --name-only --diff-filter=U)"
 	# d) còn conflict hoặc check_conventions lỗi: hủy
@@ -121,7 +118,7 @@ while IFS=$'\t' read -r PR BRANCH; do
 		fail_pr "$PR" "$BRANCH" "còn tệp conflict" $UNRESOLVED
 		continue
 	fi
-	if ! python3 "$TOOLS/scripts/check_conventions.py" "$REPO_ROOT" >"$TOOLS/conv.log" 2>&1; then
+	if ! python3 scripts/check_conventions.py "$REPO_ROOT" >"$TOOLS/conv.log" 2>&1; then
 		mapfile -t LINES <"$TOOLS/conv.log"
 		fail_pr "$PR" "$BRANCH" "check_conventions.py báo lỗi sau khi gộp" "${LINES[@]:0:15}"
 		continue
