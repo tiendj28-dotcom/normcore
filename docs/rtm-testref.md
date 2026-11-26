@@ -173,3 +173,15 @@
 | FR-AI-014 | `test_FR_AI_014_*` (nc_prompt_template), `test_new_prompt_version` (api/test_ai.py), unit/test_ai_prompts.py |
 | FR-AI-015 | `test_TC_AI_07_tat_ai_an_nut_van_chay_thu_cong` (api/test_ai.py; phần "giá tham chiếu" chưa kiểm được vì NC Benchmark Price chưa có trên develop, ASM-023-16), unit/test_ai_ui_conventions.py |
 | NFR-SEC-004 | `test_TC_NFR_04_khoa_khong_lo` (nc_ai_settings), `test_loi_khong_lo_khoa` (unit/test_ai_providers_openai.py) |
+
+## FEAT-002
+
+# Test ref — FEAT-002 (Dev ghi; chờ QA kiểm định độc lập)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-NOTI-001 | `test_TC_NOTI_01_gui_duyet_thong_bao_va_trang_chu_truong_khoa` (api/test_home.py), `test_FR_NOTI_001_notify_bo_administrator_guest_va_user_tat`, `test_FR_NOTI_001_notify_gop_trung_va_goi_lai_khong_tao_them`, `test_FR_NOTI_001_notify_co_lien_ket_ban_ghi` (core/test_notify.py) |
+| FR-NOTI-002 | `test_FR_NOTI_002_email_khi_co_may_chu`, `test_FR_NOTI_002_khong_may_chu_van_thong_bao` (core/test_notify.py) |
+| FR-NOTI-003 | `test_TC_NOTI_01_gui_duyet_thong_bao_va_trang_chu_truong_khoa`, `test_TC_NOTI_01_viec_cho_dung_nguoi`, `test_TC_NOTI_01_auditor_khong_co_viec`, `test_quyen_get_home_guest` (api/test_home.py), `test_FR_NOTI_003_*` (core/test_notify.py) |
+| FR-OUT-010 | `test_FR_OUT_010_*` (unit/test_chain_stages.py), `test_FR_OUT_010_dem_theo_tinh_trang_chuoi`, `test_FR_OUT_010_loc_khoa_va_pham_vi`, `test_FR_OUT_010_bo_loc_danh_sach_dich_vu`, `test_FR_OUT_010_so_truy_van_get_home` (api/test_home.py), `test_workspace_co_block_trang_chu` (tests/test_feat_002.py) |
+| FR-ADM-003 | `test_TC_ADM_03_doi_so_ca_toi_thieu_ap_ngay` (**một phần** của TC-ADM-03, Lead chọn PA1, ASM-002-13; phần trung vị/cảnh báo thiếu ca là `test_TC_ADM_03_ket_qua_bam_gio_3_ca` của FEAT-014), `test_FR_ADM_003_so_ngay_nhac_ap_ngay`, `test_FR_ADM_003_thoi_han_ai_ap_ngay`, `test_nc_settings_*`, `test_quyen_nc_settings_*` (nc_settings/test_nc_settings.py) |
