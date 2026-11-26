@@ -184,7 +184,7 @@
 | FR-AI-015 | `test_TC_AI_07_tat_ai_an_nut_van_chay_thu_cong` (api/test_ai.py; phần "giá tham chiếu" chưa kiểm được vì NC Benchmark Price chưa có trên develop, ASM-023-16), unit/test_ai_ui_conventions.py |
 | NFR-SEC-004 | `test_TC_NFR_04_khoa_khong_lo` (nc_ai_settings), `test_loi_khong_lo_khoa` (unit/test_ai_providers_openai.py) |
 
-# Test ref — FEAT-008 (Dev NORM-50 ghi; chờ QA kiểm định độc lập)
+# Test ref — FEAT-008 (QA Multica kiểm định, accepted)
 
 | FR | Test thật |
 | :-- | :-- |
