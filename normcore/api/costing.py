@@ -278,7 +278,7 @@ def get_explanation(service_cost):
 	}
 
 
-def _recon_view(row, tolerance_needed=True) -> dict:
+def _recon_view(row) -> dict:
 	costed, acc = row.costed_amount or 0, row.accounting_amount or 0
 	return {
 		"name": row.name,
