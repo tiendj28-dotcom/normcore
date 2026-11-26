@@ -1,3 +1,5 @@
++ Add service,+ Thêm dịch vụ
+A draft already exists: {0},Đã có bản đang soạn: {0}
 Account,Tài khoản
 Actions,Thao tác
 Active,Đang dùng,NC Technical Service
@@ -7,8 +9,10 @@ Add citation,Thêm trích dẫn
 Add line,Thêm dòng
 Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
+Add service,Thêm dịch vụ
 Add step,Thêm bước
 Add test system,Thêm hệ thống xét nghiệm
+Added,Thêm
 "After confirming, the set cannot be edited until Finance returns it.","Sau khi xác nhận, bộ không sửa được cho đến khi Tài chính trả lại."
 "After finalizing, lines are locked and cannot be reopened. Finalize this import?","Sau khi chốt, các dòng bị khóa và không mở lại được. Chốt lần nhập này?"
 "After issuing, the content of this version cannot be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
@@ -16,7 +20,9 @@ Add test system,Thêm hệ thống xét nghiệm
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 "After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
+"After withdrawing, the procedure moves to Withdrawn and can no longer be used as a basis.","Sau khi thu hồi, quy trình chuyển Đã thu hồi và không dùng làm căn cứ được nữa."
 All components,Mọi cấu phần
+All sections are confirmed.,Mọi mục đã được xác nhận.
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
@@ -31,6 +37,7 @@ Assumption,Giả định
 Attach to,Gắn với
 Authority document,Văn bản ban hành định mức
 Authority norm,Định mức ban hành
+Base version,Phiên bản gốc
 Basis,Căn cứ
 Basis reference,Tham chiếu căn cứ
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
@@ -42,6 +49,10 @@ Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Cannot load the original file,Không tải được tệp gốc
 Catalog,Danh mục
+Change,Sửa
+Change service,Sửa dịch vụ
+Changed,Đổi
+Changed fields,Trường đổi
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
@@ -50,18 +61,26 @@ Choose a step,Chọn một bước
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
 Clinical volume and stock issues,Sản lượng cận lâm sàng và xuất kho
+Close comparison,Đóng so sánh
 Code,Mã
 Collapse or expand all steps,Thu gọn hoặc mở tất cả bước
 Column,Cột,Import Excel
 Comment,Ý kiến
 Comments,Ý kiến
+Compare versions,So sánh phiên bản
+Compared version,Phiên bản so sánh
 Component,Cấu phần
+Confidence,Độ tin cậy
 Confirm,Xác nhận
+Confirm all 100% ({0}),Xác nhận các dòng 100% ({0})
 Confirm import,Xác nhận ghi
 Confirm professionally,Xác nhận chuyên môn
+Confirm selected,Xác nhận đã chọn
+Confirm {0} suggestions with 100% confidence?,Xác nhận {0} đề xuất có độ tin cậy 100%?
 Confirmation,Xác nhận
 "Confirmed professionally, waiting for Finance to lock. It cannot be edited.","Bộ đã xác nhận chuyên môn, chờ Tài chính khóa. Không sửa được."
 Confirmed {0},Đã xác nhận {0}
+Confirmed {0} mapping(s),Đã xác nhận {0} ánh xạ
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
 Cost category,Loại chi phí
@@ -78,6 +97,7 @@ Could not load test systems.,Không tải được hệ thống xét nghiệm.
 Could not load the status.,Không tải được tình trạng.
 Could not load the study.,Không tải được phiếu bấm giờ.
 Create,Tạo
+Create a draft of the next version from version {0}. Step codes are kept; the draft goes through the approval flow like the first version.,Tạo bản nháp phiên bản kế tiếp từ phiên bản {0}. Mã bước giữ nguyên; bản nháp đi qua luồng duyệt như bản đầu.
 Create a draft of version {0} from this set?,Tạo bộ nháp phiên bản {0} từ bộ này?
 Create new version,Tạo phiên bản mới
 Create norm set,Khởi tạo bộ định mức
@@ -147,6 +167,7 @@ Legal document,Văn bản
 Legal section,Mục văn bản
 Legal text links are provided by the document library.,Liên kết tới mục văn bản do thư viện văn bản cung cấp.
 Line,Dòng
+Line code,Mã dòng
 Line details,Chi tiết dòng
 Lines / Total amount,Số dòng / Tổng tiền
 Lines without cost category,Dòng chưa gán loại chi phí
@@ -161,6 +182,10 @@ Machine hourly rate,Đơn giá giờ máy,NC Equipment
 Machine minutes,Phút máy
 Main equipment,Thiết bị chính
 Management,Quản lý
+Manual,Thêm tay
+Mapping removed,Đã bỏ ánh xạ
+Mapping saved,Đã lưu ánh xạ
+Mappings are available after indexing finishes.,Ánh xạ có sau khi lập chỉ mục xong.
 Matched by,Khớp theo
 Message,Thông báo,Import Excel
 Minutes,Phút
@@ -168,6 +193,7 @@ Minutes per person,Số phút / người
 More,Xem thêm
 Move step down,Chuyển bước xuống
 Move step up,Chuyển bước lên
+Moved,Đổi vị trí
 Moved to,Đã chuyển sang
 Moved to {0},Đã chuyển sang {0}
 NC Clinical Procedure,Quy trình kỹ thuật
@@ -177,6 +203,7 @@ NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
 Needs update,Cần cập nhật
+Needs update: the procedure has a new version - {0}.,Cần cập nhật: quy trình có phiên bản mới - {0}.
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -189,6 +216,7 @@ No review comments yet.,Chưa có ý kiến thẩm định.
 No sections found in the file,Không tìm thấy mục nào trong tệp
 No sections yet,Chưa có mục
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
+No suggestions found. Use + Add service on each section or Suggest again.,Không có đề xuất. Dùng + Thêm dịch vụ ở từng mục hoặc Đề xuất lại.
 No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None,Không có
@@ -240,21 +268,28 @@ Reapplied {0} lines; manual edits are kept,Đã gán lại {0} dòng; các dòng
 Reapply account mapping,Gán lại theo bảng ánh xạ
 Reason,Lý do
 Record new study,Ghi ca mới
+Recalculate suggestions? Confirmed mappings are kept; current suggestions are replaced.,Tính lại đề xuất? Ánh xạ đã xác nhận được giữ; đề xuất hiện có được thay.
 Rejected by,Bị từ chối bởi
 Rejection reason,Lý do từ chối
 Relation,Quan hệ
 Reload file,Đọc lại tệp
 Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệp sẽ thay toàn bộ dòng và bỏ các sửa tay. Tiếp tục?
+Remove,Bỏ
+Remove this mapping?,Bỏ ánh xạ này?
+Removed,Bỏ
 Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
 Rerun tests,Số test chạy lại
 Resolved,Đã xử lý
 Resource,Nguồn lực
+Resource lines,Dòng nguồn lực
 Resource not found: {0},Không tìm thấy nguồn lực: {0}
+Resources,Nguồn lực
 Retry,Thử lại
 Return reason,Lý do trả lại
 Return to draft,Trả lại
 Review actions,Thao tác duyệt
 Review comments,Ý kiến thẩm định
+Revise,Sửa đổi
 Room hourly rate,Đơn giá giờ phòng,NC Room
 Row,Dòng,Import Excel
 Row ID,Mã dòng
@@ -269,11 +304,14 @@ Save to load the steps of the procedure.,Lưu để nạp các bước của quy
 Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
 Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
+Saving confirms the mapping.,Lưu là xác nhận ánh xạ.
 Search,Tìm
 Search in content,Tìm trong nội dung
 Search line or resource,Tìm mã dòng hoặc nguồn lực
 Searching…,Đang tìm…
 Section,Mục
+Sections,Phần
+Select,Chọn
 Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
@@ -281,6 +319,7 @@ Select only one line to edit.,Chỉ chọn một dòng để sửa.
 Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
 Share (%),Tỷ trọng (%)
 Show all lines,Hiện mọi dòng
+Show differences only,Chỉ hiện chỗ khác
 Show excluded lines,Hiện dòng loại trừ
 Snippet,Đoạn trích
 Some lines are missing figures,Chưa đủ số liệu ở một số dòng
@@ -290,18 +329,26 @@ Split equally across {0} services ({1}% each),Chia đều cho {0} dịch vụ (m
 Status,Trạng thái
 Step,Bước
 Step ID,Mã bước
+Step code,Mã bước
 Step title,Tên bước
+Steps,Các bước
+Suggest again,Đề xuất lại
 Suggested,Đề xuất
+Summary of differences,Tóm tắt khác biệt
+Swap direction,Đổi chiều so sánh
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
 The procedure will move to,Quy trình sẽ chuyển sang
+"The two versions do not differ in sections, steps or resources.","Hai phiên bản không khác nhau về phần, bước, nguồn lực."
 This norm set has no lines yet.,Bộ định mức chưa có dòng nào.
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
+This procedure has only one version. Comparison is available once a revision exists.,Quy trình này mới có một phiên bản. So sánh dùng khi đã có phiên bản sửa đổi.
 This procedure is awaiting approval and cannot be edited.,"Quy trình đang chờ duyệt, không sửa được."
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This procedure is issued or closed and cannot be edited. Create a new version in the revision function.,"Quy trình đã ban hành, không sửa được. Tạo phiên bản mới ở chức năng Sửa đổi."
+This procedure was withdrawn: {0},Quy trình đã thu hồi: {0}
 This record is {0} and cannot be edited. Create a new version in the norm grid.,"Bản ghi {0}, không sửa được. Tạo phiên bản mới trên lưới định mức."
 This record is {0} and cannot be edited. Create a new version.,"Bản ghi {0}, không sửa được. Tạo phiên bản mới."
 This resource is already in {0} of the same step. Save anyway?,Nguồn lực này đã có ở dòng {0} của cùng bước. Vẫn lưu?
@@ -312,6 +359,7 @@ Totals by cost center and category,Tổng theo trung tâm và loại chi phí
 Type,Loại
 Unassign,Bỏ gán
 Unchanged,Không đổi,Import Excel
+Unconfirmed only,Chỉ chưa xác nhận
 Unit,Đơn vị
 Unit price,Đơn giá,NC Item
 Unit: {0},Đơn vị: {0}
@@ -342,6 +390,9 @@ Wastage %,Hao hụt %
 Wastage reason,Lý do vượt trần
 Whole service,Chung cho cả dịch vụ
 Will be estimated from the plan,Sẽ ước tính từ kế hoạch
+Withdraw,Thu hồi
+Withdrawal reason,Lý do thu hồi
+Withdrawal reason is required,Cần nhập lý do thu hồi
 Yes,Có
 You can only view this norm set.,Bạn chỉ xem được bộ định mức này.
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
@@ -359,3 +410,4 @@ total share,tổng tỷ trọng
 {0} lines are not ready for professional confirmation,Còn {0} dòng chưa đủ điều kiện xác nhận chuyên môn
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
 {0} results — searched by {1},{0} kết quả — tìm theo {1}
+{0} suggestions created,Đã tạo {0} đề xuất
