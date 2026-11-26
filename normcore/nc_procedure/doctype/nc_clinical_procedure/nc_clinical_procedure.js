@@ -173,11 +173,11 @@ frappe.ui.form.on("NC Clinical Procedure", {
 		if (frm.doc.workflow_state === "Đã ban hành" && frappe.model.can_create("NC Norm Set")) {
 			frm.add_custom_button(__("Create norm set"), () => {
 				frappe.call({
-					method: "normcore.nc_costing.doctype.nc_norm_set.nc_norm_set.make_norm_set",
+					method: "normcore.api.norm.create_norm_set",
 					args: { procedure: frm.doc.name },
 					freeze: true,
 					callback: (r) => {
-						if (r.message) frappe.set_route("Form", "NC Norm Set", r.message);
+						if (r.message) frappe.set_route("norm-grid", r.message.name);
 					},
 				});
 			}).addClass("btn-primary");
