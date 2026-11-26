@@ -8,6 +8,7 @@
   "step_id",
   "service_level",
   "procedure_resource_row",
+  "step_removed",
   "component",
   "resource_doctype",
   "resource",
@@ -50,6 +51,13 @@
    "fieldname": "procedure_resource_row",
    "label": "Dòng nguồn lực gốc",
    "fieldtype": "Data"
+  },
+  {
+   "default": "0",
+   "fieldname": "step_removed",
+   "fieldtype": "Check",
+   "label": "Thuộc bước đã bỏ",
+   "read_only": 1
   },
   {
    "fieldname": "component",
