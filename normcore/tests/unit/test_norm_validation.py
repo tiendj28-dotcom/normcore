@@ -164,3 +164,21 @@ class TestEffectiveParameterSet(unittest.TestCase):
 		self.assertIsNone(
 			effective_parameter_set([{"name": "C", "effective_from": date(2027, 1, 1)}], date(2026, 1, 1))
 		)
+
+
+class TestStepRemoved(unittest.TestCase):
+	"""FEAT-013, AMD-013-01: dòng thuộc bước đã bỏ."""
+
+	def test_FR_NORM_015_di04_bo_qua_dong_co_co(self):
+		self.assertEqual(errs(ln(step_id="S009", step_removed=1)), [])
+
+	def test_FR_NORM_015_di04_van_bao_khi_khong_co_co(self):
+		self.assertTrue(any("không tồn tại" in e for e in errs(ln(step_id="S009"))))
+
+	def test_FR_NORM_015_confirm_blockers_thuoc_buoc_da_bo(self):
+		out = confirm_blockers([ln(step_id="S009", step_removed=1, resource="")])
+		self.assertEqual(out[0]["reasons"], ["Chưa xác nhận", "Chưa liên kết danh mục", "Thuộc bước đã bỏ"])
+
+	def test_FR_NORM_015_confirm_blockers_thu_tu_truoc_ai(self):
+		out = confirm_blockers([ln(step_removed=1, ai_suggested=1, confirmed_by="u")])
+		self.assertEqual(out[0]["reasons"], ["Thuộc bước đã bỏ", "Còn đề xuất AI chưa xử lý"])
