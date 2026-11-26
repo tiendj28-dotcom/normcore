@@ -1,0 +1,44 @@
+{
+ "content": null,
+ "creation": "2026-11-21 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-11-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "norm-grid",
+ "owner": "Administrator",
+ "page_name": "norm-grid",
+ "roles": [
+  {
+   "role": "NC Clinician"
+  },
+  {
+   "role": "NC Department Head"
+  },
+  {
+   "role": "NC Finance"
+  },
+  {
+   "role": "NC Resource Manager"
+  },
+  {
+   "role": "NC Director"
+  },
+  {
+   "role": "NC Consultant"
+  },
+  {
+   "role": "NC Admin"
+  },
+  {
+   "role": "NC Auditor"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Lưới định mức"
+}

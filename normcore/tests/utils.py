@@ -290,3 +290,10 @@ def make_eqa_program(code="EQA-HS", department="HS-CLS", services=("GLU",), **kw
 	doc = frappe.get_doc(values)
 	doc.insert(ignore_permissions=True)
 	return doc
+
+
+def confirm_norm_set(ns):
+	"""Dựng dữ liệu: đưa bộ định mức sang "Đã xác nhận chuyên môn" để khóa được (FR-NORM-011,
+	ASM-012-04, Quyết định Lead Q1). Không đi qua luồng xác nhận; luồng thật có test ở api/test_norm.py."""
+	ns.db_set("status", "Đã xác nhận chuyên môn")
+	return ns
