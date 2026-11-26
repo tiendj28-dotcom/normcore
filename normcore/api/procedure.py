@@ -977,3 +977,68 @@ def reject_suggestion(procedure, step_id):
 	doc.remove(row)
 	_save(doc)
 	return {"deleted": step_id, "resources": len(res), "citations": len(cits)}
+
+
+@frappe.whitelist()
+def check_consistency(procedure):
+	"""FR-AI-006, UC-005 bước 6: liệt kê điểm lệch của bản nháp. Không ghi gì vào quy trình.
+
+	(1)(2) kiểm bằng quy tắc; (3) trái chống chỉ định do AI đề xuất, lỗi AI không làm hỏng kết quả (6a)."""
+	from frappe.utils import now_datetime, strip_html
+
+	from normcore.ai import prompts_install
+	from normcore.procedure import consistency
+
+	doc = _editable(procedure)
+	data = doc.as_dict()
+	steps = [_dump(s, ("step_id", "phase", "step_title", "idx")) for s in doc.steps]
+	resources = [_dump(r, versioning.RESOURCE_FIELDS) for r in doc.resources]
+	rules = consistency.rule_issues(steps, resources)
+
+	contra = strip_html(doc.contraindications or "").strip()
+	if not gateway.is_enabled():
+		ai = {"status": "disabled"}
+	elif not contra:
+		ai = {
+			"status": "skipped",
+			"message": _("Quy trình chưa ghi chống chỉ định; không có gì để đối chiếu"),
+		}
+	else:
+		prompts_install.ensure_consistency_check_v2()
+		payload = guard.build_source(DT, data)
+		for f in ("overview", "indications", "contraindications", "cautions", "preparation_notes", "monitoring"):
+			payload[f] = strip_html(payload.get(f) or "")
+		holder = {}
+
+		def post(result):
+			issues, rejected = consistency.parse_contra(
+				result,
+				[s["step_id"] for s in steps],
+				[r["resource_row_id"] for r in resources],
+				contra,
+			)
+			holder["issues"] = issues
+			return result, rejected
+
+		res = gateway.complete(
+			"CONSISTENCY_CHECK",
+			"CONSISTENCY_CHECK",
+			consistency.contra_variables(payload),
+			[],
+			ref_doctype=DT,
+			ref_name=doc.name,
+			postprocess=post,
+		)
+		if res.ok:
+			issues = holder["issues"]
+			for i in issues:
+				i["message"] = _("Có thể trái chống chỉ định: {0}").format(i["explanation"])
+			rejected = frappe.db.get_value("NC AI Log", res.log_name, "rejected_citations") or 0
+			ai = {"status": "done", "issues": issues, "rejected": rejected, "log": res.log_name}
+		else:
+			ai = {
+				"status": "failed",
+				"message": _("Phần kiểm tra bằng AI chưa thực hiện: {0}").format(res.error),
+				"log": res.log_name,
+			}
+	return {"procedure": doc.name, "checked_on": now_datetime(), "rule_issues": rules, "ai": ai}
