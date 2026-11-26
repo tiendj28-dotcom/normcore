@@ -82,6 +82,17 @@ class NCCostingRun(Document):
 		self.reload()
 		return self.status
 
+	def _run(self, eligible, progress=None):
+		"""Pha tính (chỉ đọc): nạp dữ liệu và tính từng dịch vụ; trả danh sách `ServiceResult`."""
+		ctx = loader.load_context(self, eligible)
+		return runner.run(
+			eligible,
+			lambda e: loader.load_service(ctx, e),
+			ctx.pricing,
+			progress=progress,
+			allocate=lambda rs: allocate_pools(rs),
+		)
+
 	def test_systems_in_scope(self):
 		"""FR-CLS-006, DI-06 [1.1]: mã các hệ thống xét nghiệm "Đang dùng" cho lần tính mới."""
 		systems = frappe.get_all("NC Test System", fields=["name", "status"])
@@ -114,14 +125,7 @@ def execute_costing(run, eligible, background=True):
 			frappe.db.commit()  # pha tính chỉ đọc: commit tiến độ không commit kết quả dở
 
 	try:
-		ctx = loader.load_context(doc, eligible)
-		results = runner.run(
-			eligible,
-			lambda e: loader.load_service(ctx, e),
-			ctx.pricing,
-			progress=progress,
-			allocate=lambda rs: allocate_pools(rs),
-		)
+		results = doc._run(eligible, progress)
 	except Exception:
 		return _fail(doc)
 	frappe.db.savepoint("nc_costing_run")
