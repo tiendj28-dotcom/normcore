@@ -4,42 +4,32 @@ from datetime import date
 
 from normcore.procedure import review as r
 
-DOCS = [("LD-1", "123/QĐ-BYT"), ("LD-2", "9/TT")]
-SECS = [("LS-1", "LD-1", "2"), ("LS-2", "LD-1", "Điều 3"), ("LS-3", "LD-2", "1")]
+SECS = [("LS-1", "LD-1"), ("LS-2", "LD-1"), ("LS-3", "LD-2")]
 
 
 def idx():
-	return r.build_index(DOCS, SECS)
+	return r.build_index(SECS)
 
 
-def test_normalize_section_no():
-	assert r.normalize_section_no(" Mục 2. ") == "2"
-	assert r.normalize_section_no("Điều 3") == "3"
-	assert r.normalize_section_no("2 a") == "2a"
-	assert r.normalize_section_no(None) == ""
-
-
-def test_resolve_theo_ten_ban_ghi_va_so_hieu():
+def test_resolve_theo_link_muc_va_van_ban():
 	i = idx()
 	assert r.resolve({"legal_section": "LS-2"}, i) == ("LD-1", "LS-2")
+	# mục quyết định văn bản, bỏ qua legal_document lệch
+	assert r.resolve({"legal_document": "LD-9", "legal_section": "LS-3"}, i) == ("LD-2", "LS-3")
 	assert r.resolve({"legal_document": "LD-1", "legal_section": ""}, i) == ("LD-1", None)
-	assert r.resolve({"legal_document": "123/qđ-byt", "legal_section": "Mục 2"}, i) == ("LD-1", "LS-1")
-	assert r.resolve({"legal_document": "123 / QĐ-BYT", "legal_section": "3"}, i) == ("LD-1", "LS-2")
-	assert r.resolve({"legal_document": "LD-1", "legal_section": "99"}, i) == ("LD-1", None)
-	assert r.resolve({"legal_document": "không có"}, i) is None
+	# mục ngoài chỉ mục liên quan: rơi về cấp văn bản nếu có
+	assert r.resolve({"legal_document": "LD-7", "legal_section": "LS-X"}, i) == ("LD-7", None)
+	# không có Link nào (trích dẫn cũ không chuyển được)
 	assert r.resolve({"legal_document": "", "legal_section": ""}, i) is None
-
-
-def test_build_index_bo_so_hieu_rong_va_trung():
-	i = r.build_index([("A", ""), ("B", "x"), ("C", "X")], [])
-	assert i.doc_by_number == {"x": "B"}
+	assert r.resolve({"legal_section": "LS-X"}, i) is None
+	assert r.resolve({}, i) is None
 
 
 def test_affected_ly_do():
 	i = idx()
 	cites = [
-		{"legal_document": "LD-1", "legal_section": "2"},
-		{"legal_document": "LD-1", "legal_section": "3"},
+		{"legal_document": "LD-1", "legal_section": "LS-1"},
+		{"legal_document": "LD-1", "legal_section": "LS-2"},
 		{"legal_document": "LD-2"},
 		{"legal_document": "", "legal_section": ""},
 	]
@@ -48,22 +38,22 @@ def test_affected_ly_do():
 		("LD-1", "LS-1", r.REASON_SECTION),
 		("LD-2", None, r.REASON_DOC),
 	]
-	assert r.affected([{"legal_document": "LD-1", "legal_section": "2"}], i, set(), set()) == []
+	assert r.affected([{"legal_document": "LD-1", "legal_section": "LS-1"}], i, set(), set()) == []
 	# văn bản hết: mục thuộc văn bản đó cũng bị ảnh hưởng, lý do là văn bản
-	out = r.affected([{"legal_document": "LD-1", "legal_section": "2"}], i, {"LD-1"}, set())
+	out = r.affected([{"legal_document": "LD-1", "legal_section": "LS-1"}], i, {"LD-1"}, set())
 	assert out[0]["reason"] == r.REASON_DOC
 
 
 def test_to_flag_chi_da_ban_hanh():
 	i = idx()
-	c = [{"legal_document": "LD-1", "legal_section": "2"}]
+	c = [{"legal_document": "LD-1", "legal_section": "LS-1"}]
 	procs = [
 		{"name": "P1", "workflow_state": "Đã ban hành", "citations": c},
 		{"name": "P2", "workflow_state": "Nháp", "citations": c},
 		{
 			"name": "P3",
 			"workflow_state": "Đã ban hành",
-			"citations": [{"legal_document": "LD-1", "legal_section": "3"}],
+			"citations": [{"legal_document": "LD-1", "legal_section": "LS-2"}],
 		},
 		{"name": "P4", "workflow_state": "Đã ban hành"},
 	]

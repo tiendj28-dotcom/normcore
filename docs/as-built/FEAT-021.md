@@ -26,7 +26,7 @@ Dòng "Văn bản, mục, ánh xạ": NC Document Controller, NC Admin ghi (khai
 Xem `docs/rtm-testref/FEAT-021.md` và `implementation-log.md`.
 
 ## 6. Giới hạn đã biết
-- **Trích dẫn khớp theo tên hoặc số hiệu (ASM-021-01, Lead đã duyệt):** `legal_document`, `legal_section` của NC Procedure Citation vẫn là Data (nợ ASM-046). Trích dẫn gõ sai số hiệu hoặc mã mục không được khớp nên quy trình không bị gắn cờ. Việc đổi sang Link kèm patch dữ liệu tách ở NORM-65; bộ khớp ưu tiên tên `LS-…`/`LD-…` nên vẫn đúng sau đó.
+- **Trích dẫn khớp theo Link (ASM-021-13, sau NORM-65):** `legal_section` (mục và văn bản của mục) hoặc `legal_document` khi chỉ trích dẫn cấp văn bản. Trích dẫn cũ NORM-65 không chuyển được (Link trống, "[Căn cứ cũ: …]" ở `quote`) không được gắn cờ và không hiện ở hàng đợi. ASM-021-01 (khớp theo số hiệu gõ tay) hết hiệu lực.
 - Xóa dòng thay thế không hoàn tác ngày hết hiệu lực (ASM-021-02). Quy trình đã "Không cần sửa" không bị gắn cờ lại trừ khi có văn bản/mục khác hết hiệu lực (ASM-021-05).
 - Hàng đợi không có ánh xạ mục-với-mục; chỉ hiện văn bản thay thế (ASM-021-09).
 - Giao diện chưa kiểm bằng trình duyệt ở 1366 × 768 và bàn phím (agent không có trình duyệt); chỉ kiểm quy ước tĩnh, `bench build`, API và Page có trong site.

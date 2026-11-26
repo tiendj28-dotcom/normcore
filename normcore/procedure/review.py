@@ -1,65 +1,34 @@
 """Rà soát quy trình khi văn bản hoặc mục hết hiệu lực (FR-LIB-009, UC-002). Hàm thuần, không phụ thuộc frappe.
 
-Trích dẫn của quy trình lưu `legal_document`, `legal_section` dạng Data (ASM-046, ASM-021-01): hàm khớp
-chấp nhận cả tên bản ghi lẫn giá trị người dùng gõ.
+Trích dẫn của quy trình trỏ bằng Link: `legal_section` (NC Legal Section) và/hoặc `legal_document`
+(NC Legal Document, khi chỉ trích dẫn cấp văn bản). Từ NORM-65, ASM-021-13.
 """
 
-import re
-import unicodedata
 from collections import namedtuple
 from datetime import date, datetime
 
-from normcore.library.search import normalize_doc_number
 from normcore.procedure import approval
 
 REASON_DOC = "Văn bản hết hiệu lực"
 REASON_SECTION = "Mục hết hiệu lực"
 
-Index = namedtuple("Index", "doc_names doc_by_number section_by_name section_by_key")
+Index = namedtuple("Index", "section_doc")
 
 
-def normalize_section_no(s):
-	s = unicodedata.normalize("NFC", s or "").casefold().strip()
-	s = re.sub(r"^(mục|điều)\s*", "", s)
-	s = "".join(s.split())
-	return s.rstrip(".")
-
-
-def build_index(documents, sections):
-	"""documents: (name, doc_number); sections: (name, legal_document, section_no)."""
-	doc_names = {n for n, _ in documents}
-	by_number = {}
-	for name, number in documents:
-		key = normalize_doc_number(number)
-		if key:
-			by_number.setdefault(key, name)
-	by_name = {n: (d, n) for n, d, _ in sections}
-	by_key = {}
-	for name, doc, no in sections:
-		by_key.setdefault((doc, normalize_section_no(no)), name)
-	return Index(doc_names, by_number, by_name, by_key)
-
-
-def _doc_of(value, index):
-	value = (value or "").strip()
-	if not value:
-		return None
-	if value in index.doc_names:
-		return value
-	return index.doc_by_number.get(normalize_doc_number(value))
+def build_index(sections):
+	"""sections: (name, legal_document) của các mục liên quan."""
+	return Index({name: doc for name, doc in sections})
 
 
 def resolve(citation, index):
-	"""-> (văn bản, mục | None) hoặc None."""
-	sec_value = (citation.get("legal_section") or "").strip()
-	if sec_value in index.section_by_name:
-		return index.section_by_name[sec_value]
-	doc = _doc_of(citation.get("legal_document"), index)
-	if doc is None:
-		return None
-	if not sec_value:
+	"""-> (văn bản, mục | None) hoặc None khi trích dẫn không có Link nào."""
+	sec = (citation.get("legal_section") or "").strip()
+	if sec in index.section_doc:
+		return (index.section_doc[sec], sec)
+	doc = (citation.get("legal_document") or "").strip()
+	if doc:
 		return (doc, None)
-	return (doc, index.section_by_key.get((doc, normalize_section_no(sec_value))))
+	return None
 
 
 def affected(citations, index, expired_docs, expired_sections):

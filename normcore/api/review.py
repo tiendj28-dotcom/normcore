@@ -1,6 +1,7 @@
 """Rà soát quy trình khi văn bản hoặc mục hết hiệu lực (FEAT-021: FR-LIB-009, UC-002 bước 5-7).
 
-Trích dẫn của quy trình là Data (ASM-021-01): khớp theo tên bản ghi hoặc số hiệu, mã mục chuẩn hóa.
+Trích dẫn của quy trình trỏ bằng Link NC Legal Section / NC Legal Document (ASM-021-13, sau NORM-65).
+Trích dẫn cũ không chuyển được (Link trống, "[Căn cứ cũ: ...]" trong `quote`) không được gắn cờ.
 """
 
 import frappe
@@ -16,10 +17,7 @@ DT = "NC Clinical Procedure"
 
 
 def _build_index(expired_docs, expired_sections):
-	"""Chỉ dựng từ văn bản và mục liên quan (NFR-SCAL-002)."""
-	documents = [
-		(d.name, d.doc_number) for d in frappe.get_all("NC Legal Document", fields=["name", "doc_number"])
-	]
+	"""Chỉ dựng từ mục của văn bản liên quan (NFR-SCAL-002). Trả (Index, {văn bản: số hiệu}, {mục: mã mục})."""
 	parents = set(expired_docs)
 	if expired_sections:
 		parents |= set(
@@ -27,17 +25,23 @@ def _build_index(expired_docs, expired_sections):
 				"NC Legal Section", filters={"name": ["in", list(expired_sections)]}, pluck="legal_document"
 			)
 		)
-	sections = []
+	sections, numbers = [], {}
 	if parents:
-		sections = [
-			(s.name, s.legal_document, s.section_no)
-			for s in frappe.get_all(
-				"NC Legal Section",
-				filters={"legal_document": ["in", list(parents)]},
-				fields=["name", "legal_document", "section_no"],
+		sections = frappe.get_all(
+			"NC Legal Section",
+			filters={"legal_document": ["in", list(parents)]},
+			fields=["name", "legal_document", "section_no"],
+		)
+		numbers = dict(
+			frappe.get_all(
+				"NC Legal Document",
+				filters={"name": ["in", list(parents)]},
+				fields=["name", "doc_number"],
+				as_list=True,
 			)
-		]
-	return review.build_index(documents, sections), dict(documents), {s[0]: s[2] for s in sections}
+		)
+	index = review.build_index([(s.name, s.legal_document) for s in sections])
+	return index, numbers, {s.name: s.section_no for s in sections}
 
 
 def _published_citations():

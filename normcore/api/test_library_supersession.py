@@ -206,33 +206,50 @@ class TestLibraryReviewFlag(FrappeTestCase):
 		api.declare_supersession(c.name, d.name, "Toàn bộ", past)
 		self.assertEqual(_status("NC Legal Document", d.name), "Hết hiệu lực")
 
-	def test_FR_LIB_009_khop_trich_dan_tu_do(self):
-		a, b, _secs = _pair("TT/A3", "TT/B3")
-		p_free = make_cited(
-			"DV-F2", "KHOA-F2", self.head, [{"legal_document": "tt/b3", "legal_section": "Mục 2"}]
+	def test_FR_LIB_009_trich_dan_cap_van_ban(self):
+		"""Trích dẫn chỉ có Link văn bản vẫn được gắn cờ khi văn bản hết toàn bộ (ASM-021-13)."""
+		a, b, secs = _pair("TT/A3", "TT/B3")
+		p_sec = make_cited(
+			"DV-F2", "KHOA-F2", self.head, [{"legal_document": b.name, "legal_section": secs["2"].name}]
 		)
 		p_doc = make_cited("DV-F3", "KHOA-F3", self.head, [{"legal_document": b.name}])
 		p_other = make_cited(
-			"DV-F4", "KHOA-F4", self.head, [{"legal_document": b.name, "legal_section": "3"}]
+			"DV-F4", "KHOA-F4", self.head, [{"legal_document": b.name, "legal_section": secs["3"].name}]
 		)
 		p_draft = make_cited(
-			"DV-F5", "KHOA-F5", self.head, [{"legal_document": b.name, "legal_section": "2"}], state="Nháp"
+			"DV-F5",
+			"KHOA-F5",
+			self.head,
+			[{"legal_document": b.name, "legal_section": secs["2"].name}],
+			state="Nháp",
 		)
 		api.declare_supersession(a.name, b.name, "Một phần", "2099-07-01", "2")
 		out = api.refresh_validity(today=getdate("2099-07-01"))
 		flag = lambda p: frappe.db.get_value("NC Clinical Procedure", p.name, "needs_review")  # noqa: E731
-		self.assertEqual((flag(p_free), flag(p_doc), flag(p_other), flag(p_draft)), (1, 0, 0, 0))
+		self.assertEqual((flag(p_sec), flag(p_doc), flag(p_other), flag(p_draft)), (1, 0, 0, 0))
 		self.assertEqual(out["flagged"], 1)
-		# B hết toàn bộ: cả trích dẫn chỉ ghi văn bản và mục khác đều bị gắn cờ
+		# B hết toàn bộ: cả trích dẫn chỉ ghi văn bản và mục khác đều bị gắn cờ; bản Nháp thì không
 		api.declare_supersession(a.name, b.name, "Toàn bộ", "2099-08-01")
 		out = api.refresh_validity(today=getdate("2099-08-01"))
-		self.assertEqual((flag(p_free), flag(p_doc), flag(p_other), flag(p_draft)), (1, 1, 1, 0))
+		self.assertEqual((flag(p_sec), flag(p_doc), flag(p_other), flag(p_draft)), (1, 1, 1, 0))
 		self.assertEqual(out["flagged"], 3)
 		self.assertTrue(_notified(self.head, p_doc.name))
 
+	def test_FR_LIB_009_trich_dan_khong_co_link_khong_gan_co(self):
+		"""Trích dẫn cũ không chuyển được (NORM-65: Link trống, "[Căn cứ cũ: ...]" ở `quote`) không bị gắn cờ."""
+		a, b, _secs = _pair("TT/A5", "TT/B5")
+		p = make_cited("DV-F7", "KHOA-F7", self.head, [{"quote": "[Căn cứ cũ: TT/B5, Mục 2] đoạn trích"}])
+		before = frappe.db.count("Notification Log")
+		api.declare_supersession(a.name, b.name, "Toàn bộ", "2099-07-01")
+		out = api.refresh_validity(today=getdate("2099-07-01"))
+		self.assertEqual(out["flagged"], 0)
+		self.assertEqual(frappe.db.get_value("NC Clinical Procedure", p.name, "needs_review"), 0)
+		self.assertEqual(frappe.db.count("Notification Log"), before)
+
 	def test_FR_LIB_009_khong_co_quy_trinh_trich_dan(self):
 		a, b, _s = _pair("TT/A4", "TT/B4")
-		p = make_cited("DV-F6", "KHOA-F6", self.head, [{"legal_document": "TT/KHAC"}])
+		other = make_legal_document("TT/KHAC", effective_date="2026-02-01")
+		p = make_cited("DV-F6", "KHOA-F6", self.head, [{"legal_document": other.name}])
 		before = frappe.db.count("Notification Log")
 		api.declare_supersession(a.name, b.name, "Toàn bộ", "2099-07-01")
 		out = api.refresh_validity(today=getdate("2099-07-01"))

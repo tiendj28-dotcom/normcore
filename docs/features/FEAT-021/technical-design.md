@@ -2,6 +2,8 @@
 
 Issue NORM-64. Nguồn: `srs.md` FR-LIB-007, FR-LIB-008, FR-LIB-009 (và FR-WF-009, FR-NOTI-001 mà UC-002 dẫn tới); `use-cases.md` UC-002 (bước 1–7, 2a, 5a); `data-model.md` mục 3.2 (NC Legal Document `supersessions`, `expiry_date`; NC Legal Supersession), mục 3.3 (NC Clinical Procedure `needs_review`, NC Procedure Citation) và mục 4 dòng "Văn bản, mục, ánh xạ", "Quy trình"; `ux-foundations.md` SCR-DSK-012; TC-LIB-05, TC-LIB-06, TC-LIB-07. Phụ thuộc FEAT-020, FEAT-007 (DONE trên `develop`); dùng thêm FEAT-002 (`core/notify.py`), FEAT-008 (`create_revision`), FEAT-022 (đều DONE). Giả định: `docs/decisions/assumptions/FEAT-021.md` (ASM-021-01..).
 
+> **Cập nhật sau NORM-65 (ASM-021-13):** trích dẫn của quy trình nay là Link; khớp theo `legal_section`/`legal_document`. Các đoạn dưới đây nói về khớp theo số hiệu và mã mục gõ tay (ASM-021-01, mục 3.2, tiêu chí 4, mục 6, 7) đã hết hiệu lực. Xem `docs/as-built/FEAT-021.md`.
+
 Dùng lại, **không tạo lại**: NC Legal Document, NC Legal Section, `api/library.py` (`refresh_validity`, `daily_job`, `get_sections`), `library/validity.py`, `library/search.py` (`normalize_doc_number`, `natural_key`) của FEAT-020; NC Clinical Procedure (trường `needs_review` đã có từ FEAT-006), NC Procedure Citation, `api/procedure_workflow.py`, `procedure/approval.py` của FEAT-006/007; `api/procedure.create_revision` của FEAT-008; `core/notify.notify` của FEAT-002; phạm vi khoa `core/scope_rules/nc_clinical_procedure.json`.
 
 ## 1. Phạm vi

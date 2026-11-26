@@ -44,13 +44,16 @@ class TestReviewQueue(FrappeTestCase):
 
 	def test_TC_LIB_07_gan_co_thong_bao_hang_doi(self):
 		other = make_cited(
-			"DV-Q3", "KHOA-Q3", self.head, [{"legal_document": self.b.name, "legal_section": "3"}]
+			"DV-Q3",
+			"KHOA-Q3",
+			self.head,
+			[{"legal_document": self.b.name, "legal_section": self.secs["3"].name}],
 		)
 		draft = make_cited(
 			"DV-Q4",
 			"KHOA-Q4",
 			self.head,
-			[{"legal_document": self.b.name, "legal_section": "2"}],
+			[{"legal_document": self.b.name, "legal_section": self.secs["2"].name}],
 			state="Nháp",
 		)
 		self._expire()
