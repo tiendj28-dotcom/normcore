@@ -6,6 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 from normcore.api import access
 from normcore.api import norm as api
 from normcore.tests.utils import (
+	make_base,
 	make_cls_data,
 	make_procedure,
 	make_qc_items,
@@ -142,3 +143,117 @@ class TestCreate(ClsBase):
 			api.create_options(self.proc.name)
 		with self.assertRaises(frappe.PermissionError):
 			api.create_norm_set(self.proc.name, "GLU-A")
+
+
+def _line(name, line_id):
+	ns = frappe.get_doc("NC Norm Set", name)
+	return next(r for r in ns.lines if r.line_id == line_id)
+
+
+class TestLines(ClsBase):
+	def test_TC_CLS_30_cap_phat_sinh_va_co_k(self):
+		ns = self.create("GLU-A")
+		eq_line = "L002"  # DRUG HC_GLU, Theo kết quả, nhân k bật sẵn (ASM-034-06)
+		self.assertEqual(_line(ns.name, eq_line).apply_k, 1)
+		# cờ k ở dòng Theo mẻ: từ chối, CSDL không đổi
+		with self.assertRaises(frappe.ValidationError) as cm:
+			api.save_line(ns.name, {"cost_level": "BATCH"}, eq_line)
+		self.assertIn("Theo kết quả", str(cm.exception))
+		self.assertEqual(_line(ns.name, eq_line).cost_level, "RESULT")
+		# đặt từng cấp cho dòng
+		api.save_line(ns.name, {"cost_level": "BATCH", "apply_k": 0}, eq_line)
+		self.assertEqual(_line(ns.name, eq_line).cost_level, "BATCH")
+		with self.assertRaises(frappe.ValidationError):  # bật k ở dòng Theo mẻ
+			api.save_line(ns.name, {"apply_k": 1}, eq_line)
+		self.assertEqual(_line(ns.name, eq_line).apply_k, 0)
+		api.save_line(ns.name, {"cost_level": "TUBE"}, eq_line)
+		api.save_line(ns.name, {"cost_level": "DAY", "attach_to": "Hệ thống xét nghiệm"}, eq_line)
+		with self.assertRaises(frappe.ValidationError):  # DAY thiếu Gắn với
+			api.save_line(ns.name, {"attach_to": None}, eq_line)
+		api.save_line(
+			ns.name, {"cost_level": "PERIOD", "attach_to": "Thiết bị", "attach_equipment": "EQ_A"}, eq_line
+		)
+		row = _line(ns.name, eq_line)
+		self.assertEqual((row.cost_level, row.attach_equipment), ("PERIOD", "EQ_A"))
+		out = api.save_line(ns.name, {"cost_level": "RESULT"}, eq_line)  # xóa Gắn với theo ASM-034-09
+		self.assertEqual(_line(ns.name, eq_line).attach_to, None)
+		cost = next(x for g in out["norm_set"]["groups"] for x in g["lines"] if x["line_id"] == eq_line)
+		self.assertEqual(cost["cost"].get("missing") or "ok", cost["cost"].get("missing") or "ok")
+		# cờ k ở dòng nhân lực: từ chối
+		with self.assertRaises(frappe.ValidationError):
+			api.save_line(ns.name, {"apply_k": 1}, "L001")
+		# hao hụt 5% rồi bật k: lưu được, hao hụt về 0
+		api.save_line(ns.name, {"wastage_rate": 5}, eq_line)
+		self.assertEqual(_line(ns.name, eq_line).wastage_rate, 5)
+		api.save_line(ns.name, {"apply_k": 1}, eq_line)
+		row = _line(ns.name, eq_line)
+		self.assertEqual((row.apply_k, row.wastage_rate), (1, 0))
+
+	def test_TC_CLS_30_dich_vu_khong_can_lam_sang_luon_theo_ket_qua(self):
+		svc, dept, _job = make_base(service="DV-N34-B", department="K-N34-B")
+		proc = publish_procedure(make_procedure(svc, dept, minutes=10))
+		access.assign_department(self.head, dept)
+		frappe.set_user(self.head)
+		ns = frappe.get_doc("NC Norm Set", api.create_norm_set(proc.name)["name"])
+		api.save_line(ns.name, {"cost_level": "TUBE", "apply_k": 1}, "L001")
+		row = _line(ns.name, "L001")
+		self.assertEqual((row.cost_level, row.apply_k), ("RESULT", 0))
+
+	def test_TC_CLS_31_tu_choi_dong_trung_ke_hoach_chat_luong(self):
+		make_qc_plan("GLU-A")
+		ns = self.create("GLU-A")
+		step = self.proc.steps[0].step_id
+		qc_line = {
+			"step_id": step,
+			"component": "DRUG",
+			"resource_doctype": "NC Item",
+			"resource": "QC_L",
+			"hospital_qty": 1,
+			"uom": "ml",
+			"basis": "Ước tính",
+		}
+		before = frappe.db.count("NC Norm Line", {"parent": ns.name})
+		with self.assertRaises(frappe.ValidationError) as cm:
+			api.save_line(ns.name, qc_line)
+		self.assertIn("QC_L", str(cm.exception))
+		self.assertIn("kế hoạch", str(cm.exception))
+		self.assertEqual(frappe.db.count("NC Norm Line", {"parent": ns.name}), before)
+		# bộ của hệ thống chưa có kế hoạch: lưu được
+		other = self.create("GLU-B")
+		api.save_line(other.name, qc_line)
+		self.assertEqual(frappe.db.count("NC Norm Line", {"parent": other.name}), before + 1)
+
+	def test_save_head_so_xet_nghiem_moi_ong(self):
+		ns = self.create("GLU-A")
+		out = api.save_head(ns.name, {"tests_per_tube": 4})
+		self.assertEqual(out["doc"]["tests_per_tube"], 4)
+		with self.assertRaises(frappe.ValidationError):
+			api.save_head(ns.name, {"tests_per_tube": -1})
+		with self.assertRaises(frappe.ValidationError) as cm:
+			api.save_head(ns.name, {"test_system": "GLU-B"})
+		self.assertIn("Trường không được nhập", str(cm.exception))
+		frappe.set_user(self.aud)
+		with self.assertRaises(frappe.PermissionError):
+			api.save_head(ns.name, {"tests_per_tube": 3})
+
+	def test_get_norm_set_phan_cls(self):
+		ns = self.create("GLU-A")
+		out = api.get_norm_set(ns.name)
+		self.assertEqual(out["doc"]["test_system_label"], "GLU-A · EQ_A")
+		self.assertEqual(out["doc"]["norm_template"], TEMPLATE)
+		self.assertEqual([o["value"] for o in out["options"]["cost_level"]][:2], ["RESULT", "TUBE"])
+		self.assertEqual(out["meta"]["other_test_systems"][0]["name"], "GLU-B")
+		self.assertTrue(out["meta"]["is_paraclinical"])
+		lines = {x["line_id"]: x for g in out["groups"] for x in g["lines"]}
+		self.assertTrue(lines["L003"]["placeholder"])
+		self.assertFalse(lines["L002"]["placeholder"])
+		self.assertEqual(lines["L002"]["cost"]["missing"], "Tính ở lần tính giá")  # nhân k, ASM-034-22
+		self.assertTrue(out["summary"]["incomplete"])
+		self.assertEqual(
+			{t["item_name"]: t["satisfied"] for t in out["template_items"]},
+			{"Vật tư lấy mẫu": False, "Hóa chất chính": True, "Thiết bị": False},
+		)
+		self.assertIn("save_head", out["actions"])
+		self.assertIn("copy_norm_set", out["actions"])
+		self.assertNotIn("export_norm_set", out["actions"])  # ASM-034-24
+		self.assertTrue(any("kế hoạch" in b or "Số xét nghiệm" in b for b in out["set_blockers"]))

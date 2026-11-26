@@ -46,7 +46,7 @@ def _level(line: dict) -> str:
 	return line.get("cost_level") or "RESULT"
 
 
-def _qc_conflict(line: dict, ctx: dict) -> bool:
+def qc_conflict(line: dict, ctx: dict) -> bool:
 	"""ASM-034-10: dòng dùng mặt hàng của kế hoạch nội kiểm/chuẩn máy của hệ thống."""
 	return bool(
 		line.get("resource")
@@ -167,7 +167,7 @@ def _cls_errors(line: dict, ctx: dict, lid: str, component) -> list[str]:
 			errors.append(f"Dòng {lid}: chỉ gắn với Hệ thống xét nghiệm ở bộ có hệ thống xét nghiệm")
 		elif attach == ATTACH_EQUIPMENT and not line.get("attach_equipment"):
 			errors.append(f"Dòng {lid} thiếu: Thiết bị được gắn")
-	if ctx.get("changed") and _qc_conflict(line, ctx):  # FR-NORM-024, TC-CLS-31
+	if ctx.get("changed") and qc_conflict(line, ctx):  # FR-NORM-024, TC-CLS-31
 		errors.append(
 			f"Dòng {lid}: {line['resource']} đã có trong kế hoạch nội kiểm/chuẩn máy của hệ thống xét nghiệm, "
 			"không làm dòng định mức (tính từ kế hoạch chất lượng)"
@@ -223,7 +223,7 @@ def set_blockers(head: dict, lines, ctx: dict) -> list[str]:
 	if missing:
 		out.append(f"Thiếu khoản mục bắt buộc của mẫu: {', '.join(missing)}")
 	for ln in lines:
-		if not ln.get("is_excluded") and _qc_conflict(ln, ctx):
+		if not ln.get("is_excluded") and qc_conflict(ln, ctx):
 			out.append(f"Dòng {ln.get('line_id')} dùng mặt hàng của kế hoạch chất lượng: {ln['resource']}")
 	return out
 

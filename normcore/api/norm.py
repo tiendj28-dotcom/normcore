@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, getdate, now_datetime, today
 
-from normcore.costing import engine, pricing, resources
+from normcore.costing import engine, pricing, qc_plans, resources
 from normcore.costing import provisional as prov
 from normcore.nc_costing.doctype.nc_norm_set import nc_norm_set as ctl
 from normcore.norm import templates, validation, workflow
@@ -21,6 +21,7 @@ SAVE_FIELDS = tuple(
 	f for f in ctl.LINE_INPUTS if f not in ("line_id", "procedure_resource_row", "ai_suggested")
 )
 NO_PRICE = "Chưa có đơn giá"
+DEFERRED = "Tính ở lần tính giá"  # ASM-034-22
 # Trường tên hiển thị của từng DocType nguồn lực; đọc ở máy chủ nên người dùng không cần quyền đọc DocType đó
 NAME_FIELD = {
 	"NC Job Title": "job_title_name",
@@ -179,6 +180,13 @@ class _Prices:
 		return cint(frappe.db.get_value("NC Item", line["resource"], "reuse_count")) or 1
 
 
+def _deferred(row) -> bool:
+	"""ASM-034-22: dòng không phải Theo kết quả, hoặc nhân k, tính ở lần tính giá (FEAT-036), không tạm tính ở lưới."""
+	return not row["is_excluded"] and (
+		(row.get("cost_level") or "RESULT") != "RESULT" or bool(row.get("apply_k"))
+	)
+
+
 def _cost(prices, row):
 	"""Thành tiền tạm tính của một dòng: (rate, amount) hoặc None khi thiếu đơn giá."""
 	if row["is_excluded"]:
@@ -210,7 +218,7 @@ def _actions(ns):
 	can_write = frappe.has_permission(NS, "write", doc=ns)
 	if ns.status == DRAFT:
 		if can_write:
-			out += ["save_line", "delete_line"]
+			out += ["save_line", "delete_line", "save_head"]
 			if roles & set(workflow.ROLE_OF_ACTION["confirm_line"]):
 				out.append("confirm_line")
 			if "NC Department Head" in roles:
@@ -219,7 +227,13 @@ def _actions(ns):
 		out += ["return_set", "lock_set"]
 	elif ns.status == LOCKED and can_write and frappe.has_permission(NS, "create"):
 		out.append("new_version")
-	return out
+	if (
+		ns.test_system
+		and frappe.has_permission(NS, "create")
+		and len(_active_systems(ns.technical_service, ns.department)) > 1
+	):
+		out.append("copy_norm_set")
+	return out  # export_norm_set: ai đọc được bộ thì xuất được, giao diện luôn hiện nút (ASM-034-24)
 
 
 @frappe.whitelist()
@@ -230,13 +244,16 @@ def get_norm_set(name):
 	rows = [_dict(r) for r in ns.lines]
 	dups = validation.duplicates(rows)
 	blockers = validation.confirm_blockers(rows) if ns.status == DRAFT else []
+	cls = ctl.cls_ctx(ns)
+	set_blockers = _set_blockers(ns, rows, cls) if ns.status == DRAFT else []
 	cap, cap_src = ctl.effective_wastage_cap()
 	prices = _Prices()
 	labels = {}
 	lines, summary_rows = [], []
 	for r in ns.lines:
 		d = _dict(r)
-		cost = _cost(prices, d)
+		deferred = _deferred(d)
+		cost = None if deferred else _cost(prices, d)
 		d.update(
 			{
 				"applied_qty": float(
@@ -248,8 +265,10 @@ def get_norm_set(name):
 				"resource_label": _label(d["resource_doctype"], d["resource"], labels),
 				"unlinked": not d["resource"],
 				"duplicate_of": dups.get(d["line_id"], []),
-				"cost": cost if cost is not None else {"missing": _(NO_PRICE)},
+				"cost": cost if cost is not None else {"missing": _(DEFERRED if deferred else NO_PRICE)},
 				"excluded": bool(d["is_excluded"]),
+				"placeholder": validation.is_placeholder(d),
+				"qc_conflict": validation.qc_conflict(d, cls),
 			}
 		)
 		lines.append(d)
@@ -293,6 +312,11 @@ def get_norm_set(name):
 			"locked_by": ns.locked_by,
 			"locked_on": str(ns.locked_on) if ns.locked_on else None,
 			"modified": str(ns.modified),
+			"test_system": ns.test_system,
+			"test_system_label": _system_label(ns.test_system),
+			"tests_per_tube": ns.tests_per_tube,
+			"norm_template": ns.norm_template,
+			"copied_from": ns.copied_from,
 		},
 		"steps": steps,
 		"groups": groups,
@@ -300,15 +324,61 @@ def get_norm_set(name):
 		"wastage_cap": cap,
 		"wastage_cap_source": cap_src or _("mặc định"),
 		"blockers": blockers,
+		"set_blockers": set_blockers,
+		"warnings": _warnings(ns, cls),
+		"template_items": _template_status(cls["mandatory_items"], rows),
 		"actions": _actions(ns),
 		"options": {
 			"component": list(validation.COMPONENTS),
 			"basis": list(validation.BASIS_VALUES),
 			"exclude_reason": list(validation.EXCLUDE_REASONS),
 			"resource_doctype_by_component": RESOURCE_DOCTYPE_BY_COMPONENT,
+			"cost_level": [{"value": v, "label": validation.COST_LEVEL_LABELS[v]} for v in validation.COST_LEVELS],
+			"attach_to": list(validation.ATTACH_TO),
 		},
-		"meta": {"has_test_system": bool(frappe.get_meta(NS).has_field("test_system"))},
+		"meta": {
+			"has_test_system": bool(frappe.get_meta(NS).has_field("test_system")),
+			"is_paraclinical": cls["paraclinical"],
+			"other_test_systems": [
+				sy
+				for sy in _active_systems(ns.technical_service, ns.department)
+				if sy["name"] != ns.test_system
+			],
+		},
 	}
+
+
+def _system_label(test_system):
+	if not test_system:
+		return None
+	equipment = frappe.db.get_value("NC Test System", test_system, "main_equipment")
+	return f"{test_system} · {equipment}" if equipment else test_system
+
+
+def _set_blockers(ns, rows, cls) -> list[str]:
+	"""FR-NORM-020, 023, 024, ASM-034-01: lý do cấp bộ chặn "Xác nhận chuyên môn"."""
+	ctx = {
+		"ts_required": bool(_active_systems(ns.technical_service, ns.department)),
+		"qc_items": cls["qc_items"],
+		"mandatory_items": cls["mandatory_items"],
+	}
+	return validation.set_blockers({"test_system": ns.test_system, "tests_per_tube": ns.tests_per_tube}, rows, ctx)
+
+
+def _warnings(ns, cls) -> list[dict]:
+	"""FR-QC-007, TC-CLS-26 (ASM-034-17): cảnh báo thiếu nội kiểm; không chặn khóa."""
+	if not ns.test_system:
+		return []
+	plan = {"iqc_lines": []}
+	for name in frappe.get_all("NC QC Plan", {"test_system": ns.test_system}, pluck="name"):
+		plan = {"iqc_lines": [r.as_dict() for r in frappe.get_doc("NC QC Plan", name).iqc_lines]}
+	msg = qc_plans.missing_iqc_warning(cls["cls_group"], plan, ns.test_system)
+	return [{"code": "missing_iqc", "message": _(msg)}] if msg else []
+
+
+def _template_status(items, rows) -> list[dict]:
+	status = {s["item_name"]: s["satisfied"] for s in validation.mandatory_status(items, rows)}
+	return [{**it, "satisfied": status[it["item_name"]]} for it in items]
 
 
 def _total(lines):
@@ -442,6 +512,27 @@ def save_line(norm_set, values, line_id=None, allow_duplicate=0):
 		}
 	ns.save()
 	return {"saved": True, "norm_set": get_norm_set(ns.name)}
+
+
+@frappe.whitelist()
+def save_head(norm_set, values):
+	"""FR-NORM-020: chỉ nhập Số xét nghiệm bình quân trên một ống mẫu (ASM-034-12), bộ "Nháp"."""
+	ns = _load(norm_set, "write")
+	_need_draft(ns)
+	values = _values(values)
+	unknown = set(values) - {"tests_per_tube"}
+	if unknown:
+		frappe.throw(_("Trường không được nhập: {0}").format(", ".join(sorted(unknown))))
+	if "tests_per_tube" in values:
+		try:
+			value = float(values["tests_per_tube"] or 0)
+		except (TypeError, ValueError):
+			frappe.throw(_("Số xét nghiệm trên một ống mẫu phải là số"))
+		if value < 0:
+			frappe.throw(_("Số xét nghiệm trên một ống mẫu không được âm"))
+		ns.tests_per_tube = value
+	ns.save()
+	return get_norm_set(ns.name)
 
 
 @frappe.whitelist()
