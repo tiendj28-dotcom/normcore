@@ -77,14 +77,24 @@ function normcore_chain_filter(listview) {
 	listview.filter_area.get_standard_filters = () =>
 		standard_filters().filter((f) => f[1] !== "nc_chain_stage");
 	const dept_field = () => listview.page.fields_dict.department;
+	let routing = false; // đang đặt khoa từ liên kết: set_stage sẽ tính lại sau, không tính ở onchange khoa
+	let seq = 0; // bỏ kết quả của lần tính cũ khi khoa/mức đổi liên tiếp
+	// Đổi khoa bằng tay: tính lại bộ lọc `name` theo khoa mới (NORM-58); không chọn mức thì chỉ làm mới danh sách.
+	if (dept_field()) {
+		dept_field().df.onchange = () => {
+			if (!routing) apply();
+		};
+	}
 	function apply() {
 		const stage = field.get_value();
+		const mine = ++seq;
 		listview.filter_area.remove("name");
 		if (!stage) return Promise.resolve(listview.filter_area.debounced_refresh_list_view());
 		const department = dept_field() ? dept_field().get_value() : null;
 		return frappe
 			.xcall("normcore.api.home.services_in_stage", { stage, department: department || null })
 			.then((names) => {
+				if (mine !== seq) return;
 				if (names.length > NC_MAX_FILTER) {
 					frappe.show_alert({
 						message: __("Too many services, filter by department first"),
@@ -121,7 +131,11 @@ function normcore_chain_filter(listview) {
 		const taken = normcore_take_route_params();
 		if (!taken.nc_chain_stage && !taken.nc_department) return before_refresh();
 		const dept = dept_field();
+		routing = true;
 		return Promise.resolve(dept && dept.set_value(taken.nc_department || ""))
+			.finally(() => {
+				routing = false;
+			})
 			.then(() => set_stage(taken.nc_chain_stage))
 			.then(() => before_refresh());
 	};
