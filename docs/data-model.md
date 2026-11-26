@@ -586,6 +586,7 @@ Form hiển thị (không lưu): bộ định mức hiện hành, kế hoạch c
 | is_excluded | Loại trừ | Check | | |
 | exclude_reason | Lý do loại trừ | Select | | Thanh toán riêng / Ngân sách nhà nước bảo đảm / Đã tính trong dịch vụ khác / Không áp dụng **[1.1]** / Khác |
 | ai_suggested | Đề xuất của AI chưa xử lý | Check | | |
+| ai_confidence **[AMD-025-01]** | Độ tin cậy của đề xuất | Percent | | Chỉ đọc; 0–100; chỉ tác vụ đề xuất ghi; về 0 khi đề xuất được xử lý [FR-AI-007] |
 | confirmed_by, confirmed_on | Người xác nhận, thời điểm | Link User, Datetime | | [FR-NORM-009] |
 
 **[1.1]** Dòng cấu phần EQUIPMENT của dịch vụ cận lâm sàng có thiết bị chia theo Số kết quả hoặc Phút chiếm máy: `hospital_qty` không dùng để tính tiền; chi phí lấy từ thiết bị theo BR-CLS-009. Vật liệu nội kiểm, chất chuẩn và ngoại kiểm không là dòng định mức; chúng nằm ở NC QC Plan và NC EQA Program [FR-COST-020, FR-NORM-024].

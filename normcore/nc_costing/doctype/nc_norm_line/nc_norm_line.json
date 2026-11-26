@@ -29,6 +29,7 @@
   "is_excluded",
   "exclude_reason",
   "ai_suggested",
+  "ai_confidence",
   "confirmed_by",
   "confirmed_on"
  ],
@@ -150,6 +151,13 @@
    "fieldname": "ai_suggested",
    "label": "Đề xuất của AI chưa xử lý",
    "fieldtype": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ai_confidence",
+   "label": "Độ tin cậy của đề xuất",
+   "fieldtype": "Percent",
+   "precision": "0",
    "read_only": 1
   },
   {
