@@ -18,8 +18,8 @@ Add test system,Thêm hệ thống xét nghiệm
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 "After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
-All sections are confirmed.,Mọi mục đã được xác nhận.
 All components,Mọi cấu phần
+All sections are confirmed.,Mọi mục đã được xác nhận.
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
@@ -59,20 +59,18 @@ Collapse or expand all steps,Thu gọn hoặc mở tất cả bước
 Column,Cột,Import Excel
 Comment,Ý kiến
 Comments,Ý kiến
+Component,Cấu phần
 Confidence,Độ tin cậy
 Confirm,Xác nhận
 Confirm all 100% ({0}),Xác nhận các dòng 100% ({0})
 Confirm import,Xác nhận ghi
+Confirm professionally,Xác nhận chuyên môn
 Confirm selected,Xác nhận đã chọn
 Confirm {0} suggestions with 100% confidence?,Xác nhận {0} đề xuất có độ tin cậy 100%?
-Confirmed {0} mapping(s),Đã xác nhận {0} ánh xạ
-Component,Cấu phần
-Confirm,Xác nhận
-Confirm import,Xác nhận ghi
-Confirm professionally,Xác nhận chuyên môn
 Confirmation,Xác nhận
 "Confirmed professionally, waiting for Finance to lock. It cannot be edited.","Bộ đã xác nhận chuyên môn, chờ Tài chính khóa. Không sửa được."
 Confirmed {0},Đã xác nhận {0}
+Confirmed {0} mapping(s),Đã xác nhận {0} ánh xạ
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
 Cost category,Loại chi phí
