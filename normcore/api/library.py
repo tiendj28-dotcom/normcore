@@ -232,7 +232,14 @@ def refresh_validity(today=None):
 	)
 	for name, status in changed_secs:
 		frappe.db.set_value("NC Legal Section", name, "validity_status", status, update_modified=False)
-	return {"documents": len(changed_docs), "sections": len(changed_secs)}
+	expired_docs = {n for n, st in changed_docs if st == validity.HET}
+	expired_secs = {n for n, st in changed_secs if st == validity.HET}
+	flagged = 0
+	if expired_docs or expired_secs:
+		from normcore.api.review import flag_affected
+
+		flagged = flag_affected(expired_docs, expired_secs, on)
+	return {"documents": len(changed_docs), "sections": len(changed_secs), "flagged": flagged}
 
 
 def _fmt_date(d):

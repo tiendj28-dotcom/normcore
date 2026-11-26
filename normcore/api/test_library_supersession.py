@@ -122,3 +122,83 @@ class TestLibrarySupersession(FrappeTestCase):
 		self.assertEqual(res["superseded_by"][0]["scope"], "Toàn bộ")
 		res = api.get_supersessions(a.name)
 		self.assertEqual(res["supersedes"][0]["superseded_document"], b.name)
+
+
+# ---------------------------------------------------------------------------------------------
+# FR-LIB-009: gắn cờ khi hết hiệu lực
+# ---------------------------------------------------------------------------------------------
+
+
+def make_cited(service, department, head, cites, state="Đã ban hành", version=1):
+	"""Quy trình có trích dẫn; khoa có trưởng khoa `head`."""
+	from normcore.tests.utils import make_base, make_procedure, publish_procedure, to_state
+
+	make_base(service, department)
+	frappe.db.set_value("NC Department", department, "head_user", head)
+	proc = make_procedure(service, department, version=version)
+	for c in cites:
+		proc.append("citations", {"target_section": "Chỉ định", "relation": "Theo hướng dẫn", "quote": "q", **c})
+	proc.save(ignore_permissions=True)
+	if state == "Đã ban hành":
+		publish_procedure(proc)
+	else:
+		to_state(proc, state)
+	return proc
+
+
+def _notified(user, doc_name):
+	return frappe.get_all(
+		"Notification Log", filters={"for_user": user, "document_type": "NC Clinical Procedure",
+		"document_name": doc_name}, pluck="subject")
+
+
+class TestLibraryReviewFlag(FrappeTestCase):
+	def setUp(self):
+		frappe.set_user("Administrator")
+		self.head = make_user("hd_flag21@example.com", "NC Department Head")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_FR_LIB_007_ngay_qua_khu_ap_dung_ngay(self):
+		a, b, secs = _pair("TT/A2", "TT/B2")
+		p = make_cited("DV-F1", "KHOA-F1", self.head, [{"legal_document": b.name, "legal_section": secs["2"].name}])
+		past = str(add_days(getdate(today()), -1))
+		api.declare_supersession(a.name, b.name, "Một phần", past, "2")
+		self.assertEqual(_status("NC Legal Section", secs["2"].name), "Hết hiệu lực")
+		self.assertEqual(_status("NC Legal Section", secs["3"].name), "Còn hiệu lực")
+		self.assertEqual(frappe.db.get_value("NC Clinical Procedure", p.name, "needs_review"), 1)
+		c = make_legal_document("TT/C2", effective_date="2026-02-01")
+		d = make_legal_document("TT/D2", effective_date="2026-01-01")
+		api.declare_supersession(c.name, d.name, "Toàn bộ", past)
+		self.assertEqual(_status("NC Legal Document", d.name), "Hết hiệu lực")
+
+	def test_FR_LIB_009_khop_trich_dan_tu_do(self):
+		a, b, secs = _pair("TT/A3", "TT/B3")
+		p_free = make_cited("DV-F2", "KHOA-F2", self.head, [{"legal_document": "tt/b3", "legal_section": "Mục 2"}])
+		p_doc = make_cited("DV-F3", "KHOA-F3", self.head, [{"legal_document": b.name}])
+		p_other = make_cited("DV-F4", "KHOA-F4", self.head, [{"legal_document": b.name, "legal_section": "3"}])
+		p_draft = make_cited("DV-F5", "KHOA-F5", self.head, [{"legal_document": b.name, "legal_section": "2"}], state="Nháp")
+		api.declare_supersession(a.name, b.name, "Một phần", "2099-07-01", "2")
+		out = api.refresh_validity(today=getdate("2099-07-01"))
+		flag = lambda p: frappe.db.get_value("NC Clinical Procedure", p.name, "needs_review")  # noqa: E731
+		self.assertEqual((flag(p_free), flag(p_doc), flag(p_other), flag(p_draft)), (1, 0, 0, 0))
+		self.assertEqual(out["flagged"], 1)
+		# B hết toàn bộ: cả trích dẫn chỉ ghi văn bản và mục khác đều bị gắn cờ
+		api.declare_supersession(a.name, b.name, "Toàn bộ", "2099-08-01")
+		out = api.refresh_validity(today=getdate("2099-08-01"))
+		self.assertEqual((flag(p_free), flag(p_doc), flag(p_other), flag(p_draft)), (1, 1, 1, 0))
+		self.assertEqual(out["flagged"], 3)
+		self.assertTrue(_notified(self.head, p_doc.name))
+
+	def test_FR_LIB_009_khong_co_quy_trinh_trich_dan(self):
+		a, b, _s = _pair("TT/A4", "TT/B4")
+		p = make_cited("DV-F6", "KHOA-F6", self.head, [{"legal_document": "TT/KHAC"}])
+		before = frappe.db.count("Notification Log")
+		api.declare_supersession(a.name, b.name, "Toàn bộ", "2099-07-01")
+		out = api.refresh_validity(today=getdate("2099-07-01"))
+		self.assertEqual(out["flagged"], 0)
+		self.assertEqual(frappe.db.get_value("NC Clinical Procedure", p.name, "needs_review"), 0)
+		self.assertEqual(frappe.db.count("Notification Log"), before)
+		self.assertEqual(len(api.get_supersessions(b.name)["superseded_by"]), 1)
