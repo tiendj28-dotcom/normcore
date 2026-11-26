@@ -31,6 +31,7 @@ Assumption,Giả định
 Attach to,Gắn với
 Authority document,Văn bản ban hành định mức
 Authority norm,Định mức ban hành
+BATCH,Theo mẻ
 Basis,Căn cứ
 Basis reference,Tham chiếu căn cứ
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
@@ -81,6 +82,8 @@ Create new version,Tạo phiên bản mới
 Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
 Created,Tạo mới,Import Excel
+DAY,Theo ngày-máy
+DRUG,Thuốc và hóa chất
 Deactivate,Ngừng dùng
 Deactivate test system {0}? It will not enter new costing runs; existing runs stay unchanged.,Ngừng dùng hệ thống {0}? Hệ thống sẽ không vào các lần tính giá mới; các lần tính đã có giữ nguyên.
 Decision number,Số quyết định
@@ -103,6 +106,7 @@ Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
 Duplicate of {0},Trùng nguồn lực với {0} trong cùng bước
 EQA tests,Số test ngoại kiểm
+EQUIPMENT,Thiết bị
 Edit,Sửa
 Edit cost category,Sửa loại chi phí
 Edit cost category of a line,Sửa loại chi phí của một dòng
@@ -130,6 +134,7 @@ Has error lines,Có dòng lỗi
 Headcount,Số người
 Heading,Tiêu đề
 Hospital norm,Định mức bệnh viện
+INFRA,Hạ tầng
 IQC tests,Số test nội kiểm
 Import data from Excel,Nhập dữ liệu từ Excel
 Import from Excel,Nhập từ Excel
@@ -140,6 +145,7 @@ Indexing failed: {0},Lập chỉ mục thất bại: {0}
 Indexing in progress. Sections will appear when it finishes.,Đang lập chỉ mục. Các mục sẽ hiện khi hoàn tất.
 Internal QC,Nội kiểm
 "Keyword, phrase, document number or service code","Từ khóa, cụm từ, số hiệu hoặc mã dịch vụ"
+LABOR,Nhân lực
 Labor,Nhân công
 Legal document,Văn bản
 Legal section,Mục văn bản
@@ -191,6 +197,7 @@ None yet,Chưa có
 Norm grid,Lưới định mức
 Norm set actions,Thao tác bộ định mức
 Norm sets,Bộ định mức
+Not in use,Không dùng
 Not linked,Chưa liên kết
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Only lines needing attention,Chỉ dòng cần xử lý
@@ -203,6 +210,7 @@ Original page,Trang gốc
 Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
 Over cap,Vượt trần
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
+PERIOD,Theo kỳ
 Pages,Trang
 Pages {0}–{1} of {2},Trang {0}–{1} của {2}
 Paraclinical,Cận lâm sàng
@@ -211,6 +219,7 @@ Performing department,Khoa thực hiện
 Phase,Giai đoạn
 Pick a norm set from the list.,Chọn một bộ định mức ở danh sách.
 Pick a procedure to see its steps.,Chọn một quy trình để xem các bước.
+"Preset template, not in use. Review the items, then turn on Active.","Mẫu cài sẵn, chưa dùng. Rà khoản mục rồi bật Đang dùng."
 Preview: written on finalize,Xem trước — ghi khi chốt
 Previous version,Phiên bản trước
 Price code,Mã đơn giá,NC Item
@@ -226,6 +235,7 @@ Quality plan,Kế hoạch chất lượng
 Quantity,Số lượng
 Query,Nội dung tìm
 Quote,Đoạn trích
+RESULT,Theo kết quả
 Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
 Re-index,Lập lại chỉ mục
 Re-index this document? Manual edits to section text will be overwritten (kept in version history).,Lập lại chỉ mục văn bản này? Chỗ đã sửa tay trong văn bản của mục sẽ bị ghi đè (vẫn còn trong lịch sử phiên bản).
@@ -252,6 +262,7 @@ Room hourly rate,Đơn giá giờ phòng,NC Room
 Row,Dòng,Import Excel
 Row ID,Mã dòng
 Run costing,Chạy tính giá
+SUPPLY,Vật tư
 Samples per year,Số mẫu mỗi năm
 Save,Lưu
 Save comment,Lưu ý kiến
@@ -284,6 +295,7 @@ Step,Bước
 Step ID,Mã bước
 Step title,Tên bước
 Suggested,Đề xuất
+TUBE,Theo ống mẫu
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
@@ -302,6 +314,7 @@ Total,Tổng
 Total share differs from 100%,Tổng tỷ trọng khác 100%
 Totals by cost center and category,Tổng theo trung tâm và loại chi phí
 Type,Loại
+UTILITY,Tiện ích
 Unassign,Bỏ gán
 Unchanged,Không đổi,Import Excel
 Unit,Đơn vị
