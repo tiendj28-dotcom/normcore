@@ -11,7 +11,7 @@ from frappe.utils import cint, getdate, now_datetime, today
 from normcore.costing import engine, pricing, resources
 from normcore.costing import provisional as prov
 from normcore.nc_costing.doctype.nc_norm_set import nc_norm_set as ctl
-from normcore.norm import validation, workflow
+from normcore.norm import templates, validation, workflow
 from normcore.norm.init_from_procedure import RESOURCE_DOCTYPE_BY_COMPONENT
 
 NS = "NC Norm Set"
@@ -341,9 +341,74 @@ def search_resources(norm_set, component, txt=None):
 # ---------------------------------------------------------------- ghi
 
 
+def _active_systems(service, department) -> list[dict]:
+	"""ASM-034-01: hệ thống "Đang dùng" của (dịch vụ, khoa); đọc ở máy chủ."""
+	return frappe.get_all(
+		"NC Test System",
+		{"technical_service": service, "department": department, "status": "Đang dùng"},
+		["name", "main_equipment"],
+		order_by="name",
+	)
+
+
+def _open_set(service, department, test_system):
+	"""ASM-034-14: bộ đang soạn (Nháp hoặc Đã xác nhận chuyên môn) theo (dịch vụ, khoa, hệ thống)."""
+	rows = frappe.get_all(
+		NS,
+		{
+			"technical_service": service,
+			"department": department,
+			"test_system": test_system or ["is", "not set"],
+			"status": ["in", [DRAFT, CONFIRMED]],
+		},
+		pluck="name",
+		order_by="name",
+	)
+	return rows[0] if rows else None
+
+
 @frappe.whitelist()
-def create_norm_set(procedure):
-	return {"name": ctl.create_from_procedure(procedure)}
+def create_options(procedure):
+	"""Hộp chọn hệ thống khi khởi tạo (UC-021): hệ thống đang dùng, có bắt buộc chọn không, mẫu sẽ áp."""
+	frappe.has_permission(NS, "create", throw=True)
+	proc = frappe.get_doc("NC Clinical Procedure", procedure)
+	frappe.has_permission("NC Clinical Procedure", "read", doc=proc, throw=True)
+	systems = _active_systems(proc.technical_service, proc.department)
+	for sy in systems:
+		sy["open_set"] = _open_set(proc.technical_service, proc.department, sy["name"])
+	svc = frappe.db.get_value(
+		"NC Technical Service", proc.technical_service, ["is_paraclinical", "cls_group"], as_dict=True
+	)
+	template = None
+	if svc and svc.is_paraclinical:
+		template = templates.pick_template(
+			frappe.get_all("NC Norm Template", fields=["name", "cls_group", "is_active"]), svc.cls_group
+		)
+	return {"test_systems": systems, "required": bool(systems), "template": template}
+
+
+@frappe.whitelist()
+def create_norm_set(procedure, test_system=None):
+	proc = frappe.get_doc("NC Clinical Procedure", procedure)
+	systems = _active_systems(proc.technical_service, proc.department)
+	if test_system:
+		ts = frappe.db.get_value(
+			"NC Test System", test_system, ["technical_service", "department"], as_dict=True
+		)
+		if not ts or (ts.technical_service, ts.department) != (proc.technical_service, proc.department):
+			frappe.throw(
+				_("Hệ thống xét nghiệm {0} không thuộc dịch vụ/khoa của bộ định mức").format(test_system)
+			)
+		open_set = _open_set(proc.technical_service, proc.department, test_system)
+		if open_set:  # ASM-034-14
+			return {"name": open_set, "message": _("Đã có bộ định mức đang soạn: {0}").format(open_set)}
+	elif systems:  # ASM-034-01
+		frappe.throw(
+			_("Dịch vụ có hệ thống xét nghiệm: chọn hệ thống cho bộ định mức ({0})").format(
+				", ".join(sy["name"] for sy in systems)
+			)
+		)
+	return {"name": ctl.create_from_procedure(procedure, test_system or None)}
 
 
 @frappe.whitelist()
