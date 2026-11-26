@@ -13,6 +13,8 @@
   "page_to",
   "expiry_date",
   "validity_status",
+  "mapping_section",
+  "service_mappings",
   "compare_section",
   "plain_text",
   "col_source",
@@ -74,6 +76,17 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "options": "\nChưa hiệu lực\nCòn hiệu lực\nHết hiệu lực"
+  },
+  {
+   "fieldname": "mapping_section",
+   "fieldtype": "Section Break",
+   "label": "Ánh xạ dịch vụ"
+  },
+  {
+   "fieldname": "service_mappings",
+   "label": "Ánh xạ dịch vụ",
+   "fieldtype": "Table",
+   "options": "NC Section Service Map"
   },
   {
    "fieldname": "compare_section",

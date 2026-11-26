@@ -195,6 +195,14 @@
 | FR-NOTI-003 | `test_TC_NOTI_01_gui_duyet_thong_bao_va_trang_chu_truong_khoa`, `test_TC_NOTI_01_viec_cho_dung_nguoi`, `test_TC_NOTI_01_auditor_khong_co_viec`, `test_quyen_get_home_guest` (api/test_home.py), `test_FR_NOTI_003_*` (core/test_notify.py) |
 | FR-OUT-010 | `test_FR_OUT_010_*` (unit/test_chain_stages.py), `test_FR_OUT_010_dem_theo_tinh_trang_chuoi`, `test_FR_OUT_010_loc_khoa_va_pham_vi`, `test_FR_OUT_010_bo_loc_danh_sach_dich_vu`, `test_FR_OUT_010_so_truy_van_get_home` (api/test_home.py), `test_workspace_co_block_trang_chu` (tests/test_feat_002.py) |
 | FR-ADM-003 | `test_TC_ADM_03_doi_so_ca_toi_thieu_ap_ngay` (**một phần** của TC-ADM-03, Lead chọn PA1, ASM-002-13; phần trung vị/cảnh báo thiếu ca là `test_TC_ADM_03_ket_qua_bam_gio_3_ca` của FEAT-014), `test_FR_ADM_003_so_ngay_nhac_ap_ngay`, `test_FR_ADM_003_thoi_han_ai_ap_ngay`, `test_nc_settings_*`, `test_quyen_nc_settings_*` (nc_settings/test_nc_settings.py) |
+# Test ref — FEAT-022 (Dev NORM-54 ghi)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-SVC-005 | `test_FR_SVC_005_de_xuat_sau_lap_chi_muc`, `test_FR_SVC_005_lap_lai_giu_da_xac_nhan`, `test_FR_SVC_005_loi_de_xuat_khong_lam_van_ban_loi`, `test_FR_SVC_005_de_xuat_lai_va_quyen`, `test_SCR_DSK_004_loc_chua_xac_nhan` (api/test_library_mapping.py), unit/test_library_mapping.py |
+| FR-SVC-006 | `test_FR_SVC_006_xac_nhan_luu_nguoi_va_thoi_diem`, `test_FR_SVC_006_quyen_anh_xa` (api/test_library_mapping.py), `test_FR_SVC_006_validate_dong_dau` (nc_section_service_map) |
+| FR-SVC-007 | `test_TC_SVC_02_chi_muc_da_xac_nhan_vao_nguon_ai`, `test_FR_SVC_007_nguon_chi_truong_cho_phep` (api/test_library_mapping.py) |
+| TC-SVC-02 | `test_TC_SVC_02_chi_muc_da_xac_nhan_vao_nguon_ai` |
 # Test ref — FEAT-008 (QA Multica kiểm định, accepted)
 
 | FR | Test thật |

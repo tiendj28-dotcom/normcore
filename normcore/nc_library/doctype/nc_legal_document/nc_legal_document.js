@@ -57,6 +57,215 @@ function render_sections(frm, start, rows_so_far) {
 	});
 }
 
+// SCR-DSK-004 (FEAT-022): bảng ánh xạ hướng dẫn với dịch vụ trong form văn bản.
+const MAP_PAGE = 100;
+const MAP_STATUS_COLOR = { "Đề xuất": "gray", "Đã xác nhận": "green" };
+
+function confidence_color(c) {
+	return c >= 100 ? "green" : c >= 70 ? "blue" : "yellow";
+}
+
+function map_call(frm, method, args, done, opts) {
+	frappe.call(Object.assign({ method: "normcore.api.library." + method, args: args, callback: done }, opts || {}));
+}
+
+function map_dialog(frm, title, section, row, after) {
+	const d = new frappe.ui.Dialog({
+		title: title,
+		fields: [
+			{
+				fieldname: "technical_service",
+				label: __("Technical service"),
+				fieldtype: "Link",
+				options: "NC Technical Service",
+				reqd: 1,
+				get_query: () => ({ filters: { is_active: 1 } }),
+			},
+			{ fieldtype: "HTML", options: `<p class="text-muted small">${__("Saving confirms the mapping.")}</p>` },
+		],
+		primary_action_label: __("Save"),
+		primary_action(v) {
+			map_call(
+				frm,
+				"save_mapping",
+				{ section: section, technical_service: v.technical_service, row: row || null },
+				() => {
+					d.hide();
+					frappe.show_alert({ message: __("Mapping saved"), indicator: "green" });
+					after();
+				}
+			);
+		},
+	});
+	d.show();
+}
+
+function render_mappings(frm, start) {
+	const $w = frm.fields_dict.mapping_html.$wrapper;
+	if (frm.is_new() || !frm.doc.is_procedure_guideline) {
+		$w.empty();
+		return;
+	}
+	if (frm.doc.index_status !== "Đã lập") {
+		$w.html(`<p class="text-muted">${__("Mappings are available after indexing finishes.")}</p>`);
+		return;
+	}
+	const can_write = !!(frm.perm[0] && frm.perm[0].write);
+	if (frm._nc_unconf === undefined) frm._nc_unconf = 1;
+	const reload = () => render_mappings(frm, 0);
+	map_call(
+		frm,
+		"get_mappings",
+		{ legal_document: frm.doc.name, unconfirmed_only: frm._nc_unconf, start: start, page_length: MAP_PAGE },
+		(r) => {
+			const res = r.message || { rows: [], total: 0, pending_exact: 0 };
+			if (!start) {
+				$w.html(
+					`<div class="nc-map-bar form-inline" style="gap: var(--margin-md); margin-bottom: var(--margin-md)"></div>` +
+						`<div class="table-responsive"><table class="table table-bordered nc-map-table"><thead><tr>` +
+						(can_write ? `<th></th>` : "") +
+						`<th>${__("Section")}</th><th>${__("Heading")}</th><th>${__("Technical service")}</th>` +
+						`<th>${__("Confidence")}</th><th>${__("Status")}</th>` +
+						(can_write ? `<th>${__("Actions")}</th>` : "") +
+						`</tr></thead><tbody></tbody></table></div><div class="nc-map-foot"></div>`
+				);
+				const $bar = $w.find(".nc-map-bar");
+				const $chk = $(
+					`<label class="checkbox"><input type="checkbox" class="nc-map-filter" ${frm._nc_unconf ? "checked" : ""}> ` +
+						`${__("Unconfirmed only")}</label>`
+				);
+				$chk.find("input").on("change", (e) => {
+					frm._nc_unconf = e.target.checked ? 1 : 0;
+					reload();
+				});
+				$bar.append($chk);
+				if (can_write) {
+					if (res.pending_exact) {
+						const $b = $(`<button class="btn btn-primary btn-sm">${__("Confirm all 100% ({0})", [res.pending_exact])}</button>`);
+						$b.on("click", () =>
+							frappe.confirm(__("Confirm {0} suggestions with 100% confidence?", [res.pending_exact]), () =>
+								map_call(frm, "confirm_exact", { legal_document: frm.doc.name }, (x) => {
+									frappe.show_alert({ message: __("Confirmed {0} mapping(s)", [x.message.confirmed]), indicator: "green" });
+									reload();
+								}, { freeze: true })
+							)
+						);
+						$bar.append($b);
+					}
+					const $sel = $(`<button class="btn btn-default btn-sm nc-map-sel" disabled>${__("Confirm selected")}</button>`);
+					$sel.on("click", () => {
+						const rows = $w.find(".nc-map-pick:checked").map((i, e) => $(e).data("row")).get();
+						map_call(frm, "confirm_mappings", { legal_document: frm.doc.name, rows: rows }, (x) => {
+							frappe.show_alert({ message: __("Confirmed {0} mapping(s)", [x.message.confirmed]), indicator: "green" });
+							reload();
+						}, { freeze: true });
+					});
+					const $again = $(`<button class="btn btn-default btn-sm">${__("Suggest again")}</button>`);
+					$again.on("click", () =>
+						frappe.confirm(
+							__("Recalculate suggestions? Confirmed mappings are kept; current suggestions are replaced."),
+							() => map_call(frm, "suggest_mappings", { legal_document: frm.doc.name }, (x) => {
+								frappe.show_alert({ message: __("{0} suggestions created", [x.message.suggested]), indicator: "green" });
+								reload();
+							}, { freeze: true })
+						)
+					);
+					$bar.append($sel, $again);
+				}
+			}
+			const $body = $w.find("tbody");
+			if (!start && !res.rows.length) {
+				$w.find(".nc-map-table").hide();
+				$w.find(".nc-map-foot").html(
+					`<p class="text-muted">${frm._nc_unconf ? __("All sections are confirmed.") : __("No suggestions found. Use + Add service on each section or Suggest again.")}</p>`
+				);
+				return;
+			}
+			res.rows.forEach((sec) => {
+				const rows = sec.mappings.length ? sec.mappings : [null];
+				rows.forEach((m, i) => {
+					const $tr = $("<tr></tr>");
+					if (can_write) {
+						$tr.append(
+							m && m.mapping_status === "Đề xuất"
+								? $(`<td><input type="checkbox" class="nc-map-pick" aria-label="${__("Select")}"></td>`).find("input").data("row", m.row).end()
+								: "<td></td>"
+						);
+					}
+					if (i === 0) {
+						$tr.append(
+							$(`<td rowspan="${rows.length}"><a href="#" class="nc-map-sec">${frappe.utils.escape_html(sec.section_no)}</a></td>`),
+							`<td rowspan="${rows.length}">${frappe.utils.escape_html(sec.heading || "")}</td>`
+						);
+						$tr.find(".nc-map-sec").on("click", (e) => {
+							e.preventDefault();
+							frappe.set_route("Form", "NC Legal Section", sec.section);
+						});
+					}
+					if (m) {
+						const conf = m.confidence
+							? `<span class="indicator-pill ${confidence_color(m.confidence)} ellipsis"><span>${m.confidence}%</span></span>`
+							: __("Manual");
+						let st = `<span class="indicator-pill ${MAP_STATUS_COLOR[m.mapping_status] || "gray"} ellipsis"><span>${__(m.mapping_status)}</span></span>`;
+						if (m.mapping_status === "Đã xác nhận" && m.confirmed_by) {
+							st += `<div class="text-muted small">${frappe.utils.escape_html(frappe.user.full_name(m.confirmed_by))}, ${frappe.datetime.str_to_user(m.confirmed_on)}</div>`;
+						}
+						$tr.append(
+							`<td><a href="/app/nc-technical-service/${encodeURIComponent(m.technical_service)}">${frappe.utils.escape_html(m.technical_service)}</a> — ${frappe.utils.escape_html(m.service_name || "")}</td>`,
+							`<td>${conf}</td>`,
+							`<td>${st}</td>`
+						);
+					} else {
+						$tr.append("<td>—</td><td></td><td></td>");
+					}
+					if (can_write) {
+						const $act = $("<td></td>");
+						if (m && m.mapping_status === "Đề xuất") {
+							const $c = $(`<button class="btn btn-default btn-xs">${__("Confirm")}</button>`);
+							$c.on("click", () => map_call(frm, "confirm_mappings", { legal_document: frm.doc.name, rows: [m.row] }, (x) => {
+								frappe.show_alert({ message: __("Confirmed {0} mapping(s)", [x.message.confirmed]), indicator: "green" });
+								reload();
+							}));
+							$act.append($c, " ");
+						}
+						if (m) {
+							const $e = $(`<button class="btn btn-default btn-xs">${__("Change")}</button>`);
+							$e.on("click", () => map_dialog(frm, __("Change service"), sec.section, m.row, reload));
+							const $r = $(`<button class="btn btn-default btn-xs">${__("Remove")}</button>`);
+							$r.on("click", () =>
+								frappe.confirm(__("Remove this mapping?"), () =>
+									map_call(frm, "remove_mapping", { row: m.row }, () => {
+										frappe.show_alert({ message: __("Mapping removed"), indicator: "green" });
+										reload();
+									})
+								)
+							);
+							$act.append($e, " ", $r, " ");
+						}
+						if (i === rows.length - 1) {
+							const $a = $(`<button class="btn btn-default btn-xs">${__("+ Add service")}</button>`);
+							$a.on("click", () => map_dialog(frm, __("Add service"), sec.section, null, reload));
+							$act.append($a);
+						}
+						$tr.append($act);
+					}
+					$body.append($tr);
+				});
+			});
+			$w.find(".nc-map-pick").off("change").on("change", () => {
+				$w.find(".nc-map-sel").prop("disabled", !$w.find(".nc-map-pick:checked").length);
+			});
+			const shown = start + res.rows.length;
+			$w.find(".nc-map-more").remove();
+			if (shown < res.total) {
+				const $more = $(`<button class="btn btn-default btn-sm nc-map-more">${__("More")}</button>`);
+				$more.on("click", () => render_mappings(frm, shown));
+				$w.append($more);
+			}
+		}
+	);
+}
+
 function set_headline(frm) {
 	frm.dashboard.clear_headline();
 	if (frm.is_new()) return;
@@ -80,6 +289,7 @@ frappe.ui.form.on("NC Legal Document", {
 		}
 		set_headline(frm);
 		render_sections(frm, 0, 0);
+		render_mappings(frm, 0);
 		if (!frm.is_new() && frm.perm[0] && frm.perm[0].write && frm.doc.index_status !== "Đang lập") {
 			frm.add_custom_button(
 				__("Re-index"),

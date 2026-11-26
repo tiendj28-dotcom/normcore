@@ -103,6 +103,23 @@ class TestLibrarySearch(FrappeTestCase):
 			self.assertEqual(mine[0]["page_from"], 1)
 			self.assertEqual(mine[0]["validity_status"], "Còn hiệu lực")
 
+	def test_FR_LIB_010_tim_theo_anh_xa_da_xac_nhan(self):
+		"""FEAT-022 #9: chỉ ánh xạ "Đã xác nhận" làm mục hiện ra qua nhánh ánh xạ; "Đề xuất" thì không."""
+		sec = frappe.get_doc("NC Legal Section", {"legal_document": self.doc, "section_no": "2"})
+		try:
+			sec.set("service_mappings", [])
+			sec.append("service_mappings", {"technical_service": self.service, "mapping_status": "Đề xuất"})
+			sec.save(ignore_permissions=True)
+			mine = [x for x in api.search_sections(SERVICE_CODE)["rows"] if x["doc_number"] == NUMBER]
+			self.assertEqual([x["section_no"] for x in mine], ["1"])  # chỉ nhánh tên dịch vụ
+			sec.service_mappings[0].mapping_status = "Đã xác nhận"
+			sec.save(ignore_permissions=True)
+			mine = [x for x in api.search_sections(SERVICE_CODE)["rows"] if x["doc_number"] == NUMBER]
+			self.assertEqual([x["section_no"] for x in mine], ["1", "2"])
+			self.assertEqual(next(x for x in mine if x["section_no"] == "2")["match"], "Ánh xạ dịch vụ")
+		finally:
+			frappe.db.rollback()
+
 	def test_FR_LIB_010_tim_theo_so_hieu(self):
 		r = api.search_sections("libtest / qđ-byt")
 		self.assertEqual(r["mode"], "doc_number")

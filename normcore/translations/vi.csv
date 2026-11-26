@@ -1,3 +1,4 @@
++ Add service,+ Thêm dịch vụ
 A draft already exists: {0},Đã có bản đang soạn: {0}
 AI call timeout is set in AI settings.,Thời hạn gọi AI đặt ở Cấu hình AI.
 AI settings,Cấu hình AI
@@ -10,6 +11,7 @@ Add citation,Thêm trích dẫn
 Add line,Thêm dòng
 Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
+Add service,Thêm dịch vụ
 Add step,Thêm bước
 Add test system,Thêm hệ thống xét nghiệm
 Added,Thêm
@@ -23,6 +25,7 @@ Added,Thêm
 "After withdrawing, the procedure moves to Withdrawn and can no longer be used as a basis.","Sau khi thu hồi, quy trình chuyển Đã thu hồi và không dùng làm căn cứ được nữa."
 All components,Mọi cấu phần
 All departments in scope,Tất cả khoa trong phạm vi
+All sections are confirmed.,Mọi mục đã được xác nhận.
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
@@ -53,6 +56,8 @@ Cannot load the indicative values.,Không tải được giá trị tạm tính.
 Cannot load the original file,Không tải được tệp gốc
 Catalog,Danh mục
 Chain status,Tình trạng chuỗi
+Change,Sửa
+Change service,Sửa dịch vụ
 Changed,Đổi
 Changed fields,Trường đổi
 Check,Kiểm tra
@@ -71,12 +76,17 @@ Comments,Ý kiến
 Compare versions,So sánh phiên bản
 Compared version,Phiên bản so sánh
 Component,Cấu phần
+Confidence,Độ tin cậy
 Confirm,Xác nhận
+Confirm all 100% ({0}),Xác nhận các dòng 100% ({0})
 Confirm import,Xác nhận ghi
 Confirm professionally,Xác nhận chuyên môn
+Confirm selected,Xác nhận đã chọn
+Confirm {0} suggestions with 100% confidence?,Xác nhận {0} đề xuất có độ tin cậy 100%?
 Confirmation,Xác nhận
 "Confirmed professionally, waiting for Finance to lock. It cannot be edited.","Bộ đã xác nhận chuyên môn, chờ Tài chính khóa. Không sửa được."
 Confirmed {0},Đã xác nhận {0}
+Confirmed {0} mapping(s),Đã xác nhận {0} ánh xạ
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
 Cost category,Loại chi phí
@@ -180,6 +190,10 @@ Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
 Main equipment,Thiết bị chính
 Management,Quản lý
+Manual,Thêm tay
+Mapping removed,Đã bỏ ánh xạ
+Mapping saved,Đã lưu ánh xạ
+Mappings are available after indexing finishes.,Ánh xạ có sau khi lập chỉ mục xong.
 Matched by,Khớp theo
 Message,Thông báo,Import Excel
 Minutes per person,Số phút / người
@@ -209,6 +223,7 @@ No review comments yet.,Chưa có ý kiến thẩm định.
 No sections found in the file,Không tìm thấy mục nào trong tệp
 No sections yet,Chưa có mục
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
+No suggestions found. Use + Add service on each section or Suggest again.,Không có đề xuất. Dùng + Thêm dịch vụ ở từng mục hoặc Đề xuất lại.
 No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None,Không có
@@ -267,11 +282,14 @@ Reapplied {0} lines; manual edits are kept,Đã gán lại {0} dòng; các dòng
 Reapply account mapping,Gán lại theo bảng ánh xạ
 Reason,Lý do
 Record,Bản ghi
+Recalculate suggestions? Confirmed mappings are kept; current suggestions are replaced.,Tính lại đề xuất? Ánh xạ đã xác nhận được giữ; đề xuất hiện có được thay.
 Rejected by,Bị từ chối bởi
 Rejection reason,Lý do từ chối
 Relation,Quan hệ
 Reload file,Đọc lại tệp
 Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệp sẽ thay toàn bộ dòng và bỏ các sửa tay. Tiếp tục?
+Remove,Bỏ
+Remove this mapping?,Bỏ ánh xạ này?
 Removed,Bỏ
 Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
 Rerun tests,Số test chạy lại
@@ -300,12 +318,14 @@ Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equ
 Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
 Saved. New values apply to the next operation.,Đã lưu. Giá trị mới áp dụng cho thao tác kế tiếp.
+Saving confirms the mapping.,Lưu là xác nhận ánh xạ.
 Search,Tìm
 Search in content,Tìm trong nội dung
 Search line or resource,Tìm mã dòng hoặc nguồn lực
 Searching…,Đang tìm…
 Section,Mục
 Sections,Phần
+Select,Chọn
 Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
@@ -328,6 +348,7 @@ Step ID,Mã bước
 Step code,Mã bước
 Step title,Tên bước
 Steps,Các bước
+Suggest again,Đề xuất lại
 Suggested,Đề xuất
 Summary of differences,Tóm tắt khác biệt
 Swap direction,Đổi chiều so sánh
@@ -358,6 +379,7 @@ Totals by cost center and category,Tổng theo trung tâm và loại chi phí
 Type,Loại
 Unassign,Bỏ gán
 Unchanged,Không đổi,Import Excel
+Unconfirmed only,Chỉ chưa xác nhận
 Unit,Đơn vị
 Unit price,Đơn giá,NC Item
 Unit: {0},Đơn vị: {0}
@@ -409,3 +431,4 @@ total share,tổng tỷ trọng
 {0} lines are not ready for professional confirmation,Còn {0} dòng chưa đủ điều kiện xác nhận chuyên môn
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
 {0} results — searched by {1},{0} kết quả — tìm theo {1}
+{0} suggestions created,Đã tạo {0} đề xuất
