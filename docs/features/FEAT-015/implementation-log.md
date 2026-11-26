@@ -8,4 +8,4 @@
 | T04 | `check_conventions.py` thoát 0; `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` OK (7 test, có TC_COST_19, khoa_dau_vao_khi_da_tinh); `...test_nc_equipment` OK (21) | xanh | e072b97 |
 | T05 | `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` | OK, 12 test (TC_COST_01 site, 06, 07, 15, 17, 19, khóa đầu vào, test cũ G5/DI06/chạy lại/tính lỗi). Ghi chú: LABOR `rate_source` = tên bộ tham số (giữ assert test cũ FEAT-000), lệch ASM-015-16 → ASM-015-23 | c84cee0 |
 | T06 | `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` | OK, 13 test, có test_FR_COST_015 (enqueue queue="long", Đang tính, progress 100, sự kiện realtime 50→100) | 4dde533 |
-| T07 | `with_bench.sh migrate && run-tests --module normcore.api.test_costing` | OK, 6 test (TC_COST_15 get_explanation, TC_COST_17 check_scope, TC_COST_06 ghi chú, quyền Clinician, Auditor chỉ đọc) | SHA |
+| T07 | `with_bench.sh migrate && run-tests --module normcore.api.test_costing` | OK, 6 test (TC_COST_15 get_explanation, TC_COST_17 check_scope, TC_COST_06 ghi chú, quyền Clinician, Auditor chỉ đọc) | 3599e5d |
