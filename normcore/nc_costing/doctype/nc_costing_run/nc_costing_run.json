@@ -10,10 +10,13 @@
   "parameter_set",
   "accounting_import",
   "price_category",
+  "volume_scenario",
+  "compliance_allocation_mode",
   "scope_departments",
   "scope_services",
   "status",
   "progress",
+  "run_warnings",
   "allocation_warnings"
  ],
  "fields": [
@@ -86,6 +89,31 @@
    "read_only": 1
   },
   {
+   "fieldname": "volume_scenario",
+   "label": "Kịch bản sản lượng",
+   "fieldtype": "Select",
+   "options": "Thực tế 12 tháng\nKế hoạch\nCông suất",
+   "default": "Thực tế 12 tháng",
+   "reqd": 1,
+   "description": "Dùng cho mọi sản lượng của lần tính (FR-COST-017)"
+  },
+  {
+   "fieldname": "compliance_allocation_mode",
+   "label": "Cách phân bổ kiểm định, hiệu chuẩn",
+   "fieldtype": "Select",
+   "options": "Theo giá trị tài sản\nGắn trực tiếp thiết bị",
+   "default": "Theo giá trị tài sản",
+   "reqd": 1,
+   "description": "Mặc định: Theo giá trị tài sản (REF-09)"
+  },
+  {
+   "fieldname": "run_warnings",
+   "label": "Cảnh báo của lần tính",
+   "fieldtype": "Small Text",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
    "fieldname": "allocation_warnings",
    "label": "Cảnh báo phân bổ",
    "fieldtype": "Small Text",
@@ -94,7 +122,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-21 00:00:00.000000",
+ "modified": "2026-11-26 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "NC Costing",
  "name": "NC Costing Run",

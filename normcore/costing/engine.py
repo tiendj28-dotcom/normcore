@@ -5,7 +5,7 @@ không đặt cứng ở đây).
 """
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import ROUND_HALF_UP, Decimal
 
 _Q2 = Decimal("0.01")
@@ -242,6 +242,15 @@ class CostLine:
 	driver_value: Decimal | None = None
 	driver_total: Decimal | None = None
 	pool_amount: Decimal | None = None
+	# FEAT-036 (cận lâm sàng): mọi trường để trống với dịch vụ thường
+	test_system: str = ""
+	line_origin: str = ""
+	cost_level: str = ""
+	k_factor: Decimal | None = None
+	divisor_label: str = ""
+	divisor_value: Decimal | None = None
+	divisor_source: str = ""
+	cost_category: str | None = None
 
 
 @dataclass(frozen=True)
@@ -252,6 +261,7 @@ class ServiceInput:
 	lines: tuple
 	rates: Mapping  # khóa line_id; None = thiếu đơn giá
 	volume: Decimal | None = None
+	paraclinical: "object | None" = None  # cls.ClsServiceInput (FEAT-036)
 
 
 @dataclass(frozen=True)
@@ -300,6 +310,9 @@ class ServiceResult:
 	alloc_by_category: dict
 	price: PriceResult | None
 	volume: Decimal | None = None
+	is_paraclinical: bool = False
+	eqa_cost: Decimal | None = None
+	test_system_costs: tuple = ()
 
 
 DirectServiceExtension = Callable[[ServiceInput], "list[CostLine] | None"]
@@ -387,6 +400,10 @@ def cost_service(
 	inp: ServiceInput, params: PricingParams, extension: DirectServiceExtension | None = None
 ) -> ServiceResult:
 	"""Chi phí trực tiếp của một dịch vụ (chưa phân bổ, chưa giá). FR-COST-003, FR-COST-016."""
+	if inp.paraclinical is not None:  # ADR-017: dịch vụ có hệ thống xét nghiệm đi qua costing/cls.py
+		from normcore.costing import cls  # nhập trễ: cls dùng engine
+
+		return cls.cost_service(inp, params)
 	ordered = sorted(inp.lines, key=lambda x: x.line_id)
 	missing = [
 		f"{x.line_id} ({x.resource})" for x in ordered if not x.excluded and inp.rates.get(x.line_id) is None
@@ -411,7 +428,7 @@ def cost_service(
 		lines = [direct_line(x, inp.rates.get(x.line_id) or LineRate(_ZERO, "")) for x in ordered]
 	lines = tuple(lines)
 	by_comp = _sum_by(lines, lambda x: x.component)
-	by_cat = _sum_by(lines, lambda x: COMPONENT_CATEGORY[x.component])
+	by_cat = _sum_by(lines, lambda x: x.cost_category or COMPONENT_CATEGORY[x.component])
 	warned = any(_STALE in x.warning or _UNVERIFIED in x.warning for x in lines)
 	return ServiceResult(
 		inp.service,
@@ -437,20 +454,7 @@ def finish_service(
 		return result
 	alloc = _sum_by(alloc_lines, lambda x: x.component)
 	price = price_service(result.direct_total, alloc, params)
-	return ServiceResult(
-		result.service,
-		result.department,
-		result.norm_set,
-		result.status,
-		result.message,
-		result.lines + tuple(alloc_lines),
-		result.direct_by_component,
-		result.direct_by_category,
-		result.direct_total,
-		alloc,
-		price,
-		result.volume,
-	)
+	return replace(result, lines=result.lines + tuple(alloc_lines), alloc_by_category=alloc, price=price)
 
 
 COMPONENT_LABEL = {

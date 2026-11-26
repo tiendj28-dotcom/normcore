@@ -9,7 +9,15 @@ DRAFT, CALCULATING, CALCULATED, FAILED, LOCKED = "Nháp", "Đang tính", "Đã t
 IMPORT_FINAL = "Đã chốt"
 RUNNABLE = (DRAFT, FAILED, CALCULATED)
 EDITABLE_INPUTS = (DRAFT, FAILED)
-INPUT_FIELDS = ("fiscal_year", "costing_date", "parameter_set", "accounting_import", "price_category")
+INPUT_FIELDS = (
+	"fiscal_year",
+	"costing_date",
+	"parameter_set",
+	"accounting_import",
+	"price_category",
+	"volume_scenario",
+	"compliance_allocation_mode",
+)
 EXECUTE = "normcore.nc_costing.doctype.nc_costing_run.nc_costing_run.execute_costing"
 PROGRESS_EVENT = "normcore_costing_progress"
 
@@ -85,6 +93,7 @@ class NCCostingRun(Document):
 	def _run(self, eligible, progress=None):
 		"""Pha tính (chỉ đọc): nạp dữ liệu, tính từng dịch vụ rồi phân bổ; trả danh sách `ServiceResult`."""
 		ctx = loader.load_context(self, eligible)
+		self.flags.run_warnings = loader.run_warnings(ctx, eligible)
 		actx = loader.allocation_context(self, ctx)
 
 		def load(e):
@@ -183,6 +192,7 @@ def execute_costing(run, eligible, background=True):
 				doc, reconcile.reconcile(actx.outcome.pools, actx.tolerance, actx.include_depreciation, depr)
 			)
 			warnings = actx.outcome.warnings
+		doc.db_set("run_warnings", "\n".join(doc.flags.run_warnings or []) or None, update_modified=False)
 		doc.db_set("allocation_warnings", "\n".join(warnings) or None)
 	except Exception:
 		frappe.db.rollback(save_point="nc_costing_run")
