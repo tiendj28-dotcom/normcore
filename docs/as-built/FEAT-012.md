@@ -1,7 +1,7 @@
 # As-Built FEAT-012 — Bộ định mức theo bước: khởi tạo, sửa, xác nhận, khóa
 
 Issue NORM-39. FR: FR-NORM-001..014, FR-NORM-016. UC-009, SCR-DSK-013, SCR-DSK-014. TC-NORM-01..07, 09..12.
-Người hiện thực: Dev (Multica). Giới hạn: giao diện chưa kiểm bằng trình duyệt (chỉ kiểm tĩnh và `bench build`); `test_FR_AUD_001_khoa_bo_dinh_muc` đỏ có chủ ý chờ Lead (ASM-012-17).
+Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica), 2026-11-26. Giới hạn: giao diện chưa kiểm bằng trình duyệt (chỉ kiểm tĩnh và `bench build`); QA chưa kiểm bằng trình duyệt (Playwright). Test `test_FR_AUD_001_khoa_bo_dinh_muc` đã đổi vế theo Quyết định Lead (ASM-012-17) và đạt.
 
 ## Đã làm
 - **Logic thuần** `normcore/norm/` (khởi tạo từ quy trình, `line_errors`, `duplicates`, `confirm_blockers`, `effective_parameter_set`, `TRANSITIONS`) và `normcore/costing/provisional.py` (chi phí tạm tính; lượng áp dụng qua `engine.applied_qty`, 11 dòng DV-TEST-A khớp `golden_engine.direct_lines`).
