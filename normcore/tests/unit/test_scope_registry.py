@@ -22,6 +22,7 @@ SCOPED = {
 	"NC Stock Issue Actual",
 	"NC QC Plan",  # FEAT-032, ASM-032-11
 	"NC EQA Program",  # FEAT-032, ASM-032-11
+	"NC Time Study",  # FEAT-014, ASM-014-11
 }
 
 

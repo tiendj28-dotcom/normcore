@@ -13,3 +13,4 @@
 - **T07 chưa làm:** Script Report gọi `api.time_study.get_result` (T05) nên chưa kiểm được bằng bench.
 - **T08 chưa làm, cần Lead quyết:** `NormGrid.vue` phải gọi `apply_to_norm_set` (API `normcore.api.time_study`), nhưng test cũ `test_norm_grid_ui.py::test_chi_goi_api_norm` chỉ cho `this.call(...)` thuộc `API_FUNCS` của `normcore.api.norm` và đúng một `method: API + method`. Thêm lệnh gọi sang API khác (hoặc hàm bọc `norm.apply_time_study`) làm test cũ đỏ; CLAUDE.md mục 3.1 không cho nới test ngoài trường hợp thêm DocType/bộ nhập/vai trò. Chưa sửa test.
 - **T09, T10:** chờ các task trên.
+| ASM-014-11 | `pytest normcore/tests/unit normcore/tests/golden` | thêm NC Time Study vào SCOPED theo Quyết định Lead; unit + golden xanh | (git log) |
