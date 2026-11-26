@@ -45,6 +45,7 @@ Catalog,Danh mục
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
+Choose a service and department to load the steps of the published procedure.,Chọn dịch vụ và khoa để nạp các bước của quy trình đã ban hành.
 Choose a step,Chọn một bước
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
@@ -75,6 +76,7 @@ Could not complete this action,Chưa thực hiện được thao tác này
 Could not load chain status.,Không tải được tình trạng chuỗi.
 Could not load test systems.,Không tải được hệ thống xét nghiệm.
 Could not load the status.,Không tải được tình trạng.
+Could not load the study.,Không tải được phiếu bấm giờ.
 Create,Tạo
 Create a draft of version {0} from this set?,Tạo bộ nháp phiên bản {0} từ bộ này?
 Create new version,Tạo phiên bản mới
@@ -156,10 +158,12 @@ Loading...,Đang tải...
 Loading…,Đang tải…,NC Equipment
 Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
+Machine minutes,Phút máy
 Main equipment,Thiết bị chính
 Management,Quản lý
 Matched by,Khớp theo
 Message,Thông báo,Import Excel
+Minutes,Phút
 Minutes per person,Số phút / người
 More,Xem thêm
 Move step down,Chuyển bước xuống
@@ -180,6 +184,7 @@ No matching sections,Không có mục nào khớp
 No participating services yet,Chưa có dịch vụ tham gia
 No permission to view,Không có quyền xem
 No price yet,Chưa có đơn giá,NC Item
+No resource selected,Chưa chọn nguồn lực
 No review comments yet.,Chưa có ý kiến thẩm định.
 No sections found in the file,Không tìm thấy mục nào trong tệp
 No sections yet,Chưa có mục
@@ -192,6 +197,7 @@ Norm grid,Lưới định mức
 Norm set actions,Thao tác bộ định mức
 Norm sets,Bộ định mức
 Not linked,Chưa liên kết
+Not performed,Không thực hiện
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Only lines needing attention,Chỉ dòng cần xử lý
 Only unresolved,Chỉ chưa xử lý
@@ -233,6 +239,7 @@ Reactivate,Dùng lại
 Reapplied {0} lines; manual edits are kept,Đã gán lại {0} dòng; các dòng sửa tay giữ nguyên
 Reapply account mapping,Gán lại theo bảng ánh xạ
 Reason,Lý do
+Record new study,Ghi ca mới
 Rejected by,Bị từ chối bởi
 Rejection reason,Lý do từ chối
 Relation,Quan hệ
@@ -258,6 +265,7 @@ Save comment,Lưu ý kiến
 Save section,Lưu phần
 Save the form first.,Lưu biểu mẫu trước.
 Save to add test systems,Lưu để thêm hệ thống xét nghiệm
+Save to load the steps of the procedure.,Lưu để nạp các bước của quy trình.
 Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
 Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
@@ -328,6 +336,7 @@ Verify,Xác minh,NC Item Price
 Version,Phiên bản
 View,Xem
 View costing results,Xem kết quả tính giá
+View time study result,Xem kết quả bấm giờ
 Wastage %,Hao hụt %
 "Wastage cap {0}% (Assumption, to be confirmed: no effective parameter set)",Trần hao hụt {0}% (Giả định — chờ xác nhận: chưa có bộ tham số hiệu lực)
 Wastage reason,Lý do vượt trần
@@ -336,6 +345,7 @@ Will be estimated from the plan,Sẽ ước tính từ kế hoạch
 Yes,Có
 You can only view this norm set.,Bạn chỉ xem được bộ định mức này.
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
+You can only view this study.,Bạn chỉ xem được phiếu này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
 You do not have permission to view this norm set.,Bạn không có quyền xem bộ định mức này.
 You do not have permission to view this procedure,Bạn không có quyền xem quy trình này
