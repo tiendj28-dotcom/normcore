@@ -1,0 +1,16 @@
+# FEAT-015 — Implementation log
+
+| Task | Lệnh | Kết quả | sha |
+| :-- | :-- | :-- | :-- |
+| T01 | `pytest` test_costing_engine/rates/runner/labor/accumulation; `grep -rn "import frappe" normcore/costing/` (chỉ còn dòng docstring); `build_rtm.py docs` | 43 passed; VAN DE: 0; áp AMD-015-01, AMD-015-02 | 2a40be2 |
+| T02 | `git diff origin/develop -- "*test*.py" \| grep -E "^-.*assert"` | rỗng; 9 chỗ: test_nc_audit_event.py, test_nc_costing_parameter_set.py, test_nc_costing_run.py, test_nc_test_system.py, test_feat_039.py (2), test_feat_001.py, test_form_actions.py, utils.py::make_chain_data; ASM-015-21 | b28f9b6 |
+| T03 | golden_engine.py (+ --no-depr) thoát 0; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov-fail-under=90` | 594 passed, độ phủ costing 98,9% | 87ea5f3 |
+| T04 | `check_conventions.py` thoát 0; `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` OK (7 test, có TC_COST_19, khoa_dau_vao_khi_da_tinh); `...test_nc_equipment` OK (21) | xanh | e072b97 |
+| T05 | `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` | OK, 12 test (TC_COST_01 site, 06, 07, 15, 17, 19, khóa đầu vào, test cũ G5/DI06/chạy lại/tính lỗi). Ghi chú: LABOR `rate_source` = tên bộ tham số (giữ assert test cũ FEAT-000), lệch ASM-015-16 → ASM-015-23 | c84cee0 |
+| T06 | `with_bench.sh migrate && run-tests --module ...test_nc_costing_run` | OK, 13 test, có test_FR_COST_015 (enqueue queue="long", Đang tính, progress 100, sự kiện realtime 50→100) | 4dde533 |
+| T07 | `with_bench.sh migrate && run-tests --module normcore.api.test_costing` | OK, 6 test (TC_COST_15 get_explanation, TC_COST_17 check_scope, TC_COST_06 ghi chú, quyền Clinician, Auditor chỉ đọc) | 3599e5d |
+| T08 | `check_conventions.py` 0; `pytest test_permission_matrix test_scope_registry` 20 passed; `with_bench.sh migrate && run-tests test_permissions` OK (3), `test_feat_001` OK (20), `api.test_costing` OK (7, có test_quyen_bang_giai_trinh_truong_khoa_theo_khoa) | xanh; ASM-015-22 | 38855a4 |
+| T09 | `pytest test_form_buttons_i18n test_ui_conventions test_vi_csv_order test_costing_ui` | 29 passed; check_conventions 0 | 69bdcad |
+| T10 | pytest T09 xanh; `with_bench.sh migrate && bench build --app normcore` | build DONE (exit 0) | 20d5607 |
+| T11 | `python3 docs/tools/build_rtm.py docs` | VAN DE: 0; as-built `docs/as-built/FEAT-015.md`, Test ref ở `docs/rtm-testref.md` mục FEAT-015 | 148ba4c |
+| T12 | golden_engine.py + golden_cls.py thoát 0; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90` → 658 passed, độ phủ 98,94%; `with_bench.sh migrate && run-tests --app normcore` → Ran 1245 tests, OK; `check_conventions.py` 0; `build_rtm.py docs` VAN DE: 0; đã merge origin/develop | 7c50c5a |

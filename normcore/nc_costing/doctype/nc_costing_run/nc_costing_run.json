@@ -8,7 +8,12 @@
   "fiscal_year",
   "costing_date",
   "parameter_set",
-  "status"
+  "accounting_import",
+  "price_category",
+  "scope_departments",
+  "scope_services",
+  "status",
+  "progress"
  ],
  "fields": [
   {
@@ -44,7 +49,40 @@
    "options": "Nháp\nĐang tính\nĐã tính\nTính lỗi\nĐã khóa",
    "read_only": 1,
    "default": "Nháp",
-   "in_list_view": 1
+   "in_list_view": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "accounting_import",
+   "label": "Lần nhập kế toán",
+   "fieldtype": "Link",
+   "options": "NC Accounting Import",
+   "reqd": 1
+  },
+  {
+   "fieldname": "price_category",
+   "label": "Loại giá",
+   "fieldtype": "Link",
+   "options": "NC Price Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "scope_departments",
+   "label": "Phạm vi khoa",
+   "fieldtype": "Table MultiSelect",
+   "options": "NC Costing Run Department"
+  },
+  {
+   "fieldname": "scope_services",
+   "label": "Phạm vi dịch vụ",
+   "fieldtype": "Table MultiSelect",
+   "options": "NC Costing Run Service"
+  },
+  {
+   "fieldname": "progress",
+   "label": "Tiến độ (%)",
+   "fieldtype": "Percent",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,

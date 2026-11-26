@@ -4,7 +4,14 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import make_base, make_param_set, make_procedure, make_user, publish_procedure
+from normcore.tests.utils import (
+	costing_run_inputs,
+	make_base,
+	make_param_set,
+	make_procedure,
+	make_user,
+	publish_procedure,
+)
 
 ADMIN = "Administrator"
 
@@ -119,6 +126,7 @@ class TestFormActions(FrappeTestCase):
 				"fiscal_year": 2026,
 				"costing_date": "2026-01-01",
 				"parameter_set": ps.name,
+				**costing_run_inputs(),
 			}
 		)
 		run.insert(ignore_permissions=True)

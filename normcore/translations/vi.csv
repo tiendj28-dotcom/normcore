@@ -3,6 +3,7 @@ A draft already exists: {0},Đã có bản đang soạn: {0}
 AI call timeout is set in AI settings.,Thời hạn gọi AI đặt ở Cấu hình AI.
 AI settings,Cấu hình AI
 Account,Tài khoản
+Accumulation,Tích lũy
 Actions,Thao tác
 Active,Đang dùng,NC Technical Service
 Actual figures,Có số thực tế
@@ -26,11 +27,15 @@ Added,Thêm
 All components,Mọi cấu phần
 All departments in scope,Tất cả khoa trong phạm vi
 All sections are confirmed.,Mọi mục đã được xác nhận.
+Allocated amount,Số tiền phân bổ
+Allocation,Phân bổ
+Allocation rule,Quy tắc phân bổ
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
 Applied qty,Lượng áp dụng
+Applied quantity,Lượng áp dụng
 Approved price,Giá đã duyệt
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
@@ -47,6 +52,7 @@ Base version,Phiên bản gốc
 Basis,Căn cứ
 Basis reference,Tham chiếu căn cứ
 Blank columns will be estimated from the quality plan when costing: {0}.,Các cột trống sẽ được ước tính từ kế hoạch chất lượng khi tính giá: {0}.
+Calculated price,Giá tính toán
 Calculating…,Đang tính…
 Calibration,Chuẩn máy
 Calibration tests,Số test chuẩn máy
@@ -91,8 +97,18 @@ Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
 Cost category,Loại chi phí
 Cost center,Trung tâm chi phí
+Cost eligible services only,Chỉ tính dịch vụ đủ điều kiện
+Cost explanation,Bảng giải trình giá
+Cost pool,Quỹ chi phí
+Cost type,Loại chi phí
+Cost {0} services?,Tính giá cho {0} dịch vụ?
 Costing completed.,Đã tính giá xong.
 Costing failed.,Tính giá lỗi.
+Costing progress,Tiến độ tính giá
+Costing results,Kết quả tính giá
+Costing runs,Lần tính giá
+Costing…,Đang tính giá…
+Costing… {0}%,Đang tính giá… {0}%
 Could not calculate the estimated tests.,Không tính được số test ước tính.
 Could not calculate the summary.,Không tính được tóm tắt.
 Could not complete the request. Check your permissions.,Không thực hiện được yêu cầu. Kiểm tra quyền của bạn.
@@ -121,12 +137,15 @@ Department,Khoa
 Depreciation,Khấu hao
 Description,Mô tả
 Deviations summary,Tóm tắt khác biệt
+Direct cost,Chi phí trực tiếp
+Direct costs,Chi phí trực tiếp
 Document no.,Số chứng từ,NC Item
 Document number,Số hiệu
 Down,Xuống
 Download DOCX,Tải DOCX
 Download file,Tải tệp
 Download template,Tải tệp mẫu
+Driver of the service,Tiêu chí của dịch vụ
 Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
 Duplicate of {0},Trùng nguồn lực với {0} trong cùng bước
@@ -153,8 +172,10 @@ Filter by department,Lọc theo khoa
 Filter these lines,Lọc các dòng này
 Finalize,Chốt
 Finalized: the figures can be used in a costing run.,Đã chốt: số liệu dùng được cho lần tính giá.
+Financial obligation,Nghĩa vụ tài chính
 "Fix the file, attach it again in Source file and click Reload file, or create a new import.","Sửa tệp, đính kèm lại ở ô Tệp nguồn rồi bấm Đọc lại tệp, hoặc tạo lần nhập mới."
 For reference only; the official cost is calculated in the costing run.,Chỉ để tham khảo; giá thành chính thức tính ở lần tính giá.
+Full cost,Giá thành toàn bộ
 General comment,Ý kiến chung
 Has error lines,Có dòng lỗi
 Headcount,Số người
@@ -180,6 +201,8 @@ Line details,Chi tiết dòng
 Lines / Total amount,Số dòng / Tổng tiền
 Lines without cost category,Dòng chưa gán loại chi phí
 Loading chain status…,Đang tải tình trạng chuỗi…
+Loading explanation…,Đang tải bảng giải trình…
+Loading results…,Đang tải kết quả…
 Loading status…,Đang tải tình trạng…
 Loading summary…,Đang tải tóm tắt…
 Loading test systems…,Đang tải hệ thống xét nghiệm…
@@ -213,15 +236,20 @@ Needs update,Cần cập nhật
 Needs update: the procedure has a new version - {0}.,Cần cập nhật: quy trình có phiên bản mới - {0}.
 "New values apply to the next operation, no restart needed.","Giá trị mới áp dụng cho thao tác kế tiếp, không cần khởi động lại."
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
+No costing runs yet.,Chưa có lần tính giá.
+No costing runs yet. Create the first costing run.,Chưa có lần tính giá. Tạo lần tính giá đầu tiên.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
 No matching sections,Không có mục nào khớp
 No participating services yet,Chưa có dịch vụ tham gia
 No permission to view,Không có quyền xem
 No price yet,Chưa có đơn giá,NC Item
+No results yet.,Chưa có kết quả.
 No review comments yet.,Chưa có ý kiến thẩm định.
 No sections found in the file,Không tìm thấy mục nào trong tệp
 No sections yet,Chưa có mục
+No service is eligible to be costed.,Không có dịch vụ nào đủ điều kiện để tính.
+No shared allocation yet: the shared cost allocation is added by FEAT-017.,"Chưa gồm chi phí phân bổ chung (phân bổ cấp 1, cấp 2 làm ở FEAT-017)."
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
 No suggestions found. Use + Add service on each section or Suggest again.,Không có đề xuất. Dùng + Thêm dịch vụ ở từng mục hoặc Đề xuất lại.
 No test system yet,Chưa có hệ thống xét nghiệm
@@ -229,6 +257,7 @@ No users assigned.,Chưa gán người dùng nào.
 None,Không có
 None yet,Chưa có
 Norm grid,Lưới định mức
+Norm line,Dòng định mức
 Norm set,Bộ định mức
 Norm set actions,Thao tác bộ định mức
 Norm sets,Bộ định mức
@@ -238,6 +267,7 @@ Not linked,Chưa liên kết
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Only lines needing attention,Chỉ dòng cần xử lý
 Only unresolved,Chỉ chưa xử lý
+Only {0} eligible services will be costed.,Chỉ tính {0} dịch vụ đủ điều kiện.
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
@@ -263,6 +293,7 @@ Previous version,Phiên bản trước
 Price code,Mã đơn giá,NC Item
 Price in use today,Đơn giá đang dùng hôm nay,NC Item
 Price per norm unit,Đơn giá một đơn vị định mức,NC Item
+Price structure,Cơ cấu giá
 Print PDF,In PDF
 Procedure,Quy trình
 Procedure editor,Trình soạn quy trình
@@ -275,6 +306,7 @@ Quantity,Số lượng
 Query,Nội dung tìm
 Quote,Đoạn trích
 Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
+Rate source,Nguồn đơn giá
 Re-index,Lập lại chỉ mục
 Re-index this document? Manual edits to section text will be overwritten (kept in version history).,Lập lại chỉ mục văn bản này? Chỗ đã sửa tay trong văn bản của mục sẽ bị ghi đè (vẫn còn trong lịch sử phiên bản).
 Reactivate,Dùng lại
@@ -298,6 +330,7 @@ Resource,Nguồn lực
 Resource lines,Dòng nguồn lực
 Resource not found: {0},Không tìm thấy nguồn lực: {0}
 Resources,Nguồn lực
+Result,Kết quả
 Retry,Thử lại
 Return reason,Lý do trả lại
 Return to draft,Trả lại
@@ -305,6 +338,7 @@ Review actions,Thao tác duyệt
 Review comments,Ý kiến thẩm định
 Revise,Sửa đổi
 Room hourly rate,Đơn giá giờ phòng,NC Room
+Rounded price,Giá làm tròn
 Row,Dòng,Import Excel
 Row ID,Mã dòng
 Run costing,Chạy tính giá
@@ -330,6 +364,8 @@ Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
 Select only one line to edit.,Chỉ chọn một dòng để sửa.
+Service,Dịch vụ
+Service code,Mã dịch vụ
 Service cost,Giá thành
 Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
 Services by chain status,Dịch vụ theo tình trạng chuỗi
@@ -354,9 +390,13 @@ Summary of differences,Tóm tắt khác biệt
 Swap direction,Đổi chiều so sánh
 Task,Việc
 Technical service,Dịch vụ kỹ thuật
+The costing run failed. See Error Log or run it again.,Lần tính lỗi. Xem Error Log hoặc chạy lại.
+The costing run is running in the background.,Lần tính giá đang chạy nền.
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
+The old results of this run will be replaced.,Kết quả cũ của lần tính này sẽ được thay.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
 The procedure will move to,Quy trình sẽ chuyển sang
+The run will go to the background and show progress.,Lần tính sẽ chạy nền và hiện tiến độ.
 "The two versions do not differ in sections, steps or resources.","Hai phiên bản không khác nhau về phần, bước, nguồn lực."
 There are no technical services yet.,Chưa có dịch vụ kỹ thuật nào.
 This department is outside your scope,Khoa này ngoài phạm vi của bạn
@@ -368,12 +408,15 @@ This procedure is awaiting approval and cannot be edited.,"Quy trình đang ch�
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This procedure is issued or closed and cannot be edited. Create a new version in the revision function.,"Quy trình đã ban hành, không sửa được. Tạo phiên bản mới ở chức năng Sửa đổi."
 This procedure was withdrawn: {0},Quy trình đã thu hồi: {0}
+This record is locked and cannot be edited.,"Bản ghi đã khóa, không sửa được."
 This record is {0} and cannot be edited. Create a new version in the norm grid.,"Bản ghi {0}, không sửa được. Tạo phiên bản mới trên lưới định mức."
 This record is {0} and cannot be edited. Create a new version.,"Bản ghi {0}, không sửa được. Tạo phiên bản mới."
 This resource is already in {0} of the same step. Save anyway?,Nguồn lực này đã có ở dòng {0} của cùng bước. Vẫn lưu?
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
+"To change the inputs, duplicate the costing run.","Muốn đổi đầu vào, hãy nhân bản lần tính."
 "Too many services, filter by department first","Quá nhiều dịch vụ, hãy lọc theo khoa trước"
 Total,Tổng
+Total driver,Tổng tiêu chí
 Total share differs from 100%,Tổng tỷ trọng khác 100%
 Totals by cost center and category,Tổng theo trung tâm và loại chi phí
 Type,Loại
@@ -382,6 +425,7 @@ Unchanged,Không đổi,Import Excel
 Unconfirmed only,Chỉ chưa xác nhận
 Unit,Đơn vị
 Unit price,Đơn giá,NC Item
+Unit rate,Đơn giá
 Unit: {0},Đơn vị: {0}
 Unverified,Chưa xác minh,NC Item
 Unverified,Chưa xác minh,NC Item Price
@@ -406,6 +450,7 @@ View,Xem
 View all,Xem tất cả
 View costing results,Xem kết quả tính giá
 Waiting since,Chờ từ
+Warning,Cảnh báo
 Wastage %,Hao hụt %
 "Wastage cap {0}% (Assumption, to be confirmed: no effective parameter set)",Trần hao hụt {0}% (Giả định — chờ xác nhận: chưa có bộ tham số hiệu lực)
 Wastage reason,Lý do vượt trần
@@ -431,4 +476,6 @@ total share,tổng tỷ trọng
 {0} lines are not ready for professional confirmation,Còn {0} dòng chưa đủ điều kiện xác nhận chuyên môn
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
 {0} results — searched by {1},{0} kết quả — tìm theo {1}
+{0} services,{0} dịch vụ
+{0} services have no locked norm set,Có {0} dịch vụ chưa có bộ định mức Đã khóa
 {0} suggestions created,Đã tạo {0} đề xuất
