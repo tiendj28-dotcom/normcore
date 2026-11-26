@@ -39,14 +39,16 @@
   {
    "fieldname": "legal_document",
    "label": "Văn bản",
-   "fieldtype": "Data",
-   "description": "Tạm là Data (ASM-046); FEAT-020 đổi sang Link NC Legal Document"
+   "fieldtype": "Link",
+   "description": "Văn bản; tự điền khi chọn mục, vẫn chọn được khi chỉ trích dẫn cấp văn bản",
+   "options": "NC Legal Document"
   },
   {
    "fieldname": "legal_section",
    "label": "Mục văn bản",
-   "fieldtype": "Data",
-   "description": "Tạm là Data (ASM-046); FEAT-020 đổi sang Link NC Legal Section"
+   "fieldtype": "Link",
+   "description": "Mục của văn bản",
+   "options": "NC Legal Section"
   },
   {
    "fieldname": "quote",
