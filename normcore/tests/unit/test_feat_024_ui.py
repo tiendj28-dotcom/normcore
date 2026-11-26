@@ -8,9 +8,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DIALOG = (ROOT / "public" / "js" / "ai_draft_dialog.js").read_text(encoding="utf-8")
 VUE = (ROOT / "public" / "js" / "procedure_editor" / "ProcedureEditor.vue").read_text(encoding="utf-8")
-SERVICE = (
-	ROOT / "nc_procedure" / "doctype" / "nc_technical_service" / "nc_technical_service.js"
-).read_text(encoding="utf-8")
+SERVICE = (ROOT / "nc_procedure" / "doctype" / "nc_technical_service" / "nc_technical_service.js").read_text(
+	encoding="utf-8"
+)
 HOOKS = (ROOT / "hooks.py").read_text(encoding="utf-8")
 VI = {r[0]: r[1] for r in csv.reader((ROOT / "translations" / "vi.csv").open(encoding="utf-8")) if len(r) > 1}
 
@@ -39,7 +39,13 @@ class TestFeat024Ui(unittest.TestCase):
 		self.assertIn("ai_draft_dialog.js", HOOKS)
 
 	def test_hop_thoai_goi_cac_api(self):
-		for fn in ("prepare_ai_draft", "search_extra_sources", "start_ai_draft", "get_ai_draft_status", "create_procedure"):
+		for fn in (
+			"prepare_ai_draft",
+			"search_extra_sources",
+			"start_ai_draft",
+			"get_ai_draft_status",
+			"create_procedure",
+		):
 			self.assertIn(fn, DIALOG)
 		self.assertIn("normcore_ai_draft", DIALOG)
 		self.assertIn("confirm_no_source", DIALOG)

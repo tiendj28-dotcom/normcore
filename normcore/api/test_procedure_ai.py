@@ -7,10 +7,9 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.ai import gateway, prompts_install
-from normcore.ai.providers.base import ProviderTimeout
+from normcore.ai.providers.base import ProviderResponse, ProviderTimeout
 from normcore.api import access
 from normcore.api import procedure as api
-from normcore.ai.providers.base import ProviderResponse
 from normcore.nc_library.doctype.nc_legal_document.library_fixtures import make_legal_document
 from normcore.tests.utils import make_base, make_procedure, make_user
 
@@ -29,8 +28,17 @@ class FakeProvider:
 
 def enable_ai(on=1):
 	s = frappe.get_doc("NC AI Settings")
-	s.update(dict(enabled=on, protocol="Anthropic Messages", model="m", api_key="SK-T", timeout_seconds=30,
-		max_output_tokens=1000, monthly_token_budget=0))
+	s.update(
+		dict(
+			enabled=on,
+			protocol="Anthropic Messages",
+			model="m",
+			api_key="SK-T",
+			timeout_seconds=30,
+			max_output_tokens=1000,
+			monthly_token_budget=0,
+		)
+	)
 	s.save(ignore_permissions=True)
 
 
@@ -46,17 +54,35 @@ TEXTS = {
 def make_sections(service, other_service="DV-TEST-OTHER"):
 	"""M1, M2 xác nhận + còn hiệu lực; M3 chỉ đề xuất; M4 hết hiệu lực; M5 dịch vụ khác. Trả dict số mục → tên."""
 	if not frappe.db.exists("NC Technical Service", other_service):
-		frappe.get_doc({"doctype": "NC Technical Service", "service_code": other_service,
-			"service_name": "Dịch vụ khác", "is_active": 1}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "NC Technical Service",
+				"service_code": other_service,
+				"service_name": "Dịch vụ khác",
+				"is_active": 1,
+			}
+		).insert(ignore_permissions=True)
 	doc = make_legal_document("AI/24/QĐ", effective_date="2020-01-01")
-	plan = {"1": (service, "Đã xác nhận", None), "2": (service, "Đã xác nhận", None),
-		"3": (service, "Đề xuất", None), "4": (service, "Đã xác nhận", "2021-01-01"),
-		"5": (other_service, "Đã xác nhận", None)}
+	plan = {
+		"1": (service, "Đã xác nhận", None),
+		"2": (service, "Đã xác nhận", None),
+		"3": (service, "Đề xuất", None),
+		"4": (service, "Đã xác nhận", "2021-01-01"),
+		"5": (other_service, "Đã xác nhận", None),
+	}
 	out = {}
 	for no, (svc, status, expiry) in plan.items():
-		sec = frappe.get_doc({"doctype": "NC Legal Section", "legal_document": doc.name, "section_no": no,
-			"heading": f"Mục {no}", "plain_text": TEXTS[no], "expiry_date": expiry,
-			"service_mappings": [{"technical_service": svc, "mapping_status": status}]})
+		sec = frappe.get_doc(
+			{
+				"doctype": "NC Legal Section",
+				"legal_document": doc.name,
+				"section_no": no,
+				"heading": f"Mục {no}",
+				"plain_text": TEXTS[no],
+				"expiry_date": expiry,
+				"service_mappings": [{"technical_service": svc, "mapping_status": status}],
+			}
+		)
 		out[no] = sec.insert(ignore_permissions=True).name
 	return out
 
@@ -71,7 +97,12 @@ class TestGatewayPostprocess(FrappeTestCase):
 
 	def _run(self, post, provider=None):
 		return gateway.complete(
-			"DRAFT_PROCEDURE", "DRAFT_PROCEDURE", {}, [], provider=provider or FakeProvider({"a": 1}), postprocess=post
+			"DRAFT_PROCEDURE",
+			"DRAFT_PROCEDURE",
+			{},
+			[],
+			provider=provider or FakeProvider({"a": 1}),
+			postprocess=post,
 		)
 
 	def test_FR_AI_005_gateway_postprocess(self):
@@ -101,7 +132,9 @@ class TestPromptV2(FrappeTestCase):
 		self.assertEqual(prompts_install.ensure_draft_procedure_v2(), "DRAFT_PROCEDURE-v2")
 		self.assertEqual(prompts_install.ensure_draft_procedure_v2(), "DRAFT_PROCEDURE-v2")
 		self.assertEqual(
-			frappe.get_all("NC Prompt Template", {"template_code": "DRAFT_PROCEDURE"}, pluck="name", order_by="name"),
+			frappe.get_all(
+				"NC Prompt Template", {"template_code": "DRAFT_PROCEDURE"}, pluck="name", order_by="name"
+			),
 			["DRAFT_PROCEDURE-v1", "DRAFT_PROCEDURE-v2"],
 		)
 		self.assertEqual(frappe.db.get_value("NC Prompt Template", "DRAFT_PROCEDURE-v1", "is_active"), 0)
@@ -119,8 +152,15 @@ class TestDI08(FrappeTestCase):
 
 	def _cite(self, legal_section, quote):
 		doc = frappe.get_doc("NC Clinical Procedure", self.proc.name)
-		doc.append("citations", {"target_section": "Đại cương", "relation": "Theo hướng dẫn",
-			"legal_section": legal_section, "quote": quote})
+		doc.append(
+			"citations",
+			{
+				"target_section": "Đại cương",
+				"relation": "Theo hướng dẫn",
+				"legal_section": legal_section,
+				"quote": quote,
+			},
+		)
 		doc.save()
 
 	def test_DI_08_doan_trich_nguyen_van(self):
@@ -129,7 +169,15 @@ class TestDI08(FrappeTestCase):
 		self._cite("Điều 5", "chữ tự do không bị kiểm")
 
 
-SECTION_KEYS = ("overview", "indications", "contraindications", "cautions", "preparation_notes", "monitoring", "references")
+SECTION_KEYS = (
+	"overview",
+	"indications",
+	"contraindications",
+	"cautions",
+	"preparation_notes",
+	"monitoring",
+	"references",
+)
 Q1 = "nhịn ăn 6 giờ trước khi thực hiện"
 Q2 = "Theo dõi mạch và huyết áp mỗi 15 phút"
 
@@ -143,12 +191,31 @@ def ai_json(secs, n=5, bad=None, deviation=None):
 		if i == bad:
 			c = [{"section": secs["1"], "quote": "đoạn không hề có trong mục", "relation": "Theo hướng dẫn"}]
 		if deviation and i == deviation[0]:
-			c = [{"section": secs["2"], "quote": Q2, "relation": "Khác biệt", "request_excerpt": deviation[1]}]
-		steps.append({"phase": "Thực hiện", "step_title": f"Bước {i + 1}", "description": f"Mô tả {i + 1}",
-			"reference_minutes": 5, "citations": c,
-			"resources": [{"resource_type": "Vật tư", "resource_text": "Bơm tiêm", "quantity": 1, "uom": "cái"}]})
-	return {"sections": {k: {"text": f"Nội dung {k}", "citations": [{"section": secs["2"], "quote": Q2,
-		"relation": "Theo hướng dẫn"}]} for k in SECTION_KEYS}, "steps": steps}
+			c = [
+				{"section": secs["2"], "quote": Q2, "relation": "Khác biệt", "request_excerpt": deviation[1]}
+			]
+		steps.append(
+			{
+				"phase": "Thực hiện",
+				"step_title": f"Bước {i + 1}",
+				"description": f"Mô tả {i + 1}",
+				"reference_minutes": 5,
+				"citations": c,
+				"resources": [
+					{"resource_type": "Vật tư", "resource_text": "Bơm tiêm", "quantity": 1, "uom": "cái"}
+				],
+			}
+		)
+	return {
+		"sections": {
+			k: {
+				"text": f"Nội dung {k}",
+				"citations": [{"section": secs["2"], "quote": Q2, "relation": "Theo hướng dẫn"}],
+			}
+			for k in SECTION_KEYS
+		},
+		"steps": steps,
+	}
 
 
 class AIDraftBase(FrappeTestCase):
@@ -182,7 +249,9 @@ class TestAIDraft(AIDraftBase):
 		st = self.run_draft(prov, "Dùng gói vô khuẩn")
 		self.assertEqual(st["status"], "done", st)
 		doc = self.draft(st["procedure"])
-		self.assertEqual((doc.version_no, doc.workflow_state, doc.doctor_request), (1, "Nháp", "Dùng gói vô khuẩn"))
+		self.assertEqual(
+			(doc.version_no, doc.workflow_state, doc.doctor_request), (1, "Nháp", "Dùng gói vô khuẩn")
+		)
 		self.assertEqual([s.step_id for s in doc.steps], ["S001", "S002", "S003", "S004", "S005"])
 		self.assertTrue(all(s.ai_suggested for s in doc.steps))
 		self.assertEqual(len(doc.resources), 5)
@@ -193,8 +262,12 @@ class TestAIDraft(AIDraftBase):
 			by_target.setdefault(c.target_step_id or c.target_section, []).append(c)
 		self.assertEqual(len(by_target), 7 + 5)
 		for rows in by_target.values():
-			self.assertTrue(all(c.relation == "Theo hướng dẫn" and c.legal_section in (self.sec["1"], self.sec["2"])
-				for c in rows))
+			self.assertTrue(
+				all(
+					c.relation == "Theo hướng dẫn" and c.legal_section in (self.sec["1"], self.sec["2"])
+					for c in rows
+				)
+			)
 		sent = {s["name"] for s in prov.calls[0]["sources"]}
 		self.assertEqual(sent, {self.sec["1"], self.sec["2"]})
 		log = frappe.get_doc("NC AI Log", doc.ai_log)
@@ -218,11 +291,15 @@ class TestAIDraft(AIDraftBase):
 		doc = self.draft(st["procedure"])
 		c = next(c for c in doc.citations if c.target_step_id == "S003")
 		self.assertEqual((c.relation, c.deviation_reason), ("Khác biệt", "dùng máy siêu âm cầm tay"))
-		st = self.run_draft_fresh(FakeProvider(ai_json(self.sec, deviation=(2, "không có trong yêu cầu"))), req)
+		st = self.run_draft_fresh(
+			FakeProvider(ai_json(self.sec, deviation=(2, "không có trong yêu cầu"))), req
+		)
 		c = next(c for c in self.draft(st["procedure"]).citations if c.target_step_id == "S003")
 		self.assertEqual(c.deviation_reason, req)
 		api.update_citation(st["procedure"], c.name, deviation_reason="Lý do đã sửa")
-		self.assertEqual(frappe.db.get_value("NC Procedure Citation", c.name, "deviation_reason"), "Lý do đã sửa")
+		self.assertEqual(
+			frappe.db.get_value("NC Procedure Citation", c.name, "deviation_reason"), "Lý do đã sửa"
+		)
 
 	def run_draft_fresh(self, provider, request):
 		frappe.db.delete("NC Clinical Procedure", {"technical_service": self.service})
@@ -231,8 +308,14 @@ class TestAIDraft(AIDraftBase):
 	def test_TC_AI_04_khong_co_nguon_canh_bao_roi_chua_co_can_cu(self):
 		svc = "DV-TEST-NOSRC"
 		frappe.set_user("Administrator")
-		frappe.get_doc({"doctype": "NC Technical Service", "service_code": svc, "service_name": "Không nguồn",
-			"is_active": 1}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "NC Technical Service",
+				"service_code": svc,
+				"service_name": "Không nguồn",
+				"is_active": 1,
+			}
+		).insert(ignore_permissions=True)
 		frappe.set_user(self.clin)
 		self.assertTrue(api.prepare_ai_draft(svc, self.dept)["no_sources"])
 		logs = frappe.db.count("NC AI Log")
@@ -273,8 +356,18 @@ class TestAIDraft(AIDraftBase):
 
 		class Racing(FakeProvider):
 			def complete(inner, *a, **k):
-				other["name"] = frappe.get_doc({"doctype": "NC Clinical Procedure", "technical_service": self.service,
-					"department": self.dept, "version_no": 1}).insert().name
+				other["name"] = (
+					frappe.get_doc(
+						{
+							"doctype": "NC Clinical Procedure",
+							"technical_service": self.service,
+							"department": self.dept,
+							"version_no": 1,
+						}
+					)
+					.insert()
+					.name
+				)
 				return super().complete(*a, **k)
 
 		st = self.run_draft(Racing(ai_json(self.sec)))
@@ -283,8 +376,10 @@ class TestAIDraft(AIDraftBase):
 		self.assertEqual(frappe.db.count("NC Clinical Procedure", {"technical_service": self.service}), 1)
 
 	def test_UC004_4a_ai_loi_khong_tao_ban_nhap(self):
-		for prov, status in ((FakeProvider(exc=ProviderTimeout("hết giờ")), "Quá hạn"),
-				(FakeProvider({"sections": {}}), "Lỗi")):
+		for prov, status in (
+			(FakeProvider(exc=ProviderTimeout("hết giờ")), "Quá hạn"),
+			(FakeProvider({"sections": {}}), "Lỗi"),
+		):
 			st = self.run_draft(prov, "Yêu cầu giữ lại")
 			self.assertEqual(st["status"], "failed", st)
 			self.assertFalse(frappe.db.exists("NC Clinical Procedure", {"technical_service": self.service}))
@@ -305,8 +400,14 @@ class TestAIDraft(AIDraftBase):
 		frappe.set_user(self.clin)
 		self.assertEqual(api.prepare_ai_draft(self.service, self.dept)["current_procedure"]["name"], cur.name)
 		with patch("normcore.ai.gateway.get_provider", return_value=FakeProvider({})):
-			self.assertRaises(frappe.ValidationError, api.start_ai_draft, self.service, self.dept, "yc",
-				extra_sections=json.dumps([self.sec["4"]]))
+			self.assertRaises(
+				frappe.ValidationError,
+				api.start_ai_draft,
+				self.service,
+				self.dept,
+				"yc",
+				extra_sections=json.dumps([self.sec["4"]]),
+			)
 		prov = FakeProvider(ai_json(self.sec))
 		frappe.db.delete("NC Clinical Procedure", {"name": cur.name})
 		st = self.run_draft(prov, extra_sections=[self.sec["5"]])

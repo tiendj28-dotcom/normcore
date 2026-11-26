@@ -615,8 +615,12 @@ def _ai_access(technical_service, department=None):
 	_require("create", message=_("Bạn không có quyền tạo quy trình"))
 	if not frappe.has_permission("NC Technical Service", "read", doc=technical_service):
 		_deny(_("Bạn không có quyền xem dịch vụ này"))
-	if department:  # phạm vi khoa (FEAT-001): hook has_permission so khoa của bản ghi tạm với khoa của người gọi
-		probe = frappe.get_doc({"doctype": DT, "technical_service": technical_service, "department": department})
+	if (
+		department
+	):  # phạm vi khoa (FEAT-001): hook has_permission so khoa của bản ghi tạm với khoa của người gọi
+		probe = frappe.get_doc(
+			{"doctype": DT, "technical_service": technical_service, "department": department}
+		)
 		if not frappe.has_permission(DT, "create", doc=probe):
 			_deny(_("Bạn không có quyền với khoa này"))
 
@@ -637,7 +641,10 @@ def _extra_sources(names, strict):
 	out = []
 	for name in names:
 		rec = frappe.db.get_value(
-			"NC Legal Section", name, ["name", "section_no", "heading", "plain_text", "validity_status"], as_dict=True
+			"NC Legal Section",
+			name,
+			["name", "section_no", "heading", "plain_text", "validity_status"],
+			as_dict=True,
 		)
 		if not rec or rec.validity_status != VALID:
 			if strict:
@@ -742,7 +749,9 @@ def start_ai_draft(technical_service, department, doctor_request, extra_sections
 	sources = _collect_sources(technical_service, extra, strict=True)
 	if not sources and not frappe.utils.cint(confirm_no_source):
 		raise NoSourceError(
-			_("Dịch vụ chưa có mục hướng dẫn nào đã xác nhận và còn hiệu lực. Xác nhận để soạn tiếp không có căn cứ.")
+			_(
+				"Dịch vụ chưa có mục hướng dẫn nào đã xác nhận và còn hiệu lực. Xác nhận để soạn tiếp không có căn cứ."
+			)
 		)
 	from normcore.ai.prompts_install import ensure_draft_procedure_v2
 
@@ -819,14 +828,14 @@ def run_ai_draft(draft_job, technical_service, department, doctor_request, extra
 			"NC Technical Service", technical_service, ["service_code", "service_name"], as_dict=True
 		)
 		cur = _current_procedure(technical_service, department)
-		current = (
-			guard.build_source(DT, frappe.get_doc(DT, cur.name).as_dict()) if cur else None
-		)
+		current = guard.build_source(DT, frappe.get_doc(DT, cur.name).as_dict()) if cur else None
 		holder = {}
 
 		def post(data):
 			try:
-				holder["built"] = ai_draft.build_rows(ai_draft.parse_draft(data), check_sources, doctor_request)
+				holder["built"] = ai_draft.build_rows(
+					ai_draft.parse_draft(data), check_sources, doctor_request
+				)
 			except ai_draft.DraftError as e:
 				raise ProviderError(str(e)) from e
 			return data, holder["built"].rejected
@@ -841,7 +850,9 @@ def run_ai_draft(draft_job, technical_service, department, doctor_request, extra
 			postprocess=post,
 		)
 		if not res.ok:
-			return _job_set(draft_job, status="failed", user=user, error=res.error, log=res.log_name, ai_status=res.status)
+			return _job_set(
+				draft_job, status="failed", user=user, error=res.error, log=res.log_name, ai_status=res.status
+			)
 		built = holder["built"]
 		frappe.db.savepoint("ai_draft")
 		try:
@@ -872,7 +883,7 @@ def _id_list(value):
 
 
 @frappe.whitelist()
-def accept_suggestions(procedure, step_ids=None, resource_row_ids=None, all=0):  # noqa: A002
+def accept_suggestions(procedure, step_ids=None, resource_row_ids=None, all=0):
 	"""FR-AI-008: chấp nhận đề xuất AI (bỏ cờ `ai_suggested`). Chấp nhận bước không kéo theo nguồn lực (ASM-024-13)."""
 	doc = _editable(procedure)
 	step_ids, row_ids = _id_list(step_ids), _id_list(resource_row_ids)

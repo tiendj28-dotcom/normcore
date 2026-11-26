@@ -19,7 +19,9 @@ def raw(n=5, bad_step=None):
 				"step_title": f"B{i}",
 				"description": f"mô tả {i}",
 				"reference_minutes": 5,
-				"resources": [{"resource_type": "Vật tư", "resource_text": "bơm tiêm", "quantity": 2, "uom": "cái"}],
+				"resources": [
+					{"resource_type": "Vật tư", "resource_text": "bơm tiêm", "quantity": 2, "uom": "cái"}
+				],
 				"citations": [cit(q)],
 			}
 		)
@@ -89,6 +91,13 @@ def test_parse_sua_gia_tri_lech():
 
 def test_request_variables_va_html_rong():
 	v = d.request_variables("yc", {"service_code": "X", "service_name": "Y", "extra": 1}, None)
-	assert set(v) == {"doctor_request", "service", "current_procedure", "phases", "resource_types", "section_keys"}
+	assert set(v) == {
+		"doctor_request",
+		"service",
+		"current_procedure",
+		"phases",
+		"resource_types",
+		"section_keys",
+	}
 	assert "extra" not in v["service"]
 	assert d._html("") == ""

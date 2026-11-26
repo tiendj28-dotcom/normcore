@@ -69,7 +69,11 @@ def parse_draft(data):
 
 	steps = []
 	for i, st in enumerate(raw_steps, 1):
-		if not isinstance(st, dict) or not str(st.get("step_title") or "").strip() or not str(st.get("description") or "").strip():
+		if (
+			not isinstance(st, dict)
+			or not str(st.get("step_title") or "").strip()
+			or not str(st.get("description") or "").strip()
+		):
 			errors.append(f"bước {i} thiếu tên hoặc mô tả")
 			continue
 		phase = st.get("phase")
@@ -89,7 +93,9 @@ def parse_draft(data):
 				continue
 			rtype = r.get("resource_type")
 			if rtype not in RESOURCE_TYPES:
-				warnings.append(f"Bước {i}, nguồn lực {j}: loại '{rtype}' không hợp lệ, đặt '{DEFAULT_RESOURCE_TYPE}'.")
+				warnings.append(
+					f"Bước {i}, nguồn lực {j}: loại '{rtype}' không hợp lệ, đặt '{DEFAULT_RESOURCE_TYPE}'."
+				)
 				rtype = DEFAULT_RESOURCE_TYPE
 			head = _number(r.get("headcount"))
 			text = str(r.get("resource_text") or "").strip()
@@ -182,7 +188,9 @@ def build_rows(draft, sources, doctor_request):
 	reasons = {}
 	for _it, why in res.rejected:
 		reasons[why] = reasons.get(why, 0) + 1
-	return BuildResult(sections, steps, resources, citations, len(res.rejected), reasons, list(draft.warnings))
+	return BuildResult(
+		sections, steps, resources, citations, len(res.rejected), reasons, list(draft.warnings)
+	)
 
 
 def request_variables(doctor_request, service, current):

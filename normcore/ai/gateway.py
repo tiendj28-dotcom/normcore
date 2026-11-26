@@ -159,7 +159,15 @@ def ping(settings=None) -> AIResult:
 
 
 def _write_log(
-	purpose, ref_doctype, ref_name, sources, request_hash, response, res, prompt_template=None, rejected_citations=0
+	purpose,
+	ref_doctype,
+	ref_name,
+	sources,
+	request_hash,
+	response,
+	res,
+	prompt_template=None,
+	rejected_citations=0,
 ):
 	log = frappe.get_doc(
 		{

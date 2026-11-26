@@ -73,9 +73,14 @@ def ensure_draft_procedure_v2():
 		["name", "system_prompt", "user_prompt"],
 		as_dict=True,
 	)
-	if active and active.name == "DRAFT_PROCEDURE-v1" and (active.system_prompt, active.user_prompt) == (
-		DEFAULT_SYSTEM,
-		DEFAULT_USER,
+	if (
+		active
+		and active.name == "DRAFT_PROCEDURE-v1"
+		and (active.system_prompt, active.user_prompt)
+		== (
+			DEFAULT_SYSTEM,
+			DEFAULT_USER,
+		)
 	):
 		return (
 			frappe.get_doc(
