@@ -197,3 +197,36 @@ def before_migrate():
 	import frappe
 
 	build_all(Path(frappe.get_app_path("normcore")).parent, modified=frappe.utils.now())
+
+
+def selfcheck():
+	"""`bench --site <site> execute normcore.generated.selfcheck` (NORM-60 T09): Frappe có đọc được tệp ghép không.
+
+	Trả: số khóa dịch của mảnh có mặt trong `get_all_translations("vi")` trên tổng số khóa ghép, số lối tắt
+	Workspace "Normcore" trên số lối tắt của mảnh (không tính Custom HTML Block). `ok` chỉ đúng khi đủ cả hai.
+	"""
+	import frappe
+	import frappe.translate
+
+	root = Path(frappe.get_app_path("normcore")).parent
+	rows, _errors = merge_translations(root)
+	frappe.translate.clear_cache()
+	got = frappe.translate.get_all_translations("vi")
+	# Cùng cách Frappe đọc CSV (get_translation_dict_from_file): "\\n" thành xuống dòng, khóa có ngữ cảnh là
+	# "nguồn:ngữ cảnh", bản dịch bị strip.
+	found = 0
+	for r in rows:
+		src, tr = r[0].replace("\\n", "\n"), r[1].replace("\\n", "\n").strip()
+		key = f"{src}:{r[2]}" if len(r) > 2 and r[2] else src
+		found += got.get(key) == tr
+	expected = [r for r in read_sources(root) if r[3] != "CustomBlock"]
+	ws = frappe.get_doc("Workspace", "Normcore")
+	out = {
+		"translations_found": found,
+		"translations_total": len(rows),
+		"shortcuts_in_workspace": len(ws.shortcuts),
+		"shortcuts_in_fragments": len(expected),
+	}
+	out["ok"] = found == len(rows) and len(ws.shortcuts) == len(expected)
+	print(json.dumps(out))
+	return out
