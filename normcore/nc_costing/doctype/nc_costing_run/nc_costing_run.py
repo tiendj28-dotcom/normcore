@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from normcore.costing import runner, test_systems
+from normcore.costing import allocation, reconcile, runner, test_systems
 from normcore.nc_costing.doctype.nc_costing_run import loader, writer
 
 DRAFT, CALCULATING, CALCULATED, FAILED, LOCKED = "Nháp", "Đang tính", "Đã tính", "Tính lỗi", "Đã khóa"
@@ -83,15 +83,48 @@ class NCCostingRun(Document):
 		return self.status
 
 	def _run(self, eligible, progress=None):
-		"""Pha tính (chỉ đọc): nạp dữ liệu và tính từng dịch vụ; trả danh sách `ServiceResult`."""
+		"""Pha tính (chỉ đọc): nạp dữ liệu, tính từng dịch vụ rồi phân bổ; trả danh sách `ServiceResult`."""
 		ctx = loader.load_context(self, eligible)
-		return runner.run(
+		actx = loader.allocation_context(self, ctx)
+
+		def load(e):
+			inp = loader.load_service(ctx, e)
+			actx.drivers[(e["service"], e["department"])] = allocation.service_drivers(
+				inp, actx.dept_center.get(e["department"])
+			)
+			return inp
+
+		results = runner.run(
 			eligible,
-			lambda e: loader.load_service(ctx, e),
+			load,
 			ctx.pricing,
 			progress=progress,
-			allocate=lambda rs: allocate_pools(rs),
+			allocate=lambda rs: allocate_pools(rs, actx),
 		)
+		self._allocation = actx
+		return [allocation.mark_volume(r) for r in results]
+
+	@frappe.whitelist()
+	def lock_costing(self):
+		"""Khóa lần tính giá (UC-012 bước 8, data-model 5.4): từ chối khi còn dòng vượt ngưỡng chưa giải trình.
+		FEAT-018 thêm ảnh chụp đầu vào ngay trước `db_set` (ASM-017-07)."""
+		frappe.has_permission("NC Costing Run", "write", doc=self, throw=True)
+		if self.status != CALCULATED:
+			frappe.throw(_("Chỉ khóa được lần tính giá ở trạng thái Đã tính"))
+		lines = frappe.get_all(
+			"NC Reconciliation Line",
+			{"costing_run": self.name},
+			["cost_center", "cost_category", "over_tolerance", "explanation"],
+		)
+		blockers = reconcile.lock_blockers(lines)
+		if blockers:
+			frappe.throw(
+				_("Còn {0} dòng đối soát vượt ngưỡng chưa có giải trình: {1}").format(
+					len(blockers), "; ".join(blockers)
+				)
+			)
+		self.db_set("status", LOCKED)
+		return LOCKED
 
 	def test_systems_in_scope(self):
 		"""FR-CLS-006, DI-06 [1.1]: mã các hệ thống xét nghiệm "Đang dùng" cho lần tính mới."""
@@ -99,10 +132,13 @@ class NCCostingRun(Document):
 		return test_systems.in_costing_scope(systems)
 
 
-def allocate_pools(results):
-	"""Điểm cắm phân bổ cấp 1, cấp 2 của FEAT-017: trả {(dịch vụ, khoa): [CostLine "Phân bổ"]}.
-	FEAT-015 chưa phân bổ nên giá thành = chi phí trực tiếp (ASM-015-02)."""
-	return {}
+def allocate_pools(results, actx=None):
+	"""Điểm cắm phân bổ cấp 1, cấp 2: trả {(dịch vụ, khoa): [CostLine "Phân bổ"]} (BR-COST-010, 011).
+	`actx` None (hoặc hàm bị vá trong test) thì không phân bổ."""
+	if actx is None:
+		return {}
+	actx.outcome = allocation.allocate(results, actx.drivers, actx.input)
+	return actx.outcome.lines
 
 
 def _fail(doc):
@@ -130,9 +166,20 @@ def execute_costing(run, eligible, background=True):
 		return _fail(doc)
 	frappe.db.savepoint("nc_costing_run")
 	try:
+		frappe.db.delete("NC Reconciliation Line", {"costing_run": run})  # giải trình cũ mất theo (ASM-017-08)
 		for name in frappe.get_all("NC Service Cost", {"costing_run": run}, pluck="name"):
 			frappe.delete_doc("NC Service Cost", name, force=True, ignore_permissions=True)
 		writer.write_results(doc, results)
+		warnings = []
+		actx = getattr(doc, "_allocation", None)
+		if actx is not None and actx.outcome is not None:
+			centers = {p.cost_center for p in actx.outcome.pools}
+			depr = [c for (c, cat), v in actx.accounting.items() if cat == "DEPRECIATION" and v and c in centers]
+			writer.write_reconciliation(
+				doc, reconcile.reconcile(actx.outcome.pools, actx.tolerance, actx.include_depreciation, depr)
+			)
+			warnings = actx.outcome.warnings
+		doc.db_set("allocation_warnings", "\n".join(warnings) or None)
 	except Exception:
 		frappe.db.rollback(save_point="nc_costing_run")
 		return _fail(doc)

@@ -80,3 +80,28 @@ def write_results(run, results) -> list[str]:
 		sc.insert(ignore_permissions=True)
 		names.append(sc.name)
 	return names
+
+
+def write_reconciliation(run, rows) -> list[str]:
+	"""Tạo NC Reconciliation Line từ kết quả đối soát (bỏ hàng `skipped`). Máy chủ ghi, quyền đã kiểm ở `run_costing`."""
+	names = []
+	for r in rows:
+		if r.skipped:
+			continue
+		doc = frappe.new_doc("NC Reconciliation Line")
+		doc.update(
+			{
+				"costing_run": run.name,
+				"cost_center": r.cost_center,
+				"cost_category": r.cost_category,
+				"costed_amount": _f(r.costed),
+				"accounting_amount": _f(r.accounting),
+				"variance": _f(r.variance),
+				"variance_pct": _f(r.variance_pct),
+				"over_tolerance": 1 if r.over_tolerance else 0,
+			}
+		)
+		doc.flags.from_costing = True
+		doc.insert(ignore_permissions=True)
+		names.append(doc.name)
+	return names
