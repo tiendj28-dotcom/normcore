@@ -57,6 +57,8 @@ fixtures = [
 # include js, css files in header of desk.html
 # app_include_css = "/assets/normcore/css/normcore.css"
 # app_include_js = "/assets/normcore/js/normcore.js"
+app_include_js = "/assets/normcore/js/normcore_ai.js"  # FEAT-023: normcore.ai.enabled()
+boot_session = "normcore.api.ai.boot_session"  # FR-AI-015
 
 # include js, css files in header of web template
 # web_include_css = "/assets/normcore/css/normcore.css"

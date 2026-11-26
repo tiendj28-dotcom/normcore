@@ -160,3 +160,16 @@
 | FR-LIB-010 | `test_TC_LIB_08_tim_theo_cum_tu_va_ma_dich_vu` (api/test_library_search.py), `test_FR_LIB_010_tim_theo_so_hieu`, `test_FR_LIB_010_cum_tu_phai_khop_lien_tiep`, `test_FR_LIB_010_co_chi_muc_fulltext` |
 | FR-LIB-011 | `test_FR_LIB_011_get_source_view_tra_tep_va_trang`, `test_FR_LIB_011_get_source_view_can_quyen_doc`, `test_FR_LIB_011_get_source_view_docx_khong_co_trang` |
 | FR-LIB-012 | `test_FR_LIB_012_sua_van_ban_thuan_luu_ban_truoc` |
+
+# Test ref — FEAT-023 (Dev NORM-55 ghi; QA kiểm định độc lập, accepted)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-AI-009 | `test_TC_AI_08_log_du_truong` (nc_ai_settings), `test_gateway_mock_tra_json_co_dinh_va_ghi_mot_log` (nc_ai_log) |
+| FR-AI-010 | `test_TC_AI_05_qua_han_giu_du_lieu` (nc_ai_settings), `test_qua_han` (unit/test_ai_providers_openai.py) |
+| FR-AI-011 | `test_TC_AI_06_*` (unit/test_ai_guard.py) |
+| FR-AI-012 | `test_TC_AI_11_doi_dia_chi`, `test_UC017_4c_bat_ai_kiem_ket_noi` (nc_ai_settings), `test_gui_dung_giao_thuc` (unit/test_ai_providers_openai.py) |
+| FR-AI-013 | `test_TC_AI_09_chan_han_muc`, `test_TC_AI_09_bien_bang_han_muc_khong_chan` (nc_ai_settings), `test_budget_exceeded_cac_bien` (unit/test_ai_guard.py) |
+| FR-AI-014 | `test_FR_AI_014_*` (nc_prompt_template), `test_new_prompt_version` (api/test_ai.py), unit/test_ai_prompts.py |
+| FR-AI-015 | `test_TC_AI_07_tat_ai_an_nut_van_chay_thu_cong` (api/test_ai.py; phần "giá tham chiếu" chưa kiểm được vì NC Benchmark Price chưa có trên develop, ASM-023-16), unit/test_ai_ui_conventions.py |
+| NFR-SEC-004 | `test_TC_NFR_04_khoa_khong_lo` (nc_ai_settings), `test_loi_khong_lo_khoa` (unit/test_ai_providers_openai.py) |
