@@ -275,23 +275,25 @@ def k_factor(qbn, qnk, qcal, qrerun, qeqa, h):
 
 
 def _own_compliance(eq: EquipmentInput) -> Decimal:
-	"""Chi phí năm của các hồ sơ còn hạn (BR-CLS-011); hồ sơ hết hạn không tính, không có hồ sơ còn hạn = 0."""
+	"""Phần riêng của thiết bị (BR-CLS-011, FR-CMP-002): có hồ sơ → Σ chi phí năm các hồ sơ còn hạn (hết hạn hết = 0);
+	không có hồ sơ nào → số nhập tay (trống = 0)."""
+	if not eq.records:
+		return Decimal(eq.manual_calibration or 0)
 	return sum(
 		(Decimal(r.cost_per_time) * 12 / Decimal(r.cycle_months) for r in eq.records if r.valid), _ZERO
 	)
 
 
 def compliance_annual(eq: EquipmentInput, peers, mode: str) -> Decimal:
-	"""BR-CLS-011, FR-CMP-002..004. `peers`: thiết bị cùng khoa (gồm cả `eq`).
+	"""BR-CLS-011, FR-CMP-002..004; golden `compliance_annual`. `peers`: thiết bị cùng khoa (gồm cả `eq`).
 
-	Không có hồ sơ nào (`not eq.records`): số nhập tay, tính như Gắn trực tiếp, ngoài quỹ chung (ASM-036-11).
-	Có hồ sơ nhưng hết hạn hết: phần riêng = 0, vẫn nằm trong quỹ và mẫu số theo giá trị tài sản."""
-	if not eq.records:
-		return Decimal(eq.manual_calibration or 0)
+	Gắn trực tiếp, hoặc thiết bị không có giá trị tài sản: phần riêng. Theo giá trị tài sản: quỹ = Σ phần riêng của
+	mọi thiết bị cùng khoa có giá trị tài sản (không lọc theo hồ sơ, gồm cả số nhập tay) chia theo giá trị tài sản
+	(ASM-036-11 bản sửa theo Quyết định Lead, CF-036-01)."""
 	own = _own_compliance(eq)
 	if mode == ALLOC_DIRECT or eq.asset_value is None:
 		return own
-	pool_eq = [p for p in peers if p.asset_value is not None and p.records]
+	pool_eq = [p for p in peers if p.asset_value is not None]
 	pool = sum((_own_compliance(p) for p in pool_eq), _ZERO)
 	return pool * Decimal(eq.asset_value) / sum((Decimal(p.asset_value) for p in pool_eq), _ZERO)
 

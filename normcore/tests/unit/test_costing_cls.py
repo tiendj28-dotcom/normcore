@@ -69,13 +69,17 @@ class TestEquipment(unittest.TestCase):
 		self.assertEqual(cls.compliance_annual(a, peers, "DIRECT"), D("0"))
 		self.assertEqual(cls.compliance_annual(b, peers, "DIRECT"), D("6000000"))
 
-	def test_compliance_khong_ho_so_nao_ngoai_quy(self):
-		"""Không có bản ghi nào: số nhập tay, tính như Gắn trực tiếp, không vào tử và mẫu của quỹ."""
+	def test_compliance_khong_ho_so_nhap_tay_vao_tu_so_va_mau_so(self):
+		"""Quyết định Lead: không có hồ sơ nào, nhập tay X → X vào tử số, giá trị tài sản vào mẫu số (ASSET)."""
 		e = self.inp.equipment
 		a = replace(e["EQ_A"], records=(), manual_calibration=D("999"))
 		b = replace(e["EQ_B"], records=(cls.RecordInput(D("6000000"), D(12), True),))
-		self.assertEqual(cls.compliance_annual(a, [a, b], "ASSET"), D("999"))
-		self.assertEqual(cls.compliance_annual(b, [a, b], "ASSET"), D("6000000"))
+		pool = D("999") + D("6000000")
+		self.assertEqual(cls.compliance_annual(a, [a, b], "ASSET"), pool * D("3600000000") / D("4800000000"))
+		self.assertEqual(cls.compliance_annual(b, [a, b], "ASSET"), pool * D("1200000000") / D("4800000000"))
+		self.assertEqual(cls.compliance_annual(a, [a, b], "DIRECT"), D("999"))
+		a0 = replace(a, manual_calibration=None)
+		self.assertEqual(cls.compliance_annual(a0, [a0, b], "DIRECT"), D(0))
 
 	def test_compliance_khong_nguyen_gia_tinh_truc_tiep(self):
 		a = replace(self.inp.equipment["EQ_A"], asset_value=None)

@@ -2,6 +2,7 @@
 
 import sys
 from decimal import Decimal as D
+from unittest import mock
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -139,10 +140,15 @@ class TestNCCostingCls(FrappeTestCase):
 		self.assertEqual(
 			{r.test_system: r.low_volume_warning for r in sc.test_system_costs}, {"GLU-A": 1, "GLU-B": 0}
 		)
-		# EQ_A có hồ sơ nhưng hết hạn: kiểm định = 6.000.000 (EQ_B) x 3,6 tỷ / 4,8 tỷ = 4.500.000 (ASM-036-11);
-		# thiết bị năm = 360.000.000 + 120.000.000 + 24.000.000 + 4.500.000 = 508.500.000; Qtb = 1.000 + 288.000
+		# EQ_A có hồ sơ nhưng hết hạn = phần riêng 0, vẫn trong quỹ (ASM-036-11 sửa, CF-036-01). Số tham chiếu lấy từ
+		# golden_cls: EQ_A không còn hồ sơ còn hạn, Qtb = 1.000 (GLU-A) + 288.000 (hệ thống phụ).
 		l07 = {x.test_system: x.amount for x in sc.lines if x.norm_line_id == "L07"}
-		self.assertEqual(l07["GLU-A"], 1759.52)
+		with (
+			mock.patch.dict(g.EQUIP["EQ_A"], {"compliance": []}),
+			mock.patch.dict(g.USAGE["EQ_A"], {"qtb": D(289000)}),
+		):
+			expected = g.per_result("EQ_A", g.equipment_annual("EQ_A"))
+		self.assertEqual(l07["GLU-A"], float(expected))
 
 	def test_TC_CLS_38_tai_lap_tu_anh_chup(self):
 		from normcore.costing import snapshot
