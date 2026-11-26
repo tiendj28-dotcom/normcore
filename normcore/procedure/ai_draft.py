@@ -92,13 +92,18 @@ def parse_draft(data):
 				warnings.append(f"Bước {i}, nguồn lực {j}: loại '{rtype}' không hợp lệ, đặt '{DEFAULT_RESOURCE_TYPE}'.")
 				rtype = DEFAULT_RESOURCE_TYPE
 			head = _number(r.get("headcount"))
+			text = str(r.get("resource_text") or "").strip()
+			uom = LABOR_UOM if rtype == LABOR else str(r.get("uom") or "").strip()
+			if not text or not uom:
+				warnings.append(f"Bước {i}, nguồn lực {j}: thiếu tên hoặc đơn vị, bỏ dòng.")
+				continue
 			resources.append(
 				{
 					"resource_type": rtype,
-					"resource_text": str(r.get("resource_text") or "").strip(),
+					"resource_text": text,
 					"quantity": qty,
-					"uom": LABOR_UOM if rtype == LABOR else str(r.get("uom") or "").strip(),
-					"headcount": head if head and head > 0 else None,
+					"uom": uom,
+					"headcount": int(head) if head and head > 0 else None,
 				}
 			)
 		steps.append(

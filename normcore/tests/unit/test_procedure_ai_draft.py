@@ -71,9 +71,10 @@ def test_parse_sua_gia_tri_lech():
 	data["steps"][0]["phase"] = "Lạ"
 	data["steps"][0]["reference_minutes"] = -1
 	data["steps"][0]["resources"] = [
-		{"resource_type": "Lạ", "quantity": 1},
-		{"resource_type": "Vật tư", "quantity": 0},
-		{"resource_type": "Nhân lực", "quantity": 10, "uom": "giờ", "headcount": 2},
+		{"resource_type": "Lạ", "quantity": 1, "resource_text": "x", "uom": "cái"},
+		{"resource_type": "Vật tư", "quantity": 1, "resource_text": "", "uom": "cái"},
+		{"resource_type": "Vật tư", "quantity": 0, "resource_text": "x", "uom": "cái"},
+		{"resource_type": "Nhân lực", "quantity": 10, "uom": "giờ", "headcount": 2, "resource_text": "BS"},
 		"rác",
 	]
 	data["sections"] = {"overview": "rác"}
@@ -82,7 +83,7 @@ def test_parse_sua_gia_tri_lech():
 	assert st["phase"] == "Thực hiện" and st["reference_minutes"] is None
 	assert [r["resource_type"] for r in st["resources"]] == ["Khác", "Nhân lực"]
 	assert st["resources"][1]["uom"] == "phút" and st["resources"][1]["headcount"] == 2
-	assert len(dr.warnings) == 3
+	assert len(dr.warnings) == 4
 	assert dr.sections["overview"]["text"] == ""
 
 
