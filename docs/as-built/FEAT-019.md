@@ -25,6 +25,7 @@ Không DocType mới, không đổi quyền. Quyền xuất = quyền đọc b�
 Xem `docs/rtm-testref/FEAT-019.md` và `implementation-log.md`.
 
 ## 6. Giới hạn đã biết
+- Giao diện (SCR-DSK-028) chưa được QA kiểm bằng trình duyệt; chỉ có test_export_ui.py.
 - AMD-019-01, DEF-019-01: nút "Xuất Excel" có sẵn ở lưới định mức (FEAT-034, `api.norm.export_norm_set`) chưa có trang thông tin và chưa ghi nhật ký; không có nút PDF ở lưới. Hai đường đó đi qua hộp thoại SCR-DSK-028.
 - **TBD-01:** cấu trúc cột Phụ lục II–V là mẫu tạm (ASM-019-01); mọi tệp Phụ lục ghi "Giả định — chờ xác nhận". Khi có mẫu chính thức thay tệp `.xlsx` và hằng trong `annex.py`.
 - Phụ lục I (FEAT-026), bảng so sánh giá (FEAT-027/028) và điểm vào từ phương án giá (R3) chưa có.
