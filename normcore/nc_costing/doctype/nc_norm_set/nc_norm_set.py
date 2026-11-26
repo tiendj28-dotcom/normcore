@@ -86,7 +86,7 @@ class NCNormSet(Document):
 			return
 		if prev.status == REPLACED or (prev.status == LOCKED and not self.flags.allow_replace):
 			frappe.throw(_("Bộ định mức đã khóa, không sửa được."), title=_("Bản ghi đã khóa"))
-		if prev.status == CONFIRMED and not self.flags.norm_action:
+		if prev.status == CONFIRMED:  # không thao tác nào từ đây (khóa, trả lại) được đổi nội dung
 			changed_head = any(_norm(self.get(f)) != _norm(prev.get(f)) for f in HEAD_FIELDS)
 			old = [_inputs(r) for r in prev.lines]
 			new = [_inputs(r) for r in self.lines]
@@ -98,7 +98,11 @@ class NCNormSet(Document):
 
 	def validate_status_change(self, prev):
 		if prev is None:
+			# Tạo mới chỉ ở "Nháp" (FR-NORM-010, 011). Mã máy chủ tin cậy (ignore_permissions) dựng dữ liệu được
+			# "Đã thay thế"; "Đã khóa" luôn cần allow_lock. Người dùng qua frappe.client/API không vượt được.
 			if self.status == LOCKED and not self.flags.allow_lock:
+				frappe.throw(_("Chỉ đổi trạng thái bằng nút trên lưới định mức"))
+			if self.status != DRAFT and self.status != LOCKED and not self.flags.ignore_permissions:
 				frappe.throw(_("Chỉ đổi trạng thái bằng nút trên lưới định mức"))
 			return
 		if self.status == prev.status:
@@ -148,7 +152,7 @@ class NCNormSet(Document):
 			confirming = self.flags.norm_action == "confirm_line"
 			if confirming:
 				continue
-			if changed:  # ASM-012-06: sửa dòng thì xóa xác nhận của dòng đó
+			if changed or before is None:  # ASM-012-06; dòng tạo mới không mang xác nhận do client gửi
 				r.confirmed_by = r.confirmed_on = None
 			elif before is not None:  # không cho đổi xác nhận bằng đường khác
 				for f in CONFIRM_FIELDS:
@@ -166,6 +170,7 @@ def lock_norm_set(ns):
 	"""Thân của `lock` và `api.norm.lock_set`. Kiểm vai trò trước kiểm trạng thái."""
 	if "NC Finance" not in frappe.get_roles():
 		frappe.throw(_("Chỉ NC Finance được khóa bộ định mức"), frappe.PermissionError)
+	ns.reload()  # nạp lại từ CSDL: bỏ mọi thay đổi do client gửi kèm (run_doc_method)
 	if ns.status != CONFIRMED:
 		frappe.throw(_("Chỉ khóa được bộ định mức Đã xác nhận chuyên môn"))
 	# DI-03: mỗi (dịch vụ, khoa) tối đa một bộ đã khóa; bộ cũ chuyển "Đã thay thế"

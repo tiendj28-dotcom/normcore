@@ -1,5 +1,6 @@
 """FEAT-012: API bộ định mức (UC-009). Mỗi TC có test cùng mã; quyền: Council không có quyền, Auditor chỉ đọc."""
 
+import copy
 import json
 
 import frappe
@@ -440,3 +441,80 @@ class TestQuyen(NormBase):
 		name = self.make_set()
 		frappe.set_user(self.clin2)
 		self.assertRaises(frappe.PermissionError, api.save_line, name, {"uom": "x"}, "L001")
+
+
+class TestDiVongCong(NormBase):
+	"""Code review lần 1 (PR #51): không đi vòng FR-NORM-010, FR-NORM-011 bằng frappe.client hay run_doc_method."""
+
+	def _payload(self, **extra):
+		proc = self.procedure6()
+		row = frappe.get_doc("NC Clinical Procedure", proc.name).resources[0]
+		return {
+			"doctype": "NC Norm Set",
+			"technical_service": self.service,
+			"department": DEPT,
+			"procedure": proc.name,
+			"version_no": 77,
+			"lines": [
+				{
+					"doctype": "NC Norm Line",
+					"step_id": row.step_id,
+					"procedure_resource_row": row.resource_row_id,
+					"component": "LABOR",
+					"resource_doctype": "NC Job Title",
+					"resource": "BS",
+					"headcount": 1,
+					"hospital_qty": 10,
+					"uom": "phút",
+					"basis": "Quy trình",
+					"confirmed_by": "Administrator",
+					"confirmed_on": "2026-11-01 08:00:00",
+				}
+			],
+			**extra,
+		}
+
+	def test_insert_qua_client_chi_nhan_trang_thai_nhap(self):
+		payload = self._payload()
+		frappe.set_user(self.clin)
+		for status in ("Đã xác nhận chuyên môn", "Đã thay thế", "Đã khóa"):
+			with self.assertRaises(frappe.ValidationError):
+				frappe.client.insert(copy.deepcopy({**payload, "status": status}))
+		self.assertFalse(frappe.db.exists("NC Norm Set", {"version_no": 77}))
+
+	def test_insert_qua_client_xoa_xac_nhan_do_client_gui(self):
+		frappe.set_user(self.clin)
+		out = frappe.client.insert(self._payload(status="Nháp"))
+		row = frappe.get_doc("NC Norm Set", out.name).lines[0]
+		self.assertEqual(row.get("confirmed_by"), None)
+		self.assertEqual(row.get("confirmed_on"), None)
+
+	def test_lock_qua_run_doc_method_bo_qua_noi_dung_client_gui(self):
+		name = self.make_set()
+		self.to_confirmed(name)
+		before = frappe.db.get_value("NC Norm Line", {"parent": name, "idx": 1}, "hospital_qty")
+		doc = frappe.get_doc("NC Norm Set", name)
+		doc.lines[0].hospital_qty = 99
+		docs = frappe.as_json(doc.as_dict())
+		frappe.set_user(self.fin)
+		from frappe.handler import run_doc_method
+
+		frappe.local.request = frappe._dict(method="POST")  # is_valid_http_method đọc frappe.request
+		try:
+			run_doc_method("lock", docs=docs)
+		finally:
+			del frappe.local.request
+		frappe.set_user("Administrator")
+		self.assertEqual(frappe.db.get_value("NC Norm Set", name, "status"), "Đã khóa")
+		self.assertEqual(
+			frappe.db.get_value("NC Norm Line", {"parent": name, "idx": 1}, "hospital_qty"), before
+		)
+
+	def test_da_xac_nhan_chuyen_mon_khong_sua_noi_dung_ke_ca_khi_co_action(self):
+		name = self.make_set()
+		self.to_confirmed(name)
+		doc = frappe.get_doc("NC Norm Set", name)
+		doc.lines[0].hospital_qty = 99
+		doc.flags.norm_action = "lock_set"
+		doc.status = "Đã khóa"
+		self.assertRaises(frappe.ValidationError, doc.save, ignore_permissions=True)
