@@ -90,3 +90,51 @@ class TestLibraryUI(unittest.TestCase):
 		for link in ("NC Legal Document", "NC Legal Section"):
 			self.assertIn(f'"link_to": "{link}"', ws)
 		self.assertIn("Văn bản pháp lý", ws)
+
+
+class TestMappingUI(unittest.TestCase):
+	"""FEAT-022 SCR-DSK-004: bảng ánh xạ trong form văn bản và lưới trong form mục."""
+
+	def test_goi_dung_sau_api_anh_xa(self):
+		js = _text(FILES[0])
+		for m in (
+			"get_mappings",
+			"confirm_mappings",
+			"confirm_exact",
+			"save_mapping",
+			"remove_mapping",
+			"suggest_mappings",
+		):
+			self.assertIn(f'"{m}"', js)
+		self.assertIn('"normcore.api.library." + method', js)
+
+	def test_chi_bao_anh_xa_dung_lop_desk(self):
+		js = _text(FILES[0])
+		self.assertIn('"Đề xuất": "gray"', js)
+		self.assertIn('"Đã xác nhận": "green"', js)
+		self.assertIn("indicator-pill", js)
+		self.assertNotIn("purple", js)  # đề xuất theo quy tắc, không phải của AI
+
+	def test_nut_ghi_chi_khi_co_quyen_ghi_va_du_lieu_qua_escape(self):
+		js = _text(FILES[0])
+		self.assertIn("frm.perm[0].write", js)
+		self.assertIn("can_write", js)
+		self.assertGreaterEqual(js.count("escape_html"), 6)
+
+	def test_luoi_chi_chon_dich_vu_dang_dung(self):
+		js = _text(FILES[2])
+		self.assertIn('frm.set_query("technical_service", "service_mappings"', js)
+		self.assertIn("is_active: 1", js)
+
+	def test_truong_html_va_bang_con_o_dung_cho(self):
+		sec = json.loads(_text(SEC / "nc_legal_section.json"))
+		self.assertLess(
+			sec["field_order"].index("validity_status"), sec["field_order"].index("mapping_section")
+		)
+		self.assertLess(
+			sec["field_order"].index("service_mappings"), sec["field_order"].index("compare_section")
+		)
+		doc = json.loads(_text(DOC / "nc_legal_document.json"))
+		f = {x["fieldname"]: x for x in doc["fields"]}
+		self.assertEqual(f["mapping_html"]["fieldtype"], "HTML")
+		self.assertEqual(f["mapping_doc_section"]["depends_on"], "eval:doc.is_procedure_guideline")

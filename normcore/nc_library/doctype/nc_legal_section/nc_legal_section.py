@@ -3,8 +3,9 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, today
+from frappe.utils import getdate, now_datetime, today
 
+from normcore.library import mapping
 from normcore.library.validity import compute_section_validity
 
 FT_INDEX = "nc_section_ft"
@@ -24,8 +25,21 @@ class NCLegalSection(Document):
 		)
 		if dup:
 			frappe.throw(_("Số mục {0} đã có trong văn bản này").format(self.section_no))
+		self._stamp_mappings()
 		doc_status = frappe.db.get_value("NC Legal Document", self.legal_document, "validity_status")
 		self.validity_status = compute_section_validity(doc_status, self.expiry_date, getdate(today()))
+
+	def _stamp_mappings(self):
+		"""FR-SVC-006: máy chủ đóng dấu người và thời điểm xác nhận, kể cả khi sửa bảng con trực tiếp."""
+		rows = self.get("service_mappings") or []
+		if not rows:
+			return
+		before = self.get_doc_before_save()
+		before_rows = (before.get("service_mappings") or []) if before else []
+		try:
+			mapping.stamp_rows(rows, before_rows, frappe.session.user, now_datetime())
+		except mapping.MappingError as e:
+			frappe.throw(_("Dịch vụ {0} đã được ánh xạ với mục này").format(e.args[0]))
 
 
 def on_doctype_update():

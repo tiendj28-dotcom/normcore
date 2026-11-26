@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["Site sạch 1143 test OK; pytest 589 pass, phủ 99%; TC-SVC-02 và FR-SVC-005..007 có test; diff test chỉ thêm; CI xanh; chưa kiểm giao diện bằng trình duyệt (thiếu tài khoản test)"], "commit": "3458567764b5504ec1623b1d78f17c42b6157583"}

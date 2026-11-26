@@ -1,5 +1,9 @@
 // SCR-DSK-003 (FEAT-020), FR-LIB-011/012: mục cạnh trang gốc của tệp.
 frappe.ui.form.on("NC Legal Section", {
+	setup(frm) {
+		// FR-SVC-006: chỉ chọn dịch vụ đang dùng cho lưới ánh xạ
+		frm.set_query("technical_service", "service_mappings", () => ({ filters: { is_active: 1 } }));
+	},
 	refresh(frm) {
 		const $w = frm.fields_dict.source_view_html.$wrapper;
 		$w.empty();
