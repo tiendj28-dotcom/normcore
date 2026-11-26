@@ -6,10 +6,10 @@ from decimal import Decimal
 import frappe
 from frappe import _
 
-from normcore.costing import allocation, cls, engine, reconcile
+from normcore.costing import allocation, cls, compare, engine, reconcile
 
 RUN, COST, RECON = "NC Costing Run", "NC Service Cost", "NC Reconciliation Line"
-CALCULATED = "Đã tính"
+CALCULATED, LOCKED = "Đã tính", "Đã khóa"
 CATEGORY_LABEL = {
 	"LABOR": "Nhân công",
 	"DRUG_SUPPLY": "Thuốc, vật tư",
@@ -164,6 +164,9 @@ def get_run_results(run):
 		"results": rows,
 		"counts": counts,
 		"recon_blocked": len(_blockers(run)),
+		"snapshot_hash": run_doc.get("snapshot_hash"),
+		"can_duplicate": bool(frappe.has_permission(RUN, "create")),
+		"can_verify": run_doc.status == LOCKED and bool(run_doc.get("snapshot_file")),
 		"run": {
 			"volume_scenario": run_doc.get("volume_scenario"),
 			"compliance_allocation_mode": run_doc.get("compliance_allocation_mode"),
@@ -475,3 +478,89 @@ def lock_run(run):
 	"""UC-012 bước 8: khóa lần tính giá; lỗi của `lock_costing` trả nguyên văn."""
 	doc = _run(run, "write")
 	return {"status": doc.lock_costing()}
+
+
+@frappe.whitelist()
+def verify_snapshot(run):
+	"""NFR-REL-001: kiểm tra tái lập từ tệp ảnh chụp (đọc, không ghi)."""
+	return _run(run, "read").verify_snapshot()
+
+
+@frappe.whitelist()
+def duplicate_run(run):
+	"""FR-COST-012: nhân bản lần tính (kể cả đã khóa) thành lần tính mới ở "Nháp"."""
+	return {"name": _run(run, "read").duplicate_run()}
+
+
+def run_meta(doc) -> dict:
+	"""Đầu vào của một lần tính, dạng dùng cho `compare.input_changes`."""
+	return {
+		"name": doc.name,
+		"title": doc.title,
+		"status": doc.status,
+		"fiscal_year": doc.fiscal_year,
+		"costing_date": str(doc.costing_date),
+		"parameter_set": doc.parameter_set,
+		"accounting_import": doc.accounting_import,
+		"price_category": doc.price_category,
+		"volume_scenario": doc.get("volume_scenario"),
+		"compliance_allocation_mode": doc.get("compliance_allocation_mode"),
+		"scope_departments": sorted(r.department for r in doc.scope_departments),
+		"scope_services": sorted(r.technical_service for r in doc.scope_services),
+	}
+
+
+def _flat_costs(run):
+	fields = ["technical_service", "department", "calc_status", "full_cost"]
+	fields += [f for _g, f, _l in compare.COMPONENTS]
+	return frappe.get_list(COST, {"costing_run": run}, fields, limit_page_length=0)
+
+
+def _f2(x):
+	return None if x is None else float(x)
+
+
+def build_comparison(base_run, other_run, only_changed=0) -> dict:
+	"""FR-COST-013: so sánh hai lần tính đã có kết quả; dùng chung cho API và Script Report."""
+	if base_run == other_run:
+		frappe.throw(_("Chọn hai lần tính giá khác nhau"))
+	docs = [_run(n, "read") for n in (base_run, other_run)]
+	for d in docs:
+		if d.status not in (CALCULATED, LOCKED):
+			frappe.throw(_("Lần tính giá {0} chưa có kết quả").format(d.name))
+	diffs = compare.compare(_flat_costs(base_run), _flat_costs(other_run))
+	summary = compare.summary(diffs)
+	summary["total_diff"] = _f2(summary["total_diff"])
+	if frappe.utils.cint(only_changed):
+		diffs = [d for d in diffs if compare.changed(d)]
+	services = _names("NC Technical Service", "service_name", {d.service for d in diffs})
+	delta = lambda x: {"base": _f2(x.base), "other": _f2(x.other), "diff": _f2(x.diff), "pct": _f2(x.pct)}  # noqa: E731
+	rows = [
+		{
+			"service": d.service,
+			"service_name": services.get(d.service),
+			"department": d.department,
+			"presence": d.presence,
+			"base_status": d.base_status,
+			"other_status": d.other_status,
+			"full_cost": delta(d.full_cost),
+			"components": [
+				{"group": c.group, "field": c.field, "label": c.label, **delta(c)} for c in d.components
+			],
+		}
+		for d in diffs
+	]
+	base_meta, other_meta = run_meta(docs[0]), run_meta(docs[1])
+	return {
+		"base": base_meta,
+		"other": other_meta,
+		"input_changes": [list(x) for x in compare.input_changes(base_meta, other_meta)],
+		"summary": summary,
+		"rows": rows,
+	}
+
+
+@frappe.whitelist()
+def compare_runs(base_run, other_run, only_changed=0):
+	"""FR-COST-013 (SCR-DSK-022): chênh lệch = lần so sánh - lần gốc, theo dịch vụ và cấu phần."""
+	return build_comparison(base_run, other_run, only_changed)
