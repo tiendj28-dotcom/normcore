@@ -83,3 +83,38 @@ class TestNormSetFormButton(unittest.TestCase):
 			text=True,
 		)
 		self.assertEqual(out.stdout, "")
+
+
+class TestTimeStudyReportUi(unittest.TestCase):
+	"""SCR-DSK-016 (FEAT-014): Script Report chỉ ghi qua api.time_study.apply_to_norm_set, có xác nhận thiếu ca."""
+
+	@classmethod
+	def setUpClass(cls):
+		cls.js = (
+			ROOT / "nc_costing" / "report" / "nc_time_study_result" / "nc_time_study_result.js"
+		).read_text(encoding="utf-8")
+
+	def test_chi_goi_apply_to_norm_set(self):
+		self.assertEqual(
+			set(re.findall(r'method:\s*"([^"]+)"', self.js)), {"normcore.api.time_study.apply_to_norm_set"}
+		)
+
+	def test_xac_nhan_thieu_ca_goi_lai_confirm_1(self):
+		self.assertIn("res.needs_confirm", self.js)
+		self.assertIn("frappe.confirm(", self.js)
+		self.assertIn("nc_ts_apply(report, normSet, true)", self.js)
+
+	def test_nut_chi_hien_khi_co_quyen_ghi_bo_dinh_muc(self):
+		self.assertIn('frappe.model.can_write("NC Norm Set")', self.js)
+
+	def test_hop_chon_loc_bo_nhap(self):
+		self.assertIn('status: "Nháp"', self.js)
+		self.assertIn("f.norm_set", self.js)
+
+	def test_chuoi_co_ban_dich_va_khong_ma_mau(self):
+		with open(ROOT / "translations" / "vi.csv", encoding="utf-8", newline="") as f:
+			vi = {r[0] for r in csv.reader(f) if len(r) >= 2}
+		used = {m.replace('\\"', '"') for m in I18N.findall(self.js)}
+		self.assertTrue(used)
+		self.assertEqual(sorted(used - vi), [])
+		self.assertIsNone(HEX.search(self.js))
