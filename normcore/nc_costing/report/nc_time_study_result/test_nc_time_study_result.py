@@ -85,3 +85,61 @@ class TestNCTimeStudyResult(FrappeTestCase):
 				"NC Auditor",
 			},
 		)
+
+
+class TestNCTimeStudyResultReportPermission(FrappeTestCase):
+	"""QA rework lần 2: Frappe đòi quyền `report` trên DocType tham chiếu; mở report qua đường Desk."""
+
+	REPORT = "NC Time Study Result"
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		self.service, self.dept, _job = make_base("DV-BG", "K01")
+		self.proc = make_four_step_procedure(self.service, self.dept)
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def _run(self):
+		from frappe.desk.query_report import run
+
+		return run(self.REPORT, filters={"technical_service": self.service, "department": self.dept})
+
+	def test_docperm_report_theo_ma_tran(self):
+		with_report = {p.role for p in frappe.get_meta("NC Time Study").permissions if p.report}
+		self.assertEqual(
+			with_report,
+			{
+				"NC Clinician",
+				"NC Department Head",
+				"NC Consultant",
+				"NC Finance",
+				"NC Director",
+				"NC Admin",
+				"NC Auditor",
+			},
+		)
+
+	def test_vai_tro_doc_mo_duoc_report_qua_desk(self):
+		for role in ("NC Auditor", "NC Finance", "NC Consultant", "NC Admin", "NC Director"):
+			user = make_user(f"rep.{role.split()[-1].lower()}@normcore.test", role)
+			frappe.set_user(user)
+			result = self._run()
+			self.assertIn("columns", result, role)
+			frappe.set_user("Administrator")
+
+	def test_clinician_khoa_k01_mo_duoc_report(self):
+		from normcore.core import permissions as access
+
+		user = make_user("rep.clin@normcore.test", "NC Clinician")
+		access.assign_department(user, "K01")
+		frappe.set_user(user)
+		self.assertIn("columns", self._run())
+
+	def test_vai_tro_khong_quyen_bi_tu_choi_qua_desk(self):
+		for role in ("NC Council Member", "NC Resource Manager", "NC Document Controller"):
+			user = make_user(f"rep.no.{role.split()[-1].lower()}@normcore.test", role)
+			frappe.set_user(user)
+			self.assertRaises(frappe.PermissionError, self._run)
+			frappe.set_user("Administrator")

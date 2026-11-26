@@ -82,35 +82,42 @@
    "role": "NC Clinician",
    "read": 1,
    "write": 1,
-   "create": 1
+   "create": 1,
+   "report": 1
   },
   {
    "role": "NC Department Head",
    "read": 1,
    "write": 1,
-   "create": 1
+   "create": 1,
+   "report": 1
   },
   {
    "role": "NC Consultant",
    "read": 1,
    "write": 1,
-   "create": 1
+   "create": 1,
+   "report": 1
   },
   {
    "role": "NC Finance",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Director",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Admin",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Auditor",
-   "read": 1
+   "read": 1,
+   "report": 1
   }
  ]
 }
