@@ -60,7 +60,8 @@ function normcore_take_route_params() {
 
 // Bộ lọc "Tình trạng chuỗi" (FR-OUT-010, AMD-004); đọc nc_chain_stage, nc_department trên URL (liên kết từ trang chủ).
 function normcore_chain_filter(listview) {
-	const taken = normcore_take_route_params();
+	let options_ready = false;
+	let pending = null; // mức chờ đặt khi danh sách mức chưa nạp xong
 	const field = listview.page.add_field({
 		fieldname: "nc_chain_stage",
 		fieldtype: "Select",
@@ -93,12 +94,28 @@ function normcore_chain_filter(listview) {
 				listview.filter_area.add([[listview.doctype, "name", "in", names.length ? names : ["__none__"]]]);
 			});
 	}
+	function set_stage(stage) {
+		if (options_ready) field.set_value(stage || "");
+		else pending = stage || "";
+	}
+	// Frappe giữ list view trong cache (onload chỉ chạy một lần): đọc và gỡ tham số ở MỖI lần list hiện ra,
+	// trước khi before_refresh gốc đọc URL/route_options. Có tham số thì đặt lại khoa và mức theo liên kết.
+	const before_refresh = listview.before_refresh.bind(listview);
+	listview.before_refresh = function () {
+		const taken = normcore_take_route_params();
+		if (taken.nc_chain_stage || taken.nc_department) {
+			if (dept_field()) dept_field().set_value(taken.nc_department || "");
+			set_stage(taken.nc_chain_stage);
+		}
+		return before_refresh();
+	};
 	frappe.xcall("normcore.api.home.get_home").then((data) => {
 		const labels = (data.stages || []).filter((s) => !s.no_permission).map((s) => [s.stage, s.label]);
 		field.df.options = [{ label: "", value: "" }].concat(labels.map((l) => ({ value: l[0], label: l[1] })));
 		field.refresh();
-		if (taken.nc_department && dept_field()) dept_field().set_value(taken.nc_department);
-		if (taken.nc_chain_stage) field.set_value(taken.nc_chain_stage);
+		options_ready = true;
+		if (pending !== null) field.set_value(pending);
+		pending = null;
 	});
 }
 
