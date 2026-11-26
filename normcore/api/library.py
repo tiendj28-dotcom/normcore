@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, getdate, today
 
-from normcore.library import mapping, validity
+from normcore.library import mapping, supersession, validity
 from normcore.library.extract import ExtractionError, available_ocr, extract_pages, file_kind
 from normcore.library.search import (
 	build_fulltext_query,
@@ -232,7 +232,145 @@ def refresh_validity(today=None):
 	)
 	for name, status in changed_secs:
 		frappe.db.set_value("NC Legal Section", name, "validity_status", status, update_modified=False)
-	return {"documents": len(changed_docs), "sections": len(changed_secs)}
+	expired_docs = {n for n, st in changed_docs if st == validity.HET}
+	expired_secs = {n for n, st in changed_secs if st == validity.HET}
+	flagged = 0
+	if expired_docs or expired_secs:
+		from normcore.api.review import flag_affected
+
+		flagged = flag_affected(expired_docs, expired_secs, on)
+	return {"documents": len(changed_docs), "sections": len(changed_secs), "flagged": flagged}
+
+
+def _fmt_date(d):
+	return getdate(d).strftime("%d/%m/%Y")
+
+
+def apply_supersessions(doc):
+	"""Áp dụng các dòng thay thế của văn bản A (FR-LIB-007, FR-LIB-008). Idempotent; trả số bản ghi đổi."""
+	changed, past = 0, False
+	on = getdate(today())
+	for row in doc.get("supersessions") or []:
+		b = row.superseded_document
+		if not b:
+			continue
+		if not frappe.has_permission("NC Legal Document", "write", doc=b):
+			frappe.throw(_("Bạn không có quyền sửa văn bản {0}").format(b), frappe.PermissionError)
+		n = 0
+		if row.scope == supersession.PART:
+			wanted = supersession.parse_sections(row.superseded_sections)
+			secs = frappe.get_all(
+				"NC Legal Section",
+				filters={"legal_document": b},
+				fields=["name", "section_no", "expiry_date"],
+			)
+			plan = supersession.plan_section_expiry(
+				[(s.name, s.section_no, s.expiry_date) for s in secs], wanted, row.from_date
+			)
+			for name, new in plan:
+				frappe.db.set_value("NC Legal Section", name, "expiry_date", new, update_modified=False)
+			n = len(plan)
+			note = _("Các mục {0} bị thay thế bởi {1} từ {2}").format(
+				supersession.format_sections(wanted), doc.name, _fmt_date(row.from_date)
+			)
+		else:
+			new = supersession.plan_expiry(
+				frappe.db.get_value("NC Legal Document", b, "expiry_date"), row.from_date
+			)
+			if new is not None:
+				frappe.db.set_value("NC Legal Document", b, "expiry_date", new, update_modified=False)
+				n = 1
+			note = _("Bị thay thế toàn bộ bởi {0} từ {1}").format(doc.name, _fmt_date(row.from_date))
+		if n:
+			frappe.get_doc("NC Legal Document", b).add_comment("Info", note)
+			changed += n
+			past = past or getdate(row.from_date) <= on
+	if past:
+		refresh_validity()
+	return changed
+
+
+def _sections_info(b, wanted):
+	names = {w.casefold() for w in wanted}
+	return [
+		{"name": s.name, "section_no": s.section_no, "expiry_date": s.expiry_date}
+		for s in frappe.get_all(
+			"NC Legal Section", filters={"legal_document": b}, fields=["name", "section_no", "expiry_date"]
+		)
+		if (s.section_no or "").strip().casefold() in names
+	]
+
+
+@frappe.whitelist()
+def declare_supersession(legal_document, superseded_document, scope, from_date, sections=None):
+	"""UC-002 bước 1-3: văn bản `legal_document` thay thế `superseded_document` từ `from_date`."""
+	doc = frappe.get_doc("NC Legal Document", legal_document)
+	if not frappe.has_permission("NC Legal Document", "write", doc=doc):
+		frappe.throw(_("Bạn không có quyền khai báo thay thế cho văn bản này"), frappe.PermissionError)
+	if isinstance(sections, str) and sections.strip().startswith("["):
+		sections = frappe.parse_json(sections)
+	if isinstance(sections, (list, tuple)):
+		sections = ", ".join(str(s) for s in sections)
+	row = next((r for r in doc.supersessions if r.superseded_document == superseded_document), None)
+	if row is None:
+		row = doc.append("supersessions", {})
+	row.superseded_document = superseded_document
+	row.scope = scope
+	row.superseded_sections = sections or ""
+	row.from_date = from_date
+	doc.save()
+	row = next(r for r in doc.supersessions if r.superseded_document == superseded_document)
+	wanted = supersession.parse_sections(row.superseded_sections)
+	return {
+		"row": row.name,
+		"expiry_date": frappe.db.get_value("NC Legal Document", superseded_document, "expiry_date"),
+		"sections": _sections_info(superseded_document, wanted) if row.scope == supersession.PART else [],
+	}
+
+
+@frappe.whitelist()
+def get_supersessions(legal_document):
+	"""Thay thế của văn bản và tra ngược "bị thay thế bởi" (FR-LIB-007)."""
+	doc = frappe.get_doc("NC Legal Document", legal_document)
+	if not frappe.has_permission("NC Legal Document", "read", doc=doc):
+		frappe.throw(_("Bạn không có quyền xem văn bản này"), frappe.PermissionError)
+
+	def info(name):
+		return frappe.db.get_value("NC Legal Document", name, ["doc_number", "title"], as_dict=True) or {}
+
+	supersedes = []
+	for r in doc.supersessions:
+		i = info(r.superseded_document)
+		supersedes.append(
+			{
+				"row": r.name,
+				"superseded_document": r.superseded_document,
+				"doc_number": i.get("doc_number"),
+				"title": i.get("title"),
+				"scope": r.scope,
+				"sections": r.superseded_sections or "",
+				"from_date": r.from_date,
+			}
+		)
+	superseded_by = []
+	for r in frappe.db.sql(
+		"SELECT parent, scope, superseded_sections, from_date FROM `tabNC Legal Supersession` "
+		"WHERE parenttype = 'NC Legal Document' AND superseded_document = %s ORDER BY from_date",
+		(legal_document,),
+		as_dict=True,
+	):
+		i = info(r.parent)
+		superseded_by.append(
+			{
+				"document": r.parent,
+				"doc_number": i.get("doc_number"),
+				"title": i.get("title"),
+				"scope": r.scope,
+				"sections": r.superseded_sections or "",
+				"from_date": r.from_date,
+			}
+		)
+	return {"supersedes": supersedes, "superseded_by": superseded_by}
 
 
 def daily_job():

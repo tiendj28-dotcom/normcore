@@ -27,3 +27,4 @@ nc-ais-s|Cấu hình AI|NC AI Settings|DocType|List
 nc-apt-s|Mẫu lệnh AI|NC Prompt Template|DocType|List
 nc-nt-s|Mẫu định mức|NC Norm Template|DocType|List
 nc-home-b|NC Trang chủ||CustomBlock|
+nc-rvq-s|Hàng đợi rà soát|review-queue|Page|

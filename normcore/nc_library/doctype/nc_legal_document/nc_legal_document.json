@@ -22,6 +22,9 @@
   "index_error",
   "sections_section",
   "sections_html",
+  "supersession_section",
+  "supersessions",
+  "superseded_by_html",
   "mapping_doc_section",
   "mapping_html"
  ],
@@ -136,6 +139,22 @@
   {
    "fieldname": "sections_html",
    "label": "Các mục",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "supersession_section",
+   "fieldtype": "Section Break",
+   "label": "Thay thế"
+  },
+  {
+   "fieldname": "supersessions",
+   "label": "Thay thế",
+   "fieldtype": "Table",
+   "options": "NC Legal Supersession"
+  },
+  {
+   "fieldname": "superseded_by_html",
+   "label": "Bị thay thế bởi",
    "fieldtype": "HTML"
   },
   {
