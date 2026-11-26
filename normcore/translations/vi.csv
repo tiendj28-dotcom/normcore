@@ -1,4 +1,9 @@
+(norm set in progress),(đã có bộ đang soạn)
 + Add service,+ Thêm dịch vụ
+/batch,/mẻ
+/day,/ngày
+/tube,/ống
+/year,/năm
 A draft already exists: {0},Đã có bản đang soạn: {0}
 AI call timeout is set in AI settings.,Thời hạn gọi AI đặt ở Cấu hình AI.
 AI settings,Cấu hình AI
@@ -25,6 +30,7 @@ Added,Thêm
 "After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
 "After withdrawing, the procedure moves to Withdrawn and can no longer be used as a basis.","Sau khi thu hồi, quy trình chuyển Đã thu hồi và không dùng làm căn cứ được nữa."
 All components,Mọi cấu phần
+All cost levels,Tất cả cấp phát sinh
 All departments in scope,Tất cả khoa trong phạm vi
 All sections are confirmed.,Mọi mục đã được xác nhận.
 Allocated amount,Số tiền phân bổ
@@ -36,6 +42,8 @@ Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
 Applied qty,Lượng áp dụng
 Applied quantity,Lượng áp dụng
+Apply k,Nhân k
+Apply k factor,Nhân hệ số tiêu hao k
 Approved price,Giá đã duyệt
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
@@ -45,9 +53,12 @@ Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
 Assumption — pending confirmation,Giả định — chờ xác nhận
 Attach to,Gắn với
+Attached equipment,Thiết bị được gắn
 Authority document,Văn bản ban hành định mức
 Authority norm,Định mức ban hành
 Available,Có
+Average tests per sample tube,Số xét nghiệm bình quân trên một ống mẫu
+BATCH,Theo mẻ
 Base version,Phiên bản gốc
 Basis,Căn cứ
 Basis reference,Tham chiếu căn cứ
@@ -57,6 +68,7 @@ Calculating…,Đang tính…
 Calibration,Chuẩn máy
 Calibration tests,Số test chuẩn máy
 Cancel,Hủy
+Cannot confirm professionally yet:,Chưa xác nhận chuyên môn được:
 Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Cannot load the original file,Không tải được tệp gốc
@@ -70,6 +82,8 @@ Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
 Choose a step,Chọn một bước
+Choose a system,Chọn hệ thống
+Choose test system,Chọn hệ thống xét nghiệm
 Choose the approval authority; it is required.,Hãy chọn cấp phê duyệt; mục này bắt buộc.
 Citations,Trích dẫn
 Clinical volume and stock issues,Sản lượng cận lâm sàng và xuất kho
@@ -93,12 +107,15 @@ Confirmation,Xác nhận
 "Confirmed professionally, waiting for Finance to lock. It cannot be edited.","Bộ đã xác nhận chuyên môn, chờ Tài chính khóa. Không sửa được."
 Confirmed {0},Đã xác nhận {0}
 Confirmed {0} mapping(s),Đã xác nhận {0} ánh xạ
+Copied from,Sao chép từ
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
+Copy to another system,Sao chép sang hệ thống khác
 Cost category,Loại chi phí
 Cost center,Trung tâm chi phí
 Cost eligible services only,Chỉ tính dịch vụ đủ điều kiện
 Cost explanation,Bảng giải trình giá
+Cost level,Cấp phát sinh
 Cost pool,Quỹ chi phí
 Cost type,Loại chi phí
 Cost {0} services?,Tính giá cho {0} dịch vụ?
@@ -125,9 +142,14 @@ Create new version,Tạo phiên bản mới
 Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
 Created,Tạo mới,Import Excel
+Created {0},Đã tạo {0}
+Creates a new draft for the target system with the lines whose step still exists; confirmations must be redone.,"Tạo bộ nháp mới cho hệ thống đích, mang các dòng có mã bước còn trong quy trình; phải xác nhận lại các dòng."
+DAY,Theo ngày-máy
+DRUG,Thuốc và hóa chất
 Deactivate,Ngừng dùng
 Deactivate test system {0}? It will not enter new costing runs; existing runs stay unchanged.,Ngừng dùng hệ thống {0}? Hệ thống sẽ không vào các lần tính giá mới; các lần tính đã có giữ nguyên.
 Decision number,Số quyết định
+Default cost level,Cấp phát sinh mặc định
 Delete,Xóa
 Delete line,Xóa dòng
 Delete this citation?,Xóa trích dẫn này?
@@ -150,6 +172,7 @@ Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
 Duplicate of {0},Trùng nguồn lực với {0} trong cùng bước
 EQA tests,Số test ngoại kiểm
+EQUIPMENT,Thiết bị
 Each service is counted at the highest stage it has reached.,Mỗi dịch vụ tính ở mức cao nhất đã đạt.
 Edit,Sửa
 Edit cost category,Sửa loại chi phí
@@ -167,8 +190,10 @@ Exclusion reason,Lý do loại trừ
 Expired {0} days ago,Đã hết hạn {0} ngày trước
 Expires in {0} days,Còn {0} ngày đến hạn
 Export,Xuất
+Export Excel,Xuất Excel
 File errors,Dòng lỗi khi đọc tệp
 Filter by department,Lọc theo khoa
+Filter placeholder lines,Lọc dòng giữ chỗ
 Filter these lines,Lọc các dòng này
 Finalize,Chốt
 Finalized: the figures can be used in a costing run.,Đã chốt: số liệu dùng được cho lần tính giá.
@@ -181,16 +206,22 @@ Has error lines,Có dòng lỗi
 Headcount,Số người
 Heading,Tiêu đề
 Hospital norm,Định mức bệnh viện
+INFRA,Hạ tầng
 IQC tests,Số test nội kiểm
 Import data from Excel,Nhập dữ liệu từ Excel
 Import from Excel,Nhập từ Excel
 Import result,Kết quả nhập
+In quality plan,Trong kế hoạch chất lượng
 Inactive,Ngừng dùng,NC Technical Service
 Incomplete: some lines have no price or are not linked,Chưa đủ: có dòng chưa có đơn giá hoặc chưa liên kết
 Indexing failed: {0},Lập chỉ mục thất bại: {0}
 Indexing in progress. Sections will appear when it finishes.,Đang lập chỉ mục. Các mục sẽ hiện khi hoàn tất.
 Internal QC,Nội kiểm
+Item,Khoản mục
+Item is already in the quality plan,Mặt hàng đã có trong kế hoạch chất lượng
+Item is already in the quality plan of the system; mark it excluded or change the resource,Mặt hàng đã có trong kế hoạch chất lượng của hệ thống; đánh dấu Loại trừ hoặc đổi nguồn lực
 "Keyword, phrase, document number or service code","Từ khóa, cụm từ, số hiệu hoặc mã dịch vụ"
+LABOR,Nhân lực
 Labor,Nhân công
 Legal document,Văn bản
 Legal section,Mục văn bản
@@ -199,6 +230,7 @@ Line,Dòng
 Line code,Mã dòng
 Line details,Chi tiết dòng
 Lines / Total amount,Số dòng / Tổng tiền
+Lines not copied,Các dòng không sao chép
 Lines without cost category,Dòng chưa gán loại chi phí
 Loading chain status…,Đang tải tình trạng chuỗi…
 Loading explanation…,Đang tải bảng giải trình…
@@ -213,6 +245,7 @@ Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
 Main equipment,Thiết bị chính
 Management,Quản lý
+Mandatory,Bắt buộc
 Manual,Thêm tay
 Mapping removed,Đã bỏ ánh xạ
 Mapping saved,Đã lưu ánh xạ
@@ -220,6 +253,7 @@ Mappings are available after indexing finishes.,Ánh xạ có sau khi lập ch�
 Matched by,Khớp theo
 Message,Thông báo,Import Excel
 Minutes per person,Số phút / người
+Missing,Thiếu
 More,Xem thêm
 Move step down,Chuyển bước xuống
 Move step up,Chuyển bước lên
@@ -252,6 +286,7 @@ No service is eligible to be costed.,Không có dịch vụ nào đủ điều k
 No shared allocation yet: the shared cost allocation is added by FEAT-017.,"Chưa gồm chi phí phân bổ chung (phân bổ cấp 1, cấp 2 làm ở FEAT-017)."
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
 No suggestions found. Use + Add service on each section or Suggest again.,Không có đề xuất. Dùng + Thêm dịch vụ ở từng mục hoặc Đề xuất lại.
+No test system linked,Chưa gắn hệ thống xét nghiệm
 No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
 None,Không có
@@ -263,22 +298,27 @@ Norm set actions,Thao tác bộ định mức
 Norm sets,Bộ định mức
 Normcore home,Trang chủ Normcore
 Not available,Chưa có
+Not in use,Không dùng
 Not linked,Chưa liên kết
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Only lines needing attention,Chỉ dòng cần xử lý
+"Only lines per result of drug, chemical or supply type","Chỉ dòng Theo kết quả loại thuốc, hóa chất, vật tư"
 Only unresolved,Chỉ chưa xử lý
 Only {0} eligible services will be costed.,Chỉ tính {0} dịch vụ đủ điều kiện.
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
+Open new norm set,Mở bộ định mức mới
 Open norm grid,Mở lưới định mức
 Open procedure list,Mở danh sách quy trình
+Open quality plan,Mở kế hoạch chất lượng
 Open service list,Mở danh sách dịch vụ
 Original page,Trang gốc
 Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
 Over cap,Vượt trần
 Overdue,Quá hạn
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
+PERIOD,Theo kỳ
 Pages,Trang
 Pages {0}–{1} of {2},Trang {0}–{1} của {2}
 Paraclinical,Cận lâm sàng
@@ -288,6 +328,8 @@ Performing department,Khoa thực hiện
 Phase,Giai đoạn
 Pick a norm set from the list.,Chọn một bộ định mức ở danh sách.
 Pick a procedure to see its steps.,Chọn một quy trình để xem các bước.
+Present,Đã có
+"Preset template, not in use. Review the items, then turn on Active.","Mẫu cài sẵn, chưa dùng. Rà khoản mục rồi bật Đang dùng."
 Preview: written on finalize,Xem trước — ghi khi chốt
 Previous version,Phiên bản trước
 Price code,Mã đơn giá,NC Item
@@ -305,6 +347,7 @@ Quality plan,Kế hoạch chất lượng
 Quantity,Số lượng
 Query,Nội dung tìm
 Quote,Đoạn trích
+RESULT,Theo kết quả
 Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
 Rate source,Nguồn đơn giá
 Re-index,Lập lại chỉ mục
@@ -324,6 +367,8 @@ Remove,Bỏ
 Remove this mapping?,Bỏ ánh xạ này?
 Removed,Bỏ
 Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
+Required before professional confirmation (a line is per tube),Bắt buộc trước khi xác nhận chuyên môn (có dòng Theo ống mẫu)
+"Required item, no quantity yet","Khoản mục bắt buộc, chưa có lượng"
 Rerun tests,Số test chạy lại
 Resolved,Đã xử lý
 Resource,Nguồn lực
@@ -342,6 +387,7 @@ Rounded price,Giá làm tròn
 Row,Dòng,Import Excel
 Row ID,Mã dòng
 Run costing,Chạy tính giá
+SUPPLY,Vật tư
 Samples per year,Số mẫu mỗi năm
 Save,Lưu
 Save comment,Lưu ý kiến
@@ -388,8 +434,15 @@ Suggest again,Đề xuất lại
 Suggested,Đề xuất
 Summary of differences,Tóm tắt khác biệt
 Swap direction,Đổi chiều so sánh
+System,Hệ thống
+TUBE,Theo ống mẫu
+Target system,Hệ thống đích
 Task,Việc
 Technical service,Dịch vụ kỹ thuật
+Template,Mẫu
+Template item,Khoản mục của mẫu
+Template items,Khoản mục của mẫu
+Test system,Hệ thống xét nghiệm
 The costing run failed. See Error Log or run it again.,Lần tính lỗi. Xem Error Log hoặc chạy lại.
 The costing run is running in the background.,Lần tính giá đang chạy nền.
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
@@ -420,6 +473,7 @@ Total driver,Tổng tiêu chí
 Total share differs from 100%,Tổng tỷ trọng khác 100%
 Totals by cost center and category,Tổng theo trung tâm và loại chi phí
 Type,Loại
+UTILITY,Tiện ích
 Unassign,Bỏ gán
 Unchanged,Không đổi,Import Excel
 Unconfirmed only,Chỉ chưa xác nhận
@@ -453,8 +507,10 @@ Waiting since,Chờ từ
 Warning,Cảnh báo
 Wastage %,Hao hụt %
 "Wastage cap {0}% (Assumption, to be confirmed: no effective parameter set)",Trần hao hụt {0}% (Giả định — chờ xác nhận: chưa có bộ tham số hiệu lực)
+Wastage is already in the k factor,Hao hụt đã nằm trong hệ số k
 Wastage reason,Lý do vượt trần
 Whole service,Chung cho cả dịch vụ
+Will add the mandatory items of template {0}.,Sẽ thêm khoản mục bắt buộc của mẫu {0}.
 Will be estimated from the plan,Sẽ ước tính từ kế hoạch
 Withdraw,Thu hồi
 Withdrawal reason,Lý do thu hồi
