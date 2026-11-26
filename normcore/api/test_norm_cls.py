@@ -336,3 +336,86 @@ class TestConfirm(ClsBase):
 		make_qc_plan("GLU-B")
 		other = self.create("GLU-B")
 		self.assertEqual(api.get_norm_set(other.name)["warnings"], [])
+
+
+class TestCopyVersion(ClsBase):
+	def _locked_gluA(self):
+		ns = self.create("GLU-A")
+		api.save_line(
+			ns.name,
+			{"cost_level": "PERIOD", "attach_to": "Thiết bị", "attach_equipment": "EQ_A", "apply_k": 0},
+			"L002",
+		)
+		confirm_norm_set(ns)
+		frappe.set_user(self.fin)
+		api.lock_set(ns.name)
+		return ns.name
+
+	def test_TC_CLS_33_sao_chep_khoa_hai_bo_va_xuat(self):
+		src = self._locked_gluA()
+		frappe.set_user(self.head)
+		out = api.copy_norm_set(src, "GLU-B")
+		self.assertEqual(out["skipped"], [])
+		new = frappe.get_doc("NC Norm Set", out["name"])
+		self.assertEqual(new.name, f"DM-{self.service}-{self.dept}-GLU-B-v1")
+		self.assertEqual((new.status, new.copied_from, new.test_system), ("Nháp", src, "GLU-B"))
+		source = frappe.get_doc("NC Norm Set", src)
+		self.assertEqual([r.line_id for r in new.lines], [r.line_id for r in source.lines])
+		self.assertFalse(any(r.confirmed_by for r in new.lines))
+		self.assertEqual(next(r for r in new.lines if r.line_id == "L002").attach_equipment, "EQ_B")
+		self.assertEqual(new.norm_template, TEMPLATE)
+		# khóa cả hai: bộ GLU-A không thành "Đã thay thế" (DI-03 theo hệ thống)
+		confirm_norm_set(new)
+		frappe.set_user(self.fin)
+		api.lock_set(new.name)
+		self.assertEqual(frappe.db.get_value("NC Norm Set", src, "status"), "Đã khóa")
+		self.assertEqual(frappe.db.get_value("NC Norm Set", new.name, "status"), "Đã khóa")
+
+	def test_sao_chep_bo_cac_dong_thuoc_ke_hoach_chat_luong(self):
+		ns = self.create("GLU-A")
+		api.save_line(
+			ns.name,
+			{
+				"step_id": self.proc.steps[0].step_id,
+				"component": "DRUG",
+				"resource_doctype": "NC Item",
+				"resource": "QC_L",
+				"hospital_qty": 1,
+				"uom": "ml",
+				"basis": "Ước tính",
+			},
+		)
+		make_qc_plan("GLU-B")
+		out = api.copy_norm_set(ns.name, "GLU-B")
+		self.assertEqual(len(out["skipped"]), 1)
+		self.assertIn("kế hoạch chất lượng", out["skipped"][0]["reason"])
+
+	def test_sao_chep_tu_choi(self):
+		ns = self.create("GLU-A")
+		with self.assertRaises(frappe.ValidationError):
+			api.copy_norm_set(ns.name, "GLU-A")  # cùng hệ thống
+		bare = frappe.get_doc("NC Norm Set", make_norm_set(self.proc.name))
+		with self.assertRaises(frappe.ValidationError):
+			api.copy_norm_set(bare.name, "GLU-B")  # nguồn không có hệ thống
+		first = api.copy_norm_set(ns.name, "GLU-B")
+		again = api.copy_norm_set(ns.name, "GLU-B")  # đã có bộ đang soạn (ASM-034-14)
+		self.assertEqual(again["name"], first["name"])
+		self.assertIn("message", again)
+		frappe.set_user(self.aud)
+		with self.assertRaises(frappe.PermissionError):
+			api.copy_norm_set(ns.name, "GLU-B")
+
+	def test_FR_NORM_017_phien_ban_moi_giu_he_thong(self):
+		src = self._locked_gluA()
+		frappe.db.set_value("NC Norm Set", src, "tests_per_tube", 4)
+		frappe.set_user(self.head)
+		out = api.new_version(src)
+		new = frappe.get_doc("NC Norm Set", out["name"])
+		self.assertEqual(
+			(new.test_system, new.tests_per_tube, new.norm_template, new.version_no, new.previous_version),
+			("GLU-A", 4, TEMPLATE, 2, src),
+		)
+		self.assertIn("GLU-A-v2", new.name)
+		again = api.new_version(src)  # đã có bộ đang soạn của hệ thống
+		self.assertEqual(again["name"], new.name)
+		self.assertIn("message", again)

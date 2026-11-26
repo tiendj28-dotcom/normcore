@@ -11,6 +11,7 @@ from frappe.utils import cint, getdate, now_datetime, today
 from normcore.costing import engine, pricing, qc_plans, resources
 from normcore.costing import provisional as prov
 from normcore.nc_costing.doctype.nc_norm_set import nc_norm_set as ctl
+from normcore.norm import copy as norm_copy
 from normcore.norm import templates, validation, workflow
 from normcore.norm.init_from_procedure import RESOURCE_DOCTYPE_BY_COMPONENT
 
@@ -611,32 +612,19 @@ def new_version(norm_set):
 	src = _load(norm_set, "write")
 	if src.status != LOCKED:
 		frappe.throw(_("Chỉ tạo phiên bản mới từ bộ Đã khóa"))
-	open_sets = frappe.get_all(
-		NS,
-		{
-			"technical_service": src.technical_service,
-			"department": src.department,
-			"status": ["in", [DRAFT, CONFIRMED]],
-		},
-		pluck="name",
-	)
-	if open_sets:  # ASM-012-09
-		return {"name": open_sets[0], "message": _("Đã có bộ định mức đang soạn: {0}").format(open_sets[0])}
-	version = (
-		frappe.db.get_value(
-			NS,
-			{"technical_service": src.technical_service, "department": src.department},
-			"max(version_no)",
-		)
-		or 0
-	) + 1
+	open_set = _open_set(src.technical_service, src.department, src.test_system)  # ASM-012-09, 034-14
+	if open_set:
+		return {"name": open_set, "message": _("Đã có bộ định mức đang soạn: {0}").format(open_set)}
 	new = frappe.new_doc(NS)
 	new.update(
 		{
 			"technical_service": src.technical_service,
 			"department": src.department,
 			"procedure": src.procedure,
-			"version_no": version,
+			"test_system": src.test_system,
+			"tests_per_tube": src.tests_per_tube,
+			"norm_template": src.norm_template,
+			"version_no": ctl.next_version(src.technical_service, src.department, src.test_system),
 			"previous_version": src.name,
 			"status": DRAFT,
 			"next_line_seq": src.next_line_seq,
@@ -644,5 +632,79 @@ def new_version(norm_set):
 	)
 	for r in src.lines:  # giữ line_id; bỏ xác nhận (DI-03 giữ nguyên ở lock)
 		new.append("lines", {f: r.get(f) for f in ctl.LINE_INPUTS})
+	new.flags.from_procedure = True  # dòng giữ chỗ chưa sửa không bị kiểm đầy đủ (ASM-034-05)
 	new.insert()
 	return {"name": new.name}
+
+
+@frappe.whitelist()
+def copy_norm_set(source, test_system):
+	"""FR-NORM-025 (ASM-034-13, 14): bộ Nháp mới cho hệ thống khác của cùng dịch vụ."""
+	frappe.has_permission(NS, "create", throw=True)
+	src = _load(source)
+	if not src.test_system:
+		frappe.throw(_("Chỉ sao chép được bộ định mức có hệ thống xét nghiệm"))
+	target = frappe.db.get_value(
+		"NC Test System",
+		test_system,
+		["technical_service", "department", "main_equipment", "status"],
+		as_dict=True,
+	)
+	if not target or target.technical_service != src.technical_service:
+		frappe.throw(_("Hệ thống xét nghiệm {0} không thuộc dịch vụ của bộ định mức").format(test_system))
+	if test_system == src.test_system:
+		frappe.throw(_("Chọn hệ thống khác hệ thống của bộ nguồn"))
+	if target.status != "Đang dùng":
+		frappe.throw(_("Hệ thống xét nghiệm {0} đã ngừng dùng").format(test_system))
+	open_set = _open_set(src.technical_service, target.department, test_system)
+	if open_set:
+		return {"name": open_set, "message": _("Đã có bộ định mức đang soạn: {0}").format(open_set)}
+	procs = frappe.get_all(
+		"NC Clinical Procedure",
+		{
+			"technical_service": src.technical_service,
+			"department": target.department,
+			"workflow_state": ctl.PUBLISHED,
+		},
+		pluck="name",
+		order_by="version_no desc",
+		limit_page_length=1,
+	)
+	if not procs:
+		frappe.throw(
+			_("Khoa {0} chưa có quy trình đã ban hành của dịch vụ này, chưa sao chép được").format(
+				target.department
+			)
+		)
+	proc = frappe.get_doc("NC Clinical Procedure", procs[0])
+	src_equipment = frappe.db.get_value("NC Test System", src.test_system, "main_equipment")
+	lines, skipped = norm_copy.copy_lines(
+		[_dict(r) for r in src.lines],
+		{st.step_id for st in proc.steps},
+		{r.resource_row_id for r in proc.resources},
+		{src_equipment: target.main_equipment} if src_equipment and target.main_equipment else {},
+		ctl.qc_items_of(test_system),
+		inputs=ctl.LINE_INPUTS,
+	)
+	new = frappe.new_doc(NS)
+	new.update(
+		{
+			"technical_service": src.technical_service,
+			"department": target.department,
+			"procedure": proc.name,
+			"test_system": test_system,
+			"tests_per_tube": src.tests_per_tube,
+			"norm_template": src.norm_template,
+			"copied_from": src.name,
+			"version_no": ctl.next_version(src.technical_service, target.department, test_system),
+			"status": DRAFT,
+			"next_line_seq": src.next_line_seq,
+		}
+	)
+	if not frappe.has_permission(NS, "create", doc=new):  # phạm vi theo khoa (FR-ACC-003)
+		frappe.throw(_("Bạn không có quyền tạo bộ định mức cho khoa này"), frappe.PermissionError)
+	for ln in lines:
+		new.append("lines", ln)
+	new.flags.from_procedure = True  # dòng giữ chỗ chưa sửa không bị kiểm đầy đủ
+	new.insert()
+	return {"name": new.name, "skipped": skipped}
