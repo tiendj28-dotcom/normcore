@@ -1,5 +1,5 @@
 # As-Built: FEAT-024 Soạn dự thảo quy trình bằng AI
-- Phiên bản app 0.0.1; Dev: NORM-63; nghiệm thu: chờ QA (chưa có `acceptance.md`, `verdict.json`)
+- Phiên bản app 0.0.1; Dev: NORM-63; nghiệm thu: QA (Multica), `docs/features/FEAT-024/acceptance.md`
 
 ## 1. Luồng nghiệp vụ đã xây
 Người soạn mở dịch vụ, chọn "Soạn quy trình" (SCR-DSK-006). AI tắt: tạo bản nháp trống (UC-004 1a). AI bật: hộp thoại ba bước (SCR-DSK-008): xem nguồn (mục đã xác nhận, còn hiệu lực, quy trình hiện hành), nhập yêu cầu và chọn thêm mục, theo dõi tiến độ. `start_ai_draft` xếp tác vụ vào hàng đợi `long`; `run_ai_draft` gọi gateway, kiểm từng trích dẫn nguyên văn (`ai/citation.py`), dựng bản nháp (`procedure/ai_draft.py`): 7 phần văn bản, bước và nguồn lực mang `ai_suggested = 1`, trích dẫn "Theo hướng dẫn"/"Khác biệt", "Chưa có căn cứ" ở phần/bước không còn trích dẫn. Trích dẫn sai bị loại, số loại ghi vào NC AI Log. Trình soạn (SCR-DSK-009) hiện nhãn "Đề xuất", "Chấp nhận", "Bỏ", "Chấp nhận tất cả"; gửi duyệt bị từ chối khi còn đề xuất.
@@ -25,4 +25,5 @@ TC-AI-01, 02, 03, 04, 10: xem `docs/rtm-testref/FEAT-024.md` và `implementation
 - ASM-024-01..15 (`docs/decisions/assumptions/FEAT-024.md`); ASM-024-15 lệch thiết kế 3.5 (không patch/after_install cho mẫu v2).
 - ASM-024-10: văn bản 7 phần do AI viết không có cờ "Đề xuất" riêng.
 - Staging dùng provider `mock` chỉ trả `{"mock": true}`: nhánh thành công chỉ kiểm bằng test tích hợp.
+- Giao diện SCR-DSK-008/009 chưa kiểm bằng trình duyệt (staging chưa có mã PR).
 - Chất lượng mẫu lệnh trên bộ 10 dịch vụ mẫu chưa chấm (rủi ro của kế hoạch).
