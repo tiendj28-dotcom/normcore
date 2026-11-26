@@ -197,6 +197,13 @@ class TestLibraryMappingConfirm(MappingTestBase):
 		self.assertEqual(api.remove_mapping(rname), {"removed": 1})
 		self.assertEqual(len(section_by_no(doc, "3").service_mappings), 0)
 
+	def test_FR_SVC_006_dich_vu_ngung_dung_bi_tu_choi(self):
+		doc = self.make_doc("MAP/14")
+		s1 = section_by_no(doc, "1")
+		frappe.db.set_value("NC Technical Service", self.other_svc, "is_active", 0)
+		with self.assertRaises(frappe.ValidationError):
+			api.save_mapping(s1.name, self.other_svc)
+
 	def test_FR_SVC_006_dong_khong_thuoc_van_ban(self):
 		doc, other = self.make_doc("MAP/11"), self.make_doc("MAP/12")
 		row = section_by_no(other, "1").service_mappings[0].name

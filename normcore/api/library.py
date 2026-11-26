@@ -553,7 +553,6 @@ def _confirm_rows(legal_document, only=None):
 @frappe.whitelist()
 def confirm_mappings(legal_document, rows):
 	"""Xác nhận các dòng đã chọn (FR-SVC-006); dòng đã xác nhận được bỏ qua."""
-	_require_guideline_write(legal_document)
 	return _confirm_rows(legal_document, set(frappe.parse_json(rows) if isinstance(rows, str) else rows))
 
 
@@ -567,7 +566,9 @@ def confirm_exact(legal_document):
 def save_mapping(section, technical_service, row=None):
 	"""Sửa dịch vụ của một dòng, hoặc thêm ánh xạ tay (UC-003 5a); kết quả luôn "Đã xác nhận"."""
 	sec = _writable_section(section)
-	frappe.get_doc("NC Technical Service", technical_service)  # DoesNotExistError nếu không có
+	service = frappe.get_doc("NC Technical Service", technical_service)  # DoesNotExistError nếu không có
+	if not service.is_active:
+		frappe.throw(_("Dịch vụ {0} đã ngừng dùng, không thể ánh xạ").format(technical_service))
 	if row:
 		target = next((r for r in sec.service_mappings if r.name == row), None)
 		if target is None:
