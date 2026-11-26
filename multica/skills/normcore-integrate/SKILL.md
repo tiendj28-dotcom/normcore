@@ -16,7 +16,7 @@ QA dùng ngay sau `normcore-verify` khi verdict là `accepted`, trên **cùng nh
 ## Các bước
 0. Dùng tệp ngữ cảnh từ skill `normcore-feat-context`. Lấy danh sách FR trong đó để ghi Test ref.
 1. Viết `docs/as-built/FEAT-NNN.md` theo mẫu ở `docs/implementation-plan.md` mục 6. Người nghiệm thu: "QA (Multica)". Mục giới hạn ghi rõ những gì chưa kiểm được, ví dụ giao diện chưa kiểm bằng trình duyệt.
-2. Ghi cột Test ref cho các FR của FEAT trong `docs/rtm.md` (tên test thật). Chạy `python3 docs/tools/build_rtm.py docs`: không thêm vấn đề mới. Nếu script sinh lại `rtm.md` và xóa cột Test ref, ghi vào `docs/rtm-testref.md` (FR → test) thay vì sửa tay.
+2. Ghi cột Test ref cho các FR của FEAT trong `docs/rtm.md` (tên test thật). Chạy `python3 docs/tools/build_rtm.py docs`: không thêm vấn đề mới. Nếu script sinh lại `rtm.md` và xóa cột Test ref, ghi vào `docs/rtm-testref/FEAT-NNN.md` (FR → test; mỗi FEAT một tệp, NORM-60) thay vì sửa tay.
 3. Tạo `docs/features/FEAT-NNN/DONE`, nội dung:
    ```
    verify accepted: <commit trong verdict.json>
