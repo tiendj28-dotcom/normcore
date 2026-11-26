@@ -45,3 +45,8 @@ TC-NOTI-01 (hai test), TC-ADM-03 **một phần** (phần tham số; phần trun
 - Lỗi: liên kết `/app/nc-technical-service?nc_chain_stage=...&nc_department=...` bị Frappe coi là bộ lọc DocType, `reportview.get` trả 417.
 - Sửa ở `nc_technical_service_list.js`: `normcore_take_route_params()` đọc hai tham số, gỡ khỏi `frappe.route_options` và URL (`history.replaceState`) trước khi list view dựng truy vấn. Việc này làm ở mỗi lần `before_refresh` (list view được Frappe cache, `onload` chỉ chạy một lần), đặt khoa (chờ ghi xong) rồi mới đặt mức theo liên kết mới và luôn tính lại bộ lọc `name` (kể cả cùng mức, khác khoa); ô chọn mức bị loại khỏi bộ lọc chuẩn của Frappe nên không ghi vào URL. `api/home.py` không đổi.
 - Test: `test_FR_OUT_010_lien_ket_tham_so_khong_loi` và `test_FR_OUT_010_lan_vao_thu_hai_khi_list_view_da_cache` (ba lần vào: (a,K01), (a,K02), (b,K03); stub Frappe: bỏ qua set_value cùng giá trị, Link ghi bất đồng bộ; `normcore/tests/test_feat_002.py`, chạy đoạn JS bằng node; kiểm cả loại `nc_chain_stage` khỏi bộ lọc chuẩn).
+
+## Bổ sung NORM-58: đổi khoa bằng tay tính lại bộ lọc mức (SCR-DSK-005, FR-OUT-010)
+- Lỗi: onchange của ô `department` chỉ làm mới danh sách, bộ lọc `name in [...]` giữ theo khoa cũ nên danh sách sai/rỗng khi đã chọn mức.
+- Sửa ở `nc_technical_service_list.js`: `normcore_chain_filter` thay onchange của khoa bằng `apply()` (tính lại theo khoa mới; không chọn mức thì chỉ làm mới); cờ `routing` tránh tính hai lần khi khoa đặt từ liên kết; bộ đếm `seq` bỏ kết quả của lần tính cũ.
+- Test: `test_FR_OUT_010_doi_khoa_bang_tay_tinh_lai_bo_loc_muc` (mức A, K01 → K02 → tất cả; `normcore/tests/test_feat_002.py`). Test cũ giữ nguyên.
