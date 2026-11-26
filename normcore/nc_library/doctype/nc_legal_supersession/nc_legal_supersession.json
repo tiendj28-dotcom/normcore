@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "creation": "2026-11-26 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "superseded_document",
+  "scope",
+  "superseded_sections",
+  "from_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "superseded_document",
+   "label": "Văn bản bị thay thế",
+   "fieldtype": "Link",
+   "options": "NC Legal Document",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "scope",
+   "label": "Phạm vi",
+   "fieldtype": "Select",
+   "options": "Toàn bộ\nMột phần",
+   "default": "Toàn bộ",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "superseded_sections",
+   "label": "Các mục bị thay thế",
+   "fieldtype": "Small Text",
+   "depends_on": "eval:doc.scope=='Một phần'",
+   "mandatory_depends_on": "eval:doc.scope=='Một phần'",
+   "description": "Danh sách mã mục, cách nhau bằng dấu phẩy"
+  },
+  {
+   "fieldname": "from_date",
+   "label": "Từ ngày",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "in_list_view": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Library",
+ "name": "NC Legal Supersession",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

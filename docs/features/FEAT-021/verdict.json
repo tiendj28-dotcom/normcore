@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["TC-LIB-05/06/07 và FR-LIB-007..009 có test cùng mã, assertion đúng yêu cầu", "Site sạch: 1772 test OK; pytest 1045 passed, phủ 99%", "Không test bị sửa/skip, không sửa tài liệu chỉ đọc"], "commit": "4489a1a3391b642b461172ff8c03c8cb400317e1"}
