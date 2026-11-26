@@ -127,6 +127,16 @@ frappe.ui.form.on("NC Clinical Procedure", {
 		frm.add_custom_button(__("Print PDF"), () => nc_download(frm, "download_pdf"), __("Export"));
 		frm.add_custom_button(__("Download DOCX"), () => nc_download(frm, "download_docx"), __("Export"));
 
+		if (frm.doc.needs_review && frm.doc.workflow_state === "Đã ban hành") {
+			// FR-LIB-009 (FEAT-021): cờ "Cần rà soát" do văn bản hoặc mục được trích dẫn hết hiệu lực
+			frm.dashboard.set_headline_alert(
+				frappe.utils.escape_html(
+					__("This procedure cites a legal document or section that is no longer in force. Review it in the review queue.")
+				),
+				"yellow"
+			);
+			frm.add_custom_button(__("Open review queue"), () => frappe.set_route("review-queue"));
+		}
 		if (frm.doc.workflow_state !== "Nháp") {
 			frm.dashboard.set_headline(
 				NC_CLOSED.includes(frm.doc.workflow_state)

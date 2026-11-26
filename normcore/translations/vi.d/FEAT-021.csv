@@ -1,0 +1,35 @@
+(whole document),(cả văn bản)
+A revision is already being drafted,Đã có bản sửa đổi đang soạn
+Affected citations could not be identified,Không xác định được trích dẫn bị ảnh hưởng
+"After declaring, {0} (or the chosen sections) will expire from {1}; issued procedures that cite it will be flagged for review.","Sau khi khai báo, {0} (hoặc các mục đã chọn) sẽ hết hiệu lực từ {1}; các quy trình đã ban hành có trích dẫn sẽ được gắn cờ Cần rà soát."
+Choose at least one section,Chọn ít nhất một mục
+Could not load the review queue,Không tải được hàng đợi rà soát
+Declare,Khai báo
+Declare supersession,Khai báo thay thế
+"Document has no sections indexed, sections cannot be chosen","Văn bản chưa lập chỉ mục, không chọn được mục"
+"Document, section","Văn bản, mục"
+From date,Từ ngày
+Issued · Needs review,Đã ban hành · Cần rà soát
+Location in procedure,Vị trí trong quy trình
+No change needed,Không cần sửa
+No procedures need review. A procedure is flagged when a cited legal document or section expires.,Không có quy trình nào cần rà soát. Quy trình được gắn cờ khi văn bản hoặc mục được trích dẫn hết hiệu lực.
+Open review queue,Mở hàng đợi rà soát
+Replacing document,Văn bản thay thế
+Review flag removed,Đã gỡ cờ cần rà soát
+Review queue,Hàng đợi rà soát
+Revision in progress: {0},Đang có bản sửa đổi: {0}
+Scope,Phạm vi
+Superseded by,Bị thay thế bởi
+Superseded document,Văn bản bị thay thế
+Superseded sections,Các mục bị thay thế
+Supersession declared,Đã khai báo thay thế
+The review flag will be removed; the reason is recorded in the procedure history.,Cờ Cần rà soát sẽ được gỡ; lý do ghi vào lịch sử quy trình.
+This procedure cites a legal document or section that is no longer in force. Review it in the review queue.,Quy trình trích dẫn văn bản hoặc mục đã hết hiệu lực. Rà soát ở hàng đợi rà soát.
+Whole document,Toàn bộ văn bản
+You do not have permission to view procedures,Bạn không có quyền xem quy trình
+from,từ
+section,mục
+sections,các mục
+whole,toàn bộ
+{0} procedures need review,{0} quy trình cần rà soát
+{0} will expire from {1} (expiry date {2}),{0} sẽ hết hiệu lực từ {1} (ngày hết hiệu lực {2})
