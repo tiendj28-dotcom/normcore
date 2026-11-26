@@ -13,7 +13,7 @@ Quy ước:
 - [x] T03 Golden: `tests/golden/test_snapshot_compare_golden.py` gồm `test_TC_COST_09_recompute_tu_anh_chup_vang` và `test_TC_COST_18_chenh_lech_V1_theo_cau_phan` (tiêu chí #7; số lấy từ `golden_engine.run()`, `run(False)`, không chép; −63.636,36 so thêm với TC-COST-18) — done-when:
   - `python3 docs/golden/golden_engine.py && python3 docs/golden/golden_engine.py --no-depr` thoát 0;
   - `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov-fail-under=90` xanh.
-- [ ] T04 DocType và controller (mục 2.1, 4.1–4.3):
+- [x] T04 DocType và controller (mục 2.1, 4.1–4.3):
   - `nc_costing_run.json`: section "Ảnh chụp đầu vào", `snapshot_file`, `snapshot_hash`; `no_copy` cho `progress`, `allocation_warnings`;
   - `validate` (khóa cứng bản ghi "Đã khóa", trường ảnh chụp chỉ do Khóa ghi), `on_trash`;
   - `run_costing` câu từ chối riêng cho "Đã khóa"; `lock_costing` mở rộng; `verify_snapshot`, `duplicate_run`;

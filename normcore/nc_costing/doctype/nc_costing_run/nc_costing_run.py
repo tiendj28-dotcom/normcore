@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from normcore.costing import allocation, reconcile, runner, test_systems
+from normcore.costing import allocation, reconcile, runner, snapshot, test_systems
 from normcore.nc_costing.doctype.nc_costing_run import loader, writer
 
 DRAFT, CALCULATING, CALCULATED, FAILED, LOCKED = "Nháp", "Đang tính", "Đã tính", "Tính lỗi", "Đã khóa"
@@ -32,8 +32,30 @@ class NCCostingRun(Document):
 			if status != IMPORT_FINAL:
 				frappe.throw(_("Lần nhập kế toán {0} chưa chốt").format(self.accounting_import))
 		prev = None if self.is_new() else self.get_doc_before_save()
+		if prev is None:
+			self.snapshot_file = self.snapshot_hash = None  # chỉ thao tác Khóa ghi (FR-COST-011)
+		elif prev.status == LOCKED and self._changed_since(prev):
+			frappe.throw(
+				_("Lần tính giá {0} đã khóa, không sửa được. Dùng Nhân bản để tạo lần tính mới.").format(self.name)
+			)
+		elif (self.snapshot_file, self.snapshot_hash) != (prev.snapshot_file, prev.snapshot_hash):
+			frappe.throw(_("Ảnh chụp chỉ do thao tác Khóa ghi"))
 		if prev is not None and prev.status not in EDITABLE_INPUTS and self._inputs_changed(prev):
 			frappe.throw(_("Lần tính giá ở trạng thái {0}, không sửa được đầu vào").format(prev.status))
+
+	def _changed_since(self, prev) -> bool:
+		"""FR-COST-012: có trường nào khác bản trong CSDL (bỏ qua `modified`, `modified_by`)."""
+		skip = {"modified", "modified_by"}
+		for df in self.meta.fields:
+			if df.fieldtype in frappe.model.table_fields or df.fieldname in skip:
+				continue
+			if self.get(df.fieldname) != prev.get(df.fieldname):
+				return True
+		return self._inputs_changed(prev)
+
+	def on_trash(self):
+		if self.status == LOCKED:
+			frappe.throw(_("Lần tính giá {0} đã khóa, không xóa được").format(self.name))
 
 	def _inputs_changed(self, prev) -> bool:
 		if any(self.get(f) != prev.get(f) for f in INPUT_FIELDS):
@@ -59,6 +81,12 @@ class NCCostingRun(Document):
 	def run_costing(self, confirm_ineligible=0):
 		"""FR-COST-003: tính cho mọi bộ định mức "Đã khóa" trong phạm vi (DI-06). Việc tính nằm ở normcore.costing."""
 		frappe.has_permission("NC Costing Run", "write", doc=self, throw=True)
+		if self.status == LOCKED:
+			frappe.throw(
+				_("Lần tính giá {0} đã khóa, không tính lại được. Dùng Nhân bản để tạo lần tính mới.").format(
+					self.name
+				)
+			)
 		if self.status not in RUNNABLE:
 			frappe.throw(_("Chỉ chạy được lần tính giá ở trạng thái Nháp, Tính lỗi hoặc Đã tính"))
 		info = self.scope()
@@ -116,7 +144,7 @@ class NCCostingRun(Document):
 	@frappe.whitelist()
 	def lock_costing(self):
 		"""Khóa lần tính giá (UC-012 bước 8, data-model 5.4): từ chối khi còn dòng vượt ngưỡng chưa giải trình.
-		FEAT-018 thêm ảnh chụp đầu vào ngay trước `db_set` (ASM-017-07)."""
+		FEAT-018 (FR-COST-011): tính lại từ ảnh chụp đầu vào, trùng kết quả đã lưu mới lưu tệp, mã băm và khóa."""
 		frappe.has_permission("NC Costing Run", "write", doc=self, throw=True)
 		if self.status != CALCULATED:
 			frappe.throw(_("Chỉ khóa được lần tính giá ở trạng thái Đã tính"))
@@ -132,8 +160,86 @@ class NCCostingRun(Document):
 					len(blockers), "; ".join(blockers)
 				)
 			)
-		self.db_set("status", LOCKED)
+		eligible = loader.eligible_from_results(self)
+		snap = loader.capture_snapshot(self, eligible)
+		rec = snapshot.recompute(snap)
+		diffs = snapshot.diff_rows(
+			writer.expected_rows(self.name, rec.results, rec.recon_rows), loader.stored_rows(self)
+		)
+		if diffs:
+			frappe.throw(
+				_(
+					"Đầu vào đã thay đổi sau lần tính ({0} khác biệt, ví dụ: {1}). Chạy tính giá lại rồi khóa."
+				).format(len(diffs), "; ".join(diffs[:3]))
+			)
+		blob, digest = snapshot.pack(snap)
+		frappe.db.savepoint("nc_costing_lock")
+		try:
+			file = frappe.get_doc(
+				{
+					"doctype": "File",
+					"file_name": f"{self.name}-anh-chup-v{snapshot.VERSION}.json.gz",
+					"content": blob,
+					"is_private": 1,
+					"attached_to_doctype": "NC Costing Run",
+					"attached_to_name": self.name,
+					"attached_to_field": "snapshot_file",
+				}
+			).insert(ignore_permissions=True)
+			self.flags.audit_detail = f"Ảnh chụp {digest[:12]}"
+			self.db_set({"snapshot_file": file.file_url, "snapshot_hash": digest, "status": LOCKED})
+		except Exception:
+			frappe.db.rollback(save_point="nc_costing_lock")
+			frappe.log_error(title=f"Khóa lỗi: {self.name}")
+			frappe.throw(_("Không lưu được ảnh chụp đầu vào; lần tính chưa khóa"))
 		return LOCKED
+
+	@frappe.whitelist()
+	def verify_snapshot(self):
+		"""NFR-REL-001: tính lại từ tệp ảnh chụp đã lưu (không đọc dữ liệu sống), so từng trường. Chỉ đọc."""
+		frappe.has_permission("NC Costing Run", "read", doc=self, throw=True)
+		if self.status != LOCKED or not self.snapshot_file:
+			frappe.throw(_("Lần tính giá chưa khóa, chưa có ảnh chụp"))
+		try:
+			content = frappe.get_doc("File", {"file_url": self.snapshot_file}).get_content()
+		except Exception:
+			return {"ok": False, "diffs": [_("Không tìm thấy tệp ảnh chụp")], "diff_count": 1, "hash": self.snapshot_hash}
+		blob = content.encode() if isinstance(content, str) else content
+		try:
+			snap = snapshot.unpack(blob, self.snapshot_hash)
+		except ValueError as e:
+			return {"ok": False, "diffs": [str(e)], "diff_count": 1, "hash": self.snapshot_hash}
+		rec = snapshot.recompute(snap)
+		stored = loader.stored_rows(self)
+		diffs = snapshot.diff_rows(writer.expected_rows(self.name, rec.results, rec.recon_rows), stored)
+		kinds = [r["key"][0] for r in stored]
+		return {
+			"ok": not diffs,
+			"version": snap.get("version"),
+			"hash": self.snapshot_hash,
+			"services": kinds.count("cost"),
+			"lines": kinds.count("line"),
+			"recon_lines": kinds.count("recon"),
+			"diffs": diffs[:50],
+			"diff_count": len(diffs),
+		}
+
+	@frappe.whitelist()
+	def duplicate_run(self):
+		"""FR-COST-012: lần tính mới ở "Nháp", cùng đầu vào và phạm vi, không mang kết quả, đối soát, ảnh chụp."""
+		frappe.has_permission("NC Costing Run", "read", doc=self, throw=True)
+		frappe.has_permission("NC Costing Run", "create", throw=True)
+		if self.status == CALCULATING:
+			frappe.throw(_("Lần tính giá đang tính, chưa nhân bản được"))
+		new = frappe.copy_doc(self)
+		new.title = _("{0} (bản sao)").format(self.title)
+		new.status, new.progress = DRAFT, 0
+		for f in ("snapshot_file", "snapshot_hash", "allocation_warnings", "run_warnings", "based_on_run"):
+			if new.meta.has_field(f):
+				new.set(f, None)
+		new.insert()
+		new.add_comment("Comment", _("Nhân bản từ {0}").format(self.name))
+		return new.name
 
 	def test_systems_in_scope(self):
 		"""FR-CLS-006, DI-06 [1.1]: mã các hệ thống xét nghiệm "Đang dùng" cho lần tính mới."""
@@ -184,10 +290,7 @@ def execute_costing(run, eligible, background=True):
 		warnings = []
 		actx = getattr(doc, "_allocation", None)
 		if actx is not None and actx.outcome is not None:
-			centers = {p.cost_center for p in actx.outcome.pools}
-			depr = [
-				c for (c, cat), v in actx.accounting.items() if cat == "DEPRECIATION" and v and c in centers
-			]
+			depr = reconcile.depreciation_centers(actx.accounting, actx.outcome.pools)
 			writer.write_reconciliation(
 				doc, reconcile.reconcile(actx.outcome.pools, actx.tolerance, actx.include_depreciation, depr)
 			)

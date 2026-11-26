@@ -22,6 +22,7 @@ from normcore.costing import (
 	test_systems,
 )
 from normcore.nc_costing.doctype.nc_cost_center_driver.nc_cost_center_driver import get_driver_values
+from normcore.nc_costing.doctype.nc_costing_run import writer
 
 LOCKED_NORM = "Đã khóa"
 VOLUME_SCENARIO = "Thực tế 12 tháng"  # mặc định; lần tính dùng `run.volume_scenario` (FR-COST-017)
@@ -682,7 +683,8 @@ def run_warnings(ctx, eligible) -> list[str]:
 
 
 def capture_snapshot(run, eligible) -> dict:
-	"""FR-COST-032: ảnh chụp đầu vào đã phân giải + bản ghi nguồn cận lâm sàng. FEAT-018 gọi khi khóa (ASM-036-21)."""
+	"""FR-COST-011, FR-COST-032: ảnh chụp đầu vào đã phân giải (định mức, đơn giá, tham số, kế toán, phân bổ,
+	sản lượng, nguồn cận lâm sàng) và `meta` của lần tính. FEAT-018 gọi khi khóa."""
 	ctx = load_context(run, eligible)
 	inputs = [load_service(ctx, e) for e in eligible]
 	sources = {
@@ -697,7 +699,90 @@ def capture_snapshot(run, eligible) -> dict:
 		"warnings": run_warnings(ctx, eligible),
 	}
 	sources = frappe.parse_json(frappe.as_json(sources))
-	return snapshot.build(inputs, ctx.pricing, sources)
+	actx = allocation_context(run, ctx)
+	ss, sd = scope_values(run)
+	meta = {
+		"run": run.name,
+		"title": run.title,
+		"fiscal_year": run.fiscal_year,
+		"costing_date": getdate(run.costing_date),
+		"parameter_set": run.parameter_set,
+		"accounting_import": run.accounting_import,
+		"price_category": run.price_category,
+		"scope_services": sorted(ss),
+		"scope_departments": sorted(sd),
+		"volume_scenario": run.get("volume_scenario"),
+		"compliance_allocation_mode": run.get("compliance_allocation_mode"),
+	}
+	alloc = {"input": actx.input, "dept_center": actx.dept_center, "tolerance": repr(actx.tolerance)}
+	return snapshot.build(inputs, ctx.pricing, sources, allocation=alloc, meta=meta)
+
+
+def eligible_from_results(run) -> list[dict]:
+	"""Dựng lại danh sách `eligible` của lần tính đã chạy từ NC Service Cost đã lưu, không gọi `scope_info`
+	(phạm vi sống có thể đã đổi, ASM-018-02). Dịch vụ cận lâm sàng có `test_systems` theo `idx`."""
+	rows = frappe.get_all(
+		"NC Service Cost",
+		{"costing_run": run.name},
+		["name", "technical_service", "department", "norm_set"],
+	)
+	systems: dict = {}
+	if rows:
+		for t in frappe.get_all(
+			"NC Test System Cost",
+			{"parent": ["in", [r.name for r in rows]], "parenttype": "NC Service Cost"},
+			["parent", "test_system", "norm_set"],
+			order_by="parent, idx",
+		):
+			systems.setdefault(t.parent, []).append({"test_system": t.test_system, "norm_set": t.norm_set or ""})
+	out = []
+	for r in rows:
+		e = {"service": r.technical_service, "department": r.department, "norm_set": r.norm_set or ""}
+		if r.name in systems:
+			e["test_systems"] = systems[r.name]
+		out.append(e)
+	out.sort(key=lambda e: (e["service"], e["department"], e["norm_set"]))
+	return out
+
+
+def stored_rows(run) -> list[dict]:
+	"""Bản ghi phẳng của kết quả và đối soát đã lưu, cùng dạng `writer.expected_rows`."""
+	costs = frappe.get_all("NC Service Cost", {"costing_run": run.name}, list(writer.HEADER_FIELDS) + ["name"])
+	by_name = {c.name: c for c in costs}
+	rows = []
+	for c in costs:
+		values = {k: c[k] for k in writer.HEADER_FIELDS}
+		rows.append(
+			{
+				"key": ("cost", c.technical_service, c.department),
+				"values": writer.canonical("NC Service Cost", values),
+			}
+		)
+	if by_name:
+		for dt, kind, fields in (
+			(writer.LINE_DT, "line", writer.LINE_FIELDS),
+			(writer.SYSTEM_DT, "system", writer.SYSTEM_FIELDS),
+		):
+			for ch in frappe.get_all(
+				dt,
+				{"parent": ["in", list(by_name)], "parenttype": "NC Service Cost"},
+				["parent", "idx", *fields],
+			):
+				c = by_name[ch.parent]
+				rows.append(
+					{
+						"key": (kind, c.technical_service, c.department, ch.idx),
+						"values": writer.canonical(dt, {k: ch[k] for k in fields}),
+					}
+				)
+	for r in frappe.get_all("NC Reconciliation Line", {"costing_run": run.name}, list(writer.RECON_FIELDS)):
+		rows.append(
+			{
+				"key": ("recon", r.cost_center, r.cost_category),
+				"values": writer.canonical(writer.RECON_DT, {k: r[k] for k in writer.RECON_FIELDS}),
+			}
+		)
+	return rows
 
 
 class AllocCtx:
