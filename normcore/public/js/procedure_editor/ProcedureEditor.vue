@@ -436,7 +436,8 @@ export default {
 		openSource(section) {
 			return Promise.resolve(frappe.call({ method: "normcore.api.library.get_source_view", args: { section } })).then((r) => {
 				const v = r.message || {};
-				frappe.msgprint({ title: __("Open source"), message: "<pre style=\"white-space:pre-wrap\">" + frappe.utils.escape_html(v.plain_text || v.text || "") + "</pre>" });
+				const html = "<pre style=\"white-space:pre-wrap\">" + frappe.utils.escape_html(v.plain_text || v.text || "") + "</pre>";
+				new frappe.ui.Dialog({ title: __("Open source"), fields: [{ fieldtype: "HTML", fieldname: "src", options: html }] }).show();
 			});
 		},
 		relClass(rel) {
