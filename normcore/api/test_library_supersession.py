@@ -109,7 +109,8 @@ class TestLibrarySupersession(FrappeTestCase):
 		clin = make_user("tc_clin21@example.com", "NC Clinician")
 		aud = make_user("tc_aud21@example.com", "NC Auditor")
 		ctl = make_user("tc_ctl21@example.com", "NC Document Controller")
-		for user in (clin, aud):
+		fin = make_user("tc_fin21@example.com", "NC Finance")
+		for user in (clin, aud, fin):
 			frappe.set_user(user)
 			with self.assertRaises(frappe.PermissionError):
 				api.declare_supersession(a.name, b.name, "Toàn bộ", "2099-07-01")
