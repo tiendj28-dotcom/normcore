@@ -654,8 +654,8 @@ Lần nhập "Nháp" có `error_count` > 0 không chốt được [FR-ACCT-002].
 | price_category | Loại giá | Link NC Price Category | Có | |
 | volume_scenario **[1.1]** | Kịch bản sản lượng | Select | Có | Thực tế 12 tháng / Kế hoạch / Công suất; mặc định Thực tế 12 tháng [FR-COST-017] |
 | compliance_allocation_mode **[1.1]** | Cách phân bổ kiểm định, hiệu chuẩn | Select | Có | Theo giá trị tài sản / Gắn trực tiếp thiết bị; mặc định Theo giá trị tài sản [FR-COST-017] |
-| scope_departments | Phạm vi khoa | Table MultiSelect | | Trống = toàn viện |
-| scope_services | Phạm vi dịch vụ | Table MultiSelect | | |
+| scope_departments | Phạm vi khoa | Table MultiSelect | | Trống = toàn viện. Bảng con `NC Costing Run Department`, một trường Link **[AMD-015-01]** |
+| scope_services | Phạm vi dịch vụ | Table MultiSelect | | Bảng con `NC Costing Run Service`, một trường Link **[AMD-015-01]** |
 | status | Trạng thái | Select | Có | Nháp / Đang tính / Đã tính / Tính lỗi / Đã khóa |
 | based_on_run | Kịch bản của lần tính | Link NC Costing Run | | Có giá trị khi là kịch bản điều chỉnh |
 | scenario_changes | Thay đổi của kịch bản | Table NC Scenario Change | | |
