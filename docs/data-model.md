@@ -578,7 +578,7 @@ Form hiển thị (không lưu): bộ định mức hiện hành, kế hoạch c
 | hospital_qty | Định mức của bệnh viện | Float | Có | Phút với LABOR, EQUIPMENT, INFRA. **[1.1]** Tính cho: một kết quả (RESULT), một ống (TUBE), một mẻ (BATCH), một ngày (DAY), một năm (PERIOD) |
 | authority_qty | Định mức ban hành | Float | | [FR-NORM-006] |
 | authority_ref | Văn bản ban hành định mức | Data | | |
-| uom | Đơn vị | Data | Có | |
+| uom | Đơn vị | Data | Có, trừ dòng giữ chỗ của mẫu chưa sửa **[AMD-034-01]** | [FR-NORM-003, FR-NORM-022] |
 | wastage_rate | Hao hụt (%) | Percent | | DRUG, SUPPLY |
 | wastage_reason | Lý do vượt trần | Small Text | | [FR-NORM-004] |
 | basis | Căn cứ | Select | Có | Quy trình / Bấm giờ / Tiêu hao thực tế / Định mức ban hành / Ước tính |

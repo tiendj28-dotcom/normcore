@@ -15,6 +15,10 @@
 				<div class="nc-ng__title">
 					<strong>{{ data.doc.technical_service_name || data.doc.technical_service }}</strong>
 					<span class="text-muted">{{ data.doc.department }}</span>
+					<span v-if="data.doc.test_system" class="indicator-pill blue"><a :href="'/app/nc-test-system/' + encodeURIComponent(data.doc.test_system)">{{ __("System") }} {{ data.doc.test_system_label }}</a></span>
+					<span v-else-if="isCls" class="indicator-pill orange">{{ __("No test system linked") }}</span>
+					<a v-if="data.doc.copied_from" href="#" @click.prevent="open(data.doc.copied_from)">{{ __("Copied from") }} {{ data.doc.copied_from }}</a>
+					<a v-if="data.doc.norm_template" :href="'/app/nc-norm-template/' + encodeURIComponent(data.doc.norm_template)">{{ __("Template") }}: {{ data.doc.norm_template }}</a>
 					<span>{{ __("Version") }} {{ data.doc.version_no }}</span>
 					<a :href="'/app/nc-clinical-procedure/' + encodeURIComponent(data.doc.procedure)">{{ data.doc.procedure }}</a>
 					<a v-if="data.doc.previous_version" href="#" @click.prevent="open(data.doc.previous_version)">{{ __("Previous version") }}: {{ data.doc.previous_version }}</a>
@@ -29,6 +33,8 @@
 					<button v-if="can('new_version')" type="button" class="btn btn-sm" :class="data.doc.status === 'Nháp' ? 'btn-default' : 'btn-primary'" :disabled="busy" @click="startAction('new_version')">{{ data.doc.newer_procedure ? __("Create version from new procedure") : __("Create new version") }}</button>
 					<button v-if="can('return_set')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="startAction('return_set')">{{ __("Return to draft") }}</button>
 					<button v-if="can('save_line')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openAdd">{{ __("Add line") }}</button>
+					<button v-if="can('copy_norm_set')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openCopy">{{ __("Copy to another system") }}</button>
+					<button type="button" class="btn btn-default btn-sm" :disabled="busy" @click="exportExcel">{{ __("Export Excel") }}</button>
 				</div>
 			</header>
 
@@ -54,6 +60,23 @@
 				{{ __("{0} lines are not ready for professional confirmation", [blockers.length]) }}
 				<button type="button" class="btn btn-default btn-xs" @click="onlyAttention = !onlyAttention">{{ onlyAttention ? __("Show all lines") : __("Filter these lines") }}</button>
 			</div>
+			<div v-for="w in data.warnings" :key="w.code" class="nc-ng__warn" role="note">
+				{{ w.message }}
+				<a v-if="data.doc.test_system" :href="'/app/nc-qc-plan?test_system=' + encodeURIComponent(data.doc.test_system)">{{ __("Open quality plan") }}</a>
+			</div>
+			<div v-if="setBlockers.length && data.doc.status === 'Nháp'" class="nc-ng__warn" role="note">
+				<div>{{ __("Cannot confirm professionally yet:") }}</div>
+				<ul class="nc-ng__list">
+					<li v-for="(b, i) in setBlockers" :key="i">{{ b }}</li>
+				</ul>
+				<button v-if="hasPlaceholder" type="button" class="btn btn-default btn-xs" @click="onlyAttention = !onlyAttention">{{ onlyAttention ? __("Show all lines") : __("Filter placeholder lines") }}</button>
+			</div>
+			<div v-if="isCls && data.doc.test_system" class="nc-ng__form nc-ng__tpt">
+				<label for="nc-ng-tpt">{{ __("Average tests per sample tube") }}</label>
+				<input v-if="can('save_head')" id="nc-ng-tpt" ref="tpt" :value="data.doc.tests_per_tube || ''" type="number" step="any" min="0" class="form-control nc-ng__cell num" :class="{ 'nc-ng__need': needTpt }" :aria-invalid="needTpt ? 'true' : 'false'" @change="saveTpt($event.target.value)" />
+				<span v-else>{{ data.doc.tests_per_tube ? num(data.doc.tests_per_tube) : "" }}</span>
+				<span v-if="needTpt" class="text-muted nc-ng__small">{{ __("Required before professional confirmation (a line is per tube)") }}</span>
+			</div>
 			<div v-if="!data.summary.parameter_set" class="text-muted nc-ng__small">
 				{{ __("Wastage cap {0}% (Assumption, to be confirmed: no effective parameter set)", [data.wastage_cap]) }}
 			</div>
@@ -61,6 +84,7 @@
 			<div v-if="actionError" class="nc-ng__error" role="alert">
 				<div v-for="(l, i) in actionError.lines" :key="i">
 					<button v-if="l.line_id" type="button" class="nc-ng__link" @click="focusLine(l.line_id)">{{ l.text }}</button>
+					<button v-else-if="l.tpt" type="button" class="nc-ng__link" @click="focusTpt">{{ l.text }}</button>
 					<span v-else>{{ l.text }}</span>
 				</div>
 			</div>
@@ -75,6 +99,24 @@
 				<span>{{ pending.message }}</span>
 				<button type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="runAction">{{ __("Confirm") }}</button>
 				<button type="button" class="btn btn-default btn-sm" @click="pending = null">{{ __("Cancel") }}</button>
+			</div>
+
+			<form v-if="copy" class="nc-ng__form" @submit.prevent="runCopy" @keydown.esc="copy = null">
+				<label>{{ __("Target system") }}
+					<select v-model="copy.target" class="form-control" required>
+						<option value="">{{ __("Choose a system") }}</option>
+						<option v-for="t in data.meta.other_test_systems" :key="t.name" :value="t.name">{{ t.name }} · {{ t.main_equipment }}</option>
+					</select>
+				</label>
+				<span class="text-muted nc-ng__small">{{ __("Creates a new draft for the target system with the lines whose step still exists; confirmations must be redone.") }}</span>
+				<button type="submit" class="btn btn-primary btn-sm" :disabled="busy">{{ __("Copy") }}</button>
+				<button type="button" class="btn btn-default btn-sm" @click="copy = null">{{ __("Cancel") }}</button>
+				<div v-if="copy.error" class="nc-ng__error" role="alert">{{ copy.error }}</div>
+			</form>
+			<div v-if="copyResult" class="nc-ng__warn" role="note">
+				<div>{{ __("Lines not copied") }}</div>
+				<ul class="nc-ng__list"><li v-for="s in copyResult.skipped" :key="s.line_id">{{ s.line_id }} — {{ s.reason }}</li></ul>
+				<button type="button" class="btn btn-primary btn-xs" @click="open(copyResult.name)">{{ __("Open new norm set") }}</button>
 			</div>
 
 			<form v-if="add" class="nc-ng__form nc-ng__add" @submit.prevent="submitAdd" @keydown.esc="add = null">
@@ -99,6 +141,19 @@
 				<label>{{ __("Basis") }}
 					<select v-model="add.basis" class="form-control"><option v-for="b in data.options.basis" :key="b" :value="b">{{ __(b) }}</option></select>
 				</label>
+				<label v-if="isCls">{{ __("Cost level") }}
+					<select v-model="add.cost_level" class="form-control"><option v-for="o in data.options.cost_level" :key="o.value" :value="o.value">{{ o.label }}</option></select>
+				</label>
+				<label v-if="isCls && kAllowedFor(add.component, add.cost_level)"><input v-model="add.apply_k" type="checkbox" /> {{ __("Apply k factor") }}</label>
+				<label v-if="isCls && ['DAY', 'PERIOD'].includes(add.cost_level)">{{ __("Attach to") }}
+					<select v-model="add.attach_to" class="form-control">
+						<option value=""></option>
+						<option v-for="a in attachOptions" :key="a" :value="a">{{ a }}</option>
+					</select>
+				</label>
+				<label v-if="isCls && add.attach_to === 'Thiết bị'">{{ __("Attached equipment") }}
+					<input v-model="add.attach_equipment" class="form-control" :aria-label="__('Attached equipment')" />
+				</label>
 				<button type="submit" class="btn btn-primary btn-sm" :disabled="busy">{{ __("Add") }}</button>
 				<button type="button" class="btn btn-default btn-sm" @click="add = null">{{ __("Cancel") }}</button>
 				<div v-if="add.error" class="nc-ng__error" role="alert">{{ add.error }}</div>
@@ -112,6 +167,13 @@
 					<option value="">{{ __("All components") }}</option>
 					<option v-for="c in data.options.component" :key="c" :value="c">{{ compLabel(c) }}</option>
 				</select>
+				<template v-if="isCls">
+					<label class="sr-only" for="nc-ng-level">{{ __("Cost level") }}</label>
+					<select id="nc-ng-level" v-model="levelFilter" class="form-control nc-ng__comp">
+						<option value="">{{ __("All cost levels") }}</option>
+						<option v-for="o in data.options.cost_level" :key="o.value" :value="o.value">{{ o.label }}</option>
+					</select>
+				</template>
 				<label><input v-model="onlyAttention" type="checkbox" /> {{ __("Only lines needing attention") }}</label>
 				<label><input v-model="showExcluded" type="checkbox" /> {{ __("Show excluded lines") }}</label>
 				<button type="button" class="btn btn-default btn-xs" @click="toggleAll">{{ __("Collapse or expand all steps") }}</button>
@@ -128,6 +190,8 @@
 						<tr>
 							<th scope="col">{{ __("Line") }}</th>
 							<th scope="col">{{ __("Component") }}</th>
+							<th v-if="isCls" scope="col">{{ __("Cost level") }}</th>
+							<th v-if="isCls" scope="col">{{ __("Apply k") }}</th>
 							<th scope="col">{{ __("Resource") }}</th>
 							<th scope="col" class="num">{{ __("Headcount") }}</th>
 							<th scope="col" class="num">{{ __("Hospital norm") }}</th>
@@ -144,7 +208,7 @@
 					</thead>
 					<tbody v-for="g in groups" :key="g.key">
 						<tr class="nc-ng__group">
-							<td colspan="11">
+							<td :colspan="11 + colExtra">
 								<button type="button" class="nc-ng__link" :aria-expanded="!collapsed[g.key]" @click="collapsed[g.key] = !collapsed[g.key]">
 									<strong>{{ g.step_id || "" }}</strong> {{ g.title }} <span v-if="g.removed" class="indicator-pill red">{{ __("Removed step") }}</span> <span v-if="g.phase" class="text-muted">· {{ __(g.phase) }}</span>
 									<span class="text-muted">({{ g.lines.length }})</span>
@@ -155,12 +219,13 @@
 						</tr>
 						<template v-if="!collapsed[g.key]">
 							<template v-for="l in g.lines" :key="l.line_id">
-								<tr :id="'nc-ng-' + l.line_id" class="nc-ng__row" :class="{ 'nc-ng__row--off': l.excluded, 'nc-ng__row--ai': l.ai_suggested }">
+								<tr :id="'nc-ng-' + l.line_id" class="nc-ng__row" :class="{ 'nc-ng__row--off': l.excluded, 'nc-ng__row--ai': l.ai_suggested, 'nc-ng__row--hold': l.placeholder }">
 									<th scope="row">
 										<button type="button" class="nc-ng__link" :aria-label="__('Line details') + ' ' + l.line_id" @click="detail = detail === l.line_id ? '' : l.line_id">{{ l.line_id }}</button>
 										<span v-if="l.procedure_resource_row" class="text-muted nc-ng__small" :title="__('Source resource row') + ' ' + l.procedure_resource_row">·{{ l.procedure_resource_row }}</span>
 										<span v-if="l.step_removed" class="indicator-pill red">{{ __("Removed step: {0}", [l.step_id]) }}</span>
 										<span v-if="l.duplicate_of.length" class="indicator-pill orange" :title="__('Duplicate of {0}', [l.duplicate_of.join(', ')])">{{ __("Duplicate") }}</span>
+										<span v-if="l.qc_conflict" class="indicator-pill red" role="img" :aria-label="__('Item is already in the quality plan')" :title="__('Item is already in the quality plan of the system; mark it excluded or change the resource')">{{ __("In quality plan") }}</span>
 									</th>
 									<td>
 										<select v-if="canEdit" :value="l.component" class="form-control nc-ng__cell" :aria-label="__('Component')" @change="commit(l, 'component', $event.target.value)">
@@ -168,9 +233,20 @@
 										</select>
 										<span v-else>{{ compLabel(l.component) }}</span>
 									</td>
+									<td v-if="isCls">
+										<select v-if="canEdit" :value="l.cost_level" class="form-control nc-ng__cell" :aria-label="__('Cost level')" @change="commitLevel(l, $event.target.value)">
+											<option v-for="o in data.options.cost_level" :key="o.value" :value="o.value">{{ o.label }}</option>
+										</select>
+										<span v-else>{{ levelLabel(l.cost_level) }}</span>
+									</td>
+									<td v-if="isCls">
+										<input type="checkbox" :checked="!!l.apply_k" :aria-label="__('Apply k')" :aria-disabled="!canEdit || !kAllowed(l) ? 'true' : 'false'" :title="kAllowed(l) ? '' : __('Only lines per result of drug, chemical or supply type')" @change="toggleK(l, $event)" />
+									</td>
 									<td>
 										<input v-if="canEdit" :key="l.line_id + (l.resource || '') + l.component" :value="l.resource_label" class="form-control nc-ng__cell" :list="'nc-ng-dl-' + l.component" :aria-label="__('Resource')" @focus="loadOptions(l.component, '')" @input="loadOptions(l.component, $event.target.value)" @change="commitResource(l, $event.target.value)" />
 										<span v-else>{{ l.resource_label }}</span>
+										<span v-if="l.placeholder" class="indicator-pill orange">{{ __("Required item, no quantity yet") }}: {{ l.template_item }}</span>
+										<span v-else-if="l.template_item" class="text-muted nc-ng__small">{{ __("Template") }}: {{ l.template_item }}</span>
 										<span v-if="l.unlinked" class="indicator-pill orange">{{ __("Not linked") }}</span>
 										<span v-if="l.ai_suggested" class="indicator-pill purple">{{ __("Suggested") }}</span>
 									</td>
@@ -181,6 +257,7 @@
 									<td class="num">
 										<input v-if="canEdit" :value="l.hospital_qty" type="number" step="any" class="form-control nc-ng__cell num" :aria-label="__('Hospital norm')" @change="commit(l, 'hospital_qty', Number($event.target.value))" />
 										<span v-else>{{ num(l.hospital_qty) }}</span>
+										<span v-if="levelSuffix(l)" class="text-muted nc-ng__small">{{ levelSuffix(l) }}</span>
 									</td>
 									<td class="num">
 										<input v-if="canEdit" :value="l.authority_qty || ''" type="number" step="any" class="form-control nc-ng__cell num" :aria-label="__('Authority norm')" @change="commit(l, 'authority_qty', Number($event.target.value))" />
@@ -193,7 +270,7 @@
 									</td>
 									<td class="num">
 										<template v-if="isMaterial(l)">
-											<input v-if="canEdit" :value="l.wastage_rate || ''" type="number" step="any" min="0" class="form-control nc-ng__cell num" :aria-label="__('Wastage %')" @change="commit(l, 'wastage_rate', Number($event.target.value))" />
+											<input v-if="canEdit" :value="l.wastage_rate || ''" :disabled="!!l.apply_k" :title="l.apply_k ? __('Wastage is already in the k factor') : ''" type="number" step="any" min="0" class="form-control nc-ng__cell num" :aria-label="__('Wastage %')" @change="commit(l, 'wastage_rate', Number($event.target.value))" />
 											<span v-else>{{ l.wastage_rate }}</span>
 											<span v-if="l.wastage_rate > data.wastage_cap" class="indicator-pill yellow">{{ __("Over cap") }}</span>
 										</template>
@@ -222,12 +299,27 @@
 										<button type="button" class="btn btn-default btn-xs" :aria-label="__('Line details') + ' ' + l.line_id" @click="detail = detail === l.line_id ? '' : l.line_id">&hellip;</button>
 									</td>
 								</tr>
-								<tr v-if="rowError[l.line_id]" class="nc-ng__rowerr"><td colspan="14" role="alert" class="nc-ng__error">{{ rowError[l.line_id] }}</td></tr>
+								<tr v-if="rowError[l.line_id]" class="nc-ng__rowerr"><td :colspan="14 + colExtra" role="alert" class="nc-ng__error">{{ rowError[l.line_id] }}</td></tr>
 								<tr v-if="detail === l.line_id" class="nc-ng__detail">
-									<td colspan="14">
+									<td :colspan="14 + colExtra">
 										<label>{{ __("Authority document") }}<input :value="l.authority_ref || ''" :disabled="!canEdit" class="form-control" @change="commit(l, 'authority_ref', $event.target.value)" /></label>
 										<label>{{ __("Wastage reason") }}<textarea :value="l.wastage_reason || ''" :disabled="!canEdit" class="form-control" rows="2" @change="commit(l, 'wastage_reason', $event.target.value)"></textarea></label>
 										<label>{{ __("Basis reference") }}<input :value="l.basis_ref || ''" :disabled="!canEdit" class="form-control" @change="commit(l, 'basis_ref', $event.target.value)" /></label>
+										<label v-if="isCls && ['DAY', 'PERIOD'].includes(l.cost_level)">{{ __("Attach to") }}
+											<select :id="'nc-ng-attach-' + l.line_id" :value="l.attach_to || ''" :disabled="!canEdit" class="form-control" @change="commit(l, 'attach_to', $event.target.value)">
+												<option value=""></option>
+												<option v-for="a in attachOptions" :key="a" :value="a">{{ a }}</option>
+											</select>
+										</label>
+										<label v-if="isCls && l.attach_to === 'Thiết bị'">{{ __("Attached equipment") }}
+											<input :value="l.attach_equipment || ''" :disabled="!canEdit" class="form-control" :list="'nc-ng-dl-EQUIPMENT'" @focus="loadOptions('EQUIPMENT', '')" @change="commitEquipment(l, $event.target.value)" />
+										</label>
+										<label v-if="data.doc.norm_template">{{ __("Template item") }}
+											<select :value="l.template_item || ''" :disabled="!canEdit" class="form-control" @change="commit(l, 'template_item', $event.target.value)">
+												<option value=""></option>
+												<option v-for="t in data.template_items" :key="t.item_name" :value="t.item_name">{{ t.item_name }}</option>
+											</select>
+										</label>
 										<label>{{ __("Exclusion reason") }}
 											<select :value="l.exclude_reason || ''" :disabled="!canEdit" class="form-control" @change="commit(l, 'exclude_reason', $event.target.value)">
 												<option value=""></option>
@@ -249,6 +341,33 @@
 					</tbody>
 				</table>
 			</div>
+
+			<section v-if="data.doc.norm_template && data.template_items.length" class="nc-ng__summary" :aria-label="__('Template items')">
+				<h4 class="nc-ng__h">{{ __("Template items") }} ({{ data.doc.norm_template }})</h4>
+				<table class="nc-ng__table">
+					<thead>
+						<tr>
+							<th scope="col">{{ __("Item") }}</th>
+							<th scope="col">{{ __("Component") }}</th>
+							<th scope="col">{{ __("Default cost level") }}</th>
+							<th scope="col">{{ __("Mandatory") }}</th>
+							<th scope="col">{{ __("Status") }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-for="t in data.template_items" :key="t.item_name">
+							<th scope="row">{{ t.item_name }}</th>
+							<td>{{ compLabel(t.component) }}</td>
+							<td>{{ levelLabel(t.default_cost_level) }}</td>
+							<td>{{ t.is_mandatory ? __("Yes") : "" }}</td>
+							<td>
+								<span v-if="t.satisfied" class="indicator-pill green">{{ __("Present") }}</span>
+								<button v-else type="button" class="nc-ng__link" @click="showItem(t.item_name)"><span class="indicator-pill orange">{{ __("Missing") }}</span></button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
 
 			<section class="nc-ng__summary" :aria-label="__('Provisional direct cost')">
 				<h4 class="nc-ng__h">{{ __("Provisional direct cost") }}<span v-if="data.summary.parameter_set"> ({{ data.summary.parameter_set }})</span></h4>
@@ -315,8 +434,11 @@ export default {
 			rowError: {},
 			actionError: null,
 			q: "",
-			compFilter: "",
-			onlyAttention: false,
+				compFilter: "",
+				levelFilter: "",
+				copy: null,
+				copyResult: null,
+onlyAttention: false,
 			showExcluded: true,
 			collapsed: {},
 			detail: "",
@@ -333,7 +455,27 @@ export default {
 		canEdit() {
 			return this.actions.includes("save_line");
 		},
-		closed() {
+			isCls() {
+				return !!(this.data && this.data.meta.is_paraclinical);
+			},
+			colExtra() {
+				return this.isCls ? 2 : 0;
+			},
+			setBlockers() {
+				return this.data ? this.data.set_blockers : [];
+			},
+			attachOptions() {
+				const all = this.data ? this.data.options.attach_to : [];
+				return this.data && this.data.doc.test_system ? all : all.filter((a) => a !== "Hệ thống xét nghiệm");
+			},
+			hasPlaceholder() {
+				return !!this.data && this.data.groups.some((g) => g.lines.some((l) => l.placeholder));
+			},
+			needTpt() {
+				if (!this.data || !this.data.doc.test_system || Number(this.data.doc.tests_per_tube) > 0) return false;
+				return this.data.groups.some((g) => g.lines.some((l) => l.cost_level === "TUBE" && !l.excluded));
+			},
+			closed() {
 			return this.data && ["Đã khóa", "Đã thay thế"].includes(this.data.doc.status);
 		},
 		removedCount() {
@@ -358,8 +500,9 @@ export default {
 				const step = this.data.steps.find((s) => s.step_id === g.step_id);
 				const lines = g.lines.filter((l) => {
 					if (this.compFilter && l.component !== this.compFilter) return false;
+					if (this.levelFilter && l.cost_level !== this.levelFilter) return false;
 					if (!this.showExcluded && l.excluded) return false;
-					if (this.onlyAttention && !(this.blockerIds.has(l.line_id) || l.duplicate_of.length || l.unlinked)) return false;
+					if (this.onlyAttention && !(this.blockerIds.has(l.line_id) || l.duplicate_of.length || l.unlinked || l.placeholder || l.qc_conflict)) return false;
 					if (text && !(l.line_id.toLowerCase().includes(text) || (l.resource || "").toLowerCase().includes(text))) return false;
 					return true;
 				});
@@ -374,6 +517,18 @@ export default {
 		stateColor: (s) => STATE_COLOR[s] || "gray",
 		compLabel: (c) => COMP_LABEL[c] || c,
 		isMaterial: (l) => MATERIAL.includes(l.component),
+		levelLabel(v) {
+			const o = this.data && this.data.options.cost_level.find((x) => x.value === v);
+			return o ? o.label : v || "";
+		},
+		levelSuffix: (l) => ({ TUBE: __("/tube"), BATCH: __("/batch"), DAY: __("/day"), PERIOD: __("/year") })[l.cost_level] || "",
+		// DI-17: chỉ dòng Theo kết quả, thuốc/vật tư, bộ có hệ thống mới bật được nhân k
+		kAllowedFor(component, level) {
+			return !!(this.isCls && this.data.doc.test_system && (level || "RESULT") === "RESULT" && MATERIAL.includes(component));
+		},
+		kAllowed(l) {
+			return this.kAllowedFor(l.component, l.cost_level);
+		},
 		can(a) {
 			return this.actions.includes(a);
 		},
@@ -448,6 +603,85 @@ export default {
 						return this.reloadKeepingError();
 					})
 			);
+		},
+		// Các hàm API của FEAT-034 gọi qua `cls` (cùng đường `call`, cùng ràng buộc normcore.api.norm.*)
+		cls(method, args) {
+			return this.call(method, args);
+		},
+		commitLevel(line, value) {
+			const values = { cost_level: value };
+			if (value !== "RESULT" && line.apply_k) values.apply_k = 0;
+			if (["DAY", "PERIOD"].includes(value) && !line.attach_to) {
+				if (this.data.doc.test_system) values.attach_to = "Hệ thống xét nghiệm";
+				this.detail = line.line_id;
+			}
+			return this.commitValues(line, values);
+		},
+		commitValues(line, values) {
+			return this.run(() =>
+				this.call("save_line", { norm_set: this.name, values, line_id: line.line_id })
+					.then((r) => this.show(r.norm_set))
+					.catch((e) => {
+						this.rowError = { [line.line_id]: e.lines.join(" ") || e.message };
+						return this.reloadKeepingError();
+					})
+			);
+		},
+		toggleK(line, ev) {
+			if (!this.canEdit || !this.kAllowed(line)) {
+				ev.target.checked = !!line.apply_k;
+				return;
+			}
+			return this.commitValues(line, { apply_k: ev.target.checked ? 1 : 0 });
+		},
+		commitEquipment(line, text) {
+			return this.resolveResource("EQUIPMENT", text).then((value) => {
+				if (value === null) {
+					this.rowError = { [line.line_id]: __("Resource not found: {0}", [text]) };
+					return this.reloadKeepingError();
+				}
+				return this.commit(line, "attach_equipment", value || null);
+			});
+		},
+		saveTpt(value) {
+			return this.run(() =>
+				this.cls("save_head", { norm_set: this.name, values: { tests_per_tube: Number(value || 0) } })
+					.then((d) => this.show(d))
+					.catch((e) => (this.actionError = { lines: this.toActionLines(e) }))
+			);
+		},
+		openCopy() {
+			this.copyResult = null;
+			this.copy = { target: "", error: "" };
+		},
+		runCopy() {
+			const f = this.copy;
+			return this.run(() =>
+				this.cls("copy_norm_set", { source: this.name, test_system: f.target })
+					.then((r) => {
+						this.copy = null;
+						if (r.message) frappe.show_alert({ message: r.message, indicator: "blue" });
+						if (r.skipped && r.skipped.length) {
+							this.copyResult = r;
+							return;
+						}
+						frappe.show_alert({ message: __("Created {0}", [r.name]), indicator: "green" });
+						this.open(r.name);
+					})
+					.catch((e) => (f.error = e.lines.join(" ") || e.message))
+			);
+		},
+		exportExcel() {
+			window.open("/api/method/normcore.api.norm.export_norm_set?name=" + encodeURIComponent(this.name));
+		},
+		showItem(item) {
+			this.collapsed = {};
+			this.q = "";
+			this.onlyAttention = true;
+			this.$nextTick(() => {
+				const l = this.data.groups.flatMap((g) => g.lines).find((x) => x.template_item === item);
+				if (l) this.focusLine(l.line_id);
+			});
 		},
 		reloadKeepingError() {
 			const keep = this.rowError;
@@ -528,7 +762,7 @@ export default {
 			);
 		},
 		openAdd() {
-			this.add = { component: "SUPPLY", resourceText: "", target: "", headcount: 1, hospital_qty: null, uom: "", basis: "Ước tính", error: "" };
+			this.add = { component: "SUPPLY", resourceText: "", target: "", headcount: 1, hospital_qty: null, uom: "", basis: "Ước tính", cost_level: "RESULT", apply_k: false, attach_to: "", attach_equipment: "", error: "" };
 		},
 		submitAdd() {
 			const f = this.add;
@@ -550,6 +784,14 @@ export default {
 				basis: f.basis,
 			};
 			if (f.component === "LABOR") values.headcount = f.headcount;
+			if (this.isCls) {
+				values.cost_level = f.cost_level;
+				if (f.apply_k && this.kAllowedFor(f.component, f.cost_level)) values.apply_k = 1;
+				if (["DAY", "PERIOD"].includes(f.cost_level) && f.attach_to) {
+					values.attach_to = f.attach_to;
+					if (f.attach_to === "Thiết bị") values.attach_equipment = f.attach_equipment || null;
+				}
+			}
 			if (f.target === "__service__") values.service_level = 1;
 			else values.step_id = f.target;
 			const send = (allow) =>
@@ -615,8 +857,12 @@ export default {
 		toActionLines(e) {
 			return (e.lines.length ? e.lines : [e.message]).map((text) => {
 				const m = /^(L\d+)\b/.exec(text);
-				return { text, line_id: m ? m[1] : "" };
+				return { text, line_id: m ? m[1] : "", tpt: /Số xét nghiệm bình quân/.test(text) };
 			});
+		},
+		focusTpt() {
+			this.actionError = null;
+			this.$nextTick(() => this.$refs.tpt && this.$refs.tpt.focus());
 		},
 		focusLine(id) {
 			this.collapsed = {};
@@ -726,6 +972,15 @@ export default {
 }
 .nc-ng__row--ai {
 	background: var(--subtle-fg, var(--bg-light-gray));
+}
+.nc-ng__list {
+	margin: var(--margin-xs) 0 var(--margin-sm) var(--margin-md);
+}
+.nc-ng__row--hold {
+	background: var(--bg-yellow, var(--subtle-fg));
+}
+.nc-ng__need {
+	border-color: var(--orange-500, var(--primary));
 }
 .nc-ng__cell {
 	border-color: transparent;
