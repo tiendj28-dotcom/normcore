@@ -211,7 +211,7 @@
 | FR-WF-010 | `test_TC_WF_07_so_sanh_phien_ban`, `test_so_sanh_kiem_quyen_va_cung_quy_trinh` (api/test_procedure_compare.py); `test_TC_WF_07_diff_theo_phan_buoc_nguon_luc` (unit/test_procedure_diff.py); unit/test_feat_008_ui.py. Phần hiển thị loại M: QA kiểm bằng Playwright |
 | FR-WF-011 | `test_TC_WF_06_ban_hanh_gan_co_bo_dinh_muc` (api/test_procedure_norm_flag.py); `test_TC_WF_06_step_changes_them_bo_doi` (unit/test_procedure_diff.py) |
 | FR-WF-012 | `test_FR_WF_012_thu_hoi_co_ly_do`, `test_FR_WF_012_thu_hoi_tu_choi`, `test_FR_WF_012_sai_trang_thai` (api/test_procedure_withdraw.py); `TestWithdraw` (unit/test_procedure_approval.py) |
-## FEAT-012 (NORM-39, ghi bởi Dev; QA kiểm định lại)
+## FEAT-012 (NORM-39, Dev ghi, QA xác nhận)
 
 | FR | Test thật |
 | :-- | :-- |
@@ -232,12 +232,12 @@
 | Quyền (FR-ACC-003, FR-ACC-007) | `test_quyen_norm_set_council_khong_co_quyen`, `test_quyen_norm_set_auditor_chi_doc`, `test_quyen_norm_set_finance_khong_sua_khong_xac_nhan`, `test_quyen_norm_set_clinician_khong_confirm_set_lock`, `test_quyen_norm_set_clinician_khoa_khac_khong_ghi` |
 | Giao diện SCR-DSK-013, 014 | `unit/test_norm_grid_ui.py`, `unit/test_form_buttons_i18n.py` |
 
-## FEAT-013 (NORM-51, ghi bởi Dev; QA kiểm định lại)
+## FEAT-013 (NORM-51, Dev ghi, QA xác nhận)
 
 | FR | Test thật |
 | :-- | :-- |
 | FR-NORM-015 | `test_TC_NORM_08_phien_ban_theo_quy_trinh_moi`, `test_FR_NORM_015_dong_buoc_bo_chan_xac_nhan`, `test_FR_NORM_015_xu_ly_dong_buoc_bo`, `test_FR_NORM_015_xoa_dong_co_co`, `test_FR_NORM_015_co_buoc_bo_khong_ghi_tu_client`, `test_FR_NORM_015_tu_bo_nhap_va_khong_tao_trung`, `test_FR_NORM_015_khong_co_quy_trinh_moi_giu_hanh_vi_cu`, `test_FR_NORM_015_bo_da_thay_the_tu_choi`, `test_quyen_new_version_auditor_finance_khoa_khac` (api/test_norm_version.py); `test_TC_NORM_08_carry_lines_*`, `TestRemovedFlag` (unit/test_norm_carry.py); `TestStepRemoved` (unit/test_norm_validation.py); `TestNormGridFeat013` (unit/test_norm_grid_ui.py) |
-## FEAT-015 (NORM-41, ghi bởi Dev; QA kiểm định lại)
+## FEAT-015 (NORM-41, Dev ghi, QA xác nhận)
 
 | FR | Test thật |
 | :-- | :-- |

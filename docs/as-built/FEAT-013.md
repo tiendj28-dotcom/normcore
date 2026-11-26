@@ -1,7 +1,7 @@
 # As-Built FEAT-013 — Phiên bản bộ định mức theo quy trình mới
 
 Issue NORM-51. FR: FR-NORM-015. UC-009 (luồng 1a, 9a), SCR-DSK-014. TC-NORM-08 (sau TC-WF-06).
-Người hiện thực: Dev (Multica). Chưa qua QA.
+Người hiện thực: Dev (Multica). Người nghiệm thu: QA (Multica), 2026-11-26 (verdict accepted, commit 275b3dc).
 
 ## Đã làm
 - **Logic thuần** `normcore/norm/init_from_procedure.py`: `carry_lines`, `steps_without_lines`, `removed_flag`, `format_note`; `normcore/norm/validation.py`: DI-04 bỏ qua dòng `step_removed`, `confirm_blockers` thêm lý do "Thuộc bước đã bỏ".
@@ -11,7 +11,7 @@ Người hiện thực: Dev (Multica). Chưa qua QA.
 
 ## Khác thiết kế
 - Hộp kết quả sau khi tạo dùng `frappe.msgprint` rồi mở lưới của bộ mới.
-- Giao diện chưa kiểm bằng trình duyệt thật (chỉ kiểm tĩnh và `bench build`); QA cần xem.
+- Giao diện chưa kiểm bằng trình duyệt thật (mã chưa có trên staging; QA kiểm qua test `test_norm_grid_ui.py` và API `get_norm_set`). Cần xem lại trên staging sau khi merge.
 
 ## ASM, AMD
 ASM-013-01..08 (`docs/decisions/assumptions/FEAT-013.md`, trạng thái "Áp dụng theo CLAUDE.md mục 6"); AMD-013-01.
