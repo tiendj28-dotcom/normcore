@@ -378,9 +378,11 @@ def get_export_options(run=None, service_cost=None, norm_set=None):
 		frappe.throw(_("Chọn nguồn để xuất"), frappe.ValidationError)
 	out = {"source": {"run": run, "service_cost": service_cost, "norm_set": norm_set}}
 	reason, enabled = "", True
+	run_readable = False
 	if run:
 		doc = frappe.get_doc(RUN, run)
-		if not _can_read(doc):
+		run_readable = _can_read(doc)
+		if not run_readable and not service_cost:
 			_deny()
 		if doc.status != LOCKED:
 			enabled = False
@@ -388,12 +390,16 @@ def get_export_options(run=None, service_cost=None, norm_set=None):
 				run, doc.status
 			)
 	out["options"] = _options(enabled, reason)
+	if service_cost and not run_readable:  # quyền theo bản ghi dịch vụ (ASM-019-15): chỉ giải trình PDF
+		for o in out["options"]:
+			if o["file_type"] != "explanation_pdf":
+				o["enabled"], o["reason"] = False, _("Cần quyền đọc lần tính giá")
 	if norm_set and not run:  # bộ định mức xuất độc lập: chỉ hai loại của bộ
 		for o in out["options"]:
 			o["enabled"] = o["file_type"] in ("norm_set_xlsx", "norm_set_pdf")
 			o["reason"] = "" if o["enabled"] else _("Chỉ áp dụng cho lần tính giá")
 	out["service_costs"], out["norm_sets"], out["bundle"] = [], [], None
-	if run and enabled:
+	if run and enabled and run_readable:
 		costs = frappe.get_all(
 			COST,
 			{"costing_run": run},

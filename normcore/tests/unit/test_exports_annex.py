@@ -86,7 +86,12 @@ class TestRows(unittest.TestCase):
 	def test_ii_can_lam_sang_va_ngoai_kiem(self):
 		rows = a.annex_rows_ii(svc(is_paraclinical=1, eqa_cost=D("3")))
 		self.assertEqual(rows[0][4], a.PARACLINICAL_NOTE)
-		self.assertIn(["7", "Ngoại kiểm", D("3"), D("6.00"), ""], rows)
+		# ngoại kiểm đã nằm trong dòng Thuốc/Vật tư: chỉ là dòng diễn giải, không STT, không tỷ trọng
+		self.assertIn(["", a.EQA_NOTE_LABEL, D("3"), None, ""], rows)
+		stt = [r[0] for r in rows]
+		self.assertNotIn("7", stt)
+		self.assertEqual(sum(r[2] for r in rows[1:7]), rows[0][2])  # Σ dòng 1-6 của mục I = I
+		self.assertEqual(sum(r[2] for r in rows[9:14]), next(r for r in rows if r[0] == "II")[2])
 
 	def test_ii_full_cost_zero(self):
 		rows = a.annex_rows_ii(svc(full_cost=D("0")))
@@ -97,7 +102,9 @@ class TestRows(unittest.TestCase):
 		self.assertEqual(row[4:9], [D("13"), D("8"), D("25"), D("3"), D("1")])
 		self.assertEqual(row[10], "")
 		self.assertEqual(row[9], D("50"))
-		self.assertIn("ngoại kiểm", a.annex_rows_iii(svc(full_cost=D("70")))[10])
+		note = a.annex_rows_iii(svc(full_cost=D("70")))[10]
+		self.assertIn("Chênh", note)
+		self.assertNotIn("ngoại kiểm", note)
 
 	def test_iv_khong_phan_bo(self):
 		rows = a.annex_rows_iv(svc())

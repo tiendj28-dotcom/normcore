@@ -266,6 +266,14 @@ class TestExportApi(FrappeTestCase):
 		frappe.set_user(HEAD2)
 		with self.assertRaises(frappe.PermissionError):
 			api.export_file("explanation_pdf", service_cost=self.cost_a)
+		with self.assertRaises(frappe.PermissionError):
+			api.get_export_options(service_cost=self.cost_a)
+		frappe.set_user(HEAD)  # Trưởng khoa không đọc được lần tính cha nhưng mở được hộp thoại giải trình
+		opts = api.get_export_options(service_cost=self.cost_a)
+		by = {o["file_type"]: o for o in opts["options"]}
+		self.assertTrue(by["explanation_pdf"]["enabled"])
+		self.assertFalse(by["annex_v"]["enabled"])
+		self.assertEqual((opts["service_costs"], opts["norm_sets"], opts["bundle"]), ([], [], None))
 		frappe.set_user(FIN)
 		with self.assertRaisesRegex(frappe.ValidationError, "Loại tệp không hợp lệ"):
 			api.export_file("zzz", run=self.run.name)

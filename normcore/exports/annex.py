@@ -113,6 +113,7 @@ ANNEX_II_ROWS = (
 DIRECT_FIELDS = tuple(k for _, _, k, lv in ANNEX_II_ROWS[:7] if lv == 1)
 ALLOC_FIELDS = tuple(k for _, _, k, lv in ANNEX_II_ROWS[7:13] if lv == 1)
 PARACLINICAL_NOTE = "Bình quân gia quyền theo hệ thống xét nghiệm"
+EQA_NOTE_LABEL = "Trong đó: ngoại kiểm (đã gồm ở dòng Thuốc/Vật tư theo bộ tham số)"
 MISMATCH_TOLERANCE = Decimal("0.01")
 
 # Yếu tố chi phí của Phụ lục III: (nhãn, loại golden, trường trực tiếp, trường phân bổ)
@@ -199,7 +200,7 @@ def annex_rows_ii(svc: dict) -> list[list]:
 				note = f"Lệch {diff:,.2f} so với tổng cấu phần"
 		rows.append([stt, label, value, share, note])
 		if key == "direct_utility" and eqa:
-			rows.append(["7", "Ngoại kiểm", eqa, _share(eqa, full), ""])
+			rows.append(["", EQA_NOTE_LABEL, eqa, None, ""])  # diễn giải, đã nằm trong dòng Thuốc/Vật tư
 	return rows
 
 
@@ -210,7 +211,7 @@ def annex_rows_iii(svc: dict) -> list:
 	note = ""
 	diff = sum(el.values(), ZERO) - full
 	if abs(diff) > MISMATCH_TOLERANCE:
-		note = f"Chênh {diff:,.2f} với giá thành toàn bộ: chi phí ngoại kiểm"
+		note = f"Chênh {diff:,.2f} với giá thành toàn bộ"
 	return [
 		svc.get("service_code"),
 		svc.get("service_name"),

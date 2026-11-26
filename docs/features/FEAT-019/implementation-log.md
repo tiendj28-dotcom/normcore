@@ -13,3 +13,4 @@
 | T10 | `git diff origin/develop -- normcore/api/norm.py normcore/public/js/norm_grid/` rỗng; bench test_export | rỗng; 7 OK | (xem git log) |
 | T09 | golden; pytest unit+golden cov; bench migrate + run-tests --app normcore; check_conventions; build_rtm | 1053 passed cov 92,54%; bench Ran 1774 OK; cc=0; VAN DE: 0 | (xem git log) |
 | CI | sửa ruff check/format; chuyển 4 test render Jinja sang api/test_export_templates.py (job unit CI không cài jinja2) | ruff sạch; pytest 1049 passed; bench test_export_templates 4 OK, test_export 7 OK | (xem git log) |
+| Review #1 | sửa theo Reviewer: (1) `get_export_options` và nút ở `nc_service_cost.js` theo `run_status` của `get_explanation`, Trưởng khoa dùng được; (2) Phụ lục II: dòng "Trong đó: ngoại kiểm" không STT/tỷ trọng, Phụ lục III bỏ gán nguyên nhân; ASM-019-07, 019-09 và technical-design khớp mã | pytest 1067 passed, ruff sạch; bench `test_export` 7 OK, `bench build` 0 | (xem git log) |

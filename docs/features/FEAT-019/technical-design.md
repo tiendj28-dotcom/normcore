@@ -102,7 +102,7 @@ Dòng 1–4 của mỗi mẫu: tên đơn vị (để trống, bệnh viện đi
 | VI | Giá tính toán | `calculated_price` |
 | VII | Giá đề nghị (đã làm tròn) | `rounded_price` |
 
-Tỷ trọng (%) = giá trị ÷ `full_cost` × 100, làm tròn 2 chữ số **chỉ để hiển thị** (không phải công thức giá; ASM-019-06) — chỉ cho dòng I, II và con của chúng; `full_cost` = 0 thì trống. Dịch vụ cận lâm sàng: dòng I lấy theo cùng trường (đã là bình quân gia quyền BR-CLS-013 ở FEAT-036), ghi chú dòng I "Bình quân gia quyền theo hệ thống xét nghiệm"; `eqa_cost` ≠ 0 thì thêm dòng con "7 Ngoại kiểm" = `eqa_cost` (ASM-019-07).
+Tỷ trọng (%) = giá trị ÷ `full_cost` × 100, làm tròn 2 chữ số **chỉ để hiển thị** (không phải công thức giá; ASM-019-06) — chỉ cho dòng I, II và con của chúng; `full_cost` = 0 thì trống. Dịch vụ cận lâm sàng: dòng I lấy theo cùng trường (bình quân gia quyền BR-CLS-013 ở FEAT-036, đã cộng ngoại kiểm vào dòng Thuốc/Vật tư), ghi chú dòng I "Bình quân gia quyền theo hệ thống xét nghiệm"; `eqa_cost` ≠ 0 thì thêm một dòng diễn giải "Trong đó: ngoại kiểm" = `eqa_cost`, không STT, không tỷ trọng, không tính vào tổng (ASM-019-07).
 
 Kiểm tự nhất quán: |Σ I + Σ II − `full_cost`| > 0,01 → thêm ghi chú dòng III "Lệch {x} so với tổng cấu phần" (không sửa số).
 
@@ -116,7 +116,7 @@ Kiểm tự nhất quán: |Σ I + Σ II − `full_cost`| > 0,01 → thêm ghi ch
 | Tiện ích (UTILITY) | `direct_utility` | `alloc_utility` |
 | Quản lý (MANAGEMENT) | 0 | `alloc_management` |
 
-Hàm `elements(sc: dict) -> dict[str, Decimal]` (ánh xạ lấy từ `engine.COMPONENT_CATEGORY`, không gõ lại; `exports` được import `normcore.costing.engine` vì nó là module thuần). Σ yếu tố ≠ `full_cost` (ví dụ cận lâm sàng có ngoại kiểm hạch toán loại khác) → ghi chú "Chênh {x} với giá thành toàn bộ: chi phí ngoại kiểm" và giữ `full_cost` đúng giá trị đã lưu (ASM-019-07). DV-TEST-A: 121.152,60; 49.550,00; 75.000,00; 4.900,00; 37.142,86; tổng 287.745,46.
+Hàm `elements(sc: dict) -> dict[str, Decimal]` (ánh xạ lấy từ `engine.COMPONENT_CATEGORY`, không gõ lại; `exports` được import `normcore.costing.engine` vì nó là module thuần). Σ yếu tố ≠ `full_cost` (ví dụ cận lâm sàng có ngoại kiểm hạch toán loại khác) → ghi chú "Chênh {x} với giá thành toàn bộ" và giữ `full_cost` đúng giá trị đã lưu (ASM-019-07). DV-TEST-A: 121.152,60; 49.550,00; 75.000,00; 4.900,00; 37.142,86; tổng 287.745,46.
 
 **Phụ lục IV** (`ANNEX_IV_COLUMNS = ("STT", "Nội dung", "Loại chi phí", "Quy tắc phân bổ", "Tiêu chí của dịch vụ", "Tổng tiêu chí", "Quỹ chi phí", "Thành tiền")`): mỗi dịch vụ một khối: dòng tiêu đề khối "<mã> — <tên> (khoa, sản lượng)", dòng "Chi phí trực tiếp" (= Σ I của Phụ lục II), mỗi dòng NC Service Cost Line `line_type = "Phân bổ"` một dòng (`component`, `allocation_rule`, `driver_value`, `driver_total`, `pool_amount`, `amount`), dòng "Giá thành toàn bộ" = `full_cost`. Không có dòng phân bổ → một dòng "Không có chi phí phân bổ".
 
@@ -173,7 +173,7 @@ Hàm nội bộ:
 - `_meta(file_type, source, run=None)`: `run` có → `parameter_set` và `title` của bộ tham số từ lần tính; `exported_at = now_datetime()`; `exported_by = frappe.session.user`, họ tên từ User.
 - `_locked_run(run)`: `get_doc`, kiểm đọc, `status != "Đã khóa"` → `frappe.ValidationError` "Chỉ xuất hồ sơ từ lần tính giá đã khóa. Lần tính {0} đang ở trạng thái {1}." (ASM-019-03).
 - `_annex_data(run)`: đọc mọi NC Service Cost của lần tính (`as_dict`, chuyển tiền sang `Decimal(str(x))`), tên dịch vụ, mã HIS, dòng phân bổ → `data` của mục 3.2.
-- `_explanation_pdf(service_cost)`: `costing.get_explanation` (đã kiểm quyền) → `explanation.pdf_context` → `frappe.render_template` mẫu → `get_pdf` (HTML tự chứa như `procedure_workflow._html`).
+- `_explanation_pdf(service_cost)`: `costing.get_explanation` (đã kiểm quyền) → `explanation.pdf_context` → `jinja2.Environment(autoescape=True)` dựng mẫu → `get_pdf` (HTML tự chứa như `procedure_workflow._html`).
 - `_norm_set_files(norm_set, run=None)`: `norm._load(name)` (kiểm quyền có sẵn) → `norm._export_data(ns)` → Excel (`build_workbook(data, meta)`) / PDF.
 - `_send(filename, content, file_type, ref_doctype, ref_name)`: `audit.log_export(FILE_TYPES[file_type].label, ref_doctype, ref_name, filename)` **rồi** đặt `frappe.response` (`filename`, `filecontent`, `type = "binary"`). Sinh tệp lỗi → không ghi sự kiện, ném lỗi "Không sinh được tệp {0}: {1}" (UC-016 3a).
 
