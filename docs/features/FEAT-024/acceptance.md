@@ -1,9 +1,9 @@
-# Nghiệm thu FEAT-024 (QA Multica, commit 5388fab)
+# Nghiệm thu FEAT-024 (QA Multica, commit b324986)
 
 | Tiêu chí | Bằng chứng | Kết quả |
 | :-- | :-- | :-- |
-| Site sạch normcore-verify.test, toàn bộ `run-tests --app normcore` | 1691 test, OK, site đã xóa | Đạt |
-| pytest unit + golden + độ phủ | 967 passed; costing 99% | Đạt |
+| Site sạch normcore-verify.test, toàn bộ `run-tests --app normcore` | 1750 test, OK, site đã xóa | Đạt |
+| pytest unit + golden + độ phủ | 1029 passed; costing 99% | Đạt |
 | golden_engine, golden_cls, build_rtm, check_conventions | chạy OK, không thêm vấn đề mới | Đạt |
 | CI PR #66 | cả 2 job pass | Đạt |
 | TC-AI-01 (5 bước, trích dẫn, nguồn đã xác nhận) | `test_TC_AI_01_du_thao_5_buoc_co_trich_dan` | Đạt |
@@ -17,3 +17,6 @@
 | Chỉ dùng provider giả lập | test dùng FakeProvider | Đạt |
 
 Giới hạn: giao diện (SCR-DSK-008/009) chưa kiểm bằng trình duyệt vì staging chưa có mã của PR; chỉ có kiểm tĩnh `test_feat_024_ui.py`.
+
+## Kiểm lại sau sửa theo NORM-65 (legal_* là Link, ASM-024-16/17)
+Mã đổi sau lần kiểm đầu (`23a75fb`), nên kiểm lại ở `b324986`: site sạch 1750 test OK; pytest 1029 passed; check_conventions, build_rtm không thêm vấn đề; CI PR xanh. Test cũ `test_TC_PROC_09_trich_dan` chỉ đổi dữ liệu `setUp`, giữ nguyên assertion; `test_DI_08` đổi nhánh chữ tự do thành kiểm `LinkValidationError` theo quyết định Lead 14:24. Không xóa/skip test; tài liệu chỉ đọc không đổi.
