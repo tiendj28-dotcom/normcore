@@ -26,6 +26,36 @@ Bạn không viết tính năng này và không tin lời người viết. Chỉ
 6. **Tài liệu chỉ đọc** bị sửa → `rework`.
 7. **CI của PR:** `gh pr checks` phải xanh.
 
+## Giữ verdict sau khi gộp develop
+Khi PR đã có verdict `accepted` rồi `develop` được gộp vào nhánh, verdict **vẫn hiệu lực** nếu diff riêng của PR (`git diff origin/develop...HEAD`) trước và sau khi gộp chỉ khác ở tệp sinh hoặc tệp ghép tự động. Khi đó không kiểm định lại: chỉ cần **CI xanh trên HEAD mới** (`gh pr checks`).
+
+Tệp sinh (loại khỏi phép so):
+- `docs/rtm.md`, `docs/verification-report.md`
+- `normcore/translations/vi.csv`
+- `normcore/nc_core/workspace/normcore/normcore.json`, `normcore/nc_core/workspace/normcore/shortcuts.txt`
+
+Tệp hồ sơ QA cũng loại khỏi phép so vì QA ghi sau lần kiểm: `docs/features/*/acceptance.md`, `verdict.json`, `DONE`, `docs/as-built/*`.
+
+Ghi chú: NORM-60 Phần 1 có thể đổi danh sách tệp sinh (tách `vi.csv`, workspace, test ref theo FEAT). Khi đó cập nhật danh sách này theo technical-design của NORM-60.
+
+Lệnh kiểm (`<base_cu>`/`<head_cu>`: merge-base với develop cũ và commit trong `verdict.json`; `<base_moi>`/`<head_moi>`: `origin/develop` và HEAD hiện tại):
+```
+GEN=(docs/rtm.md docs/verification-report.md normcore/translations/vi.csv normcore/nc_core/workspace/normcore/normcore.json normcore/nc_core/workspace/normcore/shortcuts.txt)
+EX=(); for f in "${GEN[@]}"; do EX+=(":(exclude)$f"); done
+EX+=(':(exclude)docs/features/*/acceptance.md' ':(exclude)docs/features/*/verdict.json' ':(exclude)docs/features/*/DONE' ':(exclude)docs/as-built/*')
+d() { git diff "$1...$2" -- . "${EX[@]}"; }
+cu=$(d <base_cu> <head_cu> | git patch-id --stable | cut -d' ' -f1)
+moi=$(d <base_moi> <head_moi> | git patch-id --stable | cut -d' ' -f1)
+echo "cu=$cu moi=$moi"; [ "$cu" = "$moi" ] && echo GIU-VERDICT || echo KIEM-LAI
+```
+`<base_cu>` lấy bằng `git merge-base <commit trong verdict> <develop cũ>`; không còn ref develop cũ thì dùng cha thứ nhất của commit gộp. Xem thêm: `git range-diff <base_cu>..<head_cu> <base_moi>..<head_moi>`, hoặc so `--stat` hai diff rồi tự lọc tệp sinh.
+
+Ví dụ đã chạy trên PR #57 (FEAT-015): `<base_cu>`=`f71b9f4`, `<head_cu>`=`a1b16fb` (commit đã kiểm), `<base_moi>`=`3b917c4` (develop sau gộp #54), `<head_moi>`=`3ed1e15` (sau sắp lại `vi.csv`) cho `cu=moi=9676a787…` → `GIU-VERDICT`. Đối chứng với `<head_moi>`=`cfcb1c8` (QA thêm test) cho hai giá trị khác nhau → `KIEM-LAI`.
+
+Kết quả:
+- `GIU-VERDICT`: ghi **một dòng** vào `acceptance.md`: `Giữ verdict: commit cũ <sha>, commit mới <sha>, lệnh so diff (patch-id, loại tệp sinh), kết quả GIU-VERDICT, CI xanh <link>`. Cập nhật `commit` trong `verdict.json` sang HEAD mới nếu `normcore-integrate` cần khớp.
+- `KIEM-LAI`: diff riêng khác ở tệp không phải tệp sinh. Kiểm định lại đầy đủ như các mục trên.
+
 ## Đầu ra
 Viết `docs/features/FEAT-NNN/acceptance.md` (bảng tiêu chí → bằng chứng → đạt/không) và `verdict.json`:
 ```json

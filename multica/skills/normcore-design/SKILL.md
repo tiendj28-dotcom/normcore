@@ -26,6 +26,7 @@ Issue `FEAT-NNN ...` ở Todo, Lead mention bạn. Bị trả về do lỗi thi�
    - DocType mới/đổi: trường, kiểu, bắt buộc, quyền, luồng trạng thái, DI áp dụng. Chỉ dùng DocType có trong `data-model.md`; cần DocType mới thì viết AMD trước (CLAUDE.md mục 7).
    - API whitelisted: tên hàm, tham số, kết quả, mã lỗi, kiểm quyền.
    - Logic thuần: module, hàm, ánh xạ tới BR và tới hàm golden.
+   - **Tệp sẽ sửa** (bắt buộc): danh sách đường dẫn tệp FEAT sẽ tạo hoặc sửa, gồm thư mục DocType (`.json`, `.py`, `.js`, `_list.js`) và mọi tệp JS khác. Lead dùng mục này để đối chiếu với các FEAT đang mở (xem `multica/agents.md`, phần Lead). Thiếu mục này thì Lead trả lại.
    - Bảng tiêu chí nghiệm thu: mỗi dòng = một điều kiện kiểm được + mã TC + mã FR.
    - Giả định (ASM) và rủi ro.
 3. Viết `docs/features/FEAT-NNN/tasks.md`, mỗi task là một commit:
