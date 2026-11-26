@@ -78,6 +78,10 @@ class TestProcedureEditorAPI(FrappeTestCase):
 		self.ls1 = {n: make_section(self.ld1, n).name for n in ("5", "6")}
 		self.ld2 = make_legal_document("15/2023/QH15")
 		self.ls2 = make_section(self.ld2, "7").name
+		# FEAT-024 (DI-08, ASM-024-17): đoạn trích của TC-PROC-09 phải có nguyên văn trong mục được dẫn
+		for no in ("5", "6"):  # test chuyển trích dẫn từ mục 5 sang mục 6 nên cả hai mục chứa đoạn trích
+			frappe.db.set_value("NC Legal Section", self.ls1[no], "plain_text", "Nội dung có đoạn trích dẫn")
+		frappe.db.set_value("NC Legal Section", self.ls2, "plain_text", "Nội dung có q riêng")
 		frappe.set_user(self.clin)
 
 	def tearDown(self):

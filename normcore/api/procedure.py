@@ -7,7 +7,9 @@ tại chỗ để lịch sử có giá trị trước và sau.
 import frappe
 from frappe import _
 
-from normcore.procedure import diff, versioning
+from normcore.ai import gateway, guard
+from normcore.ai.providers.base import ProviderError
+from normcore.procedure import ai_draft, diff, versioning
 from normcore.procedure.copying import copy_structure
 from normcore.procedure.steps import reorder
 
@@ -58,6 +60,10 @@ class ExistingProcedureError(frappe.ValidationError):
 	"""Đã có quy trình cho (dịch vụ, khoa); `existing` là tên bản đó (FR-PROC-002, Q3)."""
 
 	existing = None
+
+
+class NoSourceError(frappe.ValidationError):
+	"""Dịch vụ không có mục hướng dẫn đã xác nhận, còn hiệu lực; cần xác nhận soạn tiếp (FR-AI-004)."""
 
 
 def _deny(message):
@@ -155,7 +161,7 @@ def find_existing(technical_service, department):
 
 
 @frappe.whitelist()
-def create_procedure(technical_service, department):
+def create_procedure(technical_service, department, doctor_request=None):
 	"""FR-PROC-001/002: bản nháp phiên bản 1 (hoặc kế tiếp) với 8 phần cố định; Q3: từ chối khi đã ban hành."""
 	_require("create", message=_("Bạn không có quyền tạo quy trình"))
 	version, latest = _refuse_if_exists(technical_service, department)
@@ -166,6 +172,7 @@ def create_procedure(technical_service, department):
 			"department": department,
 			"version_no": version + 1,
 			"previous_version": latest,
+			"doctor_request": (doctor_request or "").strip() or None,  # giữ yêu cầu khi AI lỗi (UC-004 4a)
 		}
 	)
 	doc.insert()
@@ -230,12 +237,39 @@ def compare_versions(base, target):
 	return {"base": _header(a), "target": _header(b), **result}
 
 
+def _relations(citations):
+	"""Quan hệ khác nhau của mỗi đích ("step:<mã>" / "section:<nhãn>") trên toàn bảng trích dẫn (FR-AI-003)."""
+	out = {}
+	for c in citations:
+		key = f"step:{c['target_step_id']}" if c["target_step_id"] else f"section:{c['target_section']}"
+		if c["relation"] not in out.setdefault(key, []):
+			out[key].append(c["relation"])
+	return out
+
+
+def _section_labels(names):
+	"""Nhãn "<số hiệu> — <số mục> <tiêu đề>" cho trích dẫn có `legal_section` là NC Legal Section thật."""
+	if not names:
+		return {}
+	rows = frappe.db.sql(
+		"SELECT s.name, d.doc_number, s.section_no, s.heading FROM `tabNC Legal Section` s"
+		" JOIN `tabNC Legal Document` d ON d.name = s.legal_document WHERE s.name IN %s",
+		(tuple(names),),
+		as_dict=True,
+	)
+	return {r.name: f"{r.doc_number} — {r.section_no} {r.heading or ''}".strip() for r in rows}
+
+
 @frappe.whitelist()
 def get_procedure(name, step_id=None, section=None):
 	"""Dữ liệu cho trình soạn. `step_id` hoặc `section` lọc bảng trích dẫn theo bước/phần đang chọn."""
 	_require("read", doc=name, message=_("Bạn không có quyền xem quy trình này"))
 	doc = frappe.get_doc(DT, name)
 	citations = [_dump(c, CITATION_FIELDS) for c in doc.citations]
+	relations = _relations(citations)
+	labels = _section_labels({c["legal_section"] for c in citations if c["legal_section"]})
+	for c in citations:
+		c["section_label"] = labels.get(c["legal_section"])
 	if step_id:
 		citations = [c for c in citations if c["target_step_id"] == step_id]
 	elif section:
@@ -249,13 +283,16 @@ def get_procedure(name, step_id=None, section=None):
 		"needs_review": doc.needs_review,
 		"copied_from": doc.copied_from,
 		"previous_version": doc.previous_version,
+		"doctor_request": doc.doctor_request,
+		"ai_log": doc.ai_log,
+		"relations": relations,
 		"can_edit": bool(frappe.has_permission(DT, "write", doc=doc)) and doc.workflow_state == DRAFT,
 		"sections": [
 			{"key": key, "label": label, "value": None if key == "steps" else doc.get(key)}
 			for key, label in SECTIONS
 		],
-		"steps": [_dump(s, STEP_FIELDS) for s in doc.steps],
-		"resources": [_dump(r, RESOURCE_FIELDS) for r in doc.resources],
+		"steps": [dict(_dump(s, STEP_FIELDS), ai_suggested=s.ai_suggested) for s in doc.steps],
+		"resources": [dict(_dump(r, RESOURCE_FIELDS), ai_suggested=r.ai_suggested) for r in doc.resources],
 		"citations": citations,
 	}
 
@@ -607,3 +644,336 @@ def copy_procedure(source, technical_service, department):
 	)
 	doc.insert()
 	return {"name": doc.name, "version_no": doc.version_no}
+
+
+# ---- FEAT-024: soạn dự thảo bằng AI (FR-AI-001..005, FR-AI-008; UC-004) ----
+
+AI_JOB_KEY = "normcore:ai_draft:{}"
+AI_JOB_TTL = 3600
+MAX_REQUEST_CHARS = 5000
+MAX_EXTRA_SECTIONS = 20
+VALID = "Còn hiệu lực"
+
+
+def _ai_access(technical_service, department=None):
+	_require("create", message=_("Bạn không có quyền tạo quy trình"))
+	if not frappe.has_permission("NC Technical Service", "read", doc=technical_service):
+		_deny(_("Bạn không có quyền xem dịch vụ này"))
+	if (
+		department
+	):  # phạm vi khoa (FEAT-001): hook has_permission so khoa của bản ghi tạm với khoa của người gọi
+		probe = frappe.get_doc(
+			{"doctype": DT, "technical_service": technical_service, "department": department}
+		)
+		if not frappe.has_permission(DT, "create", doc=probe):
+			_deny(_("Bạn không có quyền với khoa này"))
+
+
+def _legal_documents(names):
+	"""{tên mục: tên NC Legal Document chứa mục} (NORM-65: `legal_document` là Link tới tên văn bản)."""
+	if not names:
+		return {}
+	rows = frappe.db.sql(
+		"SELECT name, legal_document FROM `tabNC Legal Section` WHERE name IN %s", (tuple(names),)
+	)
+	return dict(rows)
+
+
+def _doc_numbers(names):
+	if not names:
+		return {}
+	rows = frappe.db.sql(
+		"SELECT s.name, d.doc_number FROM `tabNC Legal Section` s"
+		" JOIN `tabNC Legal Document` d ON d.name = s.legal_document WHERE s.name IN %s",
+		(tuple(names),),
+	)
+	return dict(rows)
+
+
+def _extra_sources(names, strict):
+	"""Mục do người soạn chọn thêm: chỉ mục "Còn hiệu lực" (ASM-024-03); qua guard.build_source."""
+	out = []
+	for name in names:
+		rec = frappe.db.get_value(
+			"NC Legal Section",
+			name,
+			["name", "section_no", "heading", "plain_text", "validity_status"],
+			as_dict=True,
+		)
+		if not rec or rec.validity_status != VALID:
+			if strict:
+				frappe.throw(_("Mục {0} không tồn tại hoặc không còn hiệu lực").format(name))
+			continue
+		out.append(guard.build_source("NC Legal Section", rec))
+	return out
+
+
+def _collect_sources(technical_service, extra_names, strict=True):
+	from normcore.api.library import get_draft_sources
+
+	sources = get_draft_sources(technical_service, valid_only=True)
+	have = {s["name"] for s in sources}
+	extra = [n for n in dict.fromkeys(extra_names or []) if n not in have]
+	return sources + _extra_sources(extra, strict)
+
+
+def _current_procedure(technical_service, department):
+	"""ASM-024-04: bản "Đã ban hành" mới nhất của dịch vụ (ưu tiên cùng khoa) mà người gọi đọc được."""
+	rows = frappe.get_all(
+		DT,
+		filters={"technical_service": technical_service, "workflow_state": PUBLISHED},
+		fields=["name", "department", "version_no"],
+		order_by="version_no desc",
+	)
+	rows.sort(key=lambda r: r.department != department)
+	for r in rows:
+		if frappe.has_permission(DT, "read", doc=r.name):
+			return r
+	return None
+
+
+@frappe.whitelist()
+def prepare_ai_draft(technical_service, department):
+	"""SCR-DSK-008 bước 1: nguồn sẽ gửi, bản đã có, trạng thái AI (FR-AI-001, FR-AI-004)."""
+	_ai_access(technical_service, department)
+	from normcore.api.library import get_draft_sources
+
+	sources = get_draft_sources(technical_service, valid_only=True)
+	docs = _doc_numbers([s["name"] for s in sources])
+	draft, published, _v, _n = _find_existing(technical_service, department)
+	existing = draft or published
+	cur = _current_procedure(technical_service, department)
+	return {
+		"ai_enabled": gateway.is_enabled(),
+		"existing": existing,
+		"existing_state": frappe.db.get_value(DT, existing, "workflow_state") if existing else None,
+		"sources": [
+			{
+				"name": s["name"],
+				"legal_document": docs.get(s["name"]),
+				"doc_number": docs.get(s["name"]),
+				"section_no": s["section_no"],
+				"heading": s["heading"],
+			}
+			for s in sources
+		],
+		"no_sources": not sources,
+		"current_procedure": {"name": cur.name, "version_no": cur.version_no} if cur else None,
+	}
+
+
+@frappe.whitelist()
+def search_extra_sources(query, technical_service, start=0, page_length=20):
+	"""Mục còn hiệu lực để chọn thêm, bỏ mục đã có trong nguồn ánh xạ (FR-AI-001, ASM-024-03)."""
+	_ai_access(technical_service)
+	from normcore.api.library import get_draft_sources, search_sections
+
+	have = {s["name"] for s in get_draft_sources(technical_service, valid_only=True)}
+	rows = search_sections(query, validity_status=VALID, start=start, page_length=page_length)
+	rows = rows.get("rows", rows) if isinstance(rows, dict) else rows
+	out = []
+	for r in rows:
+		if r.get("name") in have:
+			continue
+		out.append({k: r.get(k) for k in ("name", "doc_number", "section_no", "heading")})
+	return out
+
+
+def _job_set(job_id, **state):
+	frappe.cache().set_value(AI_JOB_KEY.format(job_id), state, expires_in_sec=AI_JOB_TTL)
+	frappe.publish_realtime(
+		"normcore_ai_draft", {"job_id": job_id, "status": state.get("status")}, user=state.get("user")
+	)
+
+
+@frappe.whitelist()
+def start_ai_draft(technical_service, department, doctor_request, extra_sections=None, confirm_no_source=0):
+	"""UC-004 bước 4: kiểm điều kiện rồi xếp việc soạn vào hàng đợi `long`. Trả `{job_id}`."""
+	_ai_access(technical_service, department)
+	gateway.ensure_enabled()
+	doctor_request = (doctor_request or "").strip()
+	if not doctor_request:
+		frappe.throw(_("Nhập yêu cầu soạn thảo"))
+	if len(doctor_request) > MAX_REQUEST_CHARS:
+		frappe.throw(_("Yêu cầu soạn thảo tối đa {0} ký tự").format(MAX_REQUEST_CHARS))
+	_refuse_if_exists(technical_service, department)
+	extra = frappe.parse_json(extra_sections) if isinstance(extra_sections, str) else (extra_sections or [])
+	if len(extra) > MAX_EXTRA_SECTIONS:
+		frappe.throw(_("Chọn thêm tối đa {0} mục").format(MAX_EXTRA_SECTIONS))
+	sources = _collect_sources(technical_service, extra, strict=True)
+	if not sources and not frappe.utils.cint(confirm_no_source):
+		raise NoSourceError(
+			_(
+				"Dịch vụ chưa có mục hướng dẫn nào đã xác nhận và còn hiệu lực. Xác nhận để soạn tiếp không có căn cứ."
+			)
+		)
+	from normcore.ai.prompts_install import ensure_draft_procedure_v2
+
+	ensure_draft_procedure_v2()
+	job_id = frappe.generate_hash(length=16)
+	_job_set(job_id, status="queued", user=frappe.session.user)
+	frappe.enqueue(
+		"normcore.api.procedure.run_ai_draft",
+		queue="long",
+		timeout=gateway.get_settings().timeout_seconds + 60,
+		draft_job=job_id,  # `job_id` là tham số của frappe.enqueue, không tới hàm
+		now=bool(frappe.flags.in_test),
+		enqueue_after_commit=True,
+		technical_service=technical_service,
+		department=department,
+		doctor_request=doctor_request,
+		extra_sections=extra,
+		user=frappe.session.user,
+	)
+	return {"job_id": job_id}
+
+
+@frappe.whitelist()
+def get_ai_draft_status(job_id):
+	state = frappe.cache().get_value(AI_JOB_KEY.format(job_id))
+	if not state:
+		return {"status": "unknown"}
+	if state.get("user") != frappe.session.user and frappe.session.user != "Administrator":
+		_deny(_("Bạn không có quyền xem tiến độ này"))
+	return state
+
+
+def _write_ai_draft(technical_service, department, doctor_request, built, log_name):
+	version, latest = _refuse_if_exists(technical_service, department)
+	doc = frappe.get_doc(
+		{
+			"doctype": DT,
+			"technical_service": technical_service,
+			"department": department,
+			"version_no": version + 1,
+			"previous_version": latest,
+			"doctor_request": doctor_request,
+			"ai_log": log_name,
+			**built.sections,
+			"steps": built.steps,
+		}
+	)
+	doc.insert()  # controller cấp step_id (DI-01)
+	step_ids = [s.step_id for s in doc.steps]
+	for sid, rows in zip(step_ids, built.resources, strict=True):
+		for r in rows:
+			doc.append("resources", dict(r, step_id=sid))
+	for target, rows in built.citations.items():
+		for c in rows:
+			if target[0] == "section":
+				where = {"target_section": ai_draft.SECTION_KEYS[target[1]]}
+			else:
+				where = {"target_step_id": step_ids[target[1]]}
+			doc.append("citations", dict(c, **where))
+	_save(doc)
+	return doc
+
+
+def run_ai_draft(draft_job, technical_service, department, doctor_request, extra_sections, user):
+	"""Tác vụ nền: gọi gateway, kiểm trích dẫn, ghi bản nháp. Không ném lỗi ra ngoài; mọi kết quả vào cache."""
+	previous = frappe.session.user
+	frappe.set_user(user)
+	try:
+		_job_set(draft_job, status="running", user=user)
+		sources = _collect_sources(technical_service, extra_sections, strict=False)
+		owners = _legal_documents([s["name"] for s in sources])
+		check_sources = [dict(s, legal_document=owners.get(s["name"])) for s in sources]
+		service = frappe.db.get_value(
+			"NC Technical Service", technical_service, ["service_code", "service_name"], as_dict=True
+		)
+		cur = _current_procedure(technical_service, department)
+		current = guard.build_source(DT, frappe.get_doc(DT, cur.name).as_dict()) if cur else None
+		holder = {}
+
+		def post(data):
+			try:
+				holder["built"] = ai_draft.build_rows(
+					ai_draft.parse_draft(data), check_sources, doctor_request
+				)
+			except ai_draft.DraftError as e:
+				raise ProviderError(str(e)) from e
+			return data, holder["built"].rejected
+
+		res = gateway.complete(
+			"DRAFT_PROCEDURE",
+			"DRAFT_PROCEDURE",
+			ai_draft.request_variables(doctor_request, service, current),
+			sources,
+			ref_doctype="NC Technical Service",
+			ref_name=technical_service,
+			postprocess=post,
+		)
+		if not res.ok:
+			return _job_set(
+				draft_job, status="failed", user=user, error=res.error, log=res.log_name, ai_status=res.status
+			)
+		built = holder["built"]
+		frappe.db.savepoint("ai_draft")
+		try:
+			doc = _write_ai_draft(technical_service, department, doctor_request, built, res.log_name)
+		except Exception as e:
+			frappe.db.rollback(save_point="ai_draft")
+			state = {"status": "failed", "user": user, "error": str(e), "log": res.log_name}
+			state["existing_procedure"] = getattr(e, "existing", None)
+			return _job_set(draft_job, **state)
+		_job_set(
+			draft_job,
+			status="done",
+			user=user,
+			procedure=doc.name,
+			log=res.log_name,
+			rejected=built.rejected,
+			warnings=built.warnings,
+		)
+	except Exception as e:  # không để tác vụ nền ném lỗi; người gọi đọc trạng thái từ cache
+		_job_set(draft_job, status="failed", user=user, error=f"{type(e).__name__}: {e}")
+	finally:
+		frappe.set_user(previous)
+
+
+def _id_list(value):
+	value = frappe.parse_json(value) if isinstance(value, str) else value
+	return list(value or [])
+
+
+@frappe.whitelist()
+def accept_suggestions(procedure, step_ids=None, resource_row_ids=None, all=0):
+	"""FR-AI-008: chấp nhận đề xuất AI (bỏ cờ `ai_suggested`). Chấp nhận bước không kéo theo nguồn lực (ASM-024-13)."""
+	doc = _editable(procedure)
+	step_ids, row_ids = _id_list(step_ids), _id_list(resource_row_ids)
+	everything = frappe.utils.cint(all)
+	steps = {s.step_id: s for s in doc.steps}
+	rows = {r.resource_row_id: r for r in doc.resources}
+	missing = [i for i in step_ids if i not in steps] + [i for i in row_ids if i not in rows]
+	if missing:
+		frappe.throw(_("Không thấy: {0}").format(", ".join(missing)))
+	accepted_steps, accepted_rows = [], []
+	for sid, s in steps.items():
+		if s.ai_suggested and (everything or sid in step_ids):
+			s.ai_suggested = 0
+			accepted_steps.append(sid)
+	for rid, r in rows.items():
+		if r.ai_suggested and (everything or rid in row_ids):
+			r.ai_suggested = 0
+			accepted_rows.append(rid)
+	_save(doc)
+	remaining = sum(1 for s in doc.steps if s.ai_suggested) + sum(1 for r in doc.resources if r.ai_suggested)
+	return {"accepted_steps": accepted_steps, "accepted_resources": accepted_rows, "remaining": remaining}
+
+
+@frappe.whitelist()
+def reject_suggestion(procedure, step_id):
+	"""FR-AI-008: bỏ một bước đề xuất cùng nguồn lực và trích dẫn của nó; mã bước không tái dùng (DI-01)."""
+	doc = _editable(procedure)
+	row = _row(doc, "steps", "step_id", step_id, _("bước"))
+	if not row.ai_suggested:
+		frappe.throw(_("Bước {0} không còn là đề xuất; dùng Xóa bước").format(step_id))
+	res = [r for r in doc.resources if r.step_id == step_id]
+	cits = [c for c in doc.citations if c.target_step_id == step_id]
+	for r in res:
+		doc.remove(r)
+	for c in cits:
+		doc.remove(c)
+	doc.remove(row)
+	_save(doc)
+	return {"deleted": step_id, "resources": len(res), "citations": len(cits)}
