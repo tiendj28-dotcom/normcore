@@ -29,3 +29,14 @@ Commit đã kiểm: `f86a5f4` (nhánh `feat/FEAT-034-norm-test-system`, PR #58).
 
 ## Chưa kiểm
 - Kiểm giao diện bằng trình duyệt trên staging: nhánh chưa merge nên staging chưa có màn hình; phần giao diện được phủ bằng test unit (`test_norm_cls_ui.py`, `test_norm_template_ui.py`).
+
+## Kiểm lại sau merge develop (HEAD `bd54fd5`)
+Dev merge `origin/develop` (sau PR #57) và sắp lại `vi.csv`; Lead cho QA chạy lại nhanh.
+| Lệnh | Kết quả |
+| :-- | :-- |
+| Site sạch `normcore-verify.test`, `run-tests --app normcore` | Ran 1390 tests, OK, RC=0 |
+| pytest unit + golden + độ phủ | 743 passed, độ phủ 99% |
+| `check_conventions.py` | exit 0 |
+| `build_rtm.py docs` | không thêm vấn đề; Must chưa có TC: 0 |
+| `vi.csv`: so dòng hai bên merge với HEAD | không thiếu dòng nào |
+| Tài liệu chỉ đọc đổi từ `f86a5f4` | 0 tệp |
