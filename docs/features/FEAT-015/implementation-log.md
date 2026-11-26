@@ -12,3 +12,4 @@
 | T08 | `check_conventions.py` 0; `pytest test_permission_matrix test_scope_registry` 20 passed; `with_bench.sh migrate && run-tests test_permissions` OK (3), `test_feat_001` OK (20), `api.test_costing` OK (7, có test_quyen_bang_giai_trinh_truong_khoa_theo_khoa) | xanh; ASM-015-22 | 38855a4 |
 | T09 | `pytest test_form_buttons_i18n test_ui_conventions test_vi_csv_order test_costing_ui` | 29 passed; check_conventions 0 | 69bdcad |
 | T10 | pytest T09 xanh; `with_bench.sh migrate && bench build --app normcore` | build DONE (exit 0) | 20d5607 |
+| T11 | `python3 docs/tools/build_rtm.py docs` | VAN DE: 0; as-built `docs/as-built/FEAT-015.md`, Test ref ở `docs/rtm-testref.md` mục FEAT-015 | SHA |
