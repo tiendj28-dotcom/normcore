@@ -1,4 +1,4 @@
-import pytest
+import unittest
 
 from normcore.procedure import ai_draft as d
 
@@ -64,7 +64,7 @@ def test_khac_biet_ly_do():
 
 def test_parse_loi_cau_truc():
 	for bad in ("x", {}, {"sections": {}, "steps": []}, {"sections": {}, "steps": [{"step_title": "a"}]}):
-		with pytest.raises(d.DraftError):
+		with unittest.TestCase().assertRaises(d.DraftError):
 			d.parse_draft(bad)
 
 
