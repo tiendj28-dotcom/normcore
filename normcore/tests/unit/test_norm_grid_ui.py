@@ -111,3 +111,29 @@ class TestNormSetListUI(unittest.TestCase):
 		self.assertNotIn("<a href", js)
 		self.assertIn("button:", js)
 		self.assertIn('frappe.set_route("norm-grid"', js)
+
+
+class TestNormGridFeat013(unittest.TestCase):
+	"""FEAT-013 (FR-NORM-015): nút theo `actions`, nhóm Bước đã bỏ, dải thay đổi role=status."""
+
+	def test_FR_NORM_015_nut_tao_phien_ban_theo_quy_trinh_moi(self):
+		self.assertIn("can('new_version')", VUE)
+		self.assertIn("data.doc.newer_procedure", VUE)
+		self.assertIn('__("Create version from new procedure")', VUE)
+
+	def test_FR_NORM_015_nhom_buoc_da_bo(self):
+		self.assertIn("g.removed", VUE)
+		self.assertIn('__("Removed step")', VUE)
+		self.assertIn("l.step_removed", VUE)
+
+	def test_FR_NORM_015_dai_thay_doi_co_role_status(self):
+		self.assertRegex(VUE, r'<section v-if="changeStrip"[^>]*role="status"')
+		self.assertIn("steps_without_lines", VUE)
+
+	def test_FR_NORM_015_chip_buoc_thieu_co_aria_label(self):
+		self.assertIn("__('Add line for step {0}', [m.step_id])", VUE)
+
+	def test_FR_NORM_015_chi_goi_api_norm(self):
+		called = set(re.findall(r'this\.call\("(\w+)"', VUE))
+		self.assertTrue(called)
+		self.assertLessEqual(called, API_FUNCS)

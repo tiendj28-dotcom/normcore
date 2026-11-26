@@ -7,6 +7,7 @@ Actual figures,Có số thực tế
 Add,Thêm
 Add citation,Thêm trích dẫn
 Add line,Thêm dòng
+Add line for step {0},Thêm dòng cho bước {0}
 Add price,Thêm đơn giá,NC Item
 Add resource,Thêm nguồn lực
 Add service,Thêm dịch vụ
@@ -31,6 +32,7 @@ Applied qty,Lượng áp dụng
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
 Assign,Gán
+"Assign another step, move to whole service, or delete before professional confirmation.","Gán bước khác, chuyển Chung cho cả dịch vụ hoặc xóa trước khi xác nhận chuyên môn."
 Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
@@ -48,11 +50,13 @@ Cancel,Hủy
 Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Cannot load the original file,Không tải được tệp gốc
+Carried over: {0} lines ({1}),Mang sang: {0} dòng ({1})
 Catalog,Danh mục
 Change,Sửa
 Change service,Sửa dịch vụ
 Changed,Đổi
 Changed fields,Trường đổi
+Changes from new procedure,Thay đổi theo quy trình mới
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
@@ -96,10 +100,13 @@ Could not load test systems.,Không tải được hệ thống xét nghiệm.
 Could not load the status.,Không tải được tình trạng.
 Create,Tạo
 Create a draft of the next version from version {0}. Step codes are kept; the draft goes through the approval flow like the first version.,Tạo bản nháp phiên bản kế tiếp từ phiên bản {0}. Mã bước giữ nguyên; bản nháp đi qua luồng duyệt như bản đầu.
+Create a draft of version {0} from procedure {1}? Lines of existing steps are carried over; lines of removed steps are flagged.,Tạo bộ nháp phiên bản {0} theo quy trình {1}? Dòng của bước còn tồn tại được mang sang; dòng của bước đã bỏ được đánh dấu để xử lý.
 Create a draft of version {0} from this set?,Tạo bộ nháp phiên bản {0} từ bộ này?
+Create a version from the new procedure in the norm grid.,Tạo phiên bản theo quy trình mới trên lưới định mức.
 Create new version,Tạo phiên bản mới
 Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
+Create version from new procedure,Tạo phiên bản theo quy trình mới
 Created,Tạo mới,Import Excel
 Deactivate,Ngừng dùng
 Deactivate test system {0}? It will not enter new costing runs; existing runs stay unchanged.,Ngừng dùng hệ thống {0}? Hệ thống sẽ không vào các lần tính giá mới; các lần tính đã có giữ nguyên.
@@ -192,14 +199,17 @@ Move step up,Chuyển bước lên
 Moved,Đổi vị trí
 Moved to,Đã chuyển sang
 Moved to {0},Đã chuyển sang {0}
+Moved {0} to {1},Đã chuyển {0} sang {1}
 NC Clinical Procedure,Quy trình kỹ thuật
 NC Procedure Citation,Trích dẫn quy trình
 NC Procedure Resource,Nguồn lực của bước
 NC Procedure Step,Bước quy trình
 Name,Tên
+Needs a step,Cần gán bước
 Needs review,Cần rà soát
 Needs update,Cần cập nhật
 Needs update: the procedure has a new version - {0}.,Cần cập nhật: quy trình có phiên bản mới - {0}.
+New procedure: {0},Quy trình mới: {0}
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -226,6 +236,7 @@ Only unresolved,Chỉ chưa xử lý
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
+Open grid,Mở lưới
 Open norm grid,Mở lưới định mức
 Original page,Trang gốc
 Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
@@ -270,6 +281,8 @@ Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệ
 Remove,Bỏ
 Remove this mapping?,Bỏ ánh xạ này?
 Removed,Bỏ
+Removed step,Bước đã bỏ
+Removed step: {0},Bước đã bỏ: {0}
 Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
 Rerun tests,Số test chạy lại
 Resolved,Đã xử lý
@@ -324,6 +337,7 @@ Step ID,Mã bước
 Step code,Mã bước
 Step title,Tên bước
 Steps,Các bước
+Steps without lines,Bước chưa có dòng
 Suggest again,Đề xuất lại
 Suggested,Đề xuất
 Summary of differences,Tóm tắt khác biệt
@@ -376,6 +390,7 @@ Verify,Xác minh,NC Item Price
 Version,Phiên bản
 View,Xem
 View costing results,Xem kết quả tính giá
+View these lines,Xem các dòng này
 Wastage %,Hao hụt %
 "Wastage cap {0}% (Assumption, to be confirmed: no effective parameter set)",Trần hao hụt {0}% (Giả định — chờ xác nhận: chưa có bộ tham số hiệu lực)
 Wastage reason,Lý do vượt trần
