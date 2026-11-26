@@ -6,3 +6,4 @@
 | T02 | `pytest normcore/tests/unit/test_exports_annex.py`; `git ls-files normcore/exports/templates` | 15 passed; 4 tệp .xlsx | (xem git log) |
 | T03 | golden_engine.py; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/exports --cov-fail-under=90` | 1037 passed, cov 90,89% | (xem git log) |
 | T04 | `pytest test_exports_bundle.py test_exports_norm_set_pdf.py`; bench `run-tests --module normcore.exports.test_norm_set_export` | 7 passed; bench Ran 8 tests OK | (xem git log) |
+| T05 | `pytest test_exports_explanation.py test_exports_norm_set_pdf.py`; bench audit test | 11 passed; bench Ran 15 OK | (xem git log) |
