@@ -1,6 +1,6 @@
 // SCR-DSK-013: danh sách bộ định mức (FEAT-012). Cột tên hiện chữ thường; nút "Mở lưới" ở mỗi dòng mở trang norm-grid.
 frappe.listview_settings["NC Norm Set"] = {
-	add_fields: ["status", "needs_update"],
+	add_fields: ["status", "needs_update", "test_system"],
 	hide_name_column: false,
 	get_indicator(doc) {
 		const color = { "Nháp": "gray", "Đã xác nhận chuyên môn": "blue", "Đã khóa": "green", "Đã thay thế": "darkgrey" };
@@ -34,15 +34,9 @@ frappe.listview_settings["NC Norm Set"] = {
 				],
 				primary_action_label: __("Create norm set"),
 				primary_action(values) {
-					frappe.call({
-						method: "normcore.api.norm.create_norm_set",
-						args: { procedure: values.procedure },
-						freeze: true,
-						callback: (r) => {
-							dialog.hide();
-							if (r.message) frappe.set_route("norm-grid", r.message.name);
-						},
-					});
+					dialog.hide();
+					// UC-021: dịch vụ có hệ thống xét nghiệm thì hỏi chọn hệ thống (create_options)
+					frappe.require("/assets/normcore/js/norm_create.js", () => normcore.norm.create(values.procedure));
 				},
 			});
 			dialog.show();

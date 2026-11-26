@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "creation": "2026-11-26 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "istable": 1,
+ "field_order": [
+  "item_name",
+  "component",
+  "default_cost_level",
+  "is_mandatory"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_name",
+   "label": "Tên khoản mục",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "component",
+   "label": "Cấu phần",
+   "fieldtype": "Select",
+   "options": "LABOR\nDRUG\nSUPPLY\nEQUIPMENT\nINFRA\nUTILITY",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "default_cost_level",
+   "label": "Cấp phát sinh mặc định",
+   "fieldtype": "Select",
+   "options": "RESULT\nTUBE\nBATCH\nDAY\nPERIOD",
+   "default": "RESULT",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "is_mandatory",
+   "label": "Bắt buộc",
+   "fieldtype": "Check",
+   "in_list_view": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Norm Template Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -172,14 +172,8 @@ frappe.ui.form.on("NC Clinical Procedure", {
 
 		if (frm.doc.workflow_state === "Đã ban hành" && frappe.model.can_create("NC Norm Set")) {
 			frm.add_custom_button(__("Create norm set"), () => {
-				frappe.call({
-					method: "normcore.api.norm.create_norm_set",
-					args: { procedure: frm.doc.name },
-					freeze: true,
-					callback: (r) => {
-						if (r.message) frappe.set_route("norm-grid", r.message.name);
-					},
-				});
+				// UC-021: hộp chọn hệ thống xét nghiệm khi dịch vụ có hệ thống đang dùng
+				frappe.require("/assets/normcore/js/norm_create.js", () => normcore.norm.create(frm.doc.name));
 			}).addClass("btn-primary");
 		}
 	},

@@ -10,6 +10,7 @@ frappe.ui.form.on("NC Norm Set", {
 				frappe.utils.escape_html(__("Needs update: the procedure has a new version - {0}.", [frm.doc.step_change_note || ""])),
 				"yellow"
 			);
+			frm.dashboard.add_comment(__("Create a version from the new procedure in the norm grid."), "yellow", true);
 			frappe.db.get_list("NC Clinical Procedure", {
 				filters: { technical_service: frm.doc.technical_service, department: frm.doc.department, workflow_state: "Đã ban hành" },
 				fields: ["name"],

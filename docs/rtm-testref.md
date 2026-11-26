@@ -211,7 +211,7 @@
 | FR-WF-010 | `test_TC_WF_07_so_sanh_phien_ban`, `test_so_sanh_kiem_quyen_va_cung_quy_trinh` (api/test_procedure_compare.py); `test_TC_WF_07_diff_theo_phan_buoc_nguon_luc` (unit/test_procedure_diff.py); unit/test_feat_008_ui.py. Phần hiển thị loại M: QA kiểm bằng Playwright |
 | FR-WF-011 | `test_TC_WF_06_ban_hanh_gan_co_bo_dinh_muc` (api/test_procedure_norm_flag.py); `test_TC_WF_06_step_changes_them_bo_doi` (unit/test_procedure_diff.py) |
 | FR-WF-012 | `test_FR_WF_012_thu_hoi_co_ly_do`, `test_FR_WF_012_thu_hoi_tu_choi`, `test_FR_WF_012_sai_trang_thai` (api/test_procedure_withdraw.py); `TestWithdraw` (unit/test_procedure_approval.py) |
-## FEAT-012 (NORM-39, ghi bởi Dev; QA kiểm định lại)
+## FEAT-012 (NORM-39, Dev ghi, QA xác nhận)
 
 | FR | Test thật |
 | :-- | :-- |
@@ -244,6 +244,29 @@
 | FR-ADM-003 (phần bấm giờ) | `api/test_time_study.py::test_TC_ADM_03_ket_qua_bam_gio_3_ca` |
 | NFR-USE-003 | `unit/test_time_study_ui.py::TestTimeStudyUi` (tĩnh); TC-NFR-05 kiểm tay chưa thực hiện (xem implementation-log) |
 | Quyền (FR-ACC-003, FR-ACC-007) | `test_quyen_time_study_council_khong_quyen`, `test_quyen_time_study_auditor_chi_doc`, `test_quyen_time_study_clinician_theo_khoa`, `test_quyen_time_study_consultant_tao_duoc`, `test_docperm_khop_bang` (nc_time_study); `api/test_time_study.py::test_quyen_apply_va_result`, `test_get_entry_council_bi_tu_choi`, `test_get_entry_auditor_khong_ghi_duoc`; `test_nc_time_study_result.py::test_council_bi_tu_choi`, `test_vai_tro_doc_khop_bang` |
+## FEAT-013 (NORM-51, Dev ghi, QA xác nhận)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-NORM-015 | `test_TC_NORM_08_phien_ban_theo_quy_trinh_moi`, `test_FR_NORM_015_dong_buoc_bo_chan_xac_nhan`, `test_FR_NORM_015_xu_ly_dong_buoc_bo`, `test_FR_NORM_015_xoa_dong_co_co`, `test_FR_NORM_015_co_buoc_bo_khong_ghi_tu_client`, `test_FR_NORM_015_tu_bo_nhap_va_khong_tao_trung`, `test_FR_NORM_015_khong_co_quy_trinh_moi_giu_hanh_vi_cu`, `test_FR_NORM_015_bo_da_thay_the_tu_choi`, `test_quyen_new_version_auditor_finance_khoa_khac` (api/test_norm_version.py); `test_TC_NORM_08_carry_lines_*`, `TestRemovedFlag` (unit/test_norm_carry.py); `TestStepRemoved` (unit/test_norm_validation.py); `TestNormGridFeat013` (unit/test_norm_grid_ui.py) |
+## FEAT-015 (NORM-41, Dev ghi, QA xác nhận)
+## FEAT-034 (NORM-40; QA đã kiểm định lại, accepted)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-NORM-017 | `test_TC_CLS_29_khoi_tao_gan_he_thong_va_them_khoan_muc_bat_buoc`, `test_TC_CLS_29_bo_thieu_he_thong_khong_xac_nhan_duoc`, `test_create_options_va_bo_dang_soan`, `test_FR_NORM_017_phien_ban_moi_giu_he_thong`, `test_TC_CLS_33_sao_chep_khoa_hai_bo_va_xuat` (api/test_norm_cls.py); test cũ `nc_costing_run`, `nc_test_system` xanh không sửa |
+| FR-NORM-018 | `test_TC_CLS_30_cap_phat_sinh_va_co_k`, `test_TC_CLS_30_dich_vu_khong_can_lam_sang_luon_theo_ket_qua` (api/test_norm_cls.py), `unit/test_norm_cls.py::TestNormalize` |
+| FR-NORM-019 | `test_TC_CLS_30_cap_phat_sinh_va_co_k` (api/test_norm_cls.py), `unit/test_norm_cls.py::TestLineErrorsCls` |
+| FR-NORM-020 | `test_TC_CLS_32_xac_nhan_can_so_xn_moi_ong_va_khoan_muc_bat_buoc`, `test_save_head_so_xet_nghiem_moi_ong` (api/test_norm_cls.py), `unit/test_norm_cls.py::TestSetBlockers` |
+| FR-NORM-021 | `test_FR_NORM_021_*`, `test_mau_cai_san_hoa_sinh_va_mien_dich_chua_bat`, `test_chay_hai_lan_khong_nhan_ban_va_khong_ghi_de` (nc_norm_template), `unit/test_norm_templates.py`, `unit/test_norm_template_ui.py` |
+| FR-NORM-022 | `test_TC_CLS_29_khoi_tao_gan_he_thong_va_them_khoan_muc_bat_buoc`, `test_khong_co_mau_khong_them_dong` (api/test_norm_cls.py), `unit/test_norm_templates.py::TestApplyTemplate` |
+| FR-NORM-023 | `test_TC_CLS_32_xac_nhan_can_so_xn_moi_ong_va_khoan_muc_bat_buoc`, `test_set_blockers_dung_truoc_loi_dong` (api/test_norm_cls.py), `unit/test_norm_cls.py::TestMandatoryStatus` |
+| FR-NORM-024 | `test_TC_CLS_31_tu_choi_dong_trung_ke_hoach_chat_luong` (api/test_norm_cls.py), `unit/test_norm_cls.py::TestLineErrorsCls` |
+| FR-NORM-025 | `test_TC_CLS_33_sao_chep_khoa_hai_bo_va_xuat`, `test_sao_chep_bo_cac_dong_thuoc_ke_hoach_chat_luong`, `test_sao_chep_tu_choi`, `test_sao_chep_bo_qua_dong_nguon_luc_khong_con_o_quy_trinh_dich` (api/test_norm_cls.py), `unit/test_norm_copy.py` |
+| FR-OUT-011 | `test_TC_CLS_33_sao_chep_khoa_hai_bo_va_xuat` (api/test_norm_cls.py), `test_TC_CLS_33_tep_xuat_co_k_6_chu_so`, `test_TC_CLS_33_k_uoc_tinh_co_nhan`, `test_TC_CLS_33_chua_co_lan_tinh_gia`, `test_TC_CLS_33_trang_dong_co_cap_phat_sinh_dung_gia_tri` (exports/test_norm_set_export.py) |
+| FR-QC-007 (phần còn lại của TC-CLS-26) | `test_TC_CLS_26_canh_bao_tren_bo_dinh_muc_van_khoa_duoc` (api/test_norm_cls.py) |
+| Quyền (FR-ACC-002, FR-ACC-007) | `test_quyen_norm_template_theo_ma_tran`, `test_quyen_norm_template_council_member_bi_tu_choi`, `test_quyen_norm_template_auditor_chi_doc`, `test_quyen_norm_template_clinician_khong_tao_duoc`, `test_quyen_norm_template_finance_tao_duoc` (nc_norm_template), `test_auditor_khong_tao_duoc` (api/test_norm_cls.py) |
+| Giao diện SCR-DSK-013, 014, 041 | `unit/test_norm_cls_ui.py`, `unit/test_norm_template_ui.py`, `unit/test_norm_grid_ui.py` |
 ## FEAT-015 (NORM-41, ghi bởi Dev; QA kiểm định lại)
 
 | FR | Test thật |

@@ -8,7 +8,13 @@
   "step_id",
   "service_level",
   "procedure_resource_row",
+  "step_removed",
   "component",
+  "cost_level",
+  "apply_k",
+  "attach_to",
+  "attach_equipment",
+  "template_item",
   "resource_doctype",
   "resource",
   "headcount",
@@ -50,6 +56,13 @@
    "fieldname": "procedure_resource_row",
    "label": "Dòng nguồn lực gốc",
    "fieldtype": "Data"
+  },
+  {
+   "default": "0",
+   "fieldname": "step_removed",
+   "fieldtype": "Check",
+   "label": "Thuộc bước đã bỏ",
+   "read_only": 1
   },
   {
    "fieldname": "component",
@@ -98,8 +111,7 @@
   {
    "fieldname": "uom",
    "label": "Đơn vị",
-   "fieldtype": "Data",
-   "reqd": 1
+   "fieldtype": "Data"
   },
   {
    "fieldname": "wastage_rate",
@@ -152,6 +164,35 @@
    "label": "Thời điểm xác nhận",
    "fieldtype": "Datetime",
    "read_only": 1
+  },
+  {
+   "fieldname": "cost_level",
+   "label": "Cấp phát sinh",
+   "fieldtype": "Select",
+   "options": "RESULT\nTUBE\nBATCH\nDAY\nPERIOD",
+   "default": "RESULT"
+  },
+  {
+   "fieldname": "apply_k",
+   "label": "Nhân hệ số tiêu hao k",
+   "fieldtype": "Check"
+  },
+  {
+   "fieldname": "attach_to",
+   "label": "Gắn với",
+   "fieldtype": "Select",
+   "options": "\nHệ thống xét nghiệm\nThiết bị"
+  },
+  {
+   "fieldname": "attach_equipment",
+   "label": "Thiết bị được gắn",
+   "fieldtype": "Link",
+   "options": "NC Equipment"
+  },
+  {
+   "fieldname": "template_item",
+   "label": "Khoản mục của mẫu",
+   "fieldtype": "Data"
   }
  ],
  "index_web_pages_for_search": 0,
