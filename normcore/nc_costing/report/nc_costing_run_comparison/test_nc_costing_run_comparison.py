@@ -51,3 +51,19 @@ class TestNCCostingRunComparisonReport(FrappeTestCase):
 		frappe.set_user(clin)
 		with self.assertRaises(frappe.PermissionError):
 			execute(filters)
+
+	def test_TC_COST_18_query_report_run_theo_vai_tro(self):
+		from frappe.desk.query_report import run
+
+		filters = {"base_run": self.base.name, "other_run": self.v1.name, "only_changed": 1}
+		users = {
+			role: make_user(f"{key}.qr18@normcore.test", role)
+			for key, role in (("fin", "NC Finance"), ("aud", "NC Auditor"), ("clin", "NC Clinician"))
+		}
+		for role in ("NC Finance", "NC Auditor"):
+			frappe.set_user(users[role])
+			res = run("NC Costing Run Comparison", filters=filters)
+			self.assertEqual(res["result"][0]["diff"], -63636.36, role)
+		frappe.set_user(users["NC Clinician"])
+		with self.assertRaises(frappe.PermissionError):
+			run("NC Costing Run Comparison", filters=filters)
