@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from normcore.exports import meta as meta_mod
 
-MINUS = "−"
+MINUS = "−"  # noqa: RUF001 (dấu trừ U+2212, NFR-LOC-001)
 
 
 def _dec(x):
@@ -25,7 +25,7 @@ def _fmt(x, places):
 
 
 def money(x) -> str:
-	"""287745.46 -> "287.745,46"; âm dùng dấu "−"."""
+	"""287745.46 -> "287.745,46"; âm dùng dấu trừ U+2212."""
 	return _fmt(x, 2)
 
 
@@ -69,7 +69,11 @@ def pdf_context(expl: dict, meta: dict) -> dict:
 			"label": g["label"],
 			"total": money(g["total"]),
 			"steps": [
-				{"label": s["step_label"], "total": money(s["total"]), "lines": [_line(x) for x in s["lines"]]}
+				{
+					"label": s["step_label"],
+					"total": money(s["total"]),
+					"lines": [_line(x) for x in s["lines"]],
+				}
 				for s in g["steps"]
 			],
 		}

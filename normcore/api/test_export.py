@@ -74,7 +74,9 @@ class TestExportApi(FrappeTestCase):
 		frappe.response.pop("filecontent", None)
 
 	def _cost(self, service):
-		return frappe.db.get_value("NC Service Cost", {"costing_run": self.run.name, "technical_service": service})
+		return frappe.db.get_value(
+			"NC Service Cost", {"costing_run": self.run.name, "technical_service": service}
+		)
 
 	def _export(self, file_type, user=FIN, **kw):
 		frappe.set_user(user)
@@ -103,16 +105,23 @@ class TestExportApi(FrappeTestCase):
 			wb = wb_of(content)
 			ws = wb.worksheets[0]
 			self.assertEqual(annex.header_of(ws, code), annex.ANNEX[code]["columns"])
-			self.assertEqual(annex.header_of(ws, code), annex.header_of(annex.load_template(code).active, code))
+			self.assertEqual(
+				annex.header_of(ws, code), annex.header_of(annex.load_template(code).active, code)
+			)
 		wb = wb_of(self._export("annex_ii", run=self.run.name)[1])
 		self.assertEqual(wb.sheetnames, ["DV-TEST-A", "DV-TEST-B", meta_mod.INFO_SHEET])
 		ws = wb["DV-TEST-A"]
 		self.assertEqual(ws.cell(7, 3).value, float(g.run()[0]["DV-TEST-A"]["direct"]))
 		ws3 = wb_of(self._export("annex_iii", run=self.run.name)[1]).worksheets[0]
 		self.assertEqual(ws3.cell(6, 11).value, 287745.46)
-		self.assertEqual([round(ws3.cell(6, c).value, 2) for c in range(6, 11)], [121152.60, 49550.0, 75000.0, 4900.0, 37142.86])
+		self.assertEqual(
+			[round(ws3.cell(6, c).value, 2) for c in range(6, 11)],
+			[121152.60, 49550.0, 75000.0, 4900.0, 37142.86],
+		)
 		ws5 = wb_of(self._export("annex_v", run=self.run.name)[1]).worksheets[0]
-		self.assertEqual((ws5.cell(6, 7).value, ws5.cell(6, 8).value, ws5.cell(6, 9).value), (287745.46, 302132.73, 302100))
+		self.assertEqual(
+			(ws5.cell(6, 7).value, ws5.cell(6, 8).value, ws5.cell(6, 9).value), (287745.46, 302132.73, 302100)
+		)
 		self.assertEqual(ws5.cell(7, 9).value, 92600)
 
 	def test_phu_luc_iv_xuat_duoc(self):
@@ -135,7 +144,7 @@ class TestExportApi(FrappeTestCase):
 		self.assertEqual(html.count("<h2>Chi phí phân bổ</h2>"), 1)
 		pos = [html.index(f">{grp['label']}<") for grp in expl["direct_groups"]]
 		self.assertEqual(pos, sorted(pos))
-		labor = [x for x in expl["direct_groups"] if x["component"] == "LABOR"][0]
+		labor = next(x for x in expl["direct_groups"] if x["component"] == "LABOR")
 		self.assertEqual(len(labor["steps"]), 3)
 		for grp in expl["direct_groups"]:
 			self.assertIn(f"{grp['label']}</td>", html)
@@ -149,7 +158,11 @@ class TestExportApi(FrappeTestCase):
 	def test_TC_OUT_03_thong_tin_truy_vet_va_nhat_ky(self):
 		ps = self.params.name
 		for ft in ("annex_ii", "annex_iii", "annex_iv", "annex_v", "norm_set_xlsx"):
-			kw = {"norm_set": self.sets[0].name, "run": self.run.name} if ft == "norm_set_xlsx" else {"run": self.run.name}
+			kw = (
+				{"norm_set": self.sets[0].name, "run": self.run.name}
+				if ft == "norm_set_xlsx"
+				else {"run": self.run.name}
+			)
 			ref = self.sets[0].name if ft == "norm_set_xlsx" else self.run.name
 			before = len(self._events(ref))
 			name, content = self._export(ft, **kw)
@@ -181,10 +194,12 @@ class TestExportApi(FrappeTestCase):
 	def test_TC_OUT_04_bo_dinh_muc_excel_pdf_11_dong(self):
 		ns = self.sets[0]
 		for ln in ns.lines:
-			frappe.db.set_value("NC Norm Line", ln.name, {"confirmed_by": HEAD, "confirmed_on": "2026-02-01 08:00:00"})
-		name, content = self._export("norm_set_xlsx", norm_set=ns.name, run=self.run.name)
+			frappe.db.set_value(
+				"NC Norm Line", ln.name, {"confirmed_by": HEAD, "confirmed_on": "2026-02-01 08:00:00"}
+			)
+		_name, content = self._export("norm_set_xlsx", norm_set=ns.name, run=self.run.name)
 		ws = wb_of(content).worksheets[0]
-		hrow = [r for r in range(1, ws.max_row + 1) if ws.cell(r, 1).value == "Bước"][0]
+		hrow = next(r for r in range(1, ws.max_row + 1) if ws.cell(r, 1).value == "Bước")
 		header = [c.value for c in ws[hrow]]
 		rows = [r for r in ws.iter_rows(min_row=hrow + 1, values_only=True) if r[2]]
 		self.assertEqual(len(rows), 11)
@@ -224,11 +239,21 @@ class TestExportApi(FrappeTestCase):
 		self.assertEqual(len(ev), 1)
 		# lỗi
 		frappe.set_user("Administrator")
-		with mock.patch("normcore.api.export.ANNEX_BUILDERS", {**api.ANNEX_BUILDERS, "annex_iii": mock.Mock(side_effect=RuntimeError("hỏng"))}):
+		with mock.patch(
+			"normcore.api.export.ANNEX_BUILDERS",
+			{**api.ANNEX_BUILDERS, "annex_iii": mock.Mock(side_effect=RuntimeError("hỏng"))},
+		):
 			api.build_bundle(self.run.name, FIN)
 		self.assertEqual(len([e for e in self._events(self.run.name) if "Hồ sơ nén" in e["detail"]]), 1)
-		self.assertEqual(frappe.db.count("File", {"attached_to_name": self.run.name, "file_name": f"ho-so-{self.run.name}.zip"}), 1)
-		self.assertTrue(frappe.db.exists("Error Log", {"method": ["like", f"%Xuất hồ sơ nén {self.run.name}%"]}))
+		self.assertEqual(
+			frappe.db.count(
+				"File", {"attached_to_name": self.run.name, "file_name": f"ho-so-{self.run.name}.zip"}
+			),
+			1,
+		)
+		self.assertTrue(
+			frappe.db.exists("Error Log", {"method": ["like", f"%Xuất hồ sơ nén {self.run.name}%"]})
+		)
 
 	# ---- quyền ----
 	def test_quyen_xuat_theo_vai_tro(self):

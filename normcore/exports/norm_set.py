@@ -202,10 +202,16 @@ def pdf_context(data: dict, meta: dict) -> dict:
 		sid = ln.get("step_id") or ""
 		if not groups or groups[-1]["step_id"] != sid:
 			title = ln.get("step_title") or (GENERAL_STEP if not sid else "")
-			groups.append({"step_id": sid, "title": f"{sid} — {title}" if sid and title else (title or sid), "rows": []})
+			groups.append(
+				{"step_id": sid, "title": f"{sid} — {title}" if sid and title else (title or sid), "rows": []}
+			)
 		groups[-1]["rows"].append([_text(ln.get(c[1])) for c in cols])
 	return {
-		"head": [(label, _text(head.get(key))) for label, key in HEAD_ROWS if has_ts or key not in ("test_system", "tests_per_tube")],
+		"head": [
+			(label, _text(head.get(key)))
+			for label, key in HEAD_ROWS
+			if has_ts or key not in ("test_system", "tests_per_tube")
+		],
 		"columns": [c[0] for c in cols],
 		"groups": groups,
 		"has_test_system": has_ts,

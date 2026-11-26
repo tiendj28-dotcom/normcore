@@ -11,7 +11,8 @@ from frappe.utils import now_datetime
 
 from normcore.api import costing, norm
 from normcore.core import audit, notify
-from normcore.exports import annex, bundle, explanation, meta as meta_mod
+from normcore.exports import annex, bundle, explanation
+from normcore.exports import meta as meta_mod
 from normcore.exports import norm_set as norm_set_export
 
 RUN, COST, NS = "NC Costing Run", "NC Service Cost", "NC Norm Set"
@@ -71,7 +72,9 @@ def _meta(file_type, source, run=None, user=None):
 	if run:
 		ps = frappe.db.get_value(RUN, run, "parameter_set")
 		m["parameter_set"] = ps
-		m["parameter_set_title"] = frappe.db.get_value("NC Costing Parameter Set", ps, "title") if ps else None
+		m["parameter_set_title"] = (
+			frappe.db.get_value("NC Costing Parameter Set", ps, "title") if ps else None
+		)
 	return m
 
 
@@ -121,7 +124,9 @@ def _service_row(sc, names, his):
 
 
 def _annex_data(run_doc, meta):
-	names = dict(frappe.get_all("NC Technical Service", fields=["service_code", "service_name"], as_list=True))
+	names = dict(
+		frappe.get_all("NC Technical Service", fields=["service_code", "service_name"], as_list=True)
+	)
 	his = {}
 	for r in frappe.get_all(
 		"NC Service Code Map",
@@ -281,13 +286,18 @@ def _bundle_files(run_doc, user):
 		data = _annex_data(run_doc, _meta(ft, f"{RUN} {run}", run, user))
 		files.append((FILE_TYPES[ft][1].format(run=run), ANNEX_BUILDERS[ft](data)))
 	costs = frappe.get_all(
-		COST, {"costing_run": run}, ["name", "technical_service", "norm_set", "calc_status"], order_by="technical_service"
+		COST,
+		{"costing_run": run},
+		["name", "technical_service", "norm_set", "calc_status"],
+		order_by="technical_service",
 	)
 	for c in costs:
 		if c.calc_status == "Lỗi":
 			continue
 		html, _sc = explanation_html(c.name, user=user)
-		files.append((FILE_TYPES["explanation_pdf"][1].format(service_code=c.technical_service, run=run), _pdf(html)))
+		files.append(
+			(FILE_TYPES["explanation_pdf"][1].format(service_code=c.technical_service, run=run), _pdf(html))
+		)
 	for ns_name in dict.fromkeys(c.norm_set for c in costs if c.norm_set):
 		ns = frappe.get_doc(NS, ns_name)
 		for ft in ("norm_set_xlsx", "norm_set_pdf"):
@@ -390,7 +400,9 @@ def get_export_options(run=None, service_cost=None, norm_set=None):
 			["name", "technical_service", "department", "calc_status", "norm_set"],
 			order_by="technical_service",
 		)
-		names = dict(frappe.get_all("NC Technical Service", fields=["service_code", "service_name"], as_list=True))
+		names = dict(
+			frappe.get_all("NC Technical Service", fields=["service_code", "service_name"], as_list=True)
+		)
 		out["service_costs"] = [
 			{
 				"name": c.name,
@@ -404,11 +416,18 @@ def get_export_options(run=None, service_cost=None, norm_set=None):
 		seen = {}
 		for c in costs:
 			if c.norm_set:
-				seen.setdefault(c.norm_set, {"name": c.norm_set, "service_code": c.technical_service, "department": c.department})
+				seen.setdefault(
+					c.norm_set,
+					{"name": c.norm_set, "service_code": c.technical_service, "department": c.department},
+				)
 		out["norm_sets"] = list(seen.values())
 		f = frappe.get_all(
 			"File",
-			{"attached_to_doctype": RUN, "attached_to_name": run, "file_name": FILE_TYPES["bundle"][1].format(run=run)},
+			{
+				"attached_to_doctype": RUN,
+				"attached_to_name": run,
+				"file_name": FILE_TYPES["bundle"][1].format(run=run),
+			},
 			["file_url", "creation"],
 			limit=1,
 		)

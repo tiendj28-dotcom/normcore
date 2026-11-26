@@ -81,7 +81,7 @@ class TestRows(unittest.TestCase):
 
 	def test_ii_lech_ghi_chu(self):
 		rows = a.annex_rows_ii(svc(full_cost=D("60")))
-		self.assertIn("Lệch", [r for r in rows if r[0] == "III"][0][4])
+		self.assertIn("Lệch", next(r for r in rows if r[0] == "III")[4])
 
 	def test_ii_can_lam_sang_va_ngoai_kiem(self):
 		rows = a.annex_rows_ii(svc(is_paraclinical=1, eqa_cost=D("3")))
@@ -105,7 +105,14 @@ class TestRows(unittest.TestCase):
 
 	def test_iv_co_phan_bo(self):
 		lines = [
-			{"component": "LABOR", "allocation_rule": "R", "driver_value": 1, "driver_total": 2, "pool_amount": 9, "amount": 3}
+			{
+				"component": "LABOR",
+				"allocation_rule": "R",
+				"driver_value": 1,
+				"driver_total": 2,
+				"pool_amount": 9,
+				"amount": 3,
+			}
 		]
 		rows = a.annex_rows_iv(svc(alloc_lines=lines))
 		self.assertEqual(rows[2][2:], ["Phân bổ", "R", 1, 2, 9, D("3")])

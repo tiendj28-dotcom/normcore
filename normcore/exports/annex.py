@@ -1,4 +1,4 @@
-"""Phụ lục II–V Thông tư 21/2024/TT-BYT (FR-OUT-001..004, NFR-CPL-002). Thuần, không phụ thuộc frappe.
+"""Phụ lục II-V Thông tư 21/2024/TT-BYT (FR-OUT-001..004, NFR-CPL-002). Thuần, không phụ thuộc frappe.
 
 Cấu trúc cột nằm ở MỘT chỗ (các hằng `ANNEX_*_COLUMNS`); tệp mẫu `.xlsx` trong `templates/` được sinh từ
 các hằng này và thay được khi có mẫu chính thức (TBD-01, ASM-019-01). Chỉ ghi giá trị đã lưu, không làm tròn lại.
@@ -328,7 +328,7 @@ def _run_line(data):
 
 def _sheet_name(base, used):
 	name = (base or "Dịch vụ")[:31]
-	for ch in '[]:*?/\\':
+	for ch in "[]:*?/\\":
 		name = name.replace(ch, "-")
 	cand, n = name, 2
 	while cand.lower() in used:
@@ -348,8 +348,9 @@ def _finish(wb, code, data, errors):
 	m = dict(data.get("meta") or {})
 	m["template_note"] = meta_mod.TEMPLATE_NOTE
 	if errors:
-		m["extra"] = list(m.get("extra") or ()) + [
-			("Dịch vụ tính lỗi, không xuất", ", ".join(s.get("service_code") or "" for s in errors))
+		m["extra"] = [
+			*(m.get("extra") or ()),
+			("Dịch vụ tính lỗi, không xuất", ", ".join(s.get("service_code") or "" for s in errors)),
 		]
 	meta_mod.add_info_sheet(wb, m)
 	buf = io.BytesIO()

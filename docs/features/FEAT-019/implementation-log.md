@@ -12,3 +12,4 @@
 | T08 | `python3 docs/tools/build_rtm.py docs`; đo build_bundle 500 dịch vụ | VAN DE: 0; build_bundle 104,3s (PDF giả), 1 PDF thật 0,60s (ước tính ~400s) | (xem git log) |
 | T10 | `git diff origin/develop -- normcore/api/norm.py normcore/public/js/norm_grid/` rỗng; bench test_export | rỗng; 7 OK | (xem git log) |
 | T09 | golden; pytest unit+golden cov; bench migrate + run-tests --app normcore; check_conventions; build_rtm | 1053 passed cov 92,54%; bench Ran 1774 OK; cc=0; VAN DE: 0 | (xem git log) |
+| CI | sửa ruff check/format; chuyển 4 test render Jinja sang api/test_export_templates.py (job unit CI không cài jinja2) | ruff sạch; pytest 1049 passed; bench test_export_templates 4 OK, test_export 7 OK | (xem git log) |

@@ -27,7 +27,14 @@ def strings(p):
 class TestExportUi(unittest.TestCase):
 	def test_hop_thoai_goi_du_api_va_realtime(self):
 		js = text(DIALOG)
-		for s in ("normcore.api.export.", "get_export_options", "export_file", "export_bundle", "nc_export_bundle", "open_url_post"):
+		for s in (
+			"normcore.api.export.",
+			"get_export_options",
+			"export_file",
+			"export_bundle",
+			"nc_export_bundle",
+			"open_url_post",
+		):
 			self.assertIn(s, js)
 		self.assertIn("normcore.export.open", js)
 		self.assertIn('role="alert"', js)
@@ -53,6 +60,6 @@ class TestExportUi(unittest.TestCase):
 		used = set()
 		for p in (DIALOG, *FORMS.values()):
 			used |= strings(p)
-		for s in ("Export documents", "Export explanation PDF", "Export norm set") + tuple(strings(DIALOG)):
+		for s in ("Export documents", "Export explanation PDF", "Export norm set", *strings(DIALOG)):
 			self.assertIn(s, vi)
 		self.assertTrue(vi["Export documents"])
