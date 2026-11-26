@@ -70,6 +70,13 @@ class TestCostingLockUI(unittest.TestCase):
 		)
 		self.assertEqual((d["ref_doctype"], d["report_type"]), ("NC Costing Run", "Script Report"))
 
+	def test_TC_COST_18_doctype_cap_quyen_report(self):
+		d = json.loads(_t(FORM.with_suffix(".json")))
+		perms = {p["role"]: p for p in d["permissions"]}
+		for role in ("NC Finance", "NC Director", "NC Admin", "NC Auditor"):
+			self.assertEqual(perms[role].get("report"), 1, role)
+		self.assertNotIn("NC Clinician", perms)
+
 	def test_report_bo_loc_va_cay(self):
 		t = _t(REPORT / "nc_costing_run_comparison.js")
 		for f in ("base_run", "other_run", "only_changed", "technical_service"):
