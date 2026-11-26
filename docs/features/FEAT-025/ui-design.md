@@ -1,5 +1,7 @@
 # FEAT-025 — Thiết kế giao diện
 
+> **AMD-025-02 (Quyết định BA, NORM-71):** phần đề xuất liên kết (TD 3.5, UI SCR-DSK-014) đã đổi: API ở `normcore/api/norm_link.py`, giao diện ở form NC Norm Set, tự khởi và bỏ đề xuất ở controller; `api/norm.py` và `norm_grid/` không sửa. Khi khác với nội dung dưới đây, làm theo `docs/decisions/amendments/AMD-025-02.md`.
+
 Nguồn: `ux-foundations.md` SCR-DSK-009 ("kiểm tra nhất quán"; trạng thái "Đề xuất AI chưa xử lý"), SCR-DSK-014 ("Dòng đề xuất AI; dòng chưa liên kết"); `design.md` mục 3 ("Dòng đề xuất của AI": nền nhấn nhẹ, nhãn "Đề xuất" `purple`, hai nút nhỏ "Chấp nhận" và "Bỏ"); `technical-design.md` (TD) mục 3.4, 3.5; ui-design FEAT-012, FEAT-024 (giữ nguyên thành phần đã có). Chuỗi JS viết tiếng Anh trong `__()` kèm bản dịch ở `normcore/translations/vi.d/FEAT-025.csv`; thông báo máy chủ tiếng Việt. Chạy được ở 1366 × 768; thao tác được bằng bàn phím (Tab, Enter, Esc); dùng `indicator-pill`, `alert-*` và biến CSS của Desk, không tự đặt màu chữ. FR-AI-015: AI tắt (`normcore.ai.enabled()` = false) thì không có nút hay chữ "AI" nào.
 
 ## SCR-DSK-009 Trình soạn quy trình — mở rộng `ProcedureEditor.vue`

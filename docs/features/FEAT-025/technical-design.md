@@ -1,5 +1,7 @@
 # FEAT-025 — Kiểm tra nhất quán và đề xuất liên kết định mức — Thiết kế kỹ thuật
 
+> **AMD-025-02 (Quyết định BA, NORM-71):** phần đề xuất liên kết (TD 3.5, UI SCR-DSK-014) đã đổi: API ở `normcore/api/norm_link.py`, giao diện ở form NC Norm Set, tự khởi và bỏ đề xuất ở controller; `api/norm.py` và `norm_grid/` không sửa. Khi khác với nội dung dưới đây, làm theo `docs/decisions/amendments/AMD-025-02.md`.
+
 Issue NORM-71. Bản phát hành R2. Phụ thuộc FEAT-024, FEAT-012 (đều có `DONE` trên `develop`); dùng lại gateway, mẫu lệnh, nhật ký AI của FEAT-023.
 
 Nguồn: `srs.md` FR-AI-006, FR-AI-007 (cùng FR-AI-008, 009, 011, 015 đã có); `use-cases.md` UC-005 bước 6, 6a; UC-009 bước 2–4, 8a; `data-model.md` 3.3 (NC Procedure Resource, NC Procedure Step), 3.5 (NC Norm Line), mục 4 (dòng "Quy trình", "Bộ định mức"); `ux-foundations.md` SCR-DSK-009, SCR-DSK-014; As-Built FEAT-012, FEAT-023, FEAT-024.
