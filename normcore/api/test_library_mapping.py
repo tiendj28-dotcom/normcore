@@ -147,3 +147,86 @@ class TestLibraryMappingSuggest(MappingTestBase):
 	def test_SCR_DSK_004_pending_exact(self):
 		doc = self.make_doc("MAP/08")
 		self.assertEqual(api.get_mappings(doc.name)["pending_exact"], 1)
+
+
+class TestLibraryMappingConfirm(MappingTestBase):
+	def test_FR_SVC_006_xac_nhan_luu_nguoi_va_thoi_diem(self):
+		dc = make_user("map.dc2@normcore.test", "NC Document Controller")
+		doc = self.make_doc("MAP/10")
+		s1, s2 = section_by_no(doc, "1"), section_by_no(doc, "2")
+		frappe.set_user(dc)
+		out = api.confirm_mappings(doc.name, frappe.as_json([s2.service_mappings[0].name]))
+		self.assertEqual(out, {"confirmed": 1})
+		r = section_by_no(doc, "2").service_mappings[0]
+		self.assertEqual((r.mapping_status, r.confirmed_by), ("Đã xác nhận", dc))
+		self.assertTrue(r.confirmed_on)
+		stamp = (r.confirmed_by, r.confirmed_on)
+		# xác nhận lại: bỏ qua, không đóng dấu lại
+		self.assertEqual(api.confirm_mappings(doc.name, [r.name]), {"confirmed": 0})
+		r = section_by_no(doc, "2").service_mappings[0]
+		self.assertEqual((r.confirmed_by, r.confirmed_on), stamp)
+		# xác nhận mọi dòng 100%
+		self.assertEqual(api.confirm_exact(doc.name), {"confirmed": 1})
+		self.assertEqual(section_by_no(doc, "1").service_mappings[0].mapping_status, "Đã xác nhận")
+		self.assertEqual(api.confirm_exact(doc.name), {"confirmed": 0})
+		# thêm tay (UC-003 5a) và sửa dịch vụ của dòng
+		out = api.save_mapping(s1.name, self.other_svc)
+		self.assertEqual(out["mapping_status"], "Đã xác nhận")
+		added = frappe.get_doc("NC Section Service Map", out["row"])
+		self.assertEqual((added.technical_service, added.confirmed_by), (self.other_svc, dc))
+		self.assertFalse(added.confidence)
+		row2 = section_by_no(doc, "3")
+		row2.append("service_mappings", {"technical_service": self.name_svc})
+		row2.save()
+		rname = section_by_no(doc, "3").service_mappings[0].name
+		out = api.save_mapping(row2.name, self.other_svc, row=rname)
+		self.assertEqual(out["row"], rname)
+		edited = section_by_no(doc, "3").service_mappings[0]
+		self.assertEqual((edited.technical_service, edited.mapping_status), (self.other_svc, "Đã xác nhận"))
+		# trùng dịch vụ trong mục
+		with self.assertRaises(frappe.ValidationError):
+			api.save_mapping(s1.name, self.other_svc)
+		# dịch vụ không tồn tại
+		with self.assertRaises(frappe.DoesNotExistError):
+			api.save_mapping(s1.name, "KHONG-TON-TAI")
+		# bỏ ánh xạ
+		self.assertEqual(api.remove_mapping(rname), {"removed": 1})
+		self.assertEqual(len(section_by_no(doc, "3").service_mappings), 0)
+
+	def test_FR_SVC_006_dong_khong_thuoc_van_ban(self):
+		doc, other = self.make_doc("MAP/11"), self.make_doc("MAP/12")
+		row = section_by_no(other, "1").service_mappings[0].name
+		with self.assertRaises(frappe.ValidationError):
+			api.confirm_mappings(doc.name, [row])
+
+	def test_FR_SVC_006_quyen_anh_xa(self):
+		doc = self.make_doc("MAP/13")
+		s1 = section_by_no(doc, "1")
+		row = s1.service_mappings[0].name
+		writers = (
+			lambda: api.confirm_mappings(doc.name, [row]),
+			lambda: api.confirm_exact(doc.name),
+			lambda: api.save_mapping(s1.name, self.other_svc),
+			lambda: api.remove_mapping(row),
+			lambda: api.suggest_mappings(doc.name),
+		)
+		users = {
+			"map.aud@normcore.test": make_user("map.aud@normcore.test", "NC Auditor"),
+			"map.cli@normcore.test": make_user("map.cli@normcore.test", "NC Clinician"),
+			"map.norole@normcore.test": make_user("map.norole@normcore.test"),
+			"map.dc3@normcore.test": make_user("map.dc3@normcore.test", "NC Document Controller"),
+		}
+		for email in ("map.aud@normcore.test", "map.cli@normcore.test"):
+			frappe.set_user(users[email])
+			for call in writers:
+				with self.assertRaises(frappe.PermissionError):
+					call()
+		frappe.set_user("map.aud@normcore.test")
+		self.assertEqual(api.get_mappings(doc.name)["total"], 3)  # Auditor đọc được
+		frappe.set_user(users["map.norole@normcore.test"])
+		with self.assertRaises(frappe.PermissionError):
+			api.get_mappings(doc.name)
+		frappe.set_user(users["map.dc3@normcore.test"])
+		self.assertEqual(api.confirm_exact(doc.name), {"confirmed": 1})
+		self.assertEqual(api.suggest_mappings(doc.name)["sections"], 3)
+		self.assertEqual(api.remove_mapping(row), {"removed": 1})

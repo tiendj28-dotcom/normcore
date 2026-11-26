@@ -91,3 +91,15 @@ class TestNCSectionServiceMap(FrappeTestCase):
 		make_user("map.none@example.com")
 		frappe.set_user("map.none@example.com")
 		self.assertFalse(frappe.has_permission("NC Legal Section", "read", doc=self.section))
+
+	def test_FR_SVC_006_thay_doi_bang_con_co_version(self):
+		s = self.section
+		s.append("service_mappings", {"technical_service": self.svc_a})
+		s.save()
+		s.service_mappings[0].mapping_status = "Đã xác nhận"
+		s.save(ignore_version=False)  # Frappe bỏ qua Version khi chạy test nếu không bật rõ
+		ver = frappe.get_all(
+			"Version", filters={"ref_doctype": "NC Legal Section", "docname": s.name}, pluck="data"
+		)
+		self.assertTrue(ver)
+		self.assertIn("mapping_status", ver[-1])

@@ -501,3 +501,95 @@ def get_mappings(legal_document, unconfirmed_only=0, start=0, page_length=100):
 		)
 	start, page_length = cint(start), min(cint(page_length) or 100, 500)
 	return {"total": len(out), "pending_exact": pending_exact, "rows": out[start : start + page_length]}
+
+
+def _writable_section(section_name):
+	section = frappe.get_doc("NC Legal Section", section_name)
+	if not frappe.has_permission("NC Legal Section", "write", doc=section):
+		frappe.throw(_("Bạn không có quyền chỉnh ánh xạ dịch vụ"), frappe.PermissionError)
+	return section
+
+
+def _confirm_rows(legal_document, only=None):
+	"""Đặt "Đã xác nhận" cho các dòng "Đề xuất" (`only`: tập tên dòng, None = mọi dòng 100%)."""
+	_require_guideline_write(legal_document)
+	rows = frappe.db.sql(
+		"SELECT m.name, m.parent, m.mapping_status, m.confidence, s.legal_document"
+		" FROM `tabNC Section Service Map` m JOIN `tabNC Legal Section` s ON s.name = m.parent"
+		" WHERE m.parenttype = 'NC Legal Section' AND m.parentfield = 'service_mappings'"
+		" AND (s.legal_document = %s OR m.name IN %s)",
+		[legal_document, tuple(only or ["-"])],
+		as_dict=True,
+	)
+	by_name = {r.name: r for r in rows}
+	if only is not None:
+		for name in only:
+			if name not in by_name or by_name[name].legal_document != legal_document:
+				frappe.throw(_("Ánh xạ không thuộc văn bản này"))
+		picked = {by_name[n].name for n in only}
+	else:
+		picked = {
+			r.name
+			for r in rows
+			if r.legal_document == legal_document and (r.confidence or 0) == mapping.CODE_CONFIDENCE
+		}
+	todo = {}
+	for r in rows:
+		if r.name in picked and r.mapping_status == mapping.SUGGESTED:
+			todo.setdefault(r.parent, set()).add(r.name)
+	for parent, names in todo.items():
+		section = _writable_section(parent)
+		for row in section.service_mappings:
+			if row.name in names:
+				row.mapping_status = mapping.CONFIRMED
+		section.save()
+	return {"confirmed": sum(len(v) for v in todo.values())}
+
+
+@frappe.whitelist()
+def confirm_mappings(legal_document, rows):
+	"""Xác nhận các dòng đã chọn (FR-SVC-006); dòng đã xác nhận được bỏ qua."""
+	_require_guideline_write(legal_document)
+	return _confirm_rows(legal_document, set(frappe.parse_json(rows) if isinstance(rows, str) else rows))
+
+
+@frappe.whitelist()
+def confirm_exact(legal_document):
+	"""Xác nhận mọi dòng "Đề xuất" có độ tin cậy 100%."""
+	return _confirm_rows(legal_document, None)
+
+
+@frappe.whitelist()
+def save_mapping(section, technical_service, row=None):
+	"""Sửa dịch vụ của một dòng, hoặc thêm ánh xạ tay (UC-003 5a); kết quả luôn "Đã xác nhận"."""
+	sec = _writable_section(section)
+	frappe.get_doc("NC Technical Service", technical_service)  # DoesNotExistError nếu không có
+	if row:
+		target = next((r for r in sec.service_mappings if r.name == row), None)
+		if target is None:
+			frappe.throw(_("Ánh xạ không thuộc mục này"))
+		if target.technical_service != technical_service:
+			target.confidence = None  # độ tin cậy gắn với dịch vụ được đề xuất ban đầu
+		target.technical_service = technical_service
+		target.mapping_status = mapping.CONFIRMED
+	else:
+		target = sec.append(
+			"service_mappings", {"technical_service": technical_service, "mapping_status": mapping.CONFIRMED}
+		)
+	sec.save()
+	row_name = row or next(r.name for r in sec.service_mappings if r.technical_service == technical_service)
+	return {"row": row_name, "mapping_status": mapping.CONFIRMED}
+
+
+@frappe.whitelist()
+def remove_mapping(row):
+	"""Bỏ một ánh xạ (đề xuất sai hoặc gỡ ánh xạ, UC-003 4a)."""
+	parent = frappe.db.get_value(
+		"NC Section Service Map", row, ["parent", "parenttype"], as_dict=True
+	)
+	if not parent or parent.parenttype != "NC Legal Section":
+		frappe.throw(_("Không tìm thấy ánh xạ"), frappe.DoesNotExistError)
+	sec = _writable_section(parent.parent)
+	sec.set("service_mappings", [r for r in sec.service_mappings if r.name != row])
+	sec.save()
+	return {"removed": 1}
