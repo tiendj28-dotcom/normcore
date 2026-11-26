@@ -108,6 +108,20 @@ class TestCostingApi(FrappeTestCase):
 			with self.subTest(fn=fn.__name__), self.assertRaises(frappe.PermissionError):
 				fn(*args)
 
+	def test_quyen_clinician_khong_goi_get_explanation_va_doc_service_cost(self):
+		"""FR-ACC-003, data-model.md:815: Clinician không có quyền với NC Service Cost."""
+		frappe.set_user(FIN)
+		api.start_costing(self.run.name)
+		name = self._cost()
+		self.assertTrue(name)
+		frappe.set_user(CLIN)
+		with self.assertRaises(frappe.PermissionError):
+			api.get_explanation(name)
+		with self.assertRaises(frappe.PermissionError):
+			frappe.get_doc("NC Service Cost", name).check_permission("read")
+		with self.assertRaises(frappe.PermissionError):
+			frappe.get_list("NC Service Cost", {"costing_run": self.run.name})
+
 	def test_quyen_costing_auditor_chi_doc(self):
 		frappe.set_user(FIN)
 		api.start_costing(self.run.name)

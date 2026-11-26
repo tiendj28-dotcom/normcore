@@ -256,7 +256,14 @@ class TestNCCostingRunGolden(FrappeTestCase):
 		a = self._costs(run)["DV-TEST-A"]
 		self.assertEqual(a.calc_status, "Thành công")
 		self.assertEqual(sum(ln.amount for ln in a.lines), 183963.06)
-		self.assertEqual((a.direct_labor, a.direct_utility), (a.direct_labor, 1500.0))
+		import sys
+
+		sys.path.insert(0, frappe.get_app_path("normcore", "..", "docs", "golden"))
+		import golden_engine as g
+
+		by_cat = g.run()[0]["DV-TEST-A"]["by_cat"]
+		self.assertEqual(a.direct_labor, float(by_cat["LABOR"]))  # 69.000,94 theo golden
+		self.assertEqual(a.direct_utility, float(by_cat["UTILITY"]))  # 1.500,00 theo golden
 		self.assertEqual(a.full_cost, 183963.06)  # chưa có phân bổ (ASM-015-02)
 		self.assertEqual(a.volume, 4000)
 
