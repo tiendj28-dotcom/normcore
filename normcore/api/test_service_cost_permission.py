@@ -4,8 +4,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import costing as api
-from normcore.tests import costing_fixtures as cf
 from normcore.core import permissions
+from normcore.tests import costing_fixtures as cf
 from normcore.tests.utils import make_base, make_user
 
 COST = "NC Service Cost"
@@ -70,3 +70,22 @@ class TestServiceCostPermission(FrappeTestCase):
 		permissions.assign_department(both, "KHOA-N67-X")
 		frappe.set_user(both)
 		self.assertTrue(frappe.has_permission(COST, "read", doc=self.cost))
+
+	def test_duong_request_that_auditor_chi_mot_vai_tro(self):
+		# NORM-67: đúng đường request thật (set_user, không truyền user=), thêm NC Norm Set và NC Clinical Procedure
+		frappe.set_user(self.aud)
+		self.assertEqual(set(frappe.get_roles()) - {"All", "Guest", "Desk User"}, {"NC Auditor"})
+		hooks = frappe.get_hooks("has_permission")
+		for dt in (COST, "NC Norm Set", "NC Clinical Procedure"):
+			name = frappe.db.get_value(dt, {}, "name") if dt != COST else self.cost
+			if not name:
+				continue
+			doc = frappe.get_doc(dt, name)
+			doc.check_permission("read")
+			self.assertTrue(frappe.has_permission(dt, "read", doc=doc), (dt, hooks.get(dt)))
+			self.assertTrue(
+				frappe.call("frappe.client.has_permission", doctype=dt, docname=name, perm_type="read")[
+					"has_permission"
+				]
+			)
+		self.assertTrue(api.get_explanation(self.cost)["header"])
