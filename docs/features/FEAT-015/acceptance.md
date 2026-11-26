@@ -1,6 +1,6 @@
 # Acceptance FEAT-015 — Tính chi phí trực tiếp, giá và bảng giải trình
 
-**Kết luận: REWORK.** Sau merge origin/develop vào nhánh, `test_vi_csv_order.py::test_vi_csv_that_dat` và `check_conventions.py` (NC-10: `vi.csv` dòng 453 'Waiting since' sau 'Warning') đỏ. Các dòng bên dưới là kết quả trên 3e158cf trước merge.
+**Kết luận: ACCEPTED** (lượt 2, sau khi Dev sắp lại `vi.csv` ở 3ed1e15 và QA thêm test ở cfcb1c8). Số liệu bên dưới đã chạy lại trên HEAD cfcb1c8 (site sạch 1278 test OK; pytest 666 passed, độ phủ 98,94%; check_conventions thoát 0; build_rtm VAN DE 0; CI PR xanh).
 
 Người nghiệm thu: QA (Multica, Tester iu), 2026-11-26. Commit đã kiểm: xem `verdict.json`. PR #57.
 
@@ -16,9 +16,12 @@ Người nghiệm thu: QA (Multica, Tester iu), 2026-11-26. Commit đã kiểm: 
 | TC-COST-17 | `test_TC_COST_17_dich_vu_chua_khoa_bi_liet_ke_va_bo_qua`, `..._check_scope_liet_ke` | Đạt |
 | TC-COST-19 | `test_TC_COST_19_tao_lan_tinh_thieu_dau_vao_bi_tu_choi` | Đạt |
 | FR-COST-015 (>50 dịch vụ chạy nền) | `test_FR_COST_015_tren_50_dich_vu_chay_nen_co_tien_do` | Đạt |
-| Quyền | Clinician bị từ chối, Auditor chỉ đọc, Trưởng khoa theo khoa (`api/test_costing.py`) | Đạt |
-| Site sạch | `normcore-verify.test` tạo mới, cài app, `run-tests --app normcore`: Ran 1245 tests, OK; site đã xóa | Đạt |
-| pytest unit + golden | 658 passed, 164 subtests; độ phủ costing + benchmark 98,94% (≥ 90) | Đạt |
+| Quyền | Clinician bị từ chối, Auditor chỉ đọc, Trưởng khoa theo khoa; QA thêm `test_quyen_clinician_khong_goi_get_explanation_va_doc_service_cost` (get_explanation, đọc và get_list NC Service Cost đều PermissionError; FR-ACC-003, data-model.md:815) | Đạt |
+| Điểm Lead 1 | `test_TC_COST_01_tren_site_tong_truc_tiep_va_gia` nay so `direct_labor` 69.000,94 và `direct_utility` 1.500,00 với `golden_engine.run()` (không so với chính nó) | Đạt |
+| Điểm Lead 4 | ASM-015-17 trùng ý ASM-015-22 và ASM-015-18 trùng ý ASM-015-21: không sửa, ghi chú tại đây | Đạt |
+| Giao diện trên staging (Playwright, tài khoản test Clinician và Auditor) | Clinician mở `/app/nc-costing-run`, `/app/nc-service-cost`: "Không được phép". Auditor mở danh sách NC Costing Run (5 bản ghi) và NC Service Cost: xem được, không có nút tạo. Ảnh chụp đính kèm trên issue | Đạt (phần quyền) |
+| Site sạch | `normcore-verify.test` tạo mới, cài app, `run-tests --app normcore`: Ran 1278 tests, OK; site đã xóa | Đạt |
+| pytest unit + golden | 666 passed, 164 subtests; độ phủ costing + benchmark 98,94% (≥ 90) | Đạt |
 | golden_engine.py, golden_cls.py | thoát 0 | Đạt |
 | build_rtm.py docs | VAN DE: 0 | Đạt |
 | check_conventions.py | thoát 0 | Đạt |
@@ -27,5 +30,5 @@ Người nghiệm thu: QA (Multica, Tester iu), 2026-11-26. Commit đã kiểm: 
 | CI PR #57 | cả hai job pass (gh pr checks) | Đạt |
 
 ## Giới hạn
-- Giao diện SCR-DSK-022/023 **chưa kiểm bằng trình duyệt**: QA không có tài khoản test theo vai trò cho staging. Giao diện được kiểm bằng `unit/test_costing_ui.py`, `test_form_buttons_i18n.py` và test API theo vai trò.
-- Góp ý không chặn: `test_nc_costing_run.py:259` có assert luôn đúng với `direct_labor` (tổng 183.963,06 vẫn được kiểm ở nơi khác); ASM-015-17/18 trùng ý với 22/21.
+- Staging hiện chạy develop chưa có FEAT-015 (chỉ có lần tính cũ TG-2026-001..005 từ smoke FEAT-000), nên màn hình SCR-DSK-022/023 (nút tính, tiến độ, bảng giải trình) **chưa xem được trên staging**; kiểm bằng `unit/test_costing_ui.py`, `test_form_buttons_i18n.py` và test API theo vai trò. Cần xem lại sau khi người merge PR và staging deploy.
+- Góp ý của Reviewer về assert luôn đúng đã được sửa (điểm Lead 1); ASM trùng ý chỉ ghi chú (điểm 4).
