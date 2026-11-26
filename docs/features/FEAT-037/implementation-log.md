@@ -12,3 +12,4 @@ Pytest chạy bằng `~/frappe-bench/env/bin/python -m pytest` (python3 hệ th�
 | T06 | with_bench migrate + run-tests api.test_costing_physical, api.test_costing_reconciliation, report test_nc_reconciliation, api.test_costing_lock | 5 + 4 + 1 + 4 OK | c26d2bd |
 | T07 | with_bench migrate + run-tests api.test_costing_sensitivity | Ran 6 tests OK (TC-CLS-40: trạng thái run, NC Service Cost, dòng, đối soát, số bản ghi không đổi) | 83b845f |
 | T08 | with_bench migrate + run-tests report.nc_missing_data.test_nc_missing_data; check_conventions | Ran 4 tests OK; conventions thoát 0 | ef5c7f6 |
+| T09 | pytest test_physical_reconciliation_ui test_reconciliation_ui test_form_buttons_i18n test_ui_conventions test_vi_csv_order; with_bench migrate + run-tests report test_nc_physical_reconciliation | 39 passed; Ran 3 tests OK (+ report NC Reconciliation 1 OK); vi.csv sinh bằng build_generated.py | b41ccae |
