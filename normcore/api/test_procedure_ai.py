@@ -305,7 +305,7 @@ class TestAIDraft(AIDraftBase):
 		frappe.set_user(self.clin)
 		self.assertEqual(api.prepare_ai_draft(self.service, self.dept)["current_procedure"]["name"], cur.name)
 		with patch("normcore.ai.gateway.get_provider", return_value=FakeProvider({})):
-			self.assertRaises(frappe.ValidationError, api.start_ai_draft, self.service, "KHOA-KHAC", "yc",
+			self.assertRaises(frappe.ValidationError, api.start_ai_draft, self.service, self.dept, "yc",
 				extra_sections=json.dumps([self.sec["4"]]))
 		prov = FakeProvider(ai_json(self.sec))
 		frappe.db.delete("NC Clinical Procedure", {"name": cur.name})
@@ -316,3 +316,69 @@ class TestAIDraft(AIDraftBase):
 		for src in prov.calls[0]["sources"]:
 			self.assertEqual(set(src), {"name", "section_no", "heading", "plain_text"})
 		self.assertIn("current_procedure", prov.calls[0]["variables"])
+
+
+class TestAISuggestions(AIDraftBase):
+	def make_ai_draft(self):
+		st = self.run_draft(FakeProvider(ai_json(self.sec)))
+		self.assertEqual(st["status"], "done", st)
+		return st["procedure"]
+
+	def test_TC_AI_10_con_de_xuat_tu_choi_gui_duyet(self):
+		from normcore.api import procedure_workflow as wf
+
+		name = self.make_ai_draft()
+		doc = self.draft(name)
+		rows = [r.resource_row_id for r in doc.resources]
+		out = api.accept_suggestions(name, step_ids=["S001", "S002", "S004", "S005"], resource_row_ids=rows)
+		self.assertEqual(out["remaining"], 1)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			wf.apply_action(name, "Gửi duyệt")
+		self.assertIn("Bước S003 còn là đề xuất AI chưa xử lý", str(cm.exception))
+		self.assertEqual(self.draft(name).workflow_state, "Nháp")
+		api.accept_suggestions(name, step_ids=["S003"])
+		self.assertEqual(wf.apply_action(name, "Gửi duyệt")["workflow_state"], "Chờ trưởng khoa duyệt")
+
+	def test_TC_AI_10_bo_de_xuat(self):
+		name = self.make_ai_draft()
+		out = api.reject_suggestion(name, "S003")
+		self.assertEqual(out, {"deleted": "S003", "resources": 1, "citations": 1})
+		doc = self.draft(name)
+		self.assertNotIn("S003", [s.step_id for s in doc.steps])
+		self.assertFalse([c for c in doc.citations if c.target_step_id == "S003"])
+		self.assertFalse([r for r in doc.resources if r.step_id == "S003"])
+		new = api.add_step(name, "Thực hiện", "Bước mới", "Mô tả")
+		self.assertEqual(new["step_id"], "S006")  # mã không tái dùng
+		api.accept_suggestions(name, step_ids=["S001"])
+		self.assertRaises(frappe.ValidationError, api.reject_suggestion, name, "S001")
+		self.assertRaises(frappe.ValidationError, api.accept_suggestions, name, step_ids=["S999"])
+		out = api.accept_suggestions(name, all=1)
+		self.assertEqual(out["remaining"], 0)
+
+	def test_get_procedure_tra_de_xuat_quan_he_va_nhan(self):
+		name = self.make_ai_draft()
+		data = api.get_procedure(name)
+		self.assertTrue(all(s["ai_suggested"] for s in data["steps"]))
+		self.assertTrue(all(r["ai_suggested"] for r in data["resources"]))
+		self.assertEqual(data["relations"]["step:S001"], ["Theo hướng dẫn"])
+		self.assertEqual(data["ai_log"], self.draft(name).ai_log)
+		self.assertTrue(data["citations"][0]["section_label"].startswith("AI/24/QĐ — "))
+
+	def test_quyen_ai_draft(self):
+		name = self.make_ai_draft()
+		call = lambda f, *a, **k: self.assertRaises(frappe.PermissionError, f, *a, **k)  # noqa: E731
+		for user in (self.auditor, self.finance):
+			frappe.set_user(user)
+			call(api.prepare_ai_draft, self.service, self.dept)
+			call(api.start_ai_draft, self.service, self.dept, "yc")
+			call(api.accept_suggestions, name, all=1)
+			call(api.reject_suggestion, name, "S001")
+		frappe.set_user("Administrator")
+		other = make_base(service="DV-TEST-B", department="KHOA-KHAC-AI")[1]
+		frappe.set_user(self.clin)
+		with patch("normcore.ai.gateway.get_provider", return_value=FakeProvider({})):
+			call(api.start_ai_draft, self.service, other, "yc")
+		st_job = frappe.generate_hash(length=16)
+		frappe.cache().set_value(api.AI_JOB_KEY.format(st_job), {"status": "done", "user": "Administrator"})
+		call(api.get_ai_draft_status, st_job)
+		self.assertEqual(api.get_ai_draft_status("khong-co")["status"], "unknown")

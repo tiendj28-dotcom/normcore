@@ -237,12 +237,39 @@ def compare_versions(base, target):
 	return {"base": _header(a), "target": _header(b), **result}
 
 
+def _relations(citations):
+	"""Quan hệ khác nhau của mỗi đích ("step:<mã>" / "section:<nhãn>") trên toàn bảng trích dẫn (FR-AI-003)."""
+	out = {}
+	for c in citations:
+		key = f"step:{c['target_step_id']}" if c["target_step_id"] else f"section:{c['target_section']}"
+		if c["relation"] not in out.setdefault(key, []):
+			out[key].append(c["relation"])
+	return out
+
+
+def _section_labels(names):
+	"""Nhãn "<số hiệu> — <số mục> <tiêu đề>" cho trích dẫn có `legal_section` là NC Legal Section thật."""
+	if not names:
+		return {}
+	rows = frappe.db.sql(
+		"SELECT s.name, d.doc_number, s.section_no, s.heading FROM `tabNC Legal Section` s"
+		" JOIN `tabNC Legal Document` d ON d.name = s.legal_document WHERE s.name IN %s",
+		(tuple(names),),
+		as_dict=True,
+	)
+	return {r.name: f"{r.doc_number} — {r.section_no} {r.heading or ''}".strip() for r in rows}
+
+
 @frappe.whitelist()
 def get_procedure(name, step_id=None, section=None):
 	"""Dữ liệu cho trình soạn. `step_id` hoặc `section` lọc bảng trích dẫn theo bước/phần đang chọn."""
 	_require("read", doc=name, message=_("Bạn không có quyền xem quy trình này"))
 	doc = frappe.get_doc(DT, name)
 	citations = [_dump(c, CITATION_FIELDS) for c in doc.citations]
+	relations = _relations(citations)
+	labels = _section_labels({c["legal_section"] for c in citations if c["legal_section"]})
+	for c in citations:
+		c["section_label"] = labels.get(c["legal_section"])
 	if step_id:
 		citations = [c for c in citations if c["target_step_id"] == step_id]
 	elif section:
@@ -256,13 +283,16 @@ def get_procedure(name, step_id=None, section=None):
 		"needs_review": doc.needs_review,
 		"copied_from": doc.copied_from,
 		"previous_version": doc.previous_version,
+		"doctor_request": doc.doctor_request,
+		"ai_log": doc.ai_log,
+		"relations": relations,
 		"can_edit": bool(frappe.has_permission(DT, "write", doc=doc)) and doc.workflow_state == DRAFT,
 		"sections": [
 			{"key": key, "label": label, "value": None if key == "steps" else doc.get(key)}
 			for key, label in SECTIONS
 		],
-		"steps": [_dump(s, STEP_FIELDS) for s in doc.steps],
-		"resources": [_dump(r, RESOURCE_FIELDS) for r in doc.resources],
+		"steps": [dict(_dump(s, STEP_FIELDS), ai_suggested=s.ai_suggested) for s in doc.steps],
+		"resources": [dict(_dump(r, RESOURCE_FIELDS), ai_suggested=r.ai_suggested) for r in doc.resources],
 		"citations": citations,
 	}
 
@@ -585,8 +615,10 @@ def _ai_access(technical_service, department=None):
 	_require("create", message=_("Bạn không có quyền tạo quy trình"))
 	if not frappe.has_permission("NC Technical Service", "read", doc=technical_service):
 		_deny(_("Bạn không có quyền xem dịch vụ này"))
-	if department and not frappe.has_permission("NC Department", "read", doc=department):
-		_deny(_("Bạn không có quyền với khoa này"))
+	if department:  # phạm vi khoa (FEAT-001): hook has_permission so khoa của bản ghi tạm với khoa của người gọi
+		probe = frappe.get_doc({"doctype": DT, "technical_service": technical_service, "department": department})
+		if not frappe.has_permission(DT, "create", doc=probe):
+			_deny(_("Bạn không có quyền với khoa này"))
 
 
 def _doc_numbers(names):
@@ -832,3 +864,51 @@ def run_ai_draft(draft_job, technical_service, department, doctor_request, extra
 		_job_set(draft_job, status="failed", user=user, error=f"{type(e).__name__}: {e}")
 	finally:
 		frappe.set_user(previous)
+
+
+def _id_list(value):
+	value = frappe.parse_json(value) if isinstance(value, str) else value
+	return list(value or [])
+
+
+@frappe.whitelist()
+def accept_suggestions(procedure, step_ids=None, resource_row_ids=None, all=0):  # noqa: A002
+	"""FR-AI-008: chấp nhận đề xuất AI (bỏ cờ `ai_suggested`). Chấp nhận bước không kéo theo nguồn lực (ASM-024-13)."""
+	doc = _editable(procedure)
+	step_ids, row_ids = _id_list(step_ids), _id_list(resource_row_ids)
+	everything = frappe.utils.cint(all)
+	steps = {s.step_id: s for s in doc.steps}
+	rows = {r.resource_row_id: r for r in doc.resources}
+	missing = [i for i in step_ids if i not in steps] + [i for i in row_ids if i not in rows]
+	if missing:
+		frappe.throw(_("Không thấy: {0}").format(", ".join(missing)))
+	accepted_steps, accepted_rows = [], []
+	for sid, s in steps.items():
+		if s.ai_suggested and (everything or sid in step_ids):
+			s.ai_suggested = 0
+			accepted_steps.append(sid)
+	for rid, r in rows.items():
+		if r.ai_suggested and (everything or rid in row_ids):
+			r.ai_suggested = 0
+			accepted_rows.append(rid)
+	_save(doc)
+	remaining = sum(1 for s in doc.steps if s.ai_suggested) + sum(1 for r in doc.resources if r.ai_suggested)
+	return {"accepted_steps": accepted_steps, "accepted_resources": accepted_rows, "remaining": remaining}
+
+
+@frappe.whitelist()
+def reject_suggestion(procedure, step_id):
+	"""FR-AI-008: bỏ một bước đề xuất cùng nguồn lực và trích dẫn của nó; mã bước không tái dùng (DI-01)."""
+	doc = _editable(procedure)
+	row = _row(doc, "steps", "step_id", step_id, _("bước"))
+	if not row.ai_suggested:
+		frappe.throw(_("Bước {0} không còn là đề xuất; dùng Xóa bước").format(step_id))
+	res = [r for r in doc.resources if r.step_id == step_id]
+	cits = [c for c in doc.citations if c.target_step_id == step_id]
+	for r in res:
+		doc.remove(r)
+	for c in cits:
+		doc.remove(c)
+	doc.remove(row)
+	_save(doc)
+	return {"deleted": step_id, "resources": len(res), "citations": len(cits)}
