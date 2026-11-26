@@ -13,7 +13,8 @@
   "scope_departments",
   "scope_services",
   "status",
-  "progress"
+  "progress",
+  "allocation_warnings"
  ],
  "fields": [
   {
@@ -82,6 +83,12 @@
    "fieldname": "progress",
    "label": "Tiến độ (%)",
    "fieldtype": "Percent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "allocation_warnings",
+   "label": "Cảnh báo phân bổ",
+   "fieldtype": "Small Text",
    "read_only": 1
   }
  ],
