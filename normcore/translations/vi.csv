@@ -143,6 +143,7 @@ NC Procedure Resource,Nguồn lực của bước
 NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
+Needs update,Cần cập nhật
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -163,6 +164,7 @@ Only unresolved,Chỉ chưa xử lý
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
+Open norm grid,Mở lưới định mức
 Original page,Trang gốc
 Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
@@ -180,6 +182,7 @@ Price per norm unit,Đơn giá một đơn vị định mức,NC Item
 Print PDF,In PDF
 Procedure editor,Trình soạn quy trình
 Publish,Ban hành
+Published procedure,Quy trình đã ban hành
 Quality plan,Kế hoạch chất lượng
 Quantity,Số lượng
 Query,Nội dung tìm
@@ -241,6 +244,7 @@ This procedure cannot be edited by you or is already issued.,Bạn không sửa 
 This procedure is awaiting approval and cannot be edited.,"Quy trình đang chờ duyệt, không sửa được."
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This procedure is issued or closed and cannot be edited. Create a new version in the revision function.,"Quy trình đã ban hành, không sửa được. Tạo phiên bản mới ở chức năng Sửa đổi."
+This record is {0} and cannot be edited. Create a new version in the norm grid.,"Bản ghi {0}, không sửa được. Tạo phiên bản mới trên lưới định mức."
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
 Total,Tổng
 Total share differs from 100%,Tổng tỷ trọng khác 100%
