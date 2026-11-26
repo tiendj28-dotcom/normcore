@@ -1,0 +1,37 @@
+1. Sources,1. Nguồn
+2. Request,2. Yêu cầu
+3. Drafting,3. Soạn
+AI is drafting… This can take a few minutes.,AI đang soạn… có thể mất vài phút.
+Accept,Chấp nhận
+Accept all,Chấp nhận tất cả
+Accept all {0} AI suggestions?,Chấp nhận cả {0} đề xuất AI?
+Additional sections (optional),Mục bổ sung (không bắt buộc)
+Back,Quay lại
+Close,Đóng
+Current hospital procedure: {0} (v{1}) will also be sent,Quy trình hiện hành của bệnh viện: {0} (v{1}) cũng được gửi
+"Department conditions, equipment, drugs, supplies, technique variants. Where you differ from the guideline, say so here; it becomes the deviation reason.","Điều kiện của khoa, thiết bị, thuốc, vật tư, biến thể kỹ thuật. Chỗ nào khác hướng dẫn, ghi rõ ở đây; đó sẽ là lý do khác biệt."
+Document,Văn bản
+Draft,Soạn dự thảo
+Draft manually,Soạn thủ công
+Draft procedure,Soạn quy trình
+Draft procedure with AI — {0},Soạn dự thảo quy trình bằng AI — {0}
+Draft {0} created.,Đã tạo dự thảo {0}.
+Drafted by AI. Section text was written by AI; check it before submitting.,Do AI soạn. Văn bản các phần do AI viết; kiểm trước khi gửi duyệt.
+I understand and want to continue,Tôi hiểu và muốn soạn tiếp
+Loading sources…,Đang tải nguồn…
+Next,Tiếp
+Next suggestion,Đề xuất kế tiếp
+Open existing procedure,Mở quy trình đang có
+Open source,Mở mục nguồn
+Remove suggested resource {0}?,Bỏ nguồn lực đề xuất {0}?
+Remove suggested step {0} with its resources and citations?,Bỏ bước đề xuất {0} cùng nguồn lực và trích dẫn của bước?
+Remove {0},Bỏ {0}
+Request,Yêu cầu của người soạn
+Section no.,Số mục
+The drafting job can no longer be tracked. Check the procedure list.,Không còn theo dõi được tác vụ soạn. Kiểm tra danh sách quy trình.
+This service already has a {0} procedure for this department: {1},Dịch vụ đã có quy trình {0} của khoa này: {1}
+This service has no confirmed guideline section in effect. The draft will be marked 'Unsupported' wherever there is no source.,"Dịch vụ chưa có mục hướng dẫn nào đã xác nhận và còn hiệu lực. Dự thảo sẽ mang nhãn ""Chưa có căn cứ"" ở mọi phần không có nguồn."
+Up to 20 sections,Tối đa 20 mục
+{0} AI suggestion(s) not yet handled. Accept or remove them before submitting.,Còn {0} đề xuất AI chưa xử lý. Chấp nhận hoặc bỏ trước khi gửi duyệt.
+{0} citation(s) removed for not matching the source.,{0} trích dẫn bị loại vì không khớp nguyên văn nguồn.
+{0} confirmed guideline sections in effect,"{0} mục hướng dẫn đã xác nhận, còn hiệu lực"
