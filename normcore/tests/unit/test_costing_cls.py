@@ -356,3 +356,30 @@ class TestCostService(unittest.TestCase):
 
 if __name__ == "__main__":
 	unittest.main()
+
+
+class TestDriverMinutes(unittest.TestCase):
+	"""FEAT-036 x FEAT-017: tiêu chí phút của phân bổ cho dịch vụ cận lâm sàng (ASM-036-28)."""
+
+	def test_phut_binh_quan_gia_quyen_theo_ty_trong(self):
+		from normcore.costing import allocation
+
+		inp = f.service(f.service_input())
+		drivers = allocation.service_drivers(inp, "K01")
+		# L06 nhân công 1,5 phút, L07 thiết bị 1 phút ở cả hai hệ thống; tỷ trọng 75/25 → bình quân = chính số đó
+		self.assertEqual((drivers.labor_min_per_case, drivers.machine_min_per_case), (D("1.5"), D("1")))
+
+	def test_loi_du_lieu_khong_co_phut(self):
+		c = f.service_input(systems=(f.system("GLU-A", norm_set=None),))
+		self.assertEqual(cls.driver_minutes(c), (D(0), D(0)))
+
+	def test_hai_he_thong_khac_phut_lay_binh_quan(self):
+		a = f.system("GLU-A")
+		b = f.system("GLU-B")
+		lines = tuple(
+			replace(x, norm=replace(x.norm, hospital_qty=D("3"))) if x.norm.component == "LABOR" else x
+			for x in b.lines
+		)
+		c = f.service_input(systems=(a, replace(b, lines=lines)))
+		labor, _machine = cls.driver_minutes(c)
+		self.assertEqual(labor, D("0.75") * D("1.5") + D("0.25") * D("3"))

@@ -1,0 +1,40 @@
+Accounting amount (incl. level 1),Số kế toán (gồm cấp 1)
+Accounting amount is 0,Số kế toán bằng 0
+Allocation warnings,Cảnh báo phân bổ
+Cannot lock,Chưa khóa được
+Costed amount,Số đã tính
+Costing run,Lần tính giá
+Edit explanation,Sửa giải trình
+Enter the explanation.,Nhập nội dung giải trình
+Every line over tolerance has an explanation.,Mọi dòng vượt ngưỡng đã có giải trình.
+Existing reconciliation lines and explanations will be replaced.,Dòng đối soát và giải trình hiện có sẽ bị thay.
+Explain,Giải trình
+Explanation,Giải trình
+Explanation saved.,Đã lưu giải trình
+Explanation: {0},Giải trình: {0}
+Lock costing run,Khóa lần tính
+Lock costing run {0}? It cannot be recalculated and explanations cannot be edited afterwards.,Khóa lần tính {0}? Sau khi khóa không tính lại và không sửa giải trình được.
+Locked.,Đã khóa
+Note,Ghi chú
+Only lines over tolerance,Chỉ dòng vượt ngưỡng
+Open costing run,Mở lần tính
+Open reconciliation table,Mở bảng đối soát
+Over tolerance · explained,Vượt ngưỡng · đã giải trình
+Over tolerance · needs explanation,Vượt ngưỡng · cần giải trình
+Partial scope: the remainder of a cost center is shared only among the services in this costing run.,Phạm vi một phần: phần còn lại của trung tâm chỉ chia cho dịch vụ trong phạm vi lần tính.
+Reconciliation lines,Dòng đối soát
+"Reconciliation note: costed amounts of labor, depreciation and utility below the accounting amount are normal (the indirect part is allocated at level 2). Management is not reconciled.","Nhân công, khấu hao, tiện ích: số đã tính thấp hơn số kế toán là bình thường (phần gián tiếp được phân bổ cấp 2). Loại quản lý không đối soát."
+Reconciliation table,Bảng đối soát
+Reconciliation tolerance,Ngưỡng đối soát
+Remainder,Phần còn lại
+Select a costing run to see the reconciliation table.,Chọn một lần tính giá để xem bảng đối soát.
+State,Tình trạng
+This costing run has no reconciliation results yet. Run costing first.,Lần tính chưa có kết quả đối soát. Chạy tính giá trước.
+This price category has no depreciation: depreciation is neither allocated nor reconciled.,Loại giá không kết cấu khấu hao: không phân bổ và không đối soát khấu hao.
+Variance,Chênh lệch
+Variance (%),Chênh lệch (%)
+Volume 0,Sản lượng 0
+Watch,Theo dõi
+{0} lines over tolerance have no explanation. The costing run cannot be locked yet.,Còn {0} dòng vượt ngưỡng chưa có giải trình. Lần tính chưa khóa được.
+{0} reconciliation lines are over tolerance and have no explanation.,Còn {0} dòng đối soát vượt ngưỡng chưa có giải trình.
+{0} reconciliation lines need an explanation,{0} dòng đối soát cần giải trình

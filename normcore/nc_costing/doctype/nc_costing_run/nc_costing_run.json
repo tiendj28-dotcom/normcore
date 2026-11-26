@@ -16,7 +16,8 @@
   "scope_services",
   "status",
   "progress",
-  "run_warnings"
+  "run_warnings",
+  "allocation_warnings"
  ],
  "fields": [
   {
@@ -111,6 +112,12 @@
    "fieldtype": "Small Text",
    "read_only": 1,
    "no_copy": 1
+  },
+  {
+   "fieldname": "allocation_warnings",
+   "label": "Cảnh báo phân bổ",
+   "fieldtype": "Small Text",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,

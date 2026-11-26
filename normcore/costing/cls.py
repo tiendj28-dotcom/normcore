@@ -849,3 +849,28 @@ def group_by_system(lines) -> list:
 		if rows:
 			out.append({"test_system": code, "groups": engine.group_explanation(rows)})
 	return out
+
+
+def driver_minutes(c: ClsServiceInput):
+	"""Phút nhân công và phút máy trên một ca của dịch vụ cận lâm sàng, cho tiêu chí LABOR_MIN, MACHINE_MIN của phân bổ
+	(FEAT-017; ASM-036-28): bình quân gia quyền theo tỷ trọng các hệ thống (BR-CLS-013) của phút theo dòng định mức
+	(như `allocation.service_drivers`). Dịch vụ không tính được tỷ trọng (lỗi dữ liệu) trả (0, 0)."""
+	systems = sorted(c.systems, key=lambda s: s.code)
+	if not systems or any(not s.norm_set for s in systems):
+		return _ZERO, _ZERO
+	try:
+		share, _source = shares(systems)
+	except (ValueError, TypeError):
+		return _ZERO, _ZERO
+	labor = machine = _ZERO
+	for s in systems:
+		for ln in s.lines:
+			n = ln.norm
+			if n.excluded:
+				continue
+			q = engine.applied_qty(n.hospital_qty, n.authority_qty)
+			if n.component == "LABOR":
+				labor += share[s.code] * q * n.headcount
+			elif n.component == "EQUIPMENT":
+				machine += share[s.code] * q
+	return labor, machine

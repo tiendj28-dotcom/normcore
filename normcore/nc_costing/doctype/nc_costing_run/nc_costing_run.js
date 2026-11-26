@@ -1,6 +1,8 @@
 // SCR-DSK-022 (FEAT-015): form lần tính giá (UC-012).
 const API = "normcore.api.costing.";
 const PROGRESS_EVENT = "normcore_costing_progress";
+const LOCK_METHOD = "normcore.api.costing.lock_run"; // FEAT-017: khoa sau khi đối soát
+const RECON_REPORT = "NC Reconciliation";
 const RESULT_COLOR = { "Thành công": "green", "Cảnh báo": "yellow", "Lỗi": "red" };
 
 function esc(v) {
@@ -104,6 +106,55 @@ function render_status_banner(frm) {
 	}
 }
 
+function render_allocation_warnings(frm) {
+	frm.toggle_display("allocation_warnings", false);
+	const lines = (frm.doc.allocation_warnings || "").split("\n").filter((x) => x.trim());
+	if (!lines.length || !["Đã tính", "Đã khóa"].includes(frm.doc.status)) return;
+	const items = lines.map((x) => `<li>${esc(x)}</li>`).join("");
+	frm.dashboard.add_section(
+		`<div class="alert alert-warning" role="alert"><b>${__("Allocation warnings")}</b><ul>${items}</ul></div>`,
+		__("Allocation warnings")
+	);
+}
+
+function open_reconciliation(frm) {
+	frappe.route_options = { costing_run: frm.doc.name };
+	frappe.set_route("query-report", RECON_REPORT);
+}
+
+function lock_run(frm) {
+	frappe.call({
+		method: API + "get_run_results",
+		args: { run: frm.doc.name },
+		callback(r) {
+			const n = (r.message || {}).recon_blocked || 0;
+			if (n) {
+				frappe.msgprint({
+					title: __("Cannot lock"),
+					indicator: "red",
+					message: `${__("{0} reconciliation lines are over tolerance and have no explanation.", [n])} <a href="#" class="open-recon">${__("Reconciliation table")}</a>`,
+				});
+				$(".msgprint .open-recon").on("click", (e) => {
+					e.preventDefault();
+					open_reconciliation(frm);
+				});
+				return;
+			}
+			frappe.confirm(__("Lock costing run {0}? It cannot be recalculated and explanations cannot be edited afterwards.", [frm.doc.name]), () => {
+				frappe.call({
+					method: LOCK_METHOD,
+					args: { run: frm.doc.name },
+					freeze: true,
+					callback() {
+						frappe.show_alert({ message: __("Locked."), indicator: "green" });
+						frm.reload_doc();
+					},
+				});
+			});
+		},
+	});
+}
+
 function render_results(frm) {
 	if (!["Đã tính", "Tính lỗi", "Đã khóa"].includes(frm.doc.status)) return;
 	const section = frm.dashboard.add_section(`<div class="text-muted">${__("Loading results…")}</div>`, __("Costing results"));
@@ -122,7 +173,13 @@ function render_results(frm) {
 				.filter((k) => data.counts[k])
 				.map((k) => `<span class="indicator-pill ${RESULT_COLOR[k]}">${esc(k)}: ${data.counts[k]}</span>`)
 				.join(" ");
-			const warn = rows.some((x) => !x.has_allocation && x.calc_status !== "Lỗi")
+			const blocked = data.recon_blocked || 0;
+			const blocked_pill = blocked
+				? ` <span class="indicator-pill red">${__("{0} reconciliation lines need an explanation", [blocked])}</span>`
+				: "";
+			const btn = frm.custom_buttons && frm.custom_buttons[__("Reconciliation table")];
+			if (btn && blocked) btn.text(`${__("Reconciliation table")} (${blocked})`);
+			const warn = !rows.some((x) => x.has_allocation)
 				? `<div class="alert alert-warning" role="alert">${__("No shared allocation yet: the shared cost allocation is added by FEAT-017.")}</div>`
 				: "";
 			const body = rows
@@ -132,7 +189,8 @@ function render_results(frm) {
 					return (
 						`<tr data-name="${esc(x.name)}" tabindex="0" style="cursor:pointer">` +
 						`<td>${esc(x.service)}</td><td>${esc(x.service_name)}${tag}</td><td>${esc(x.department_name || x.department)}</td>` +
-						`<td><span class="indicator-pill ${RESULT_COLOR[x.calc_status] || "gray"}">${esc(x.calc_status)}</span></td>` +
+						`<td><span class="indicator-pill ${RESULT_COLOR[x.calc_status] || "gray"}">${esc(x.calc_status)}</span>` +
+						`${x.has_volume_warning ? ` <span class="indicator-pill yellow">${__("Volume 0")}</span>` : ""}</td>` +
 						`<td title="${esc(msg)}">${esc(msg.length > 80 ? msg.slice(0, 80) + "…" : msg)}</td>` +
 						`<td class="text-right">${money(x.full_cost)}</td><td class="text-right">${money(x.calculated_price)}</td>` +
 						`<td class="text-right"><b>${money(x.rounded_price)}</b></td></tr>`
@@ -141,7 +199,7 @@ function render_results(frm) {
 				.join("");
 			section.html(
 				render_run_warnings(section, data) +
-					`<div>${__("{0} services", [rows.length])} · ${counts}</div>${warn}` +
+				`<div>${__("{0} services", [rows.length])} · ${counts}${blocked_pill}</div>${warn}` +
 					`<div class="table-responsive"><table class="table table-bordered"><thead><tr>` +
 					`<th>${__("Service code")}</th><th>${__("Service")}</th><th>${__("Department")}</th><th>${__("Result")}</th><th>${__("Message")}</th>` +
 					`<th class="text-right">${__("Full cost")}</th><th class="text-right">${__("Calculated price")}</th><th class="text-right">${__("Rounded price")}</th>` +
@@ -185,7 +243,10 @@ function ask_to_run(frm) {
 		callback(r) {
 			const s = r.message || { eligible: [], ineligible: [] };
 			const n = s.eligible.length;
-			const rerun = frm.doc.status === "Đã tính" ? ` ${__("The old results of this run will be replaced.")}` : "";
+			const rerun =
+				frm.doc.status === "Đã tính"
+					? ` ${__("The old results of this run will be replaced.")} ${__("Existing reconciliation lines and explanations will be replaced.")}`
+					: "";
 			if (!s.ineligible.length) {
 				if (!n) {
 					frappe.msgprint(__("No service is eligible to be costed."));
@@ -248,14 +309,19 @@ frappe.ui.form.on("NC Costing Run", {
 					return;
 				}
 				ask_to_run(frm);
-			}).addClass("btn-primary");
+			}).addClass(frm.doc.status === "Đã tính" ? "btn-default" : "btn-primary");
 		}
 
-		if (frm.doc.status === "Đã tính") {
+		if (["Đã tính", "Đã khóa"].includes(frm.doc.status)) {
 			frm.add_custom_button(__("View costing results"), () => {
 				frappe.set_route("List", "NC Service Cost", { costing_run: frm.doc.name });
 			});
+			frm.add_custom_button(__("Reconciliation table"), () => open_reconciliation(frm));
 		}
+		if (frm.doc.status === "Đã tính" && can_write(frm)) {
+			frm.add_custom_button(__("Lock"), () => lock_run(frm)).addClass("btn-primary");
+		}
+		render_allocation_warnings(frm);
 		render_results(frm);
 	},
 });

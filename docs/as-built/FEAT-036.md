@@ -1,7 +1,7 @@
 # As-Built FEAT-036 — Tính giá cận lâm sàng
 
 Issue NORM-42. FR: FR-COST-017..025, FR-COST-031, FR-COST-032, FR-CLS-003, FR-CLS-004, FR-QC-004, FR-QC-006, FR-CMP-002..004 (và phần cảnh báo trên lần tính của FR-CMP-006), NFR-REL-003, NFR-CPL-003. UC-012. Màn hình SCR-DSK-022, SCR-DSK-023. TC: TC-CLS-01..15, 37, 38, 51.
-Giới hạn: (1) giao diện chưa thao tác bằng trình duyệt (chỉ có test tĩnh `test_costing_cls_ui.py`); (2) TC-CLS-38 chụp ảnh ngay sau khi tính thay cho bước khóa (khóa và lưu `snapshot_file`, `snapshot_hash` là FEAT-018, ASM-036-21); (3) TC-CLS-51 kiểm `ServiceResult.volume` và điểm cắm `allocate` bằng test double; phân bổ cấp 2 và đối soát thật là FEAT-017 (ASM-036-20), kiểm lại khi FEAT-017 xong. Người nghiệm thu: QA (Multica).
+Giới hạn: (1) giao diện chưa thao tác bằng trình duyệt (chỉ có test tĩnh `test_costing_cls_ui.py`); (2) TC-CLS-38 chụp ảnh ngay sau khi tính thay cho bước khóa (khóa và lưu `snapshot_file`, `snapshot_hash` là FEAT-018, ASM-036-21); (3) TC-CLS-51 đã kiểm với phân bổ cấp 2 thật của FEAT-017 sau khi gộp develop (`test_TC_CLS_51_phan_bo_cap_2_that`, ASM-036-20, ASM-036-28). Người nghiệm thu: QA (Multica).
 
 ## Đã làm
 - `normcore/costing/cls.py` (thuần, không phụ thuộc `frappe`): k (BR-CLS-001), kiểm định theo hồ sơ (BR-CLS-011, hai cách phân bổ), chi phí thiết bị theo hình thức có máy và tiêu chí chia (BR-CLS-009, BR-COST-004), linh kiện, điện, năm cấp phát sinh của dòng định mức, nội kiểm, chuẩn máy, ngoại kiểm, bình quân gia quyền (BR-CLS-013), cảnh báo sản lượng thấp (BR-CLS-016), kiểm dữ liệu từng dịch vụ (FR-COST-023). Mọi con số khớp `docs/golden/golden_cls.py` (dòng, k, dịch vụ GLU 42.278,67, biến thể V1–V5, V8).

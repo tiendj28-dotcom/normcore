@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-11-26 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "costing_run",
+  "cost_center",
+  "cost_category",
+  "costed_amount",
+  "accounting_amount",
+  "variance",
+  "variance_pct",
+  "over_tolerance",
+  "explanation"
+ ],
+ "fields": [
+  {
+   "fieldname": "costing_run",
+   "label": "Lần tính giá",
+   "fieldtype": "Link",
+   "options": "NC Costing Run",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "label": "Trung tâm chi phí",
+   "fieldtype": "Link",
+   "options": "NC Cost Center",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_category",
+   "label": "Loại chi phí",
+   "fieldtype": "Select",
+   "options": "LABOR\nDRUG_SUPPLY\nDEPRECIATION\nUTILITY",
+   "reqd": 1,
+   "in_list_view": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "costed_amount",
+   "label": "Số đã tính",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_amount",
+   "label": "Số kế toán",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "variance",
+   "label": "Chênh lệch",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "variance_pct",
+   "label": "Chênh lệch (%)",
+   "fieldtype": "Float",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "over_tolerance",
+   "label": "Vượt ngưỡng",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "explanation",
+   "label": "Giải trình",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC Reconciliation Line",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "cost_center",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "cost_category",
+ "track_changes": 1
+}

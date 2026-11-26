@@ -214,3 +214,42 @@ class TestNCCostingCls(FrappeTestCase):
 		# kịch bản khác không có sản lượng → GLU Lỗi
 		run2 = self._run(volume_scenario="Kế hoạch")
 		self.assertEqual(self._cost(run2).calc_status, "Lỗi")
+
+	def test_TC_CLS_51_phan_bo_cap_2_that(self):
+		"""FR-COST-024 với phân bổ cấp 2 thật của FEAT-017 (ASM-036-20): tiêu chí VOLUME của GLU = 16.000, không phải 15.800."""
+		from normcore.tests import costing_fixtures as cf
+
+		imp = cf.make_golden_allocation(self.world.other_dept)
+		frappe.db.set_value("NC Department", "XN", "cost_center", "K01")
+		run = self._run(accounting_import=imp)
+		self.assertEqual(run.status, "Đã tính")
+		sc = self._cost(run)
+		self.assertEqual(sc.calc_status, "Thành công", sc.calc_message)
+		self.assertEqual(sc.volume, 16000)
+		self.assertEqual(
+			frappe.db.get_value("NC Service Volume", {"technical_service": "GLU"}, "volume"), 15800
+		)
+		alloc = [ln for ln in sc.lines if ln.line_type == "Phân bổ"]
+		self.assertTrue(alloc)
+		by_rule = {ln.allocation_rule: ln for ln in alloc}
+		volume_rules = [
+			r for r in by_rule if frappe.db.get_value("NC Allocation Rule", r, "driver") == "VOLUME"
+		]
+		self.assertTrue(volume_rules)
+		for r in volume_rules:
+			self.assertEqual(by_rule[r].driver_value, 16000 * 1.0, r)
+		# dịch vụ GLU đã được phân bổ, có giá thành lớn hơn chi phí trực tiếp
+		self.assertGreater(
+			sc.full_cost,
+			sum(
+				sc.get(f)
+				for f in (
+					"direct_labor",
+					"direct_drug",
+					"direct_supply",
+					"direct_equipment",
+					"direct_infra",
+					"direct_utility",
+				)
+			),
+		)

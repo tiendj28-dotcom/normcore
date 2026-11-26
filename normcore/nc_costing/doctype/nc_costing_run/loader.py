@@ -9,6 +9,7 @@ import frappe
 from frappe.utils import cint, flt, getdate
 
 from normcore.costing import (
+	allocation,
 	cls,
 	compliance,
 	engine,
@@ -20,6 +21,7 @@ from normcore.costing import (
 	snapshot,
 	test_systems,
 )
+from normcore.nc_costing.doctype.nc_cost_center_driver.nc_cost_center_driver import get_driver_values
 
 LOCKED_NORM = "Đã khóa"
 VOLUME_SCENARIO = "Thực tế 12 tháng"  # mặc định; lần tính dùng `run.volume_scenario` (FR-COST-017)
@@ -696,3 +698,43 @@ def capture_snapshot(run, eligible) -> dict:
 	}
 	sources = frappe.parse_json(frappe.as_json(sources))
 	return snapshot.build(inputs, ctx.pricing, sources)
+
+
+class AllocCtx:
+	"""Dữ liệu phân bổ, đối soát của một lần tính (FEAT-017); đọc một lần."""
+
+
+def allocation_context(run, ctx) -> AllocCtx:
+	"""technical-design 4.1. `drivers` điền dần khi nạp từng dịch vụ, `outcome` do `allocate_pools` đặt."""
+	a = AllocCtx()
+	totals = frappe.get_all(
+		"NC Accounting Import Total",
+		{"parent": run.accounting_import, "parenttype": "NC Accounting Import"},
+		["cost_center", "cost_category", "amount"],
+	)
+	accounting = {(r.cost_center, r.cost_category): Decimal(str(r.amount or 0)) for r in totals}
+	center_types = {
+		r.name: r.center_type for r in frappe.get_all("NC Cost Center", fields=["name", "center_type"])
+	}
+	a.dept_center = {
+		r.name: r.cost_center for r in frappe.get_all("NC Department", fields=["name", "cost_center"])
+	}
+	center_drivers: dict = {}
+	for drv in allocation.CENTER_DRIVERS:
+		for center, value in get_driver_values(run.fiscal_year, drv).items():
+			center_drivers.setdefault(center, {})[drv] = value
+	rules = tuple(
+		allocation.Rule(r.name, r.level, r.cost_category, r.driver, r.cost_center or None)
+		for r in frappe.get_all(
+			"NC Allocation Rule", fields=["name", "level", "cost_category", "driver", "cost_center"]
+		)
+	)
+	a.accounting = accounting
+	a.include_depreciation = ctx.pricing.include_depreciation
+	a.input = allocation.AllocationInput(
+		accounting, center_types, center_drivers, rules, a.include_depreciation
+	)
+	a.tolerance = flt(ctx.params.reconciliation_tolerance)
+	a.drivers = {}
+	a.outcome = None
+	return a

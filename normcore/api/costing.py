@@ -6,9 +6,17 @@ from decimal import Decimal
 import frappe
 from frappe import _
 
-from normcore.costing import cls, engine
+from normcore.costing import allocation, cls, engine, reconcile
 
-RUN, COST = "NC Costing Run", "NC Service Cost"
+RUN, COST, RECON = "NC Costing Run", "NC Service Cost", "NC Reconciliation Line"
+CALCULATED = "Đã tính"
+CATEGORY_LABEL = {
+	"LABOR": "Nhân công",
+	"DRUG_SUPPLY": "Thuốc, vật tư",
+	"DEPRECIATION": "Khấu hao",
+	"UTILITY": "Điện, nước",
+	"MANAGEMENT": "Quản lý chung",
+}
 NOTE_NO_DEPRECIATION = "Khấu hao bị loại (loại giá không kết cấu khấu hao)"
 LEVEL_LABEL = {
 	"RESULT": "Theo kết quả",
@@ -150,16 +158,28 @@ def get_run_results(run):
 				)
 			)
 		)
+		r["has_volume_warning"] = allocation.VOLUME_WARNING in (r.get("calc_message") or "")
 		counts[r["calc_status"]] = counts.get(r["calc_status"], 0) + 1
 	return {
 		"results": rows,
 		"counts": counts,
+		"recon_blocked": len(_blockers(run)),
 		"run": {
 			"volume_scenario": run_doc.get("volume_scenario"),
 			"compliance_allocation_mode": run_doc.get("compliance_allocation_mode"),
 			"run_warnings": [x for x in (run_doc.get("run_warnings") or "").split("\n") if x],
 		},
 	}
+
+
+def _blockers(run) -> list[str]:
+	"""Dòng đối soát vượt ngưỡng chưa có giải trình (FR-COST-009)."""
+	if not frappe.has_permission(RECON, "read"):
+		return []
+	lines = frappe.get_all(
+		RECON, {"costing_run": run}, ["cost_center", "cost_category", "over_tolerance", "explanation"]
+	)
+	return reconcile.lock_blockers(lines)
 
 
 def _cost_line(ln) -> engine.CostLine:
@@ -327,7 +347,7 @@ def get_explanation(service_cost):
 					"share_pct": round(float(amount) / float(sc.full_cost) * 100, 2) if sc.full_cost else 0,
 				}
 			)
-	allocation = [_line_dict(c) for c in lines if c.line_type == engine.LINE_ALLOC]
+	allocation_lines = [_line_dict(c) for c in lines if c.line_type == engine.LINE_ALLOC]
 	notes = []
 	for marker, text in (
 		(cls.EXPIRED_ZERO_NOTE, "Khấu hao thiết bị hết thời gian sử dụng: ZERO"),
@@ -337,8 +357,10 @@ def get_explanation(service_cost):
 			notes.append(_(text))
 	if not include_depr:
 		notes.append(_(NOTE_NO_DEPRECIATION))
-	if not allocation and sc.calc_status != "Lỗi":
+	if not allocation_lines and sc.calc_status != "Lỗi":
 		notes.append(_(NOTE_NO_ALLOCATION))
+	if allocation.VOLUME_WARNING in (sc.calc_message or ""):
+		notes.append(_(allocation.VOLUME_WARNING))
 	return {
 		"header": {
 			"service": sc.technical_service,
@@ -358,12 +380,98 @@ def get_explanation(service_cost):
 			"obligation": sc.obligation,
 			"calculated_price": sc.calculated_price,
 			"rounded_price": sc.rounded_price,
-			"has_allocation": bool(allocation),
+			"has_allocation": bool(allocation_lines),
 			"is_paraclinical": bool(sc.is_paraclinical),
 		},
 		"structure": structure,
 		"direct_groups": groups,
-		"allocation_lines": allocation,
+		"allocation_lines": allocation_lines,
 		"notes": notes,
 		"paraclinical": paraclinical,
 	}
+
+
+def _recon_view(row) -> dict:
+	costed, acc = row.costed_amount or 0, row.accounting_amount or 0
+	return {
+		"name": row.name,
+		"cost_center": row.cost_center,
+		"cost_category": row.cost_category,
+		"category_label": CATEGORY_LABEL.get(row.cost_category, row.cost_category),
+		"costed_amount": costed,
+		"accounting_amount": acc,
+		"variance": row.variance,
+		"variance_pct": row.variance_pct if acc else None,
+		"remainder": max(acc - costed, 0),
+		"over_tolerance": row.over_tolerance,
+		"explanation": row.explanation,
+		"needs_explanation": bool(row.over_tolerance and not (row.explanation or "").strip()),
+	}
+
+
+@frappe.whitelist()
+def get_reconciliation(run):
+	"""FR-COST-008, 009 (SCR-DSK-024): bảng đối soát của một lần tính."""
+	doc = _run(run, "read")
+	frappe.has_permission(RECON, "read", throw=True)
+	rows = frappe.get_all(
+		RECON,
+		{"costing_run": run},
+		[
+			"name",
+			"cost_center",
+			"cost_category",
+			"costed_amount",
+			"accounting_amount",
+			"variance",
+			"variance_pct",
+			"over_tolerance",
+			"explanation",
+		],
+	)
+	order = {c: i for i, c in enumerate(allocation.CATEGORIES)}
+	rows.sort(key=lambda r: (r.cost_center, order.get(r.cost_category, len(order))))
+	centers = _names("NC Cost Center", "cost_center_name", {r.cost_center for r in rows})
+	lines = []
+	for r in rows:
+		v = _recon_view(r)
+		v["cost_center_name"] = centers.get(r.cost_center)
+		lines.append(v)
+	blocked = sum(1 for v in lines if v["needs_explanation"])
+	include_depr = bool(frappe.db.get_value("NC Price Category", doc.price_category, "include_depreciation"))
+	tolerance = frappe.db.get_value("NC Costing Parameter Set", doc.parameter_set, "reconciliation_tolerance")
+	calculated = doc.status == CALCULATED
+	return {
+		"run": doc.name,
+		"status": doc.status,
+		"tolerance": tolerance,
+		"include_depreciation": include_depr,
+		"partial_scope": bool(doc.scope_departments or doc.scope_services),
+		"warnings": [w for w in (doc.allocation_warnings or "").split("\n") if w],
+		"lines": lines,
+		"blocked": blocked,
+		"can_explain": calculated and bool(frappe.has_permission(RECON, "write")),
+		"can_lock": calculated and bool(frappe.has_permission(RUN, "write", doc=doc)) and blocked == 0,
+	}
+
+
+@frappe.whitelist()
+def save_explanation(line, explanation):
+	"""FR-COST-009: ghi giải trình của một dòng đối soát (controller kiểm trạng thái lần tính)."""
+	doc = frappe.get_doc(RECON, line)
+	frappe.has_permission(RECON, "write", doc=doc, throw=True)
+	doc.explanation = explanation
+	doc.save()
+	return {
+		"name": doc.name,
+		"explanation": doc.explanation,
+		"needs_explanation": bool(doc.over_tolerance and not (doc.explanation or "").strip()),
+		"blocked": len(_blockers(doc.costing_run)),
+	}
+
+
+@frappe.whitelist()
+def lock_run(run):
+	"""UC-012 bước 8: khóa lần tính giá; lỗi của `lock_costing` trả nguyên văn."""
+	doc = _run(run, "write")
+	return {"status": doc.lock_costing()}
