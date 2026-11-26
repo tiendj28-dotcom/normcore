@@ -124,6 +124,8 @@ def get_run_results(run):
 	depts = _names("NC Department", "department_name", {r["department"] for r in rows})
 	counts: dict = {}
 	systems: dict = {}
+	recon = _recon_lines(run) if frappe.has_permission(RECON, "read") else []
+	blockers = reconcile.lock_blockers(recon)
 	if rows:
 		for t in frappe.get_all(
 			"NC Test System Cost",
@@ -163,7 +165,12 @@ def get_run_results(run):
 	return {
 		"results": rows,
 		"counts": counts,
-		"recon_blocked": len(_blockers(run)),
+		"recon_blocked": len(blockers),
+		"physical_unreconciled": sum(
+			1
+			for r in recon
+			if _kind(r) == reconcile.MATERIAL and not r.item and r.recon_status == reconcile.UNRECONCILED
+		),
 		"snapshot_hash": run_doc.get("snapshot_hash"),
 		"can_duplicate": bool(frappe.has_permission(RUN, "create")),
 		"can_verify": run_doc.status == LOCKED and bool(run_doc.get("snapshot_file")),
@@ -179,10 +186,7 @@ def _blockers(run) -> list[str]:
 	"""Dòng đối soát vượt ngưỡng chưa có giải trình (FR-COST-009)."""
 	if not frappe.has_permission(RECON, "read"):
 		return []
-	lines = frappe.get_all(
-		RECON, {"costing_run": run}, ["cost_center", "cost_category", "over_tolerance", "explanation"]
-	)
-	return reconcile.lock_blockers(lines)
+	return reconcile.lock_blockers(_recon_lines(run))
 
 
 def _cost_line(ln) -> engine.CostLine:
@@ -408,8 +412,36 @@ def _recon_view(row) -> dict:
 		"remainder": max(acc - costed, 0),
 		"over_tolerance": row.over_tolerance,
 		"explanation": row.explanation,
-		"needs_explanation": bool(row.over_tolerance and not (row.explanation or "").strip()),
+		"needs_explanation": reconcile.needs_explanation(row),
 	}
+
+
+RECON_FIELDS = [
+	"name",
+	"cost_center",
+	"cost_category",
+	"costed_amount",
+	"accounting_amount",
+	"variance",
+	"variance_pct",
+	"over_tolerance",
+	"explanation",
+	"recon_type",
+	"recon_status",
+	"department",
+	"item",
+	"technical_service",
+	"calculated_qty",
+	"actual_qty",
+]
+
+
+def _kind(row) -> str:
+	return row.get("recon_type") or reconcile.FINANCIAL
+
+
+def _recon_lines(run):
+	return frappe.get_all(RECON, {"costing_run": run}, RECON_FIELDS)
 
 
 @frappe.whitelist()
@@ -417,21 +449,8 @@ def get_reconciliation(run):
 	"""FR-COST-008, 009 (SCR-DSK-024): bảng đối soát của một lần tính."""
 	doc = _run(run, "read")
 	frappe.has_permission(RECON, "read", throw=True)
-	rows = frappe.get_all(
-		RECON,
-		{"costing_run": run},
-		[
-			"name",
-			"cost_center",
-			"cost_category",
-			"costed_amount",
-			"accounting_amount",
-			"variance",
-			"variance_pct",
-			"over_tolerance",
-			"explanation",
-		],
-	)
+	all_rows = _recon_lines(run)
+	rows = [r for r in all_rows if _kind(r) == reconcile.FINANCIAL]
 	order = {c: i for i, c in enumerate(allocation.CATEGORIES)}
 	rows.sort(key=lambda r: (r.cost_center, order.get(r.cost_category, len(order))))
 	centers = _names("NC Cost Center", "cost_center_name", {r.cost_center for r in rows})
@@ -440,7 +459,14 @@ def get_reconciliation(run):
 		v = _recon_view(r)
 		v["cost_center_name"] = centers.get(r.cost_center)
 		lines.append(v)
-	blocked = sum(1 for v in lines if v["needs_explanation"])
+	blocked = sum(1 for r in all_rows if reconcile.needs_explanation(r))
+	material = [r for r in all_rows if _kind(r) == reconcile.MATERIAL]
+	physical = {
+		"available": _physical_available(doc),
+		"material_blocked": sum(1 for r in material if reconcile.needs_explanation(r)),
+		"unreconciled": sum(1 for r in material if r.recon_status == reconcile.UNRECONCILED),
+		"volume_warnings": sum(1 for r in all_rows if _kind(r) == reconcile.VOLUME and r.over_tolerance),
+	}
 	include_depr = bool(frappe.db.get_value("NC Price Category", doc.price_category, "include_depreciation"))
 	tolerance = frappe.db.get_value("NC Costing Parameter Set", doc.parameter_set, "reconciliation_tolerance")
 	calculated = doc.status == CALCULATED
@@ -452,6 +478,79 @@ def get_reconciliation(run):
 		"partial_scope": bool(doc.scope_departments or doc.scope_services),
 		"warnings": [w for w in (doc.allocation_warnings or "").split("\n") if w],
 		"lines": lines,
+		"physical": physical,
+		"blocked": blocked,
+		"can_explain": calculated and bool(frappe.has_permission(RECON, "write")),
+		"can_lock": calculated and bool(frappe.has_permission(RUN, "write", doc=doc)) and blocked == 0,
+	}
+
+
+def _physical_available(doc) -> int:
+	"""ASM-037-02: chỉ lập đối soát vật chất, sản lượng khi kịch bản là "Thực tế 12 tháng"."""
+	return int((doc.get("volume_scenario") or "Thực tế 12 tháng") == "Thực tế 12 tháng")
+
+
+@frappe.whitelist()
+def get_physical_reconciliation(run):
+	"""FR-COST-026..029 (SCR-DSK-038): đối soát vật chất theo (khoa, mặt hàng), sản lượng theo (dịch vụ, khoa)."""
+	doc = _run(run, "read")
+	frappe.has_permission(RECON, "read", throw=True)
+	rows = _recon_lines(run)
+	items = _names("NC Item", "item_name", {r.item for r in rows if r.item})
+	norm_uom = _names("NC Item", "norm_uom", {r.item for r in rows if r.item})
+	services = _names("NC Technical Service", "service_name", {r.technical_service for r in rows if r.technical_service})
+	depts = _names("NC Department", "department_name", {r.department for r in rows if r.department})
+
+	def view(r):
+		diff = None
+		# Frappe lưu số trống thành 0: lượng thực tế 0 = thiếu số liệu (xuất kho, sản lượng HIS)
+		if r.recon_status != reconcile.UNRECONCILED and r.actual_qty:
+			diff = (r.actual_qty or 0) - (r.calculated_qty or 0)
+		out = {
+			"name": r.name,
+			"department": r.department,
+			"department_name": depts.get(r.department),
+			"calculated_qty": r.calculated_qty,
+			"actual_qty": r.actual_qty,
+			"diff_qty": diff,
+			"variance_pct": r.variance_pct if diff is not None else None,
+			"over_tolerance": r.over_tolerance,
+			"explanation": r.explanation,
+			"needs_explanation": reconcile.needs_explanation(r),
+		}
+		if _kind(r) == reconcile.MATERIAL:
+			out.update(
+				item=r.item,
+				item_name=items.get(r.item),
+				norm_uom=norm_uom.get(r.item),
+				recon_status=r.recon_status,
+			)
+		else:
+			out.update(technical_service=r.technical_service, service_name=services.get(r.technical_service))
+		return out
+
+	material = sorted(
+		(view(r) for r in rows if _kind(r) == reconcile.MATERIAL),
+		key=lambda v: (v["department"] or "", v["item"] is not None, v["item"] or ""),
+	)
+	volume = sorted(
+		(view(r) for r in rows if _kind(r) == reconcile.VOLUME),
+		key=lambda v: (v["technical_service"] or "", v["department"] or ""),
+	)
+	blocked = sum(1 for r in rows if reconcile.needs_explanation(r))
+	calculated = doc.status == CALCULATED
+	tol = frappe.db.get_value(
+		"NC Costing Parameter Set", doc.parameter_set, ["material_recon_tolerance", "volume_recon_tolerance"], as_dict=True
+	) or {}
+	return {
+		"run": doc.name,
+		"status": doc.status,
+		"scenario": doc.get("volume_scenario"),
+		"available": _physical_available(doc),
+		"material_tolerance": tol.get("material_recon_tolerance") or 5,
+		"volume_tolerance": tol.get("volume_recon_tolerance") or 2,
+		"material": material,
+		"volume": volume,
 		"blocked": blocked,
 		"can_explain": calculated and bool(frappe.has_permission(RECON, "write")),
 		"can_lock": calculated and bool(frappe.has_permission(RUN, "write", doc=doc)) and blocked == 0,
@@ -468,7 +567,7 @@ def save_explanation(line, explanation):
 	return {
 		"name": doc.name,
 		"explanation": doc.explanation,
-		"needs_explanation": bool(doc.over_tolerance and not (doc.explanation or "").strip()),
+		"needs_explanation": reconcile.needs_explanation(doc.as_dict()),
 		"blocked": len(_blockers(doc.costing_run)),
 	}
 
