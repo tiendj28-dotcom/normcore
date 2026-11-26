@@ -36,9 +36,31 @@ frappe.listview_settings["NC Technical Service"] = {
 };
 
 const NC_MAX_FILTER = 2000;
+const NC_ROUTE_PARAMS = ["nc_chain_stage", "nc_department"];
+
+// Lấy nc_chain_stage, nc_department khỏi frappe.route_options và URL trước khi list view dựng truy vấn
+// (Frappe coi chúng là trường lọc của DocType và trả 417); trả về giá trị đã đọc (NORM-57).
+function normcore_take_route_params() {
+	const taken = {};
+	const params = new URLSearchParams(window.location.search);
+	NC_ROUTE_PARAMS.forEach((key) => {
+		const value = (frappe.route_options && frappe.route_options[key]) || params.get(key);
+		if (value) taken[key] = value;
+		if (frappe.route_options) delete frappe.route_options[key];
+		params.delete(key);
+	});
+	const query = params.toString();
+	window.history.replaceState(
+		window.history.state,
+		"",
+		window.location.pathname + (query ? "?" + query : "") + window.location.hash
+	);
+	return taken;
+}
 
 // Bộ lọc "Tình trạng chuỗi" (FR-OUT-010, AMD-004); đọc nc_chain_stage, nc_department trên URL (liên kết từ trang chủ).
 function normcore_chain_filter(listview) {
+	const taken = normcore_take_route_params();
 	const field = listview.page.add_field({
 		fieldname: "nc_chain_stage",
 		fieldtype: "Select",
@@ -48,6 +70,10 @@ function normcore_chain_filter(listview) {
 			apply();
 		},
 	});
+	// nc_chain_stage không phải trường của DocType: không để Frappe đưa nó vào bộ lọc/URL (NORM-57).
+	const standard_filters = listview.filter_area.get_standard_filters.bind(listview.filter_area);
+	listview.filter_area.get_standard_filters = () =>
+		standard_filters().filter((f) => f[1] !== "nc_chain_stage");
 	const dept_field = () => listview.page.fields_dict.department;
 	function apply() {
 		const stage = field.get_value();
@@ -71,9 +97,8 @@ function normcore_chain_filter(listview) {
 		const labels = (data.stages || []).filter((s) => !s.no_permission).map((s) => [s.stage, s.label]);
 		field.df.options = [{ label: "", value: "" }].concat(labels.map((l) => ({ value: l[0], label: l[1] })));
 		field.refresh();
-		const params = new URLSearchParams(window.location.search);
-		if (params.get("nc_department") && dept_field()) dept_field().set_value(params.get("nc_department"));
-		if (params.get("nc_chain_stage")) field.set_value(params.get("nc_chain_stage"));
+		if (taken.nc_department && dept_field()) dept_field().set_value(taken.nc_department);
+		if (taken.nc_chain_stage) field.set_value(taken.nc_chain_stage);
 	});
 }
 

@@ -40,3 +40,8 @@ TC-NOTI-01 (hai test), TC-ADM-03 **một phần** (phần tham số; phần trun
 - Gửi thông báo: `core.notify.notify(users, subject, ref_doctype, ref_name)`.
 - Thêm việc chờ: khai hàm `(user) -> list[dict]` ở hook `normcore_pending_sources`; mỗi phần tử có `doctype, name, title, task, state, department, since (ISO), overdue, route`.
 - FEAT-014 (bấm giờ) đọc số ca tối thiểu qua `core.settings.get("min_time_study_cases")` và thêm `test_TC_ADM_03_ket_qua_bam_gio_3_ca` (trung vị được tính, hết cảnh báo thiếu ca khi đổi 5 → 3, không khởi động lại).
+
+## Bổ sung NORM-57: liên kết lọc tình trạng chuỗi (SCR-DSK-005, FR-OUT-010)
+- Lỗi: liên kết `/app/nc-technical-service?nc_chain_stage=...&nc_department=...` bị Frappe coi là bộ lọc DocType, `reportview.get` trả 417.
+- Sửa ở `nc_technical_service_list.js`: `normcore_take_route_params()` đọc hai tham số, gỡ khỏi `frappe.route_options` và URL (`history.replaceState`) trước khi list view dựng truy vấn; ô chọn mức bị loại khỏi bộ lọc chuẩn của Frappe nên không ghi vào URL. `api/home.py` không đổi.
+- Test: `test_FR_OUT_010_lien_ket_tham_so_khong_loi` (`normcore/tests/test_feat_002.py`, chạy đoạn JS bằng node).
