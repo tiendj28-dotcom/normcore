@@ -12,6 +12,7 @@ Người hiện thực: Dev (Multica). Chưa qua QA.
 
 ## Khác thiết kế
 - AMD-014-01: không thêm nút "Áp kết quả bấm giờ" vào lưới định mức (`NormGrid.vue`) và không sửa `api/norm.py`; áp đi qua report. Nút trên form NC Norm Set chỉ điều hướng.
+- ASM-014-12: `procedure` kiểm bắt buộc ở controller, không `reqd` ở meta (để Desk lưu được phiếu mới). Bảng con `lines` ẩn dưới 1200 px bằng class riêng `nc-ts-lines`, không dùng selector chung.
 - ASM-014-11: thêm `NC Time Study` vào tập `SCOPED` của `test_scope_registry.py` theo Quyết định Lead.
 
 ## Nợ kỹ thuật, ghi chú
@@ -19,4 +20,4 @@ Người hiện thực: Dev (Multica). Chưa qua QA.
 - Không lưu ngoại tuyến, không xóa phiếu (ASM-014-09).
 
 ## ASM
-ASM-014-01..11 (`docs/decisions/assumptions/FEAT-014.md`); AMD-014-01. ASM-014-01 và ASM-014-11 theo Quyết định Lead.
+ASM-014-01..12 (`docs/decisions/assumptions/FEAT-014.md`); AMD-014-01. ASM-014-01, ASM-014-11 và ASM-014-12 theo Quyết định Lead.

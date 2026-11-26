@@ -125,9 +125,14 @@ class TestTimeStudyFormFixes(unittest.TestCase):
 
 	def test_bang_con_lines_an_duoi_1200px(self):
 		js = (DIR / "nc_time_study.js").read_text(encoding="utf-8")
-		self.assertRegex(
-			js, r"@media \(max-width: 1199px\) \{[^}]*\[data-fieldname=\"lines\"\][^}]*display: none"
-		)
+		self.assertRegex(js, r"@media \(max-width: 1199px\) \{[^}]*\.nc-ts-lines[^}]*display: none")
+		self.assertIn('frm.fields_dict.lines.$wrapper.addClass("nc-ts-lines")', js)
+
+	def test_khong_selector_chung_theo_ten_truong_lines(self):
+		# NC Norm Set, NC Service Cost, NC Accounting Import cũng có trường `lines`: style không được lan sang
+		js = (DIR / "nc_time_study.js").read_text(encoding="utf-8")
+		self.assertNotIn('[data-fieldname="lines"]', js)
+		self.assertNotIn("[data-fieldname=lines]", js)
 
 	def test_procedure_khong_reqd_de_luu_phieu_moi(self):
 		import json

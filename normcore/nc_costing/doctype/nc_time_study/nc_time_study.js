@@ -8,7 +8,7 @@ frappe.dom.set_style(`
 .nc-ts-cell { display: flex; flex-direction: column; margin: 0; }
 .nc-ts-input { min-height: 44px; min-width: 88px; max-width: 100%; }
 .nc-ts-panel .btn { min-height: 44px; min-width: 44px; }
-@media (max-width: 1199px) { .form-layout [data-fieldname="lines"] { display: none; } }
+@media (max-width: 1199px) { .nc-ts-lines { display: none; } }
 `);
 
 function nc_ts_render(frm, data) {
@@ -88,6 +88,8 @@ frappe.ui.form.on("NC Time Study", {
 		}));
 	},
 	refresh(frm) {
+		// Chỉ bảng con của form này: không dùng selector chung theo tên trường, vì NC Norm Set, NC Service Cost, NC Accounting Import cũng có `lines`.
+		frm.fields_dict.lines.$wrapper.addClass("nc-ts-lines");
 		const panel = frm.fields_dict.entry_panel.$wrapper.empty();
 		if (frm.is_new()) {
 			const msg = frm.doc.technical_service && frm.doc.department
