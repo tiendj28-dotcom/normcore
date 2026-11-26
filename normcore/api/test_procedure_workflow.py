@@ -5,6 +5,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import access
 from normcore.api import procedure_workflow as wf
+from normcore.nc_library.doctype.nc_legal_document.library_fixtures import make_legal_document
 from normcore.tests.utils import make_base, make_procedure, make_user
 
 DT = "NC Clinical Procedure"
@@ -131,8 +132,9 @@ class TestApplyAction(WorkflowBase):
 
 	def test_TC_PROC_05_khac_biet_thieu_ly_do(self):
 		doc = frappe.get_doc(DT, self.name)
+		legal = make_legal_document("TT/NORM65").name  # NORM-65: legal_document là Link, cần bản ghi thật
 		doc.append(
-			"citations", {"target_section": "Chỉ định", "relation": "Khác biệt", "legal_document": "TT"}
+			"citations", {"target_section": "Chỉ định", "relation": "Khác biệt", "legal_document": legal}
 		)
 		doc.save(ignore_permissions=True)  # lưu nháp vẫn được
 		with self.assertRaises(frappe.ValidationError) as cm:
