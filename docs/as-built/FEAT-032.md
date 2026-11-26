@@ -1,7 +1,7 @@
 # As-Built FEAT-032 — Kế hoạch chất lượng và ngoại kiểm
 
 Issue NORM-35. FR: FR-QC-001..003, FR-QC-005, FR-QC-008 (đủ); FR-QC-007 (một phần); FR-CLS-007, FR-CLS-008 (phần kế hoạch chất lượng). UC-019, SCR-DSK-033, SCR-DSK-034. TC: TC-CLS-24, TC-CLS-25, TC-CLS-26 (một phần).
-Giới hạn: TC-CLS-26 mới kiểm hàm cảnh báo, API và thẻ trên SCR-DSK-032; phần gắn cảnh báo vào bộ định mức và kiểm "vẫn khóa được" làm ở FEAT-034 (ASM-032-05). Giao diện chưa xem bằng trình duyệt (chỉ test quy ước tĩnh và `bench build`).
+Giới hạn: TC-CLS-26 mới kiểm hàm cảnh báo, API và thẻ trên SCR-DSK-032; phần gắn cảnh báo vào bộ định mức và kiểm "vẫn khóa được" làm ở FEAT-034 (ASM-032-05). Giao diện SCR-DSK-033, SCR-DSK-034 đã xem bằng Playwright trên staging (Clinician; ảnh ở `docs/features/FEAT-032/evidence/`); từ chối sai loại và tổng ≠ 100% kiểm bằng test bench, chưa thao tác tay. Người nghiệm thu: QA (Multica), NORM-45.
 
 ## Đã làm
 - DocType mới: NC QC Plan (`KHCL-<hệ thống>`, một kế hoạch mỗi hệ thống — DI-11), NC QC IQC Line, NC QC Calibration Line, NC EQA Program, NC EQA Service. Quyền theo dòng ma trận chung, không ai xóa (ASM-032-01).

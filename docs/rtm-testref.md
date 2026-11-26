@@ -161,6 +161,16 @@
 | FR-LIB-011 | `test_FR_LIB_011_get_source_view_tra_tep_va_trang`, `test_FR_LIB_011_get_source_view_can_quyen_doc`, `test_FR_LIB_011_get_source_view_docx_khong_co_trang` |
 | FR-LIB-012 | `test_FR_LIB_012_sua_van_ban_thuan_luu_ban_truoc` |
 
+# Test ref — FEAT-032 (Dev NORM-35 ghi; QA độc lập NORM-45 kiểm định, accepted)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-QC-001 | `test_TC_CLS_24_ke_hoach_du_truong_luu_duoc`, `test_TC_CLS_24_thieu_truong_bi_tu_choi_den_khi_du`, `test_TC_CLS_24_so_khong_bi_tu_choi` (nc_qc_plan), `test_TC_CLS_24_thieu_truong_dau`, `test_TC_CLS_24_thieu_truong_dong_noi_kiem` (unit/test_qc_plans.py) |
+| FR-QC-002 | `test_TC_CLS_24_thieu_truong_bi_tu_choi_den_khi_du` (nc_qc_plan), `test_TC_CLS_24_thieu_truong_dong_chuan_may` (unit) |
+| FR-QC-003 | `test_TC_CLS_24_chuong_trinh_du_truong_luu_duoc`, `test_TC_CLS_24_thieu_truong_bi_tu_choi` (nc_eqa_program), `test_TC_CLS_24_thieu_truong` (unit) |
+| FR-QC-005 | `test_TC_CLS_25_50_va_40_bi_tu_choi`, `test_TC_CLS_25_60_va_40_luu_duoc`, `test_TC_CLS_25_de_trong_chia_deu` (nc_eqa_program), `test_TC_CLS_25_50_va_40_bi_tu_choi` (unit) |
+| FR-QC-007 | `test_TC_CLS_26_he_thong_hoa_sinh_khong_ke_hoach_noi_kiem_canh_bao`, `test_TC_CLS_26_ke_hoach_khong_dong_noi_kiem_van_canh_bao`, `test_TC_CLS_26_co_noi_kiem_het_canh_bao`, `test_TC_CLS_26_nhom_khac_khong_canh_bao` (api/test_qc_plan.py), `test_TC_CLS_26_*` (unit) — một phần: gắn vào bộ định mức và "vẫn khóa được" ở FEAT-034 |
+| FR-QC-008 | `test_TC_CLS_25_vat_lieu_noi_kiem_sai_loai`, `test_TC_CLS_25_chat_chuan_sai_loai` (nc_qc_plan), `test_TC_CLS_25_vat_lieu_sai_loai`, `test_TC_CLS_25_chat_chuan_sai_loai` (unit) |
 # Test ref — FEAT-023 (Dev NORM-55 ghi; QA kiểm định độc lập, accepted)
 
 | FR | Test thật |
