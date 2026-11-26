@@ -9,3 +9,4 @@
 | T05 | `pytest test_exports_explanation.py test_exports_norm_set_pdf.py`; bench audit test | 11 passed; bench Ran 15 OK | (xem git log) |
 | T06 | bench migrate + run-tests test_export, test_norm_cls, test_costing | 7 OK; 19 OK; 11 OK | (xem git log) |
 | T07 | pytest 7 tệp UI (54 passed); bench build --app normcore | 54 passed; build thoát 0 | (xem git log) |
+| T08 | `python3 docs/tools/build_rtm.py docs`; đo build_bundle 500 dịch vụ | VAN DE: 0; build_bundle 104,3s (PDF giả), 1 PDF thật 0,60s (ước tính ~400s) | (xem git log) |
