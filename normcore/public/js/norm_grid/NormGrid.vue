@@ -26,7 +26,7 @@
 				<div class="nc-ng__actions" role="toolbar" :aria-label="__('Norm set actions')">
 					<button v-if="can('confirm_set')" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="startAction('confirm_set')">{{ __("Confirm professionally") }}</button>
 					<button v-if="can('lock_set')" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="startAction('lock_set')">{{ __("Lock") }}</button>
-					<button v-if="can('new_version')" type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="startAction('new_version')">{{ data.doc.newer_procedure ? __("Create version from new procedure") : __("Create new version") }}</button>
+					<button v-if="can('new_version')" type="button" class="btn btn-sm" :class="data.doc.status === 'Nháp' ? 'btn-default' : 'btn-primary'" :disabled="busy" @click="startAction('new_version')">{{ data.doc.newer_procedure ? __("Create version from new procedure") : __("Create new version") }}</button>
 					<button v-if="can('return_set')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="startAction('return_set')">{{ __("Return to draft") }}</button>
 					<button v-if="can('save_line')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openAdd">{{ __("Add line") }}</button>
 				</div>
@@ -38,7 +38,7 @@
 			<section v-if="changeStrip" class="nc-ng__warn" role="status" :aria-label="__('Changes from new procedure')">
 				<strong>{{ __("Changes from new procedure") }}</strong>
 				<div v-if="removedCount">
-					{{ __("Removed step: {0}", [removedCount]) }} <span class="indicator-pill red">{{ __("Removed step") }}</span>
+					{{ __("Removed step: {0} lines", [removedCount]) }} <span class="indicator-pill red">{{ __("Removed step") }}</span>
 					<button type="button" class="btn btn-default btn-xs" @click="focusRemoved">{{ __("View these lines") }}</button>
 					<div class="text-muted nc-ng__small">{{ __("Assign another step, move to whole service, or delete before professional confirmation.") }}</div>
 				</div>
@@ -263,7 +263,9 @@
 					</thead>
 					<tbody>
 						<tr v-for="(comps, key) in data.summary.by_step_component" :key="key">
-							<th scope="row">{{ key === "service" ? __("Whole service") : key }}</th>
+							<th v-if="key === 'service'" scope="row">{{ __("Whole service") }}</th>
+							<th v-else-if="!data.steps.some((s) => s.step_id === key)" scope="row" class="text-muted">{{ __("{0} (removed)", [key]) }}</th>
+							<th v-else scope="row">{{ key }}</th>
 							<td v-for="c in data.options.component" :key="c" class="num">{{ comps[c] && Number(comps[c]) ? money(comps[c]) : "–" }}</td>
 							<td class="num">{{ money(rowTotal(comps)) }}</td>
 						</tr>
@@ -591,10 +593,10 @@ export default {
 								frappe.msgprint(
 									[
 										__("Carried over: {0} lines ({1})", [d.carried.length, d.carried.join(", ")]),
-										__("Removed step: {0}", [d.removed.length]) + " (" + d.removed_steps.join(", ") + ")",
+										__("Removed step: {0} lines", [d.removed.length]) + " (" + d.removed_steps.join(", ") + ")",
 										__("Steps without lines") + ": " + (d.steps_without_lines.join(", ") || "-"),
 									].join("<br>"),
-									__("Open grid")
+									__("Created {0}", [d.name])
 								);
 							}
 							return this.open(d.name);

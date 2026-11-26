@@ -148,6 +148,17 @@ class TestNormVersion(RevisionBase):
 		res = self.as_user(self.clin, api.new_version, ns.name)
 		self.assertEqual(frappe.db.get_value(NS, res["name"], "procedure"), self.v2.name)
 
+	def test_FR_NORM_015_tu_bo_da_xac_nhan_chuyen_mon(self):
+		frappe.db.set_value(NS, self.src, "status", "Đã xác nhận chuyên môn")
+		got = self.as_user(self.head, api.get_norm_set, self.src)
+		self.assertIn("new_version", got["actions"])
+		self.assertEqual(got["doc"]["newer_procedure"], self.v2.name)
+		res = self.as_user(self.head, api.new_version, self.src)
+		new = frappe.get_doc(NS, res["name"])
+		self.assertEqual((new.status, new.procedure), ("Nháp", self.v2.name))
+		self.assertEqual(res["steps_without_lines"], ["S005"])
+		self.assertEqual(frappe.db.get_value(NS, self.src, "status"), "Đã xác nhận chuyên môn")
+
 	def test_FR_NORM_015_bo_da_thay_the_tu_choi(self):
 		frappe.db.set_value(NS, self.src, "status", "Đã thay thế")
 		with self.assertRaises(frappe.ValidationError):

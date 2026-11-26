@@ -116,6 +116,7 @@ Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
 Create version from new procedure,Tạo phiên bản theo quy trình mới
 Created,Tạo mới,Import Excel
+Created {0},Đã tạo {0}
 Deactivate,Ngừng dùng
 Deactivate test system {0}? It will not enter new costing runs; existing runs stay unchanged.,Ngừng dùng hệ thống {0}? Hệ thống sẽ không vào các lần tính giá mới; các lần tính đã có giữ nguyên.
 Decision number,Số quyết định
@@ -304,6 +305,7 @@ Remove this mapping?,Bỏ ánh xạ này?
 Removed,Bỏ
 Removed step,Bước đã bỏ
 Removed step: {0},Bước đã bỏ: {0}
+Removed step: {0} lines,Bước đã bỏ: {0} dòng
 Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
 Rerun tests,Số test chạy lại
 Resolved,Đã xử lý
@@ -443,6 +445,7 @@ open comments,ý kiến chưa xử lý
 service code,mã dịch vụ
 tests,test
 total share,tổng tỷ trọng
+{0} (removed),{0} (đã bỏ)
 {0} lines are not ready for professional confirmation,Còn {0} dòng chưa đủ điều kiện xác nhận chuyên môn
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
 {0} results — searched by {1},{0} kết quả — tìm theo {1}

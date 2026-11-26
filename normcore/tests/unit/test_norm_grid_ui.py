@@ -137,3 +137,6 @@ class TestNormGridFeat013(unittest.TestCase):
 		called = set(re.findall(r'this\.call\("(\w+)"', VUE))
 		self.assertTrue(called)
 		self.assertLessEqual(called, API_FUNCS)
+
+	def test_FR_NORM_015_khoi_chi_phi_ghi_buoc_da_bo(self):
+		self.assertIn('__("{0} (removed)", [key])', VUE)

@@ -10,7 +10,6 @@ Người hiện thực: Dev (Multica). Chưa qua QA.
 - **Giao diện** `NormGrid.vue`: nút "Tạo phiên bản theo quy trình mới", dải "Thay đổi theo quy trình mới" (`role="status"`, chip bước chưa có dòng), nhóm và nhãn "Bước đã bỏ", ô "Gắn với" và nút xóa cho dòng có cờ; form NC Norm Set thêm dòng dẫn; chuỗi mới ở `vi.csv`.
 
 ## Khác thiết kế
-- Khối chi phí tạm tính chưa ghi "S002 (đã bỏ)" (ui-design mục 5, chi tiết trình bày); số tiền không đổi.
 - Hộp kết quả sau khi tạo dùng `frappe.msgprint` rồi mở lưới của bộ mới.
 - Giao diện chưa kiểm bằng trình duyệt thật (chỉ kiểm tĩnh và `bench build`); QA cần xem.
 

@@ -245,8 +245,10 @@ def _actions(ns):
 				out.append("confirm_line")
 			if "NC Department Head" in roles:
 				out.append("confirm_set")
-	elif ns.status == CONFIRMED and "NC Finance" in roles:
-		out += ["return_set", "lock_set"]
+	elif ns.status == CONFIRMED:
+		if "NC Finance" in roles:
+			out += ["return_set", "lock_set"]
+		# technical-design 3.2: người có quyền tạo + ghi (không đòi NC Finance)
 		if can_write and frappe.has_permission(NS, "create") and _newer_procedure(ns):
 			out.append("new_version")
 	elif ns.status == LOCKED and can_write and frappe.has_permission(NS, "create"):
