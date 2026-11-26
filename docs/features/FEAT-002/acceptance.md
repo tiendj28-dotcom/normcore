@@ -18,3 +18,20 @@ Người kiểm: QA (Multica, Tester iu). Commit đã kiểm: `d0a4f8129cc2d48d4
 ## Giới hạn
 - Chưa kiểm bằng trình duyệt (Playwright): nhánh PR chưa có trên staging 112.213.88.40:8100 và tôi không có tài khoản test cho từng vai trò; kiểm vai trò không quyền và NC Auditor được thực hiện bằng test bench (quyền, `get_home`).
 - `get_home` dùng 9 truy vấn (thiết kế ≤ 6), ASM-002-16; chưa đo 300 dịch vụ.
+
+## Nghiệm thu bổ sung NORM-58 (PR #62, sửa lỗi đổi khoa bằng tay, FR-OUT-010)
+
+Người kiểm: QA (Tester iu). Commit đã kiểm: `f9bb87e2a69965104247f9aee5879c0679f7b4eb` (HEAD PR #62).
+
+| Tiêu chí | Bằng chứng | Kết quả |
+| :-- | :-- | :-- |
+| Đổi khoa tính lại bộ lọc mức (mức A, K01 → K02 → tất cả) | `test_FR_OUT_010_doi_khoa_bang_tay_tinh_lai_bo_loc_muc` (tests/test_feat_002.py, chạy JS bằng node, stub Frappe); `nc_technical_service_list.js:83-87` gán lại `df.onchange` gọi `apply()`; cờ `routing` tránh tính hai lần khi vào từ liên kết; `seq` bỏ kết quả cũ | Đạt |
+| Site sạch `normcore-verify.test` | `scripts/with_bench.sh` (new-site, install-app, run-tests, drop-site, một lần gọi): Ran 1432 tests, OK | Đạt |
+| pytest unit + golden + độ phủ | 772 passed; costing+benchmark phủ 99% | Đạt |
+| golden_engine, golden_cls, build_rtm, check_conventions | chạy không lỗi mới; check_conventions rc=0 | Đạt |
+| Soát diff test | Diff test chỉ thêm (+65), không dòng nào bị xóa/skip/nới; hai test cũ của `TestChainStageRoute` giữ nguyên và OK | Đạt |
+| Phạm vi / tài liệu chỉ đọc | 3 tệp: `nc_technical_service_list.js`, `tests/test_feat_002.py`, `docs/as-built/FEAT-002.md`; không đụng tài liệu chỉ đọc | Đạt |
+| CI PR #62 | "Tài liệu, golden, unit test" và "Test trên site Frappe v15" đều SUCCESS; MERGEABLE | Đạt |
+
+## Giới hạn (NORM-58)
+- Chưa kiểm bằng Playwright: staging 112.213.88.40:8100 chỉ deploy từ develop (chưa có mã PR #62), bench dev không có web server cho trình duyệt, và QA không có tài khoản test (Lead đồng ý phương án thay thế ở bình luận trên NORM-58). Kịch bản nghiệm thu được kiểm bằng test node. Cần kiểm lại và chụp ảnh trên staging sau khi merge (số dòng mức A khớp số đếm trang chủ khi K01 → K02 → tất cả).
