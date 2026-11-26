@@ -41,9 +41,9 @@ Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
 Applied qty,Lượng áp dụng
+Applied quantity,Lượng áp dụng
 Apply k,Nhân k
 Apply k factor,Nhân hệ số tiêu hao k
-Applied quantity,Lượng áp dụng
 Approved price,Giá đã duyệt
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
@@ -113,9 +113,9 @@ Copy from this procedure,Sao chép từ quy trình này
 Copy to another system,Sao chép sang hệ thống khác
 Cost category,Loại chi phí
 Cost center,Trung tâm chi phí
-Cost level,Cấp phát sinh
 Cost eligible services only,Chỉ tính dịch vụ đủ điều kiện
 Cost explanation,Bảng giải trình giá
+Cost level,Cấp phát sinh
 Cost pool,Quỹ chi phí
 Cost type,Loại chi phí
 Cost {0} services?,Tính giá cho {0} dịch vụ?
