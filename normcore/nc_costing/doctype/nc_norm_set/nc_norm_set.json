@@ -8,7 +8,10 @@
   "department",
   "procedure",
   "version_no",
+  "previous_version",
   "status",
+  "needs_update",
+  "step_change_note",
   "lines",
   "next_line_seq",
   "locked_by",
@@ -45,6 +48,13 @@
    "reqd": 1
   },
   {
+   "fieldname": "previous_version",
+   "label": "Phiên bản trước",
+   "fieldtype": "Link",
+   "options": "NC Norm Set",
+   "read_only": 1
+  },
+  {
    "fieldname": "status",
    "label": "Trạng thái",
    "fieldtype": "Select",
@@ -52,7 +62,21 @@
    "options": "Nháp\nĐã xác nhận chuyên môn\nĐã khóa\nĐã thay thế",
    "read_only": 1,
    "default": "Nháp",
-   "in_list_view": 1
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "needs_update",
+   "label": "Cần cập nhật",
+   "fieldtype": "Check",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "step_change_note",
+   "label": "Bước thêm, bỏ, đổi",
+   "fieldtype": "Small Text",
+   "read_only": 1
   },
   {
    "fieldname": "lines",
