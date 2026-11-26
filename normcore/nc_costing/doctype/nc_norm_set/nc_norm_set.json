@@ -7,6 +7,8 @@
   "technical_service",
   "department",
   "procedure",
+  "needs_update",
+  "step_change_note",
   "version_no",
   "status",
   "lines",
@@ -37,6 +39,20 @@
    "fieldtype": "Link",
    "reqd": 1,
    "options": "NC Clinical Procedure"
+  },
+  {
+   "fieldname": "needs_update",
+   "label": "Cần cập nhật",
+   "fieldtype": "Check",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "step_change_note",
+   "label": "Bước thêm, bỏ, đổi",
+   "fieldtype": "Small Text",
+   "read_only": 1
   },
   {
    "fieldname": "version_no",

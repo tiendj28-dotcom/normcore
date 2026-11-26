@@ -10,7 +10,7 @@ from frappe.utils import getdate, nowdate
 
 from normcore.core import audit
 from normcore.core import permissions as scope
-from normcore.procedure import approval, printing, validation
+from normcore.procedure import approval, diff, printing, validation
 
 DT = "NC Clinical Procedure"
 COMMENT = "NC Review Comment"
@@ -185,6 +185,49 @@ def _withdraw(doc, reason):
 	return {"workflow_state": new_state}
 
 
+NORM_SET = "NC Norm Set"
+REPLACED = "Đã thay thế"
+
+
+def _procedure_data(name):
+	doc = frappe.get_doc(DT, name)
+	return {"steps": _rows(doc, "steps"), "resources": _rows(doc, "resources")}
+
+
+def _flag_norm_sets(doc):
+	"""FR-WF-011 (ASM-008-14): gắn cờ "Cần cập nhật" và ghi chú bước thêm, bỏ, đổi cho các bộ định mức dựa trên
+	phiên bản cũ hơn của cùng (dịch vụ, khoa), trừ bộ "Đã thay thế". Ghi bằng `db.set_value` (bộ "Đã khóa" chặn
+	`save()`); chạy với quyền hệ thống vì người ban hành chỉ có quyền đọc bộ định mức."""
+	rows = frappe.get_all(
+		NORM_SET,
+		{
+			"technical_service": doc.technical_service,
+			"department": doc.department,
+			"status": ["!=", REPLACED],
+			"procedure": ["!=", doc.name],
+		},
+		["name", "procedure"],
+	)
+	if not rows:
+		return 0
+	new = _procedure_data(doc.name)
+	notes, flagged = {}, 0
+	for r in rows:
+		if (frappe.db.get_value(DT, r.procedure, "version_no") or 0) >= doc.version_no:
+			continue
+		if r.procedure not in notes:
+			notes[r.procedure] = diff.format_step_note(diff.step_changes(_procedure_data(r.procedure), new))
+		note = notes[r.procedure]
+		frappe.db.set_value(
+			NORM_SET, r.name, {"needs_update": 1, "step_change_note": note}, update_modified=False
+		)
+		frappe.get_doc(NORM_SET, r.name).add_comment(
+			"Info", _("Cần cập nhật do ban hành {0}: {1}").format(doc.name, note)
+		)
+		flagged += 1
+	return flagged
+
+
 def _after_action(doc, action, from_state, new_state, reason):
 	name = doc.name
 	if action in ("Gửi duyệt", "Đồng ý", "Thông qua"):
@@ -192,6 +235,7 @@ def _after_action(doc, action, from_state, new_state, reason):
 	elif action == "Ban hành":
 		if getdate(doc.effective_date) <= getdate(nowdate()):
 			supersede_due(for_procedure=name)
+		_flag_norm_sets(doc)
 		_notify([doc.owner], f"{name}: đã ban hành", doc)
 	elif action == "Từ chối":
 		level = approval.reject_level(from_state)
