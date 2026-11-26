@@ -21,7 +21,9 @@
   "index_status",
   "index_error",
   "sections_section",
-  "sections_html"
+  "sections_html",
+  "mapping_doc_section",
+  "mapping_html"
  ],
  "fields": [
   {
@@ -134,6 +136,17 @@
   {
    "fieldname": "sections_html",
    "label": "Các mục",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "mapping_doc_section",
+   "fieldtype": "Section Break",
+   "label": "Ánh xạ hướng dẫn",
+   "depends_on": "eval:doc.is_procedure_guideline"
+  },
+  {
+   "fieldname": "mapping_html",
+   "label": "Ánh xạ hướng dẫn",
    "fieldtype": "HTML"
   }
  ],
