@@ -11,6 +11,8 @@
   "calc_status",
   "calc_message",
   "volume",
+  "is_paraclinical",
+  "eqa_cost",
   "direct_labor",
   "direct_drug",
   "direct_supply",
@@ -27,7 +29,8 @@
   "obligation",
   "calculated_price",
   "rounded_price",
-  "lines"
+  "lines",
+  "test_system_costs"
  ],
  "fields": [
   {
@@ -199,11 +202,31 @@
    "fieldtype": "Currency",
    "precision": "2",
    "read_only": 1
+  },
+  {
+   "fieldname": "is_paraclinical",
+   "label": "Dịch vụ cận lâm sàng",
+   "fieldtype": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "eqa_cost",
+   "label": "Chi phí ngoại kiểm một kết quả",
+   "fieldtype": "Currency",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "test_system_costs",
+   "label": "Kết quả theo hệ thống xét nghiệm",
+   "fieldtype": "Table",
+   "options": "NC Test System Cost",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-21 00:00:00.000000",
+ "modified": "2026-11-26 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "NC Costing",
  "name": "NC Service Cost",

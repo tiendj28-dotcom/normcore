@@ -9,7 +9,15 @@ DRAFT, CALCULATING, CALCULATED, FAILED, LOCKED = "Nháp", "Đang tính", "Đã t
 IMPORT_FINAL = "Đã chốt"
 RUNNABLE = (DRAFT, FAILED, CALCULATED)
 EDITABLE_INPUTS = (DRAFT, FAILED)
-INPUT_FIELDS = ("fiscal_year", "costing_date", "parameter_set", "accounting_import", "price_category")
+INPUT_FIELDS = (
+	"fiscal_year",
+	"costing_date",
+	"parameter_set",
+	"accounting_import",
+	"price_category",
+	"volume_scenario",
+	"compliance_allocation_mode",
+)
 EXECUTE = "normcore.nc_costing.doctype.nc_costing_run.nc_costing_run.execute_costing"
 PROGRESS_EVENT = "normcore_costing_progress"
 

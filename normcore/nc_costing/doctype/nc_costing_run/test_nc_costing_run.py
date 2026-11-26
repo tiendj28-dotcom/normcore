@@ -223,6 +223,28 @@ class TestNCCostingRunInputs(FrappeTestCase):
 		run.fiscal_year = 2032
 		run.save(ignore_permissions=True)
 
+	def test_TC_CLS_08_mac_dinh_lan_tinh(self):
+		"""FR-COST-017: mặc định Thực tế 12 tháng và Theo giá trị tài sản."""
+		doc = frappe.new_doc("NC Costing Run")
+		self.assertEqual(doc.volume_scenario, "Thực tế 12 tháng")
+		self.assertEqual(doc.compliance_allocation_mode, "Theo giá trị tài sản")
+		run = self._doc().insert(ignore_permissions=True)
+		self.assertEqual(run.volume_scenario, "Thực tế 12 tháng")
+		self.assertEqual(run.compliance_allocation_mode, "Theo giá trị tài sản")
+
+	def test_khoa_dau_vao_kich_ban_khi_da_tinh(self):
+		run = self._doc().insert(ignore_permissions=True)
+		run.db_set("status", "Đã tính")
+		for field, value in (("volume_scenario", "Kế hoạch"), ("compliance_allocation_mode", "Gắn trực tiếp thiết bị")):
+			run.reload()
+			run.set(field, value)
+			with self.assertRaisesRegex(frappe.ValidationError, "không sửa được đầu vào"):
+				run.save(ignore_permissions=True)
+		run.db_set("status", "Nháp")
+		run.reload()
+		run.volume_scenario = "Kế hoạch"
+		run.save(ignore_permissions=True)
+
 
 class TestNCCostingRunGolden(FrappeTestCase):
 	"""FR-COST-002, 003, 007, 010, 016: lần tính trên site với dữ liệu vàng."""
