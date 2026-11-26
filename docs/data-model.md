@@ -566,6 +566,7 @@ Form hiển thị (không lưu): bộ định mức hiện hành, kế hoạch c
 | step_id | Mã bước | Data | | Trống khi `service_level` bật |
 | service_level | Chung cho cả dịch vụ | Check | | [FR-NORM-005] |
 | procedure_resource_row | Dòng nguồn lực gốc | Data | | `resource_row_id` của quy trình; trống với dòng thêm |
+| step_removed | Thuộc bước đã bỏ | Check | | Đặt bởi phiên bản theo quy trình mới; chặn xác nhận [FR-NORM-015] **[AMD-013-01]** |
 | component | Cấu phần | Select | Có | LABOR / DRUG / SUPPLY / EQUIPMENT / INFRA / UTILITY |
 | resource_doctype, resource | Nguồn lực | Link DocType, Dynamic Link | `resource_doctype`: Có; `resource`: khi sửa dòng và trước xác nhận chuyên môn **[AMD-012-01]** | Theo cấu phần. Trống = chưa liên kết danh mục [FR-NORM-010] |
 | cost_level **[1.1]** | Cấp phát sinh | Select | Có | RESULT (Theo kết quả) / TUBE (Theo ống mẫu) / BATCH (Theo mẻ) / DAY (Theo ngày-máy) / PERIOD (Theo kỳ); mặc định RESULT. Dịch vụ không thuộc khối cận lâm sàng: luôn RESULT [FR-NORM-018] |
@@ -875,7 +876,7 @@ Các trạng thái giữ như bản 1.0 (Nháp, Đang tính, Đã tính, Tính l
 | DI-01 | `step_id` duy nhất trong một quy trình và không đổi giữa các phiên bản; bước mới lấy số từ `next_step_seq` |
 | DI-02 | Mỗi (dịch vụ, khoa) có tối đa một quy trình "Đã ban hành" đang hiệu lực và tối đa một bản đang soạn hoặc đang duyệt |
 | DI-03 | Mỗi (dịch vụ, khoa) có tối đa một bộ định mức "Đã khóa" đang hiệu lực. **[1.1] Sửa:** với dịch vụ có hệ thống xét nghiệm, tối đa một bộ cho mỗi (dịch vụ, khoa, hệ thống xét nghiệm) [FR-NORM-017] |
-| DI-04 | `NC Norm Line.step_id` phải tồn tại trong quy trình mà bộ định mức tham chiếu, trừ khi `service_level` bật |
+| DI-04 | `NC Norm Line.step_id` phải tồn tại trong quy trình mà bộ định mức tham chiếu, trừ khi `service_level` bật **hoặc `step_removed` bật [AMD-013-01]** |
 | DI-05 | `NC Norm Line.resource_doctype` phải khớp cấu phần: LABOR → NC Job Title; DRUG, SUPPLY, UTILITY → NC Item; EQUIPMENT → NC Equipment; INFRA → NC Room |
 | DI-06 | Lần tính giá chỉ đọc bộ định mức "Đã khóa" và lần nhập kế toán "Đã chốt". **[1.1]** Và chỉ đọc hệ thống xét nghiệm "Đang dùng" |
 | DI-07 | Bản ghi ở trạng thái khóa (quy trình đã ban hành, bộ định mức đã khóa, lần nhập đã chốt, lần tính giá đã khóa, phương án đã duyệt) không sửa, không xóa. **[1.1]** Dữ liệu gốc không có trạng thái khóa (hệ thống xét nghiệm, kế hoạch chất lượng, hồ sơ tuân thủ, thiết bị) vẫn sửa được sau khi lần tính giá khóa; ảnh chụp của lần tính là nguồn tái lập (ADR-004) |
