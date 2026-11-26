@@ -68,9 +68,10 @@ function normcore_chain_filter(listview) {
 		label: __("Chain status"),
 		options: "",
 		onchange() {
-			apply();
+			if (!silent) apply();
 		},
 	});
+	let silent = false; // đặt mức từ liên kết: tự gọi apply() một lần sau khi khoa đã ghi xong
 	// nc_chain_stage không phải trường của DocType: không để Frappe đưa nó vào bộ lọc/URL (NORM-57).
 	const standard_filters = listview.filter_area.get_standard_filters.bind(listview.filter_area);
 	listview.filter_area.get_standard_filters = () =>
@@ -79,9 +80,9 @@ function normcore_chain_filter(listview) {
 	function apply() {
 		const stage = field.get_value();
 		listview.filter_area.remove("name");
-		if (!stage) return listview.filter_area.debounced_refresh_list_view();
+		if (!stage) return Promise.resolve(listview.filter_area.debounced_refresh_list_view());
 		const department = dept_field() ? dept_field().get_value() : null;
-		frappe
+		return frappe
 			.xcall("normcore.api.home.services_in_stage", { stage, department: department || null })
 			.then((names) => {
 				if (names.length > NC_MAX_FILTER) {
@@ -94,28 +95,46 @@ function normcore_chain_filter(listview) {
 				listview.filter_area.add([[listview.doctype, "name", "in", names.length ? names : ["__none__"]]]);
 			});
 	}
+	// Đặt mức theo liên kết và luôn tính lại bộ lọc `name`, kể cả khi giá trị mức không đổi
+	// (Frappe bỏ qua set_value cùng giá trị nên onchange không chạy).
 	function set_stage(stage) {
-		if (options_ready) field.set_value(stage || "");
-		else pending = stage || "";
+		if (!options_ready) {
+			pending = stage || "";
+			return Promise.resolve();
+		}
+		silent = true;
+		return Promise.resolve(field.set_value(stage || "", true))
+			.then(() => {
+				silent = false;
+				return apply();
+			})
+			.catch((e) => {
+				silent = false;
+				throw e;
+			});
 	}
 	// Frappe giữ list view trong cache (onload chỉ chạy một lần): đọc và gỡ tham số ở MỖI lần list hiện ra,
-	// trước khi before_refresh gốc đọc URL/route_options. Có tham số thì đặt lại khoa và mức theo liên kết.
+	// trước khi before_refresh gốc đọc URL/route_options. Có tham số thì đặt khoa (chờ ghi xong, vì trường
+	// Link kiểm tra qua mạng) rồi mới đặt mức, để apply() đọc đúng khoa mới.
 	const before_refresh = listview.before_refresh.bind(listview);
 	listview.before_refresh = function () {
 		const taken = normcore_take_route_params();
-		if (taken.nc_chain_stage || taken.nc_department) {
-			if (dept_field()) dept_field().set_value(taken.nc_department || "");
-			set_stage(taken.nc_chain_stage);
-		}
-		return before_refresh();
+		if (!taken.nc_chain_stage && !taken.nc_department) return before_refresh();
+		const dept = dept_field();
+		return Promise.resolve(dept && dept.set_value(taken.nc_department || ""))
+			.then(() => set_stage(taken.nc_chain_stage))
+			.then(() => before_refresh());
 	};
 	frappe.xcall("normcore.api.home.get_home").then((data) => {
 		const labels = (data.stages || []).filter((s) => !s.no_permission).map((s) => [s.stage, s.label]);
 		field.df.options = [{ label: "", value: "" }].concat(labels.map((l) => ({ value: l[0], label: l[1] })));
 		field.refresh();
 		options_ready = true;
-		if (pending !== null) field.set_value(pending);
-		pending = null;
+		if (pending !== null) {
+			const stage = pending;
+			pending = null;
+			return set_stage(stage);
+		}
 	});
 }
 
