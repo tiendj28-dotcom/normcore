@@ -37,7 +37,7 @@ Quy ước:
 - [x] T07 Giao diện: Script Report `nc_costing/report/nc_costing_run_comparison/` ("So sánh hai lần tính giá": JSON, `.py`, `.js`), theo `ui-design.md` — done-when:
   - lệnh pytest của T06 xanh;
   - `scripts/with_bench.sh 'bench --site normcore.test migrate && bench build --app normcore && bench --site normcore.test run-tests --module normcore.nc_costing.report.nc_costing_run_comparison.test_nc_costing_run_comparison'` in `OK` (tệp có `test_bao_cao_so_sanh_cot_cay_va_quyen`: cột, dòng dịch vụ `indent` 0, cấu phần `indent` 1, số DV-TEST-A −63.636,36, NC Clinician bị từ chối, NC Auditor đọc được).
-- [ ] T08 Hồ sơ: `docs/as-built/FEAT-018.md`; Test ref ở `docs/rtm-testref/FEAT-018.md`; cập nhật trạng thái ASM-018-*; `implementation-log.md` — done-when: `python3 docs/tools/build_rtm.py docs` in `VAN DE: 0`.
+- [x] T08 Hồ sơ: `docs/as-built/FEAT-018.md`; Test ref ở `docs/rtm-testref/FEAT-018.md`; cập nhật trạng thái ASM-018-*; `implementation-log.md` — done-when: `python3 docs/tools/build_rtm.py docs` in `VAN DE: 0`.
 - [ ] T09 Kiểm toàn bộ — done-when: pytest, `bench run-tests --app normcore`, `check_conventions.py`, golden đều xanh. Cụ thể:
   - `python3 docs/golden/golden_engine.py && python3 docs/golden/golden_cls.py`;
   - `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90`;
