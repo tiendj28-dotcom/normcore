@@ -1,3 +1,4 @@
+A draft already exists: {0},Đã có bản đang soạn: {0}
 Account,Tài khoản
 Actions,Thao tác
 Active,Đang dùng,NC Technical Service
@@ -12,6 +13,7 @@ Add test system,Thêm hệ thống xét nghiệm
 "After locking, the norm set can no longer be edited.","Sau khi khóa, bộ định mức không sửa được."
 "After publishing, this version's content can no longer be edited.","Sau khi ban hành, nội dung phiên bản này không sửa được."
 "After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
+"After withdrawing, the procedure moves to 'Withdrawn' and can no longer be used as a basis.","Sau khi thu hồi, quy trình chuyển 'Đã thu hồi' và không dùng làm căn cứ được nữa."
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
 Annual equipment cost,Chi phí thiết bị năm,NC Equipment
@@ -42,6 +44,7 @@ Code,Mã
 Column,Cột,Import Excel
 Comment,Ý kiến
 Comments,Ý kiến
+Compare versions,So sánh phiên bản
 Confirm import,Xác nhận ghi
 Copy,Sao chép
 Copy from this procedure,Sao chép từ quy trình này
@@ -58,6 +61,7 @@ Could not load chain status.,Không tải được tình trạng chuỗi.
 Could not load test systems.,Không tải được hệ thống xét nghiệm.
 Could not load the status.,Không tải được tình trạng.
 Create,Tạo
+Create a draft of the next version from version {0}. Step codes are kept; the draft goes through the approval flow like the first version.,Tạo bản nháp phiên bản kế tiếp từ phiên bản {0}. Mã bước giữ nguyên; bản nháp đi qua luồng duyệt như bản đầu.
 Create norm set,Khởi tạo bộ định mức
 Create procedure,Tạo quy trình
 Created,Tạo mới,Import Excel
@@ -143,6 +147,8 @@ NC Procedure Resource,Nguồn lực của bước
 NC Procedure Step,Bước quy trình
 Name,Tên
 Needs review,Cần rà soát
+Needs update,Cần cập nhật
+Needs update: the procedure has a new version - {0}.,Cần cập nhật: quy trình có phiên bản mới - {0}.
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -202,6 +208,7 @@ Resolved,Đã xử lý
 Retry,Thử lại
 Review actions,Thao tác duyệt
 Review comments,Ý kiến thẩm định
+Revise,Sửa đổi
 Room hourly rate,Đơn giá giờ phòng,NC Room
 Row,Dòng,Import Excel
 Row ID,Mã dòng
@@ -241,6 +248,7 @@ This procedure cannot be edited by you or is already issued.,Bạn không sửa 
 This procedure is awaiting approval and cannot be edited.,"Quy trình đang chờ duyệt, không sửa được."
 This procedure is issued and read-only.,"Quy trình đã ban hành, chỉ đọc."
 This procedure is issued or closed and cannot be edited. Create a new version in the revision function.,"Quy trình đã ban hành, không sửa được. Tạo phiên bản mới ở chức năng Sửa đổi."
+This procedure was withdrawn: {0},Quy trình đã thu hồi: {0}
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
 Total,Tổng
 Total share differs from 100%,Tổng tỷ trọng khác 100%
@@ -272,6 +280,9 @@ Verify,Xác minh,NC Item Price
 View,Xem
 View costing results,Xem kết quả tính giá
 Will be estimated from the plan,Sẽ ước tính từ kế hoạch
+Withdraw,Thu hồi
+Withdrawal reason,Lý do thu hồi
+Withdrawal reason is required,Cần nhập lý do thu hồi
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
 You do not have permission to view this procedure,Bạn không có quyền xem quy trình này
