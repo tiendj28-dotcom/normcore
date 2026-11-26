@@ -84,7 +84,10 @@ def ensure_default_account_mapping():
 
 
 def after_install():
+	from normcore.ai.prompts_install import ensure_default_templates
+
 	ensure_roles()
 	ensure_workflow_states()
 	ensure_sample_price_categories()
 	ensure_default_account_mapping()
+	ensure_default_templates()

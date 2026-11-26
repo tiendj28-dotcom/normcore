@@ -171,3 +171,15 @@
 | FR-QC-005 | `test_TC_CLS_25_50_va_40_bi_tu_choi`, `test_TC_CLS_25_60_va_40_luu_duoc`, `test_TC_CLS_25_de_trong_chia_deu` (nc_eqa_program), `test_TC_CLS_25_50_va_40_bi_tu_choi` (unit) |
 | FR-QC-007 | `test_TC_CLS_26_he_thong_hoa_sinh_khong_ke_hoach_noi_kiem_canh_bao`, `test_TC_CLS_26_ke_hoach_khong_dong_noi_kiem_van_canh_bao`, `test_TC_CLS_26_co_noi_kiem_het_canh_bao`, `test_TC_CLS_26_nhom_khac_khong_canh_bao` (api/test_qc_plan.py), `test_TC_CLS_26_*` (unit) — một phần: gắn vào bộ định mức và "vẫn khóa được" ở FEAT-034 |
 | FR-QC-008 | `test_TC_CLS_25_vat_lieu_noi_kiem_sai_loai`, `test_TC_CLS_25_chat_chuan_sai_loai` (nc_qc_plan), `test_TC_CLS_25_vat_lieu_sai_loai`, `test_TC_CLS_25_chat_chuan_sai_loai` (unit) |
+# Test ref — FEAT-023 (Dev NORM-55 ghi; QA kiểm định độc lập, accepted)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-AI-009 | `test_TC_AI_08_log_du_truong` (nc_ai_settings), `test_gateway_mock_tra_json_co_dinh_va_ghi_mot_log` (nc_ai_log) |
+| FR-AI-010 | `test_TC_AI_05_qua_han_giu_du_lieu` (nc_ai_settings), `test_qua_han` (unit/test_ai_providers_openai.py) |
+| FR-AI-011 | `test_TC_AI_06_*` (unit/test_ai_guard.py) |
+| FR-AI-012 | `test_TC_AI_11_doi_dia_chi`, `test_UC017_4c_bat_ai_kiem_ket_noi` (nc_ai_settings), `test_gui_dung_giao_thuc` (unit/test_ai_providers_openai.py) |
+| FR-AI-013 | `test_TC_AI_09_chan_han_muc`, `test_TC_AI_09_bien_bang_han_muc_khong_chan` (nc_ai_settings), `test_budget_exceeded_cac_bien` (unit/test_ai_guard.py) |
+| FR-AI-014 | `test_FR_AI_014_*` (nc_prompt_template), `test_new_prompt_version` (api/test_ai.py), unit/test_ai_prompts.py |
+| FR-AI-015 | `test_TC_AI_07_tat_ai_an_nut_van_chay_thu_cong` (api/test_ai.py; phần "giá tham chiếu" chưa kiểm được vì NC Benchmark Price chưa có trên develop, ASM-023-16), unit/test_ai_ui_conventions.py |
+| NFR-SEC-004 | `test_TC_NFR_04_khoa_khong_lo` (nc_ai_settings), `test_loi_khong_lo_khoa` (unit/test_ai_providers_openai.py) |

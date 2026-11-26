@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "autoname": "format:{template_code}-v{version}",
+ "creation": "2026-11-26 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_code",
+  "version",
+  "is_active",
+  "system_prompt",
+  "user_prompt",
+  "output_schema"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_code",
+   "label": "Mã mẫu",
+   "fieldtype": "Select",
+   "reqd": 1,
+   "options": "DRAFT_PROCEDURE\nCONSISTENCY_CHECK\nSUGGEST_NORM_LINK\nMAP_SECTION_SERVICE\nEXTRACT_PRICE_LIST\nMATCH_SERVICE_NAME\nSUGGEST_CLS_NORM",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "version",
+   "label": "Phiên bản",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "Tự cấp khi tạo."
+  },
+  {
+   "fieldname": "is_active",
+   "label": "Đang dùng",
+   "fieldtype": "Check",
+   "default": "0",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "system_prompt",
+   "label": "Lệnh hệ thống",
+   "fieldtype": "Long Text",
+   "reqd": 1
+  },
+  {
+   "fieldname": "user_prompt",
+   "label": "Lệnh người dùng (Jinja)",
+   "fieldtype": "Long Text",
+   "reqd": 1,
+   "description": "Dùng biến variables và sources, ví dụ {{ variables | tojson }}."
+  },
+  {
+   "fieldname": "output_schema",
+   "label": "Lược đồ JSON đầu ra",
+   "fieldtype": "Code",
+   "options": "JSON",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC AI",
+ "name": "NC Prompt Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
