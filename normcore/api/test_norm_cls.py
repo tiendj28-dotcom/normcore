@@ -5,7 +5,9 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import access
 from normcore.api import norm as api
+from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
 from normcore.tests.utils import (
+	confirm_norm_set,
 	make_base,
 	make_cls_data,
 	make_procedure,
@@ -257,3 +259,80 @@ class TestLines(ClsBase):
 		self.assertIn("copy_norm_set", out["actions"])
 		self.assertNotIn("export_norm_set", out["actions"])  # ASM-034-24
 		self.assertTrue(any("kế hoạch" in b or "Số xét nghiệm" in b for b in out["set_blockers"]))
+
+
+class TestConfirm(ClsBase):
+	def test_TC_CLS_29_bo_thieu_he_thong_khong_xac_nhan_duoc(self):
+		bare = frappe.get_doc("NC Norm Set", make_norm_set(self.proc.name))
+		self.assertIsNone(bare.test_system)
+		frappe.set_user(self.head)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			api.confirm_set(bare.name)
+		self.assertIn("Chưa gắn hệ thống xét nghiệm", str(cm.exception))
+
+	def test_TC_CLS_32_xac_nhan_can_so_xn_moi_ong_va_khoan_muc_bat_buoc(self):
+		ns = self.create("GLU-A")
+		frappe.set_user(self.head)
+		for lid in ("L001", "L002"):
+			api.confirm_line(ns.name, lid)
+		# thiếu số xét nghiệm mỗi ống (dòng L003 Theo ống mẫu)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			api.confirm_set(ns.name)
+		self.assertIn("Số xét nghiệm bình quân trên một ống mẫu", str(cm.exception))
+		self.assertEqual(frappe.db.get_value("NC Norm Set", ns.name, "status"), "Nháp")
+		api.save_head(ns.name, {"tests_per_tube": 4})
+		# thiếu khoản mục bắt buộc
+		with self.assertRaises(frappe.ValidationError) as cm:
+			api.confirm_set(ns.name)
+		msg = str(cm.exception)
+		self.assertIn("Thiếu khoản mục bắt buộc", msg)
+		self.assertIn("Thiết bị", msg)
+		self.assertNotIn("Số xét nghiệm", msg)
+		# đánh dấu "Không áp dụng" (nhập đủ nguồn lực, đơn vị vì dòng đã sửa), rồi xác nhận từng dòng
+		api.save_line(
+			ns.name,
+			{
+				"is_excluded": 1,
+				"exclude_reason": "Không áp dụng",
+				"resource_doctype": "NC Item",
+				"resource": "HC_GLU",
+				"uom": "ống",
+			},
+			"L003",
+		)
+		api.save_line(
+			ns.name,
+			{
+				"is_excluded": 1,
+				"exclude_reason": "Không áp dụng",
+				"resource_doctype": "NC Equipment",
+				"resource": "EQ_A",
+				"uom": "phút",
+			},
+			"L004",
+		)
+		for lid in ("L003", "L004"):
+			api.confirm_line(ns.name, lid)
+		out = api.confirm_set(ns.name)
+		self.assertEqual(out["doc"]["status"], "Đã xác nhận chuyên môn")
+
+	def test_set_blockers_dung_truoc_loi_dong(self):
+		ns = self.create("GLU-A")
+		frappe.set_user(self.head)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			api.confirm_set(ns.name)
+		msg = str(cm.exception)
+		self.assertLess(msg.index("Số xét nghiệm"), msg.index("Chưa xác nhận"))
+
+	def test_TC_CLS_26_canh_bao_tren_bo_dinh_muc_van_khoa_duoc(self):
+		ns = self.create("GLU-A")
+		out = api.get_norm_set(ns.name)
+		self.assertEqual(out["warnings"][0]["code"], "missing_iqc")
+		self.assertIn("GLU-A", out["warnings"][0]["message"])
+		confirm_norm_set(ns)
+		frappe.set_user(self.fin)
+		self.assertEqual(api.lock_set(ns.name)["doc"]["status"], "Đã khóa")  # cảnh báo không chặn
+		# có kế hoạch nội kiểm thì hết cảnh báo
+		make_qc_plan("GLU-B")
+		other = self.create("GLU-B")
+		self.assertEqual(api.get_norm_set(other.name)["warnings"], [])

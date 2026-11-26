@@ -569,12 +569,12 @@ def confirm_set(norm_set):
 	_need_role("confirm_set")
 	ns = _load(norm_set, "write")
 	_need_draft(ns)
-	blockers = validation.confirm_blockers([_dict(r) for r in ns.lines])
-	if blockers:
-		frappe.throw(
-			"<br>".join(f"{b['line_id']}: {', '.join(b['reasons'])}" for b in blockers),
-			title=_("Chưa xác nhận chuyên môn được"),
-		)
+	rows = [_dict(r) for r in ns.lines]
+	# lỗi cấp bộ (FR-NORM-020, 023, 024, ASM-034-01) đứng trước lỗi dòng, cùng một thông báo (TC-CLS-32)
+	messages = [_(m) for m in _set_blockers(ns, rows, ctl.cls_ctx(ns))]
+	messages += [f"{b['line_id']}: {', '.join(b['reasons'])}" for b in validation.confirm_blockers(rows)]
+	if messages:
+		frappe.throw("<br>".join(messages), title=_("Chưa xác nhận chuyên môn được"))
 	ns.status = CONFIRMED
 	ns.flags.norm_action = "confirm_set"
 	ns.save()
