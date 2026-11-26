@@ -13,4 +13,4 @@
 | T09 | `pytest test_form_buttons_i18n test_ui_conventions test_vi_csv_order test_costing_ui` | 29 passed; check_conventions 0 | 69bdcad |
 | T10 | pytest T09 xanh; `with_bench.sh migrate && bench build --app normcore` | build DONE (exit 0) | 20d5607 |
 | T11 | `python3 docs/tools/build_rtm.py docs` | VAN DE: 0; as-built `docs/as-built/FEAT-015.md`, Test ref ở `docs/rtm-testref.md` mục FEAT-015 | 148ba4c |
-| T12 | golden_engine.py + golden_cls.py thoát 0; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90` → 658 passed, độ phủ 98,94%; `with_bench.sh migrate && run-tests --app normcore` → Ran 1245 tests, OK; `check_conventions.py` 0; `build_rtm.py docs` VAN DE: 0; đã merge origin/develop | SHA |
+| T12 | golden_engine.py + golden_cls.py thoát 0; `pytest normcore/tests/unit normcore/tests/golden --cov=normcore/costing --cov=normcore/benchmark --cov-fail-under=90` → 658 passed, độ phủ 98,94%; `with_bench.sh migrate && run-tests --app normcore` → Ran 1245 tests, OK; `check_conventions.py` 0; `build_rtm.py docs` VAN DE: 0; đã merge origin/develop | 7c50c5a |
