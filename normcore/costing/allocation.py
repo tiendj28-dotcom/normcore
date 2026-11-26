@@ -7,7 +7,7 @@ Module thuần Python, dùng Decimal, làm tròn HALF_UP đúng thứ tự golde
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import ROUND_HALF_UP, Decimal
 
 from normcore.costing import engine
@@ -78,8 +78,14 @@ def _cat_index(c: str) -> int:
 
 
 def service_drivers(inp: engine.ServiceInput, cost_center: str | None) -> ServiceDrivers:
-	"""Phút trên một ca (golden `labor_min`, `mach_min` trước khi nhân sản lượng)."""
+	"""Phút trên một ca (golden `labor_min`, `mach_min` trước khi nhân sản lượng).
+	Dịch vụ cận lâm sàng: bình quân gia quyền theo tỷ trọng các hệ thống (FEAT-036, ASM-036-28)."""
 	labor = machine = _ZERO
+	if inp.paraclinical is not None:
+		from normcore.costing import cls  # nhập trễ: cls dùng engine
+
+		labor, machine = cls.driver_minutes(inp.paraclinical)
+		return ServiceDrivers(inp.service, inp.department, cost_center, labor, machine)
 	for ln in inp.lines:
 		if ln.excluded:
 			continue
@@ -253,17 +259,4 @@ def mark_volume(result: engine.ServiceResult) -> engine.ServiceResult:
 	if result.status == engine.STATUS_ERROR or (result.volume is not None and result.volume > 0):
 		return result
 	msg = f"{result.message}; {VOLUME_WARNING}" if result.message else VOLUME_WARNING
-	return engine.ServiceResult(
-		result.service,
-		result.department,
-		result.norm_set,
-		result.status,
-		msg,
-		result.lines,
-		result.direct_by_component,
-		result.direct_by_category,
-		result.direct_total,
-		result.alloc_by_category,
-		result.price,
-		result.volume,
-	)
+	return replace(result, message=msg)  # giữ trường của dịch vụ cận lâm sàng (FEAT-036)

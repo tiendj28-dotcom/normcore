@@ -1,0 +1,30 @@
+Calibrator,Chất chuẩn
+Cost per result,Chi phí một kết quả
+Direct cost by test system,Chi phí trực tiếp theo hệ thống xét nghiệm
+Direct cost of the service,Chi phí trực tiếp của dịch vụ
+Direct cost per result,Chi phí trực tiếp một kết quả
+Divisor,Mẫu số
+Divisor source,Nguồn mẫu số
+Each amount is the cost of one result of the system. The direct cost of the service is the weighted average by share plus external quality assessment.,"Thành tiền mỗi dòng là chi phí cho một kết quả của hệ thống. Chi phí trực tiếp của dịch vụ là bình quân gia quyền theo tỷ trọng, cộng ngoại kiểm."
+Equipment,Thiết bị
+Equipment electricity,Điện của thiết bị
+Estimated from plan,Ước tính từ kế hoạch
+External quality assessment,Ngoại kiểm
+External quality assessment per result,Ngoại kiểm một kết quả
+How k is calculated,k được tính thế nào
+Internal QC material,Vật liệu nội kiểm
+Line origin,Nguồn của dòng
+Low volume,Sản lượng thấp
+Parts per result,Linh kiện theo số kết quả
+Patient results,Số kết quả trả
+Results by test system,Kết quả theo hệ thống xét nghiệm
+Service level,Cấp dịch vụ
+Share,Tỷ trọng
+Share source,Nguồn tỷ trọng
+Show more,Xem thêm
+The costing run has {0} warnings and was still costed,"Lần tính có {0} cảnh báo, vẫn tính"
+Total tests,Tổng số test
+Weighted average,Bình quân gia quyền
+Weighted average + external quality assessment = direct cost of the service,Bình quân gia quyền + ngoại kiểm = chi phí trực tiếp dịch vụ
+k factor,Hệ số k
+one result of the system,một kết quả của hệ thống
