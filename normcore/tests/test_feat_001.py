@@ -7,7 +7,14 @@ from frappe.tests.utils import FrappeTestCase
 from normcore.api import access
 from normcore.api.procedure import add_step
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import ensure, make_base, make_procedure, make_user, publish_procedure
+from normcore.tests.utils import (
+	costing_run_inputs,
+	ensure,
+	make_base,
+	make_procedure,
+	make_user,
+	publish_procedure,
+)
 
 K01, K02 = "K01-F1", "K02-F1"
 
@@ -134,6 +141,7 @@ class TestSoLieuTaiChinh(FeatBase):
 				"fiscal_year": 2031,
 				"costing_date": "2031-03-01",
 				"parameter_set": self._ps(),
+				**costing_run_inputs(),
 				"status": "Nháp",
 			}
 		)

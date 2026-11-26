@@ -244,3 +244,17 @@
 | FR-ADM-003 (phần bấm giờ) | `api/test_time_study.py::test_TC_ADM_03_ket_qua_bam_gio_3_ca` |
 | NFR-USE-003 | `unit/test_time_study_ui.py::TestTimeStudyUi` (tĩnh); TC-NFR-05 kiểm tay chưa thực hiện (xem implementation-log) |
 | Quyền (FR-ACC-003, FR-ACC-007) | `test_quyen_time_study_council_khong_quyen`, `test_quyen_time_study_auditor_chi_doc`, `test_quyen_time_study_clinician_theo_khoa`, `test_quyen_time_study_consultant_tao_duoc`, `test_docperm_khop_bang` (nc_time_study); `api/test_time_study.py::test_quyen_apply_va_result`, `test_get_entry_council_bi_tu_choi`, `test_get_entry_auditor_khong_ghi_duoc`; `test_nc_time_study_result.py::test_council_bi_tu_choi`, `test_vai_tro_doc_khop_bang` |
+## FEAT-015 (NORM-41, ghi bởi Dev; QA kiểm định lại)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-COST-001 | `test_TC_COST_19_tao_lan_tinh_thieu_dau_vao_bi_tu_choi`, `test_khoa_dau_vao_khi_da_tinh` (nc_costing_run) |
+| FR-COST-002 | `test_TC_COST_17_dich_vu_chua_khoa_bi_liet_ke_va_bo_qua` (nc_costing_run), `test_TC_COST_17_check_scope_liet_ke` (api/test_costing.py), `unit/test_costing_runner.py::test_TC_COST_17_eligibility` |
+| FR-COST-003 | `test_TC_COST_01_thanh_tien_11_dong_DV_TEST_A` (golden/test_costing_golden.py), `test_TC_COST_01_tren_site_tong_truc_tiep_va_gia` (nc_costing_run), `unit/test_costing_engine.py`, `unit/test_costing_rates.py` |
+| FR-COST-006 | `test_TC_COST_04_gia_thanh_tich_luy_lam_tron`, `test_TC_COST_12_V3_ON_PRICE` (golden/test_costing_golden.py), `test_TC_COST_13_lam_tron_302150_va_302149_99` (unit/test_costing_engine.py) |
+| FR-COST-007 | `test_TC_COST_06_V1_khong_khau_hao` (golden), `test_TC_COST_06_bang_giai_trinh_ghi_khau_hao_bi_loai` (nc_costing_run), `test_TC_COST_06_ghi_chu_khau_hao_bi_loai` (api/test_costing.py), `test_TC_COST_06_loai_gia_khong_khau_hao_don_gia_gio_may` (nc_equipment) |
+| FR-COST-010 | `test_TC_COST_15_dong_giai_trinh_du_nguon` (nc_costing_run), `test_TC_COST_15_get_explanation_du_truong` (api/test_costing.py) |
+| FR-COST-015 | `test_FR_COST_015_tren_50_dich_vu_chay_nen_co_tien_do` (nc_costing_run) |
+| FR-COST-016 | `test_TC_COST_07_V4_thieu_don_gia_THUOCX`, `test_TC_COST_07_chay_runner_dich_vu_khac_van_tinh` (golden), `test_TC_COST_07_V4_tren_site_dich_vu_khac_van_tinh` (nc_costing_run) |
+| Quyền (FR-ACC-003, FR-ACC-007) | `test_quyen_costing_clinician_bi_tu_choi`, `test_quyen_costing_auditor_chi_doc`, `test_quyen_bang_giai_trinh_truong_khoa_theo_khoa` (api/test_costing.py) |
+| Giao diện SCR-DSK-022, 023 | `unit/test_costing_ui.py`, `unit/test_form_buttons_i18n.py` |

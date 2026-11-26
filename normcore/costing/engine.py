@@ -4,7 +4,7 @@ BR-COST-013 (TBD-02: công thức đang chờ Tài chính kế toán xác nhận
 không đặt cứng ở đây).
 """
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -170,3 +170,319 @@ def compute_direct_lines(
 			result = labor_line(line.hospital_qty, line.authority_qty, line.headcount, line.hourly_rate)
 		results.append(result)
 	return results
+
+
+# ---------------------------------------------------------------------------
+# FEAT-015: chi phí trực tiếp đủ sáu cấu phần, giá thành, giá tính toán, giá làm tròn, giải trình
+# ---------------------------------------------------------------------------
+
+# Cấu phần dòng định mức -> loại chi phí (= golden_engine.CATEGORY)
+COMPONENT_CATEGORY = {
+	"LABOR": "LABOR",
+	"DRUG": "DRUG_SUPPLY",
+	"SUPPLY": "DRUG_SUPPLY",
+	"EQUIPMENT": "DEPRECIATION",
+	"INFRA": "DEPRECIATION",
+	"UTILITY": "UTILITY",
+}
+DEPR_EXCLUDED_WARNING = "Khấu hao bị loại (loại giá không kết cấu khấu hao)"
+EXCLUDED_REASON = (
+	"Thanh toán riêng ngoài giá dịch vụ"  # = pricing.EXCLUDED_REASON (giữ engine không import pricing)
+)
+STATUS_OK, STATUS_WARN, STATUS_ERROR = "Thành công", "Cảnh báo", "Lỗi"
+LINE_DIRECT, LINE_ALLOC = "Trực tiếp", "Phân bổ"
+_STALE = "Đơn giá quá hạn tham chiếu"
+_UNVERIFIED = "Đơn giá chưa xác minh"
+_ZERO = Decimal(0)
+
+
+@dataclass(frozen=True)
+class NormLine:
+	"""Một dòng của bộ định mức đã khóa."""
+
+	line_id: str
+	step_id: str
+	component: str
+	resource: str
+	resource_label: str
+	hospital_qty: Decimal
+	authority_qty: Decimal | None = None
+	headcount: int = 1
+	wastage_rate: Decimal = Decimal(0)  # phân số (Percent ÷ 100)
+	excluded: bool = False
+	exclude_reason: str | None = None
+
+
+@dataclass(frozen=True)
+class LineRate:
+	"""Đơn giá của một dòng, do rates.py dựng từ dữ liệu đã nạp."""
+
+	rate: Decimal
+	source: str
+	reuse_count: int = 1
+	warnings: tuple = ()
+	billed_separately: bool = False
+
+
+@dataclass(frozen=True)
+class CostLine:
+	"""Một dòng bảng giải trình (NC Service Cost Line)."""
+
+	line_type: str
+	component: str
+	amount: Decimal
+	step_id: str = ""
+	norm_line_id: str = ""
+	resource_label: str = ""
+	applied_qty: Decimal | None = None
+	unit_rate: Decimal | None = None
+	rate_source: str = ""
+	warning: str = ""
+	allocation_rule: str | None = None
+	driver_value: Decimal | None = None
+	driver_total: Decimal | None = None
+	pool_amount: Decimal | None = None
+
+
+@dataclass(frozen=True)
+class ServiceInput:
+	service: str
+	department: str
+	norm_set: str
+	lines: tuple
+	rates: Mapping  # khóa line_id; None = thiếu đơn giá
+	volume: Decimal | None = None
+
+
+@dataclass(frozen=True)
+class PricingParams:
+	accumulation_mode: str | None
+	accumulation_rate: Decimal
+	obligation_rate: Decimal
+	rounding_unit: Decimal
+	include_depreciation: bool
+
+	@classmethod
+	def from_values(cls, param_set: dict, price_category: dict) -> "PricingParams":
+		"""ASM-015-09: tỷ lệ là Percent ÷ 100; NONE hoặc không tính tích lũy -> None."""
+		mode = param_set.get("accumulation_mode")
+		if mode in (None, "", "NONE") or not price_category.get("include_accumulation", 1):
+			mode = None
+		return cls(
+			mode,
+			Decimal(str(param_set.get("accumulation_rate") or 0)) / 100,
+			Decimal(str(param_set.get("obligation_rate") or 0)) / 100,
+			Decimal(str(param_set.get("rounding_unit") or 0)),
+			bool(price_category.get("include_depreciation", 1)),
+		)
+
+
+@dataclass(frozen=True)
+class PriceResult:
+	full_cost: Decimal
+	accumulation: Decimal
+	obligation: Decimal
+	calculated_price: Decimal
+	rounded_price: Decimal
+
+
+@dataclass(frozen=True)
+class ServiceResult:
+	service: str
+	department: str
+	norm_set: str
+	status: str
+	message: str
+	lines: tuple
+	direct_by_component: dict
+	direct_by_category: dict
+	direct_total: Decimal
+	alloc_by_category: dict
+	price: PriceResult | None
+	volume: Decimal | None = None
+
+
+DirectServiceExtension = Callable[[ServiceInput], "list[CostLine] | None"]
+
+
+def direct_line(line: NormLine, rate: LineRate) -> CostLine:
+	"""BR-COST-002..007 một dòng trực tiếp (golden `direct_lines`)."""
+	from normcore.costing import provisional  # tránh vòng nhập: provisional dùng engine
+
+	if line.excluded:
+		reason = line.exclude_reason or ""
+		return CostLine(
+			LINE_DIRECT,
+			line.component,
+			_ZERO,
+			line.step_id,
+			line.line_id,
+			line.resource_label,
+			_ZERO,
+			_ZERO,
+			f"Loại trừ: {reason}",
+		)
+	q = applied_qty(line.hospital_qty, line.authority_qty)
+	warning = "; ".join(rate.warnings)
+	if rate.billed_separately:
+		return CostLine(
+			LINE_DIRECT,
+			line.component,
+			_ZERO,
+			line.step_id,
+			line.line_id,
+			line.resource_label,
+			q,
+			_ZERO,
+			rate.source,
+			"; ".join((EXCLUDED_REASON, *rate.warnings)),
+		)
+	amount = provisional.line_amount(
+		line.component, q, rate.rate, line.headcount, line.wastage_rate, rate.reuse_count
+	)
+	return CostLine(
+		LINE_DIRECT,
+		line.component,
+		amount,
+		line.step_id,
+		line.line_id,
+		line.resource_label,
+		q,
+		Decimal(rate.rate),
+		rate.source,
+		warning,
+	)
+
+
+def round_price(calc: Decimal, unit: Decimal) -> Decimal:
+	"""BR-COST-014: làm tròn tới bội số của `unit`, HALF_UP."""
+	unit = Decimal(unit)
+	if unit <= 0:
+		raise ValueError("Đơn vị làm tròn phải lớn hơn 0")
+	return (Decimal(calc) / unit).quantize(Decimal(1), rounding=ROUND_HALF_UP) * unit
+
+
+def price_service(direct_total: Decimal, alloc_by_category: Mapping, params: PricingParams) -> PriceResult:
+	"""BR-COST-012 (giá thành = trực tiếp + phân bổ), BR-COST-013, BR-COST-014."""
+	full = Decimal(direct_total) + sum((Decimal(v) for v in alloc_by_category.values()), _ZERO)
+	acc = apply_accumulation(full, params.accumulation_mode, params.accumulation_rate, params.obligation_rate)
+	return PriceResult(
+		full,
+		acc.accumulation,
+		acc.obligation,
+		acc.calculated_price,
+		round_price(acc.calculated_price, params.rounding_unit),
+	)
+
+
+def _sum_by(lines, key) -> dict:
+	out: dict = {}
+	for ln in lines:
+		k = key(ln)
+		out[k] = out.get(k, _ZERO) + ln.amount
+	return out
+
+
+def cost_service(
+	inp: ServiceInput, params: PricingParams, extension: DirectServiceExtension | None = None
+) -> ServiceResult:
+	"""Chi phí trực tiếp của một dịch vụ (chưa phân bổ, chưa giá). FR-COST-003, FR-COST-016."""
+	ordered = sorted(inp.lines, key=lambda x: x.line_id)
+	missing = [
+		f"{x.line_id} ({x.resource})" for x in ordered if not x.excluded and inp.rates.get(x.line_id) is None
+	]
+	if missing:
+		return ServiceResult(
+			inp.service,
+			inp.department,
+			inp.norm_set,
+			STATUS_ERROR,
+			"Dòng thiếu đơn giá: " + ", ".join(missing),
+			(),
+			{},
+			{},
+			_ZERO,
+			{},
+			None,
+			inp.volume,
+		)
+	lines = extension(inp) if extension is not None else None
+	if lines is None:
+		lines = [direct_line(x, inp.rates.get(x.line_id) or LineRate(_ZERO, "")) for x in ordered]
+	lines = tuple(lines)
+	by_comp = _sum_by(lines, lambda x: x.component)
+	by_cat = _sum_by(lines, lambda x: COMPONENT_CATEGORY[x.component])
+	warned = any(_STALE in x.warning or _UNVERIFIED in x.warning for x in lines)
+	return ServiceResult(
+		inp.service,
+		inp.department,
+		inp.norm_set,
+		STATUS_WARN if warned else STATUS_OK,
+		"",
+		lines,
+		by_comp,
+		by_cat,
+		sum((x.amount for x in lines), _ZERO),
+		{},
+		None,
+		inp.volume,
+	)
+
+
+def finish_service(
+	result: ServiceResult, alloc_lines: Sequence[CostLine], params: PricingParams
+) -> ServiceResult:
+	"""Gộp dòng "Phân bổ" và tính giá. Dịch vụ "Lỗi" giữ nguyên, không có giá."""
+	if result.status == STATUS_ERROR:
+		return result
+	alloc = _sum_by(alloc_lines, lambda x: x.component)
+	price = price_service(result.direct_total, alloc, params)
+	return ServiceResult(
+		result.service,
+		result.department,
+		result.norm_set,
+		result.status,
+		result.message,
+		result.lines + tuple(alloc_lines),
+		result.direct_by_component,
+		result.direct_by_category,
+		result.direct_total,
+		alloc,
+		price,
+		result.volume,
+	)
+
+
+COMPONENT_LABEL = {
+	"LABOR": "Nhân công",
+	"DRUG": "Thuốc",
+	"SUPPLY": "Vật tư",
+	"EQUIPMENT": "Thiết bị",
+	"INFRA": "Hạ tầng",
+	"UTILITY": "Tiện ích",
+}
+COMPONENT_ORDER = ("LABOR", "DRUG", "SUPPLY", "EQUIPMENT", "INFRA", "UTILITY")
+
+
+def group_explanation(lines: Sequence[CostLine]) -> list[dict]:
+	"""Gom dòng trực tiếp theo cấu phần rồi theo bước (SCR-DSK-023). Bước trống = dòng chung ("")."""
+	groups = []
+	for comp in COMPONENT_ORDER:
+		rows = [x for x in lines if x.line_type == LINE_DIRECT and x.component == comp]
+		if not rows:
+			continue
+		steps: dict = {}
+		for r in rows:
+			steps.setdefault(r.step_id or "", []).append(r)
+		groups.append(
+			{
+				"component": comp,
+				"label": COMPONENT_LABEL[comp],
+				"total": sum((r.amount for r in rows), _ZERO),
+				"steps": [
+					{"step_id": sid, "total": sum((r.amount for r in rs), _ZERO), "lines": rs}
+					for sid, rs in sorted(steps.items(), key=lambda kv: (kv[0] == "", kv[0]))
+				],
+			}
+		)
+	return groups
