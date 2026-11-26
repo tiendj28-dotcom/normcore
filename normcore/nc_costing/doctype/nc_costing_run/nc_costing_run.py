@@ -126,8 +126,11 @@ class NCCostingRun(Document):
 		self.flags.run_warnings = loader.run_warnings(ctx, eligible)
 		actx = loader.allocation_context(self, ctx)
 
+		self._inputs = {}
+
 		def load(e):
 			inp = loader.load_service(ctx, e)
+			self._inputs[(e["service"], e["department"])] = inp
 			actx.drivers[(e["service"], e["department"])] = allocation.service_drivers(
 				inp, actx.dept_center.get(e["department"])
 			)
@@ -153,12 +156,21 @@ class NCCostingRun(Document):
 		lines = frappe.get_all(
 			"NC Reconciliation Line",
 			{"costing_run": self.name},
-			["cost_center", "cost_category", "over_tolerance", "explanation"],
+			[
+				"cost_center",
+				"cost_category",
+				"over_tolerance",
+				"explanation",
+				"recon_type",
+				"recon_status",
+				"department",
+				"item",
+			],
 		)
 		blockers = reconcile.lock_blockers(lines)
 		if blockers:
 			frappe.throw(
-				_("Còn {0} dòng đối soát vượt ngưỡng chưa có giải trình: {1}").format(
+				_("Còn {0} dòng đối soát vượt ngưỡng hoặc chưa đối soát chưa có giải trình: {1}").format(
 					len(blockers), "; ".join(blockers)
 				)
 			)
@@ -302,6 +314,12 @@ def execute_costing(run, eligible, background=True):
 				doc, reconcile.reconcile(actx.outcome.pools, actx.tolerance, actx.include_depreciation, depr)
 			)
 			warnings = actx.outcome.warnings
+		pctx = loader.physical_context(doc, results, getattr(doc, "_inputs", {}))
+		if pctx.available:
+			rows = reconcile.material_rows(
+				pctx.calc, pctx.issued, pctx.units, pctx.item_meta, pctx.departments_with_data, pctx.material_tol
+			) + reconcile.volume_rows(pctx.results, pctx.his, pctx.volume_tol)
+			writer.write_physical_reconciliation(doc, rows, pctx.dept_center)
 		doc.db_set("run_warnings", "\n".join(doc.flags.run_warnings or []) or None, update_modified=False)
 		doc.db_set("allocation_warnings", "\n".join(warnings) or None)
 	except Exception:

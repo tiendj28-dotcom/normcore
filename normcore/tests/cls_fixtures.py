@@ -180,8 +180,31 @@ def _norm_set(system, proc):
 	return ns
 
 
-def make_cls_golden():
+def make_stock_issues(boxes=None):
+	"""FEAT-037 (ASM-037-19): xuất kho năm 2026 của khoa XN khớp lượng tính được của bộ 2A (lệch 0%), riêng
+	HC_GLU xuất 94 hộp (biến thể V6, lệch 3,27%, không vượt). `boxes` ghi đè số hộp theo mặt hàng."""
+	from decimal import Decimal
+
+	from normcore.costing import reconcile
+	from normcore.tests.golden import cls_fixture as cf36
+
+	calc = reconcile.material_quantities([cf36.service()])
+	for (dept, item), qty in sorted(calc.items()):
+		n = (boxes or {}).get(item, 94 if item == "HC_GLU" else qty / Decimal(str(gc.ITEM[item]["units"])))
+		frappe.get_doc(
+			{
+				"doctype": "NC Stock Issue Actual",
+				"fiscal_year": 2026,
+				"department": DEPT,
+				"item": item,
+				"issued_qty": float(n),
+			}
+		).insert(ignore_permissions=True)
+
+
+def make_cls_golden(stock_issue=True):
 	"""Bộ 2A trên site. Trả frappe._dict(params, dept, other_dept, run_kwargs, systems, norm_sets).
+	`stock_issue` False: không có số liệu xuất kho (TC-CLS-19).
 
 	Qtb = 300.000 (EQ_A), 100.000 (EQ_B) nhờ hệ thống phụ "Ngừng dùng" (ASM-036-10)."""
 	params, other_dept, other_sets = cf.make_golden_world()
@@ -274,6 +297,8 @@ def make_cls_golden():
 	proc = make_procedure("GLU", DEPT)
 	publish_procedure(proc, "QĐ-CLS", "2026-01-01")
 	norm_sets = {c: _norm_set(c, proc.name) for c in ("GLU-A", "GLU-B")}
+	if stock_issue:
+		make_stock_issues()
 	return frappe._dict(
 		params=params, dept=DEPT, other_dept=other_dept, other_sets=other_sets, norm_sets=norm_sets
 	)
