@@ -43,9 +43,10 @@ class TestChainStageRoute(FrappeTestCase):
 		self.assertTrue(node, "cần node để chạy kiểm tra JS")
 		src = open(self.JS).read()
 		start = src.index("const NC_ROUTE_PARAMS")
-		end = src.index("// Bộ lọc \"Tình trạng chuỗi\"")
-		script = textwrap.dedent(
-			"""
+		end = src.index('// Bộ lọc "Tình trạng chuỗi"')
+		script = (
+			textwrap.dedent(
+				"""
 			const frappe = {route_options: {nc_chain_stage: "no_procedure", nc_department: "K01", status: "x"}};
 			let replaced = null;
 			const window = {
@@ -56,7 +57,9 @@ class TestChainStageRoute(FrappeTestCase):
 			const taken = normcore_take_route_params();
 			console.log(JSON.stringify({taken, ro: frappe.route_options, url: replaced}));
 			"""
-		) % src[start:end]
+			)
+			% src[start:end]
+		)
 		out = subprocess.run([node, "-e", script], capture_output=True, text=True, check=True).stdout
 		r = json.loads(out)
 		self.assertEqual(r["taken"], {"nc_chain_stage": "no_procedure", "nc_department": "K01"})
@@ -70,9 +73,10 @@ class TestChainStageRoute(FrappeTestCase):
 		import textwrap
 
 		src = open(self.JS).read()
-		body = src[src.index("const NC_MAX_FILTER") : src.index("// Cột \"Tình trạng chuỗi\"")]
-		script = textwrap.dedent(
-			"""
+		body = src[src.index("const NC_MAX_FILTER") : src.index('// Cột "Tình trạng chuỗi"')]
+		script = (
+			textwrap.dedent(
+				"""
 			const log = [];
 			const __ = (s) => s;
 			const frappe = {
@@ -111,8 +115,12 @@ class TestChainStageRoute(FrappeTestCase):
 				console.log(JSON.stringify({first, second, std: listview.filter_area.get_standard_filters()}));
 			})();
 			"""
-		) % body
-		out = subprocess.run([shutil.which("node"), "-e", script], capture_output=True, text=True, check=True).stdout
+			)
+			% body
+		)
+		out = subprocess.run(
+			[shutil.which("node"), "-e", script], capture_output=True, text=True, check=True
+		).stdout
 		r = json.loads(out)
 		self.assertEqual(r["first"]["log"], ["department=K01", "nc_chain_stage=a", "orig"])
 		self.assertEqual(r["second"]["log"], ["department=K02", "nc_chain_stage=b", "orig"])
