@@ -48,7 +48,9 @@ class TestNCReconciliationLine(FrappeTestCase):
 
 	def test_patch_backfill_reconciliation_type(self):
 		line = self._insert(cost_center="K01", cost_category="LABOR")
-		frappe.db.sql(f"UPDATE `tab{DT}` SET recon_type = NULL, recon_status = NULL WHERE name = %s", line.name)
+		frappe.db.sql(
+			f"UPDATE `tab{DT}` SET recon_type = NULL, recon_status = NULL WHERE name = %s", line.name
+		)
 		patch.execute()
 		patch.execute()  # chạy lại không đổi gì thêm
 		got = frappe.db.get_value(DT, line.name, ["recon_type", "recon_status"])

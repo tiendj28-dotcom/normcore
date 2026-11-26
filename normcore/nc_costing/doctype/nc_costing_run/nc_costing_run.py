@@ -317,7 +317,12 @@ def execute_costing(run, eligible, background=True):
 		pctx = loader.physical_context(doc, results, getattr(doc, "_inputs", {}))
 		if pctx.available:
 			rows = reconcile.material_rows(
-				pctx.calc, pctx.issued, pctx.units, pctx.item_meta, pctx.departments_with_data, pctx.material_tol
+				pctx.calc,
+				pctx.issued,
+				pctx.units,
+				pctx.item_meta,
+				pctx.departments_with_data,
+				pctx.material_tol,
 			) + reconcile.volume_rows(pctx.results, pctx.his, pctx.volume_tol)
 			writer.write_physical_reconciliation(doc, rows, pctx.dept_center)
 		doc.db_set("run_warnings", "\n".join(doc.flags.run_warnings or []) or None, update_modified=False)

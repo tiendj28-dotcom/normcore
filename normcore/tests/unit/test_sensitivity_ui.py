@@ -62,7 +62,11 @@ class TestSensitivityUI(unittest.TestCase):
 	def test_loi_role_alert_va_kiem_tra_phia_may_khach(self):
 		self.assertIn('class="nc-sens__error" role="alert"', VUE)
 		self.assertIn('role="alert"', VUE)
-		for msg in ("Assumed volume must be greater than 0", "Assumed price must not be negative", "Enter the annual contract cost"):
+		for msg in (
+			"Assumed volume must be greater than 0",
+			"Assumed price must not be negative",
+			"Enter the annual contract cost",
+		):
 			self.assertIn(msg, VUE)
 		self.assertIn("Ctrl", VUE)
 
@@ -72,7 +76,9 @@ class TestSensitivityUI(unittest.TestCase):
 			sorted(r["role"] for r in d["roles"]),
 			["NC Admin", "NC Auditor", "NC Department Head", "NC Director", "NC Finance"],
 		)
-		self.assertEqual((d["name"], d["page_name"], d["module"]), ("sensitivity", "sensitivity", "NC Costing"))
+		self.assertEqual(
+			(d["name"], d["page_name"], d["module"]), ("sensitivity", "sensitivity", "NC Costing")
+		)
 
 	def test_loi_vao_tu_nc_service_cost(self):
 		t = SERVICE_COST_JS.read_text(encoding="utf-8")

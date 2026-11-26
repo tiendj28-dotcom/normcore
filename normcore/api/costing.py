@@ -498,7 +498,9 @@ def get_physical_reconciliation(run):
 	rows = _recon_lines(run)
 	items = _names("NC Item", "item_name", {r.item for r in rows if r.item})
 	norm_uom = _names("NC Item", "norm_uom", {r.item for r in rows if r.item})
-	services = _names("NC Technical Service", "service_name", {r.technical_service for r in rows if r.technical_service})
+	services = _names(
+		"NC Technical Service", "service_name", {r.technical_service for r in rows if r.technical_service}
+	)
 	depts = _names("NC Department", "department_name", {r.department for r in rows if r.department})
 
 	def view(r):
@@ -539,9 +541,15 @@ def get_physical_reconciliation(run):
 	)
 	blocked = sum(1 for r in rows if reconcile.needs_explanation(r))
 	calculated = doc.status == CALCULATED
-	tol = frappe.db.get_value(
-		"NC Costing Parameter Set", doc.parameter_set, ["material_recon_tolerance", "volume_recon_tolerance"], as_dict=True
-	) or {}
+	tol = (
+		frappe.db.get_value(
+			"NC Costing Parameter Set",
+			doc.parameter_set,
+			["material_recon_tolerance", "volume_recon_tolerance"],
+			as_dict=True,
+		)
+		or {}
+	)
 	return {
 		"run": doc.name,
 		"status": doc.status,
@@ -705,7 +713,13 @@ def _stored_view(sc) -> dict:
 	}
 	alloc = sum(
 		sc.get(f) or 0
-		for f in ("alloc_labor", "alloc_drug_supply", "alloc_depreciation", "alloc_utility", "alloc_management")
+		for f in (
+			"alloc_labor",
+			"alloc_drug_supply",
+			"alloc_depreciation",
+			"alloc_utility",
+			"alloc_management",
+		)
 	)
 	return {
 		"status": sc.calc_status,
@@ -820,7 +834,10 @@ def get_sensitivity_base(service_cost):
 					"item_name": meta[i].item_name if i in meta else i,
 					"uom": meta[i].uom if i in meta else None,
 					"norm_units": meta[i].norm_units_per_purchase_unit if i in meta else None,
-					"purchase_price": _f(rates.get(i, Decimal(0)) * Decimal(str((meta[i].norm_units_per_purchase_unit if i in meta else 1) or 1)))
+					"purchase_price": _f(
+						rates.get(i, Decimal(0))
+						* Decimal(str((meta[i].norm_units_per_purchase_unit if i in meta else 1) or 1))
+					)
 					if i in rates
 					else None,
 				}
@@ -841,7 +858,8 @@ def run_sensitivity(service_cost, overrides=None):
 		frappe.throw(_("Giả định không hợp lệ"))
 	snap = _snapshot_for(run)
 	units = {
-		k: Decimal(str(v.norm_units_per_purchase_unit or 1)) for k, v in _units(set(ov.get("prices") or {})).items()
+		k: Decimal(str(v.norm_units_per_purchase_unit or 1))
+		for k, v in _units(set(ov.get("prices") or {})).items()
 	}
 	try:
 		trial = sensitivity.trial(snap, sc.technical_service, sc.department, ov, units)
@@ -851,7 +869,11 @@ def run_sensitivity(service_cost, overrides=None):
 	warnings = []
 	if run.status == CALCULATED:
 		base = next(
-			(r for r in snapshot.recompute(snap).results if (r.service, r.department) == (sc.technical_service, sc.department)),
+			(
+				r
+				for r in snapshot.recompute(snap).results
+				if (r.service, r.department) == (sc.technical_service, sc.department)
+			),
 			None,
 		)
 		if base is None or base.price is None or _f(base.price.full_cost) != _f(origin["full_cost"]):
@@ -868,7 +890,9 @@ def run_sensitivity(service_cost, overrides=None):
 	stored_systems = {
 		x.test_system: x
 		for x in frappe.get_all(
-			"NC Test System Cost", {"parent": sc.name, "parenttype": COST}, ["test_system", "k_factor", "direct_cost"]
+			"NC Test System Cost",
+			{"parent": sc.name, "parenttype": COST},
+			["test_system", "k_factor", "direct_cost"],
 		)
 	}
 	systems = [
@@ -876,9 +900,18 @@ def run_sensitivity(service_cost, overrides=None):
 			"test_system": x.test_system,
 			"k_origin": stored_systems[x.test_system].k_factor if x.test_system in stored_systems else None,
 			"k_trial": _f(x.k_factor),
-			"direct_origin": stored_systems[x.test_system].direct_cost if x.test_system in stored_systems else None,
+			"direct_origin": stored_systems[x.test_system].direct_cost
+			if x.test_system in stored_systems
+			else None,
 			"direct_trial": _f(x.direct_cost),
 		}
 		for x in trial.test_system_costs
 	]
-	return {"trial": t, "origin": origin, "diff": diff, "systems": systems, "warnings": warnings, "note": _("Kết quả thử, không lưu")}
+	return {
+		"trial": t,
+		"origin": origin,
+		"diff": diff,
+		"systems": systems,
+		"warnings": warnings,
+		"note": _("Kết quả thử, không lưu"),
+	}

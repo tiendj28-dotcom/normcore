@@ -18,7 +18,12 @@ class TestCostingPhysicalApi(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
 		self.addCleanup(frappe.db.rollback)
-		for u, r in ((FIN, "NC Finance"), (AUD, "NC Auditor"), (CLIN, "NC Clinician"), (HEAD, "NC Department Head")):
+		for u, r in (
+			(FIN, "NC Finance"),
+			(AUD, "NC Auditor"),
+			(CLIN, "NC Clinician"),
+			(HEAD, "NC Department Head"),
+		):
 			make_user(u, r)
 		self.world = fx.make_cls_golden()
 		frappe.db.set_value("NC Stock Issue Actual", {"item": "HC_GLU"}, "issued_qty", 100)
@@ -40,18 +45,50 @@ class TestCostingPhysicalApi(FrappeTestCase):
 
 	def test_dang_tra_ve_va_can_lock(self):
 		r = self._physical()
-		self.assertEqual((r["status"], r["available"], r["material_tolerance"], r["volume_tolerance"]), ("Đã tính", 1, 5, 2))
+		self.assertEqual(
+			(r["status"], r["available"], r["material_tolerance"], r["volume_tolerance"]),
+			("Đã tính", 1, 5, 2),
+		)
 		glu = next(x for x in r["material"] if x["item"] == "HC_GLU")
-		self.assertEqual((glu["department"], glu["actual_qty"], glu["variance_pct"], glu["over_tolerance"], glu["needs_explanation"]), (fx.DEPT, 20000, 9.07, 1, True))
+		self.assertEqual(
+			(
+				glu["department"],
+				glu["actual_qty"],
+				glu["variance_pct"],
+				glu["over_tolerance"],
+				glu["needs_explanation"],
+			),
+			(fx.DEPT, 20000, 9.07, 1, True),
+		)
 		self.assertEqual(round(glu["diff_qty"], 2), round(20000 - glu["calculated_qty"], 2))
 		vol = r["volume"][0]
-		self.assertEqual((vol["technical_service"], vol["calculated_qty"], vol["actual_qty"], vol["variance_pct"], vol["over_tolerance"], vol["needs_explanation"]), ("GLU", 16000, 15500, 3.23, 1, False))
-		self.assertEqual((r["blocked"], r["can_explain"], r["can_lock"]), (len([x for x in r["material"] if x["needs_explanation"]]) + sum(1 for x in api.get_reconciliation(self.run.name)["lines"] if x["needs_explanation"]), True, False))
+		self.assertEqual(
+			(
+				vol["technical_service"],
+				vol["calculated_qty"],
+				vol["actual_qty"],
+				vol["variance_pct"],
+				vol["over_tolerance"],
+				vol["needs_explanation"],
+			),
+			("GLU", 16000, 15500, 3.23, 1, False),
+		)
+		self.assertEqual(
+			(r["blocked"], r["can_explain"], r["can_lock"]),
+			(
+				len([x for x in r["material"] if x["needs_explanation"]])
+				+ sum(1 for x in api.get_reconciliation(self.run.name)["lines"] if x["needs_explanation"]),
+				True,
+				False,
+			),
+		)
 
 	def test_get_reconciliation_chi_dong_tai_chinh_va_dai_vat_chat(self):
 		r = api.get_reconciliation(self.run.name)
 		self.assertTrue(all(x["cost_category"] for x in r["lines"]))
-		self.assertEqual(r["physical"], {"available": 1, "material_blocked": 1, "unreconciled": 0, "volume_warnings": 1})
+		self.assertEqual(
+			r["physical"], {"available": 1, "material_blocked": 1, "unreconciled": 0, "volume_warnings": 1}
+		)
 		self.assertEqual(api.get_run_results(self.run.name)["physical_unreconciled"], 0)
 
 	def test_giai_trinh_va_khoa(self):
@@ -71,7 +108,10 @@ class TestCostingPhysicalApi(FrappeTestCase):
 		api.start_costing(run.name)
 		self.assertEqual(api.get_run_results(run.name)["physical_unreconciled"], 1)
 		r = api.get_physical_reconciliation(run.name)
-		self.assertEqual([(x["item"], x["recon_status"], x["variance_pct"]) for x in r["material"]], [(None, "Chưa đối soát", None)])
+		self.assertEqual(
+			[(x["item"], x["recon_status"], x["variance_pct"]) for x in r["material"]],
+			[(None, "Chưa đối soát", None)],
+		)
 
 	def test_quyen(self):
 		line = self._physical()["material"][0]["name"]

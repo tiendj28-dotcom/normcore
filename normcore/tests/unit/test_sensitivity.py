@@ -73,8 +73,14 @@ class TestSensitivity(unittest.TestCase):
 	def test_dich_vu_thuong_va_khong_co(self):
 		from normcore.costing import engine
 
-		plain = engine.ServiceInput("SV", "K", "NS", (engine.NormLine("L1", "S", "DRUG", "IT", "Thuốc", D(1)),),
-			{"L1": engine.LineRate(D(10), "src")}, D(100))
+		plain = engine.ServiceInput(
+			"SV",
+			"K",
+			"NS",
+			(engine.NormLine("L1", "S", "DRUG", "IT", "Thuốc", D(1)),),
+			{"L1": engine.LineRate(D(10), "src")},
+			D(100),
+		)
 		out = s.apply(plain, {"volume": 50, "prices": {"IT": 20}}, {"IT": D(2)})
 		self.assertEqual((out.volume, out.rates["L1"].rate), (D(50), D("10.0000")))
 		self.assertIn("giả định", out.rates["L1"].source)

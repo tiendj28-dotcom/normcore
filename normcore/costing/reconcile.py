@@ -147,7 +147,18 @@ def material_rows(
 	for dept in sorted({d for d, _ in calc}):
 		if dept not in has_data:  # FR-COST-029, A-08
 			rows.append(
-				PhysRow(MATERIAL, dept, None, None, None, None, None, False, UNRECONCILED, "Khoa chưa có số liệu xuất kho")
+				PhysRow(
+					MATERIAL,
+					dept,
+					None,
+					None,
+					None,
+					None,
+					None,
+					False,
+					UNRECONCILED,
+					"Khoa chưa có số liệu xuất kho",
+				)
 			)
 	for (dept, item), qty in sorted(calc.items()):
 		if dept not in has_data or qty <= 0:
@@ -156,11 +167,26 @@ def material_rows(
 		need_unit = bool((item_meta.get(item) or {}).get("norm_required"))
 		raw = issued.get((dept, item))
 		if raw is None or Decimal(raw) == 0:
-			rows.append(PhysRow(MATERIAL, dept, item, None, qty, None, None, False, UNRECONCILED, "Không có dòng xuất kho"))
+			rows.append(
+				PhysRow(
+					MATERIAL, dept, item, None, qty, None, None, False, UNRECONCILED, "Không có dòng xuất kho"
+				)
+			)
 			continue
 		if need_unit and not unit:
 			rows.append(
-				PhysRow(MATERIAL, dept, item, None, qty, None, None, False, UNRECONCILED, "Thiếu số đơn vị định mức")
+				PhysRow(
+					MATERIAL,
+					dept,
+					item,
+					None,
+					qty,
+					None,
+					None,
+					False,
+					UNRECONCILED,
+					"Thiếu số đơn vị định mức",
+				)
 			)
 			continue
 		actual = Decimal(raw) * Decimal(unit or 1)
@@ -171,14 +197,25 @@ def material_rows(
 
 
 def volume_rows(results: Mapping, his: Mapping, tolerance) -> list[PhysRow]:
-	"""BR-CLS-015: (số kết quả trả − sản lượng HIS) ÷ HIS × 100; cảnh báo, không chặn khóa."""
+	"""BR-CLS-015: (số kết quả trả - sản lượng HIS) / HIS x 100; cảnh báo, không chặn khóa."""
 	tol = Decimal(str(tolerance))
 	rows = []
 	for (service, dept), res in sorted(results.items()):
 		h = his.get((service, dept))
 		if h is None or Decimal(h) == 0:
 			rows.append(
-				PhysRow(VOLUME, dept, None, service, Decimal(res), h, None, True, RECONCILED, "Thiếu sản lượng HIS")
+				PhysRow(
+					VOLUME,
+					dept,
+					None,
+					service,
+					Decimal(res),
+					h,
+					None,
+					True,
+					RECONCILED,
+					"Thiếu sản lượng HIS",
+				)
 			)
 			continue
 		pct = _pct(Decimal(res) - Decimal(h), h)

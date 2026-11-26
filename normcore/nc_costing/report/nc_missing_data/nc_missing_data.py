@@ -76,7 +76,14 @@ def _compliance_data(all_codes):
 		r.name: cint(r.compliance_required)
 		for r in frappe.get_all("NC Equipment Type", fields=["name", "compliance_required"])
 	}
-	eq = {r.name: {"name": r.name, "type": r.equipment_type, "compliance_required": types.get(r.equipment_type, 0)} for r in rows}
+	eq = {
+		r.name: {
+			"name": r.name,
+			"type": r.equipment_type,
+			"compliance_required": types.get(r.equipment_type, 0),
+		}
+		for r in rows
+	}
 	recs: dict = {}
 	for r in frappe.get_all(
 		"NC Equipment Compliance",
@@ -84,7 +91,9 @@ def _compliance_data(all_codes):
 		["equipment", "performed_on", "expiry_date"],
 	):
 		if r.performed_on and r.expiry_date:
-			recs.setdefault(r.equipment, []).append({"performed_on": r.performed_on, "expiry_date": r.expiry_date})
+			recs.setdefault(r.equipment, []).append(
+				{"performed_on": r.performed_on, "expiry_date": r.expiry_date}
+			)
 	return eq, recs
 
 
@@ -103,7 +112,10 @@ def collect(filters):
 	eligible = info["eligible"]
 	ctx = loader.load_context(run, eligible)
 	on = getdate(run.costing_date)
-	studied = {(r.technical_service, r.department) for r in frappe.get_all("NC Time Study", fields=["technical_service", "department"])}
+	studied = {
+		(r.technical_service, r.department)
+		for r in frappe.get_all("NC Time Study", fields=["technical_service", "department"])
+	}
 	codes = {c for e in eligible for c in _equipment_codes(ctx, e)}
 	eq_docs, eq_records = _compliance_data(codes)
 	pairs = []
@@ -155,8 +167,22 @@ def execute(filters=None):
 	if not (filters.get("fiscal_year") and filters.get("parameter_set") and filters.get("price_category")):
 		return _columns(), [], None, None, []
 	gaps, skipped, scanned = collect(filters)
-	names = {r.name: r.service_name for r in frappe.get_all("NC Technical Service", {"name": ["in", sorted({g.service for g in gaps}) or [""]]}, ["name", "service_name"])}
-	depts = {r.name: r.department_name for r in frappe.get_all("NC Department", {"name": ["in", sorted({g.department for g in gaps}) or [""]]}, ["name", "department_name"])}
+	names = {
+		r.name: r.service_name
+		for r in frappe.get_all(
+			"NC Technical Service",
+			{"name": ["in", sorted({g.service for g in gaps}) or [""]]},
+			["name", "service_name"],
+		)
+	}
+	depts = {
+		r.name: r.department_name
+		for r in frappe.get_all(
+			"NC Department",
+			{"name": ["in", sorted({g.department for g in gaps}) or [""]]},
+			["name", "department_name"],
+		)
+	}
 	rows = [
 		{
 			"service": g.service,
@@ -171,7 +197,12 @@ def execute(filters=None):
 	if filters.get("kind"):
 		rows = [r for r in rows if r["kind"] == filters.kind]
 	summary = [
-		{"label": k, "value": sum(1 for g in gaps if g.kind == k), "indicator": "red" if any(g.kind == k for g in gaps) else "green", "datatype": "Int"}
+		{
+			"label": k,
+			"value": sum(1 for g in gaps if g.kind == k),
+			"indicator": "red" if any(g.kind == k for g in gaps) else "green",
+			"datatype": "Int",
+		}
 		for k in missing_data.KINDS
 	]
 	message = (

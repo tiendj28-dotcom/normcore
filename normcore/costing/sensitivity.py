@@ -87,7 +87,9 @@ def _equipment(eq: cls.EquipmentInput, spec) -> cls.EquipmentInput:
 
 def apply(inp: engine.ServiceInput, overrides: Mapping, units: Mapping) -> engine.ServiceInput:
 	"""Bản sao của `inp` với giả định; ném `InvalidAssumption`. Không sửa `inp`."""
-	if not overrides or not any(overrides.get(k) for k in ("volume", "system_volumes", "prices", "equipment_modes")):
+	if not overrides or not any(
+		overrides.get(k) for k in ("volume", "system_volumes", "prices", "equipment_modes")
+	):
 		raise InvalidAssumption("Nhập ít nhất một giả định")
 	c = inp.paraclinical
 	out = inp
@@ -125,7 +127,9 @@ def apply(inp: engine.ServiceInput, overrides: Mapping, units: Mapping) -> engin
 					systems=tuple(
 						replace(
 							s,
-							rates=_reprice(s.rates, [x.norm.line_id for x in s.lines if x.norm.resource == item], new),
+							rates=_reprice(
+								s.rates, [x.norm.line_id for x in s.lines if x.norm.resource == item], new
+							),
 							iqc=tuple(
 								replace(i, rate=_assumed(i.rate, new)) if i.item == item else i for i in s.iqc
 							),
@@ -148,7 +152,9 @@ def apply(inp: engine.ServiceInput, overrides: Mapping, units: Mapping) -> engin
 	return out
 
 
-def trial(snap: dict, service: str, department: str, overrides: Mapping, units: Mapping) -> engine.ServiceResult:
+def trial(
+	snap: dict, service: str, department: str, overrides: Mapping, units: Mapping
+) -> engine.ServiceResult:
 	"""Giá thành thử của một cặp (dịch vụ, khoa) từ ảnh chụp; không đọc, không ghi CSDL."""
 	inputs = [snapshot.from_plain(x) for x in snap["inputs"]]
 	pos = next((i for i, x in enumerate(inputs) if (x.service, x.department) == (service, department)), None)

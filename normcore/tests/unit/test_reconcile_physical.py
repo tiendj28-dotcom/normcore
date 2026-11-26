@@ -16,8 +16,16 @@ def ln(lid, level, resource="IT", qty="1", apply_k=False, comp="DRUG", wastage="
 def system(lines, iqc=(), qbn="1000", k_actual=True):
 	a = cls.AuxCounts(D(0), D(0), D(0), D(0), D(0)) if k_actual else cls.AuxCounts()
 	return cls.TestSystemInput(
-		code="S", norm_set=None, equipment="E", qbn=D(qbn), actual=a, run_days=D(300), batch=D(10),
-		tests_per_tube=D(4), lines=tuple(lines), iqc=tuple(iqc),
+		code="S",
+		norm_set=None,
+		equipment="E",
+		qbn=D(qbn),
+		actual=a,
+		run_days=D(300),
+		batch=D(10),
+		tests_per_tube=D(4),
+		lines=tuple(lines),
+		iqc=tuple(iqc),
 	)
 
 
@@ -52,7 +60,15 @@ class TestQuantities(unittest.TestCase):
 	def test_noi_kiem_va_bo_qua(self):
 		iqc = [cls.IqcLine("QC", D(2), D(3), D(1), D(2))]
 		q = self.q(
-			[ln("L1", "RESULT", "L", comp="LABOR"), ln("L2", "RESULT", "X", excluded=True), ln("L3", "RESULT", "", )],
+			[
+				ln("L1", "RESULT", "L", comp="LABOR"),
+				ln("L2", "RESULT", "X", excluded=True),
+				ln(
+					"L3",
+					"RESULT",
+					"",
+				),
+			],
 			iqc=iqc,
 		)
 		self.assertEqual(q, {("XN", "QC"): D(2) * 3 * 300 / 2 * 1})
@@ -60,7 +76,7 @@ class TestQuantities(unittest.TestCase):
 	def test_khong_phai_can_lam_sang_va_cong_don(self):
 		plain = engine.ServiceInput("SV", "XN", "", (), {}, D(1), None)
 		two = [service([system([ln("L1", "RESULT", "A")])]), service([system([ln("L1", "RESULT", "A")])])]
-		self.assertEqual(r.material_quantities([plain] + two), {("XN", "A"): D(2000)})
+		self.assertEqual(r.material_quantities([plain, *two]), {("XN", "A"): D(2000)})
 
 
 class TestRows(unittest.TestCase):
@@ -77,7 +93,10 @@ class TestRows(unittest.TestCase):
 
 	def test_khoa_chua_doi_soat(self):
 		rows = self.rows({("XN", "HC"): D(5), ("HH", "HC"): D(5)}, {("HH", "HC"): D(5)}, has=("HH",))
-		self.assertEqual([(x.department, x.item, x.status) for x in rows], [("HH", "HC", r.RECONCILED), ("XN", None, r.UNRECONCILED)])
+		self.assertEqual(
+			[(x.department, x.item, x.status) for x in rows],
+			[("HH", "HC", r.RECONCILED), ("XN", None, r.UNRECONCILED)],
+		)
 		self.assertFalse(rows[1].over_tolerance)
 
 	def test_thieu_xuat_kho_hoac_don_vi(self):
@@ -111,7 +130,10 @@ class TestBlockers(unittest.TestCase):
 		m = dict(recon_type="Vật chất", department="XN", item="HC", over_tolerance=1)
 		u = dict(recon_type="Vật chất", department="XN", item=None, recon_status="Chưa đối soát")
 		v = dict(recon_type="Sản lượng", over_tolerance=1)
-		self.assertEqual(r.lock_blockers([f, m, u, v]), ["K1 · LABOR", "Vật chất · XN · HC", "Vật chất · XN · Chưa đối soát"])
+		self.assertEqual(
+			r.lock_blockers([f, m, u, v]),
+			["K1 · LABOR", "Vật chất · XN · HC", "Vật chất · XN · Chưa đối soát"],
+		)
 		ok = [dict(x, explanation="  lý do ") for x in (f, m, u)]
 		self.assertEqual(r.lock_blockers(ok), [])
 		self.assertFalse(r.needs_explanation(dict(m, over_tolerance=0)))

@@ -22,8 +22,14 @@ class TestCollect(unittest.TestCase):
 	def test_nam_loai_va_thu_tu(self):
 		pairs = [
 			m.PairData("B", "K", plain("B", volume=None)),
-			m.PairData("A", "K", plain("A", rate=False), has_time_study=False, norm_lines_basis={"L2": "Bấm giờ", "L3": "Định mức"},
-				missing_compliance=(("EQ1", "Kiểm định"),)),
+			m.PairData(
+				"A",
+				"K",
+				plain("A", rate=False),
+				has_time_study=False,
+				norm_lines_basis={"L2": "Bấm giờ", "L3": "Định mức"},
+				missing_compliance=(("EQ1", "Kiểm định"),),
+			),
 			m.PairData("C", "K", None, systems_without_plan=("S1",), systems_without_volume=("S2",)),
 		]
 		got = [(g.service, g.kind, g.detail) for g in m.collect(pairs)]
@@ -40,7 +46,13 @@ class TestCollect(unittest.TestCase):
 		)
 
 	def test_loai_tru_khong_thieu_gia_va_khong_bam_gio_neu_khong_dong(self):
-		p = m.PairData("A", "K", plain("A", rate=False, excluded=True), has_time_study=False, norm_lines_basis={"L1": "Định mức"})
+		p = m.PairData(
+			"A",
+			"K",
+			plain("A", rate=False, excluded=True),
+			has_time_study=False,
+			norm_lines_basis={"L1": "Định mức"},
+		)
 		self.assertEqual(m.collect([p]), [])
 
 	def test_chan_doan_hinh_anh_khong_can_ke_hoach(self):
@@ -55,8 +67,8 @@ class TestCollect(unittest.TestCase):
 		s0 = c.systems[0]
 		rates = dict(s0.rates)
 		rates["L02"] = None
-		iqc = (replace(s0.iqc[0], rate=None),) + s0.iqc[1:]
-		c = replace(c, systems=(replace(s0, rates=rates, iqc=iqc),) + c.systems[1:])
+		iqc = (replace(s0.iqc[0], rate=None), *s0.iqc[1:])
+		c = replace(c, systems=(replace(s0, rates=rates, iqc=iqc), *c.systems[1:]))
 		inp = replace(inp, paraclinical=c)
 		got = [g.detail for g in m.collect([m.PairData("GLU", "XN", inp)])]
 		self.assertTrue(any(d.startswith("GLU-A · L02") for d in got), got)

@@ -24,29 +24,56 @@ class TestCostingSensitivityApi(FrappeTestCase):
 		frappe.set_user("Administrator")
 		self.addCleanup(frappe.db.rollback)
 		self.world = fx.make_cls_golden()
-		for u, r in ((FIN, "NC Finance"), (AUD, "NC Auditor"), (CLIN, "NC Clinician"), (HEAD_IN, "NC Department Head"), (HEAD_OUT, "NC Department Head")):
+		for u, r in (
+			(FIN, "NC Finance"),
+			(AUD, "NC Auditor"),
+			(CLIN, "NC Clinician"),
+			(HEAD_IN, "NC Department Head"),
+			(HEAD_OUT, "NC Department Head"),
+		):
 			make_user(u, r)
 		add_user_permission("NC Department", fx.DEPT, HEAD_IN)
 		add_user_permission("NC Department", self.world.other_dept, HEAD_OUT)
 		self.run = fx.make_run(self.world)
 		frappe.set_user(FIN)
 		api.start_costing(self.run.name)
-		self.sc = frappe.db.get_value("NC Service Cost", {"costing_run": self.run.name, "technical_service": "GLU"})
+		self.sc = frappe.db.get_value(
+			"NC Service Cost", {"costing_run": self.run.name, "technical_service": "GLU"}
+		)
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
 	def _state(self):
 		run = frappe.db.get_value("NC Costing Run", self.run.name, ["modified", "status", "snapshot_hash"])
-		costs = frappe.get_all("NC Service Cost", {"costing_run": self.run.name}, ["name", "modified", "full_cost", "rounded_price"], order_by="name")
-		lines = frappe.get_all("NC Service Cost Line", {"parenttype": "NC Service Cost"}, ["name", "amount", "modified"], order_by="name")
-		recon = frappe.get_all("NC Reconciliation Line", {"costing_run": self.run.name}, ["name", "modified", "variance_pct", "explanation"], order_by="name")
+		costs = frappe.get_all(
+			"NC Service Cost",
+			{"costing_run": self.run.name},
+			["name", "modified", "full_cost", "rounded_price"],
+			order_by="name",
+		)
+		lines = frappe.get_all(
+			"NC Service Cost Line",
+			{"parenttype": "NC Service Cost"},
+			["name", "amount", "modified"],
+			order_by="name",
+		)
+		recon = frappe.get_all(
+			"NC Reconciliation Line",
+			{"costing_run": self.run.name},
+			["name", "modified", "variance_pct", "explanation"],
+			order_by="name",
+		)
 		return run, costs, lines, recon, _count("NC Service Cost"), _count("NC Reconciliation Line")
 
 	def test_TC_CLS_40_do_nhay_khong_ghi(self):
 		base = api.get_sensitivity_base(self.sc)
-		self.assertEqual((base["service"], base["is_paraclinical"], base["run_status"]), ("GLU", True, "Đã tính"))
-		self.assertEqual({x["test_system"]: x["qbn"] for x in base["inputs"]["systems"]}, {"GLU-A": 12000, "GLU-B": 4000})
+		self.assertEqual(
+			(base["service"], base["is_paraclinical"], base["run_status"]), ("GLU", True, "Đã tính")
+		)
+		self.assertEqual(
+			{x["test_system"]: x["qbn"] for x in base["inputs"]["systems"]}, {"GLU-A": 12000, "GLU-B": 4000}
+		)
 		self.assertIn("HC_GLU", [x["item"] for x in base["inputs"]["items"]])
 		before = self._state()
 		r = api.run_sensitivity(self.sc, {"system_volumes": {"GLU-A": 6000}})
@@ -63,7 +90,9 @@ class TestCostingSensitivityApi(FrappeTestCase):
 		api.run_sensitivity(self.sc, {"prices": {"HC_GLU": 7000000}})
 		frappe.set_user("Administrator")
 		run = frappe.get_doc("NC Costing Run", self.run.name)
-		for n in frappe.get_all("NC Reconciliation Line", {"costing_run": run.name, "over_tolerance": 1}, pluck="name"):
+		for n in frappe.get_all(
+			"NC Reconciliation Line", {"costing_run": run.name, "over_tolerance": 1}, pluck="name"
+		):
 			frappe.db.set_value("NC Reconciliation Line", n, "explanation", "Dữ liệu thử")
 		run.lock_costing()
 		frappe.set_user(FIN)
@@ -96,7 +125,9 @@ class TestCostingSensitivityApi(FrappeTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			api.get_sensitivity_base(self.sc)
 		frappe.set_user(HEAD_IN)
-		self.assertTrue(api.run_sensitivity(self.sc, {"system_volumes": {"GLU-A": 6000}})["trial"]["full_cost"])
+		self.assertTrue(
+			api.run_sensitivity(self.sc, {"system_volumes": {"GLU-A": 6000}})["trial"]["full_cost"]
+		)
 
 	def test_quyen_auditor_doc_duoc_clinician_khong(self):
 		frappe.set_user(AUD)

@@ -71,7 +71,9 @@ class TestPhysicalReconciliationUI(unittest.TestCase):
 
 	def test_roles_hai_report_dung_thiet_ke(self):
 		a = json.loads(_t(PHYS / "nc_physical_reconciliation.json"))
-		self.assertEqual(sorted(r["role"] for r in a["roles"]), ["NC Admin", "NC Auditor", "NC Director", "NC Finance"])
+		self.assertEqual(
+			sorted(r["role"] for r in a["roles"]), ["NC Admin", "NC Auditor", "NC Director", "NC Finance"]
+		)
 		self.assertEqual((a["ref_doctype"], a["report_type"]), ("NC Reconciliation Line", "Script Report"))
 		b = json.loads(_t(MISS / "nc_missing_data.json"))
 		self.assertEqual(
@@ -87,12 +89,27 @@ class TestPhysicalReconciliationUI(unittest.TestCase):
 		self.assertIn("set_primary_action", t)
 		self.assertIn("m.can_lock", t)
 		m = _t(JS[1])
-		for f in ("fiscal_year", "costing_date", "parameter_set", "price_category", "volume_scenario", "department", "technical_service", "kind"):
+		for f in (
+			"fiscal_year",
+			"costing_date",
+			"parameter_set",
+			"price_category",
+			"volume_scenario",
+			"department",
+			"technical_service",
+			"kind",
+		):
 			self.assertIn(f'fieldname: "{f}"', m)
 		for write in ("save_explanation", "lock_run", "frappe.call"):
 			self.assertNotIn(write, m)  # báo cáo thiếu dữ liệu chỉ đọc
 
 	def test_form_lan_tinh_co_nut_va_dai(self):
 		t = _t(JS[3])
-		for s in ('__("Material and volume reconciliation")', '__("Missing data report")', "physical_unreconciled", "open_physical", "open_missing"):
+		for s in (
+			'__("Material and volume reconciliation")',
+			'__("Missing data report")',
+			"physical_unreconciled",
+			"open_physical",
+			"open_missing",
+		):
 			self.assertIn(s, t)

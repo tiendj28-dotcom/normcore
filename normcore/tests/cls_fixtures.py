@@ -189,7 +189,7 @@ def make_stock_issues(boxes=None):
 	from normcore.tests.golden import cls_fixture as cf36
 
 	calc = reconcile.material_quantities([cf36.service()])
-	for (dept, item), qty in sorted(calc.items()):
+	for (_dept, item), qty in sorted(calc.items()):
 		n = (boxes or {}).get(item, 94 if item == "HC_GLU" else qty / Decimal(str(gc.ITEM[item]["units"])))
 		frappe.get_doc(
 			{

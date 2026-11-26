@@ -69,7 +69,9 @@ def execute(filters=None):
 			row["service_label"] = f"{x['technical_service']} · {x.get('service_name') or ''}".strip(" ·")
 			row["state"] = "Cảnh báo lệch sản lượng" if x["over_tolerance"] else "Trong ngưỡng"
 		else:
-			row["item_label"] = f"{x['item']} · {x.get('item_name') or ''}" if x.get("item") else "— (cả khoa)"
+			row["item_label"] = (
+				f"{x['item']} · {x.get('item_name') or ''}" if x.get("item") else "— (cả khoa)"
+			)
 			row["state"] = _material_state(x)
 		rows.append(row)
 	return _columns(table), rows

@@ -55,7 +55,7 @@ class TestNCMissingDataReport(FrappeTestCase):
 			],
 		)
 		self.assertEqual(frappe.db.count("NC Costing Run"), 0)  # không tạo bản ghi
-		_c, rows, _m, _ch, summary = execute(self.filters)
+		_c, _rows, _m, _ch, summary = execute(self.filters)
 		self.assertEqual({x["label"]: x["value"] for x in summary}["Thiếu kế hoạch chất lượng"], 1)
 		self.assertEqual(self._gaps(technical_service="GLU"), [("GLU", "Thiếu kế hoạch chất lượng")])
 		self.assertEqual(self._gaps(kind="Thiếu sản lượng"), [("DV-TEST-B", "Thiếu sản lượng")])

@@ -33,7 +33,16 @@ class TestNCPhysicalReconciliationReport(FrappeTestCase):
 		cols, rows = execute({"costing_run": self.run.name})
 		self.assertEqual(
 			[c["fieldname"] for c in cols],
-			["department_label", "item_label", "calculated_qty", "actual_qty", "diff_qty", "variance_pct", "state", "explanation"],
+			[
+				"department_label",
+				"item_label",
+				"calculated_qty",
+				"actual_qty",
+				"diff_qty",
+				"variance_pct",
+				"state",
+				"explanation",
+			],
 		)
 		glu = next(r for r in rows if r["item"] == "HC_GLU")
 		self.assertEqual((glu["variance_pct"], glu["state"]), (9.07, "Vượt ngưỡng · cần giải trình"))
@@ -45,7 +54,10 @@ class TestNCPhysicalReconciliationReport(FrappeTestCase):
 	def test_bang_san_luong(self):
 		cols, rows = execute({"costing_run": self.run.name, "table": "Sản lượng"})
 		self.assertEqual(cols[0]["fieldname"], "service_label")
-		self.assertEqual([(r["technical_service"], r["variance_pct"], r["state"]) for r in rows], [("GLU", 3.23, "Cảnh báo lệch sản lượng")])
+		self.assertEqual(
+			[(r["technical_service"], r["variance_pct"], r["state"]) for r in rows],
+			[("GLU", 3.23, "Cảnh báo lệch sản lượng")],
+		)
 
 	def test_quyen(self):
 		frappe.set_user(AUD)
