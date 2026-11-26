@@ -48,4 +48,3 @@ def execute(filters=None):
 			}
 		)
 	return _columns(), rows
-

@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
 
 from normcore.costing import engine
-from normcore.costing.allocation_rules import CLINICAL, LEVEL1, LEVEL2, SUPPORT, driver_shares  # noqa: F401
+from normcore.costing.allocation_rules import CLINICAL, LEVEL1, LEVEL2, SUPPORT, driver_shares
 
 CATEGORIES = ("LABOR", "DRUG_SUPPLY", "DEPRECIATION", "UTILITY", "MANAGEMENT")  # = accounting.ALLOCATABLE
 VOLUME_WARNING = "Sản lượng bằng 0 hoặc chưa có: không phân bổ chi phí chung (FR-COST-014)"
@@ -38,7 +38,7 @@ class ServiceDrivers:
 	service: str
 	department: str
 	cost_center: str | None
-	labor_min_per_case: Decimal  # Σ applied_qty × headcount, dòng LABOR không loại trừ
+	labor_min_per_case: Decimal  # Σ applied_qty * headcount, dòng LABOR không loại trừ
 	machine_min_per_case: Decimal  # Σ applied_qty, dòng EQUIPMENT không loại trừ
 
 
@@ -194,7 +194,7 @@ def level2(inp: AllocationInput, members: Mapping, received: Mapping):
 				if total == 0 and remainder > 0:
 					warnings.append(f"Tổng tiêu chí {rule.driver} của {center} · {cat} bằng 0: không chia")
 				elif total != 0:
-					for (d, r), dv in zip(rows, values, strict=True):
+					for (_d, r), dv in zip(rows, values, strict=True):
 						v = _volume(r)
 						if v <= 0:
 							continue
@@ -212,8 +212,16 @@ def level2(inp: AllocationInput, members: Mapping, received: Mapping):
 						)
 			pools.append(
 				Pool(
-					center, cat, own, recv, pool_in, costed, remainder,
-					rule.name if rule else None, rule.driver if rule else None, total,
+					center,
+					cat,
+					own,
+					recv,
+					pool_in,
+					costed,
+					remainder,
+					rule.name if rule else None,
+					rule.driver if rule else None,
+					total,
 				)
 			)
 	return lines, pools, warnings
@@ -246,7 +254,16 @@ def mark_volume(result: engine.ServiceResult) -> engine.ServiceResult:
 		return result
 	msg = f"{result.message}; {VOLUME_WARNING}" if result.message else VOLUME_WARNING
 	return engine.ServiceResult(
-		result.service, result.department, result.norm_set, result.status, msg, result.lines,
-		result.direct_by_component, result.direct_by_category, result.direct_total,
-		result.alloc_by_category, result.price, result.volume,
+		result.service,
+		result.department,
+		result.norm_set,
+		result.status,
+		msg,
+		result.lines,
+		result.direct_by_component,
+		result.direct_by_category,
+		result.direct_total,
+		result.alloc_by_category,
+		result.price,
+		result.volume,
 	)

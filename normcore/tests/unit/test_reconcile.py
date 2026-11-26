@@ -13,9 +13,13 @@ def pool(cat, pool_in, costed, center="K1"):
 
 class TestReconcile(unittest.TestCase):
 	def test_bo_management_va_dong_hai_so_0(self):
-		rows = r.reconcile([pool("MANAGEMENT", 10, 0), pool("LABOR", 0, 0), pool("UTILITY", 100, 100)], 10, True)
+		rows = r.reconcile(
+			[pool("MANAGEMENT", 10, 0), pool("LABOR", 0, 0), pool("UTILITY", 100, 100)], 10, True
+		)
 		self.assertEqual([x.cost_category for x in rows], ["UTILITY"])
-		self.assertEqual((rows[0].variance, rows[0].variance_pct, rows[0].over_tolerance), (D(0), D("0.00"), False))
+		self.assertEqual(
+			(rows[0].variance, rows[0].variance_pct, rows[0].over_tolerance), (D(0), D("0.00"), False)
+		)
 
 	def test_nguong_tren_va_duoi(self):
 		up = r.reconcile([pool("LABOR", 100, 111)], 10, True)[0]
@@ -33,7 +37,9 @@ class TestReconcile(unittest.TestCase):
 
 	def test_bo_khau_hao_khi_loai_gia_khong_ket_cau(self):
 		rows = r.reconcile([pool("LABOR", 100, 100), pool("DEPRECIATION", 100, 50)], 10, False, ["K1", "K1"])
-		self.assertEqual([(x.cost_category, x.skipped) for x in rows], [("LABOR", False), ("DEPRECIATION", True)])
+		self.assertEqual(
+			[(x.cost_category, x.skipped) for x in rows], [("LABOR", False), ("DEPRECIATION", True)]
+		)
 		self.assertIsNone(rows[1].costed)
 		self.assertIsNone(rows[1].over_tolerance)
 
@@ -43,8 +49,13 @@ class TestReconcile(unittest.TestCase):
 		self.assertFalse(rows[0].skipped)
 
 	def test_thu_tu_trung_tam_roi_loai(self):
-		rows = r.reconcile([pool("UTILITY", 1, 1, "K2"), pool("UTILITY", 1, 1, "K1"), pool("LABOR", 1, 1, "K2")], 10, True)
-		self.assertEqual([(x.cost_center, x.cost_category) for x in rows], [("K1", "UTILITY"), ("K2", "LABOR"), ("K2", "UTILITY")])
+		rows = r.reconcile(
+			[pool("UTILITY", 1, 1, "K2"), pool("UTILITY", 1, 1, "K1"), pool("LABOR", 1, 1, "K2")], 10, True
+		)
+		self.assertEqual(
+			[(x.cost_center, x.cost_category) for x in rows],
+			[("K1", "UTILITY"), ("K2", "LABOR"), ("K2", "UTILITY")],
+		)
 
 
 class TestLockBlockers(unittest.TestCase):
@@ -52,7 +63,12 @@ class TestLockBlockers(unittest.TestCase):
 		lines = [
 			{"cost_center": "K1", "cost_category": "DRUG_SUPPLY", "over_tolerance": 1, "explanation": "  "},
 			{"cost_center": "K1", "cost_category": "LABOR", "over_tolerance": 1, "explanation": None},
-			{"cost_center": "K1", "cost_category": "UTILITY", "over_tolerance": 1, "explanation": "đã giải trình"},
+			{
+				"cost_center": "K1",
+				"cost_category": "UTILITY",
+				"over_tolerance": 1,
+				"explanation": "đã giải trình",
+			},
 			{"cost_center": "K1", "cost_category": "DEPRECIATION", "over_tolerance": 0, "explanation": ""},
 		]
 		self.assertEqual(r.lock_blockers(lines), ["K1 · DRUG_SUPPLY", "K1 · LABOR"])

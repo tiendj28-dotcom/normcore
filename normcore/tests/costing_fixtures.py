@@ -223,11 +223,18 @@ def make_golden_allocation(department):
 	(HEADCOUNT theo golden_engine.HEADCOUNT), quy tắc theo L1_DRIVER/L2_DRIVER, lần nhập "Đã chốt" riêng
 	có `totals` bằng golden_engine.ACCOUNTING. Trả tên lần nhập."""
 	for code, typ in (("K01", "Lâm sàng"), ("K02", "Lâm sàng"), ("HC", "Hỗ trợ")):
-		ensure("NC Cost Center", "cost_center_code", code, cost_center_name=f"Trung tâm {code}", center_type=typ)
+		ensure(
+			"NC Cost Center", "cost_center_code", code, cost_center_name=f"Trung tâm {code}", center_type=typ
+		)
 	frappe.db.set_value("NC Department", department, "cost_center", "K01")
 	for center, hc in g.HEADCOUNT.items():
 		frappe.get_doc(
-			{"doctype": "NC Cost Center Driver", "fiscal_year": 2026, "cost_center": center, "headcount": float(hc)}
+			{
+				"doctype": "NC Cost Center Driver",
+				"fiscal_year": 2026,
+				"cost_center": center,
+				"headcount": float(hc),
+			}
 		).insert(ignore_permissions=True)
 	for cat in g.ACCOUNTING["HC"]:
 		frappe.get_doc(

@@ -17,7 +17,14 @@ LIMIT_SECONDS = 300
 
 def _meta(extra=None):
 	n = now()
-	return {"owner": "Administrator", "modified_by": "Administrator", "creation": n, "modified": n, "docstatus": 0, **(extra or {})}
+	return {
+		"owner": "Administrator",
+		"modified_by": "Administrator",
+		"creation": n,
+		"modified": n,
+		"docstatus": 0,
+		**(extra or {}),
+	}
 
 
 def make_bulk_world(dept, procedure):
@@ -32,7 +39,10 @@ def make_bulk_world(dept, procedure):
 	frappe.db.bulk_insert(
 		"NC Service Volume",
 		["name", "fiscal_year", "technical_service", "department", "scenario", "volume", "idx", *m],
-		[(frappe.generate_hash(length=10), 2026, c, dept, "Thực tế 12 tháng", 1000, 0, *m.values()) for c in codes],
+		[
+			(frappe.generate_hash(length=10), 2026, c, dept, "Thực tế 12 tháng", 1000, 0, *m.values())
+			for c in codes
+		],
 	)
 	frappe.db.bulk_insert(
 		"NC Norm Set",
@@ -47,19 +57,51 @@ def make_bulk_world(dept, procedure):
 			l = base[i % len(base)]
 			rows.append(
 				(
-					frappe.generate_hash(length=12), parent, "NC Norm Set", "lines", i + 1,
-					f"L{i + 1:03d}", None, 1, "x", l.comp, cf.RESOURCE_DOCTYPE[l.comp], l.res, l.headcount,
-					float(l.qty), float(l.authority) if l.authority is not None else 0, float(l.wastage * 100),
-					"Quy trình", 1 if l.excluded else 0, "Thanh toán riêng" if l.excluded else None,
+					frappe.generate_hash(length=12),
+					parent,
+					"NC Norm Set",
+					"lines",
+					i + 1,
+					f"L{i + 1:03d}",
+					None,
+					1,
+					"x",
+					l.comp,
+					cf.RESOURCE_DOCTYPE[l.comp],
+					l.res,
+					l.headcount,
+					float(l.qty),
+					float(l.authority) if l.authority is not None else 0,
+					float(l.wastage * 100),
+					"Quy trình",
+					1 if l.excluded else 0,
+					"Thanh toán riêng" if l.excluded else None,
 					*m.values(),
 				)
 			)
 	frappe.db.bulk_insert(
 		"NC Norm Line",
 		[
-			"name", "parent", "parenttype", "parentfield", "idx", "line_id", "step_id", "service_level",
-			"procedure_resource_row", "component", "resource_doctype", "resource", "headcount", "hospital_qty",
-			"authority_qty", "wastage_rate", "basis", "is_excluded", "exclude_reason", *m,
+			"name",
+			"parent",
+			"parenttype",
+			"parentfield",
+			"idx",
+			"line_id",
+			"step_id",
+			"service_level",
+			"procedure_resource_row",
+			"component",
+			"resource_doctype",
+			"resource",
+			"headcount",
+			"hospital_qty",
+			"authority_qty",
+			"wastage_rate",
+			"basis",
+			"is_excluded",
+			"exclude_reason",
+			*m,
 		],
 		rows,
 	)
@@ -75,7 +117,9 @@ class TestCostingPerformance(FrappeTestCase):
 		params, dept, sets = cf.make_golden_world()
 		cf.make_golden_allocation(dept)
 		codes = make_bulk_world(dept, sets[0].procedure)
-		self.assertEqual(frappe.db.count("NC Norm Line", {"parent": ["like", "DM-PF-%"]}), SERVICES * LINES_PER_SERVICE)
+		self.assertEqual(
+			frappe.db.count("NC Norm Line", {"parent": ["like", "DM-PF-%"]}), SERVICES * LINES_PER_SERVICE
+		)
 		run = cf.make_golden_run(params, scope_services=[{"technical_service": c} for c in codes])
 		with mock.patch("frappe.enqueue") as enq:
 			self.assertEqual(run.run_costing(), "Đang tính")
@@ -93,8 +137,10 @@ class TestCostingPerformance(FrappeTestCase):
 				timing["write"] = time.monotonic() - t
 
 		start = time.monotonic()
-		with mock.patch("frappe.db.commit"), mock.patch("frappe.publish_realtime") as rt, mock.patch.object(
-			writer, "write_results", timed
+		with (
+			mock.patch("frappe.db.commit"),
+			mock.patch("frappe.publish_realtime") as rt,
+			mock.patch.object(writer, "write_results", timed),
 		):
 			status = mod.execute_costing(run.name, enq.call_args.kwargs["eligible"], background=True)
 		total = time.monotonic() - start

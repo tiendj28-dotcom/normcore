@@ -19,7 +19,8 @@ class NCReconciliationLine(Document):
 		changed = [
 			f.fieldname
 			for f in self.meta.fields
-			if f.fieldname != "explanation" and f.fieldtype not in ("Section Break", "Column Break")
+			if f.fieldname != "explanation"
+			and f.fieldtype not in ("Section Break", "Column Break")
 			and self.get(f.fieldname) != prev.get(f.fieldname)
 		]
 		if changed:

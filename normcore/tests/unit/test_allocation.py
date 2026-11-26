@@ -12,7 +12,17 @@ L1, L2 = "Cấp 1", "Cấp 2"
 def result(svc="S1", dept="D1", vol="10", direct=None, status="Thành công", msg=""):
 	direct = direct or {"LABOR": D("100")}
 	return engine.ServiceResult(
-		svc, dept, "NS", status, msg, (), {}, direct, sum(direct.values(), D(0)), {}, None,
+		svc,
+		dept,
+		"NS",
+		status,
+		msg,
+		(),
+		{},
+		direct,
+		sum(direct.values(), D(0)),
+		{},
+		None,
 		None if vol is None else D(vol),
 	)
 
@@ -37,7 +47,9 @@ class TestDrivers(unittest.TestCase):
 		)
 		s = engine.ServiceInput("S", "D", "N", lines, {}, D("1"))
 		d = a.service_drivers(s, "K1")
-		self.assertEqual((d.labor_min_per_case, d.machine_min_per_case, d.cost_center), (D("30"), D("7"), "K1"))
+		self.assertEqual(
+			(d.labor_min_per_case, d.machine_min_per_case, d.cost_center), (D("30"), D("7"), "K1")
+		)
 
 	def test_service_driver_value_cac_tieu_chi(self):
 		d, r = drv(machine="2"), result(vol="4", direct={"LABOR": D("50")})
@@ -127,7 +139,10 @@ class TestLevel2(unittest.TestCase):
 		self.assertEqual(pools[0].costed, D("400"))
 		self.assertEqual(pools[0].remainder, D("800"))
 		x = lines[("S1", "D1")][0]
-		self.assertEqual((x.amount, x.driver_value, x.driver_total, x.pool_amount), (D("20.00"), D("10"), D("40"), D("800")))
+		self.assertEqual(
+			(x.amount, x.driver_value, x.driver_total, x.pool_amount),
+			(D("20.00"), D("10"), D("40"), D("800")),
+		)
 		self.assertEqual(x.allocation_rule, "R")
 		self.assertEqual(x.rate_source, "Cấp 2 · VOLUME")
 		self.assertEqual(lines[("S2", "D1")][0].amount, D("20.00"))
@@ -151,7 +166,9 @@ class TestLevel2(unittest.TestCase):
 		self.assertEqual(w, [])
 
 	def test_tong_tieu_chi_0(self):
-		i = inp(acc={("K1", "DEPRECIATION"): D("1000")}, rules=[a.Rule("R", L2, "DEPRECIATION", "MACHINE_MIN")])
+		i = inp(
+			acc={("K1", "DEPRECIATION"): D("1000")}, rules=[a.Rule("R", L2, "DEPRECIATION", "MACHINE_MIN")]
+		)
 		lines, pools, w = a.level2(i, self._members(), {})
 		self.assertEqual(lines, {})
 		self.assertIn("bằng 0", w[0])

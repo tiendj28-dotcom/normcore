@@ -34,7 +34,14 @@ class TestCostingRunAllocation(FrappeTestCase):
 			for r in frappe.get_all(
 				"NC Reconciliation Line",
 				{"costing_run": run.name},
-				["name", "cost_category", "costed_amount", "accounting_amount", "variance_pct", "over_tolerance"],
+				[
+					"name",
+					"cost_category",
+					"costed_amount",
+					"accounting_amount",
+					"variance_pct",
+					"over_tolerance",
+				],
 			)
 		}
 
@@ -54,7 +61,9 @@ class TestCostingRunAllocation(FrappeTestCase):
 		self.assertEqual([c for c, ln in lines.items() if ln.over_tolerance], ["DRUG_SUPPLY"])
 		costs = {
 			c.technical_service: c
-			for c in frappe.get_all("NC Service Cost", {"costing_run": run.name}, ["technical_service", "full_cost"])
+			for c in frappe.get_all(
+				"NC Service Cost", {"costing_run": run.name}, ["technical_service", "full_cost"]
+			)
 		}
 		self.assertEqual(costs["DV-TEST-A"].full_cost, 287745.46)
 		self.assertEqual(costs["DV-TEST-B"].full_cost, 88169.70)
@@ -76,7 +85,10 @@ class TestCostingRunAllocation(FrappeTestCase):
 		line = frappe.get_doc("NC Reconciliation Line", self._lines(run)["DRUG_SUPPLY"].name)
 		line.explanation = "  Nhập thuốc chưa xuất kho  "
 		line.save()
-		self.assertEqual(frappe.db.get_value("NC Reconciliation Line", line.name, "explanation"), "Nhập thuốc chưa xuất kho")
+		self.assertEqual(
+			frappe.db.get_value("NC Reconciliation Line", line.name, "explanation"),
+			"Nhập thuốc chưa xuất kho",
+		)
 		self.assertEqual(run.lock_costing(), "Đã khóa")
 		self.assertEqual(frappe.db.get_value("NC Costing Run", run.name, "status"), "Đã khóa")
 		line.reload()
@@ -102,7 +114,9 @@ class TestCostingRunAllocation(FrappeTestCase):
 		)
 
 	def test_thieu_quy_tac_ghi_allocation_warnings(self):
-		for n in frappe.get_all("NC Allocation Rule", {"level": "Cấp 2", "cost_category": "LABOR"}, pluck="name"):
+		for n in frappe.get_all(
+			"NC Allocation Rule", {"level": "Cấp 2", "cost_category": "LABOR"}, pluck="name"
+		):
 			frappe.delete_doc("NC Allocation Rule", n, force=True)
 		run = self._run()
 		text = frappe.db.get_value("NC Costing Run", run.name, "allocation_warnings")

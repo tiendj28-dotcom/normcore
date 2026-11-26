@@ -166,7 +166,9 @@ def execute_costing(run, eligible, background=True):
 		return _fail(doc)
 	frappe.db.savepoint("nc_costing_run")
 	try:
-		frappe.db.delete("NC Reconciliation Line", {"costing_run": run})  # giải trình cũ mất theo (ASM-017-08)
+		frappe.db.delete(
+			"NC Reconciliation Line", {"costing_run": run}
+		)  # giải trình cũ mất theo (ASM-017-08)
 		for name in frappe.get_all("NC Service Cost", {"costing_run": run}, pluck="name"):
 			frappe.delete_doc("NC Service Cost", name, force=True, ignore_permissions=True)
 		writer.write_results(doc, results)
@@ -174,7 +176,9 @@ def execute_costing(run, eligible, background=True):
 		actx = getattr(doc, "_allocation", None)
 		if actx is not None and actx.outcome is not None:
 			centers = {p.cost_center for p in actx.outcome.pools}
-			depr = [c for (c, cat), v in actx.accounting.items() if cat == "DEPRECIATION" and v and c in centers]
+			depr = [
+				c for (c, cat), v in actx.accounting.items() if cat == "DEPRECIATION" and v and c in centers
+			]
 			writer.write_reconciliation(
 				doc, reconcile.reconcile(actx.outcome.pools, actx.tolerance, actx.include_depreciation, depr)
 			)

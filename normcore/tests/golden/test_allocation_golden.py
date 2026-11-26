@@ -131,13 +131,13 @@ class TestAllocationGolden(unittest.TestCase):
 		g_res, g_recon, _ = g.run(False)
 		for s in g.NORMS:
 			self.assertNotIn("DEPRECIATION", _alloc(out, s))
-			self.assertEqual(_alloc(out, s), {k: v for k, v in g_res[s]["alloc"].items() if k != "DEPRECIATION"})
+			self.assertEqual(
+				_alloc(out, s), {k: v for k, v in g_res[s]["alloc"].items() if k != "DEPRECIATION"}
+			)
 		self.assertEqual(fin["DV-TEST-A"].price.full_cost, D("224109.10"))
 		rows = _recon(out, False)
 		skipped = [r for r in rows if r.skipped]
 		self.assertEqual([r.cost_category for r in skipped], ["DEPRECIATION"])
-		self.assertEqual(
-			(skipped[0].costed, skipped[0].variance_pct), (None, None)
-		)
+		self.assertEqual((skipped[0].costed, skipped[0].variance_pct), (None, None))
 		self.assertEqual(g_recon[2], ("DEPRECIATION", None, None, None, None, None))
 		self.assertEqual(len(rows), 4)

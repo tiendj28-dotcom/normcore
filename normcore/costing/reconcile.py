@@ -47,10 +47,13 @@ def reconcile(pools: Sequence, tolerance, include_depreciation: bool, depr_cente
 			over = pct > tol or (p.cost_category == DRUG_SUPPLY and pct < -tol)
 		else:
 			pct, over = None, costed > 0
-		rows.append(ReconRow(p.cost_center, p.cost_category, costed, acc, Decimal(p.remainder), variance, pct, over))
+		rows.append(
+			ReconRow(p.cost_center, p.cost_category, costed, acc, Decimal(p.remainder), variance, pct, over)
+		)
 	if not include_depreciation:
 		rows += [
-			ReconRow(c, DEPRECIATION, None, None, None, None, None, None, True) for c in sorted(set(depr_centers))
+			ReconRow(c, DEPRECIATION, None, None, None, None, None, None, True)
+			for c in sorted(set(depr_centers))
 		]
 	idx = {c: i for i, c in enumerate(CATEGORIES)}
 	return sorted(rows, key=lambda r: (r.cost_center, idx.get(r.cost_category, len(idx))))

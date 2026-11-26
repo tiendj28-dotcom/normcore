@@ -24,8 +24,15 @@ class TestNCReconciliationReport(FrappeTestCase):
 		self.assertEqual(
 			[c["fieldname"] for c in cols],
 			[
-				"cost_center_label", "category_label", "costed_amount", "accounting_amount", "variance",
-				"variance_pct", "remainder", "state", "explanation",
+				"cost_center_label",
+				"category_label",
+				"costed_amount",
+				"accounting_amount",
+				"variance",
+				"variance_pct",
+				"remainder",
+				"state",
+				"explanation",
 			],
 		)
 		fin = make_user("fin.rpt17@normcore.test", "NC Finance")
@@ -34,7 +41,9 @@ class TestNCReconciliationReport(FrappeTestCase):
 		for user in (fin, aud):
 			frappe.set_user(user)
 			_, rows = execute({"costing_run": self.run.name})
-			self.assertEqual([r["cost_category"] for r in rows], ["LABOR", "DRUG_SUPPLY", "DEPRECIATION", "UTILITY"])
+			self.assertEqual(
+				[r["cost_category"] for r in rows], ["LABOR", "DRUG_SUPPLY", "DEPRECIATION", "UTILITY"]
+			)
 			self.assertEqual(rows[0]["cost_center_label"], "K01 · Trung tâm K01")
 			self.assertEqual(
 				[r["state"] for r in rows],
@@ -47,5 +56,7 @@ class TestNCReconciliationReport(FrappeTestCase):
 		frappe.set_user(clin)
 		with self.assertRaises(frappe.PermissionError):
 			execute({"costing_run": self.run.name})
-		roles = frappe.get_all("Has Role", {"parent": "NC Reconciliation", "parenttype": "Report"}, pluck="role")
+		roles = frappe.get_all(
+			"Has Role", {"parent": "NC Reconciliation", "parenttype": "Report"}, pluck="role"
+		)
 		self.assertEqual(sorted(roles), ["NC Admin", "NC Auditor", "NC Director", "NC Finance"])
