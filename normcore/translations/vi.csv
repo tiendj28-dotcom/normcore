@@ -1,5 +1,7 @@
 + Add service,+ Thêm dịch vụ
 A draft already exists: {0},Đã có bản đang soạn: {0}
+AI call timeout is set in AI settings.,Thời hạn gọi AI đặt ở Cấu hình AI.
+AI settings,Cấu hình AI
 Account,Tài khoản
 Actions,Thao tác
 Active,Đang dùng,NC Technical Service
@@ -22,6 +24,7 @@ Added,Thêm
 "After submitting, the procedure cannot be edited until it is returned.","Sau khi gửi, quy trình không sửa được cho đến khi bị trả lại."
 "After withdrawing, the procedure moves to Withdrawn and can no longer be used as a basis.","Sau khi thu hồi, quy trình chuyển Đã thu hồi và không dùng làm căn cứ được nữa."
 All components,Mọi cấu phần
+All departments in scope,Tất cả khoa trong phạm vi
 All sections are confirmed.,Mọi mục đã được xác nhận.
 Amount,Số tiền
 Annual depreciation,Khấu hao năm,NC Equipment
@@ -29,15 +32,18 @@ Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
 Applied qty,Lượng áp dụng
 Apply time study result,Áp kết quả bấm giờ
+Approved price,Giá đã duyệt
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
 Assign,Gán
 Assign user,Gán người dùng
 Assigned users,Người dùng được gán vào khoa
 Assumption,Giả định
+Assumption — pending confirmation,Giả định — chờ xác nhận
 Attach to,Gắn với
 Authority document,Văn bản ban hành định mức
 Authority norm,Định mức ban hành
+Available,Có
 Base version,Phiên bản gốc
 Basis,Căn cứ
 Basis reference,Tham chiếu căn cứ
@@ -50,6 +56,7 @@ Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
 Cannot load the original file,Không tải được tệp gốc
 Catalog,Danh mục
+Chain status,Tình trạng chuỗi
 Change,Sửa
 Change service,Sửa dịch vụ
 Changed,Đổi
@@ -95,6 +102,7 @@ Could not complete the request. See the message from the server.,Không thực h
 Could not complete this action,Chưa thực hiện được thao tác này
 Could not load chain status.,Không tải được tình trạng chuỗi.
 Could not load test systems.,Không tải được hệ thống xét nghiệm.
+Could not load the home page. Try again.,Không tải được trang chủ. Thử lại.
 Could not load the status.,Không tải được tình trạng.
 Could not load the study.,Không tải được phiếu bấm giờ.
 Create,Tạo
@@ -126,6 +134,7 @@ Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
 Duplicate of {0},Trùng nguồn lực với {0} trong cùng bước
 EQA tests,Số test ngoại kiểm
+Each service is counted at the highest stage it has reached.,Mỗi dịch vụ tính ở mức cao nhất đã đạt.
 Edit,Sửa
 Edit cost category,Sửa loại chi phí
 Edit cost category of a line,Sửa loại chi phí của một dòng
@@ -143,6 +152,7 @@ Expired {0} days ago,Đã hết hạn {0} ngày trước
 Expires in {0} days,Còn {0} ngày đến hạn
 Export,Xuất
 File errors,Dòng lỗi khi đọc tệp
+Filter by department,Lọc theo khoa
 Filter these lines,Lọc các dòng này
 Finalize,Chốt
 Finalized: the figures can be used in a costing run.,Đã chốt: số liệu dùng được cho lần tính giá.
@@ -177,6 +187,7 @@ Loading status…,Đang tải tình trạng…
 Loading summary…,Đang tải tóm tắt…
 Loading test systems…,Đang tải hệ thống xét nghiệm…
 Loading...,Đang tải...
+Loading…,Đang tải…
 Loading…,Đang tải…,NC Equipment
 Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
@@ -205,6 +216,7 @@ Name,Tên
 Needs review,Cần rà soát
 Needs update,Cần cập nhật
 Needs update: the procedure has a new version - {0}.,Cần cập nhật: quy trình có phiên bản mới - {0}.
+"New values apply to the next operation, no restart needed.","Giá trị mới áp dụng cho thao tác kế tiếp, không cần khởi động lại."
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
@@ -223,8 +235,11 @@ No users assigned.,Chưa gán người dùng nào.
 None,Không có
 None yet,Chưa có
 Norm grid,Lưới định mức
+Norm set,Bộ định mức
 Norm set actions,Thao tác bộ định mức
 Norm sets,Bộ định mức
+Normcore home,Trang chủ Normcore
+Not available,Chưa có
 Not linked,Chưa liên kết
 Not performed,Không thực hiện
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
@@ -234,14 +249,18 @@ Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
 Open file,Mở tệp
 Open norm grid,Mở lưới định mức
+Open procedure list,Mở danh sách quy trình
+Open service list,Mở danh sách dịch vụ
 Original page,Trang gốc
 Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
 Over cap,Vượt trần
+Overdue,Quá hạn
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
 Pages,Trang
 Pages {0}–{1} of {2},Trang {0}–{1} của {2}
 Paraclinical,Cận lâm sàng
 Past useful life,Hết thời gian sử dụng,NC Equipment
+Pending tasks,Việc chờ xử lý
 Performing department,Khoa thực hiện
 Phase,Giai đoạn
 Pick a norm set from the list.,Chọn một bộ định mức ở danh sách.
@@ -252,6 +271,7 @@ Price code,Mã đơn giá,NC Item
 Price in use today,Đơn giá đang dùng hôm nay,NC Item
 Price per norm unit,Đơn giá một đơn vị định mức,NC Item
 Print PDF,In PDF
+Procedure,Quy trình
 Procedure editor,Trình soạn quy trình
 Provisional amount,Thành tiền tạm tính
 Provisional direct cost,Chi phí trực tiếp tạm tính
@@ -270,6 +290,7 @@ Reapply account mapping,Gán lại theo bảng ánh xạ
 Reason,Lý do
 Recalculate suggestions? Confirmed mappings are kept; current suggestions are replaced.,Tính lại đề xuất? Ánh xạ đã xác nhận được giữ; đề xuất hiện có được thay.
 Record new study,Ghi ca mới
+Record,Bản ghi
 Rejected by,Bị từ chối bởi
 Rejection reason,Lý do từ chối
 Relation,Quan hệ
@@ -305,6 +326,7 @@ Save to load the steps of the procedure.,Lưu để nạp các bước của quy
 Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
 Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
+Saved. New values apply to the next operation.,Đã lưu. Giá trị mới áp dụng cho thao tác kế tiếp.
 Saving confirms the mapping.,Lưu là xác nhận ánh xạ.
 Search,Tìm
 Search in content,Tìm trong nội dung
@@ -317,7 +339,9 @@ Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
 Select only one line to edit.,Chỉ chọn một dòng để sửa.
+Service cost,Giá thành
 Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
+Services by chain status,Dịch vụ theo tình trạng chuỗi
 Share (%),Tỷ trọng (%)
 Show all lines,Hiện mọi dòng
 Show differences only,Chỉ hiện chỗ khác
@@ -337,11 +361,14 @@ Suggest again,Đề xuất lại
 Suggested,Đề xuất
 Summary of differences,Tóm tắt khác biệt
 Swap direction,Đổi chiều so sánh
+Task,Việc
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
 The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
 The procedure will move to,Quy trình sẽ chuyển sang
 "The two versions do not differ in sections, steps or resources.","Hai phiên bản không khác nhau về phần, bước, nguồn lực."
+There are no technical services yet.,Chưa có dịch vụ kỹ thuật nào.
+This department is outside your scope,Khoa này ngoài phạm vi của bạn
 This norm set has no lines yet.,Bộ định mức chưa có dòng nào.
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
@@ -354,6 +381,7 @@ This record is {0} and cannot be edited. Create a new version in the norm grid.,
 This record is {0} and cannot be edited. Create a new version.,"Bản ghi {0}, không sửa được. Tạo phiên bản mới."
 This resource is already in {0} of the same step. Save anyway?,Nguồn lực này đã có ở dòng {0} của cùng bước. Vẫn lưu?
 This service already has a procedure for the department:,Dịch vụ đã có quy trình cho khoa này:
+"Too many services, filter by department first","Quá nhiều dịch vụ, hãy lọc theo khoa trước"
 Total,Tổng
 Total share differs from 100%,Tổng tỷ trọng khác 100%
 Totals by cost center and category,Tổng theo trung tâm và loại chi phí
@@ -384,8 +412,10 @@ Verified,Đã xác minh,NC Item Price
 Verify,Xác minh,NC Item Price
 Version,Phiên bản
 View,Xem
+View all,Xem tất cả
 View costing results,Xem kết quả tính giá
 View time study result,Xem kết quả bấm giờ
+Waiting since,Chờ từ
 Wastage %,Hao hụt %
 "Wastage cap {0}% (Assumption, to be confirmed: no effective parameter set)",Trần hao hụt {0}% (Giả định — chờ xác nhận: chưa có bộ tham số hiệu lực)
 Wastage reason,Lý do vượt trần
@@ -401,6 +431,7 @@ You can only view this study.,Bạn chỉ xem được phiếu này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
 You do not have permission to view this norm set.,Bạn không có quyền xem bộ định mức này.
 You do not have permission to view this procedure,Bạn không có quyền xem quy trình này
+You have no pending tasks. Tasks waiting for your approval will appear here.,Bạn không có việc nào đang chờ xử lý. Các việc cần bạn duyệt sẽ hiện ở đây.
 and {0} more errors,và {0} lỗi khác
 content,nội dung
 document number,số hiệu

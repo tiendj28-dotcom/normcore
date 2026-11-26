@@ -49,6 +49,7 @@ fixtures = [
 		"filters": [["name", "in", ["Gửi duyệt", "Đồng ý", "Thông qua", "Ban hành", "Từ chối"]]],
 	},
 	{"dt": "Workflow", "filters": [["name", "=", "NC Clinical Procedure"]]},
+	{"dt": "Custom HTML Block", "filters": [["name", "=", "NC Trang chủ"]]},  # SCR-DSK-001 (FEAT-002)
 ]
 
 # Includes in <head>
@@ -57,7 +58,10 @@ fixtures = [
 # include js, css files in header of desk.html
 # app_include_css = "/assets/normcore/css/normcore.css"
 # app_include_js = "/assets/normcore/js/normcore.js"
-app_include_js = "/assets/normcore/js/normcore_ai.js"  # FEAT-023: normcore.ai.enabled()
+app_include_js = [
+	"/assets/normcore/js/normcore_ai.js",  # FEAT-023: normcore.ai.enabled()
+	"/assets/normcore/js/nc_chain_dots.js",  # FEAT-002: thẻ tình trạng chuỗi (SCR-DSK-005)
+]
 boot_session = "normcore.api.ai.boot_session"  # FR-AI-015
 
 # include js, css files in header of web template
@@ -321,3 +325,6 @@ scheduler_events = {
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
+
+# FR-NOTI-003: nguồn việc chờ xử lý; mỗi nguồn là hàm (user) -> list[dict] theo hợp đồng core/notify.py
+normcore_pending_sources = ["normcore.api.procedure_workflow.pending_for"]
