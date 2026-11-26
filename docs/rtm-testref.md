@@ -192,6 +192,14 @@
 | FR-SVC-006 | `test_FR_SVC_006_xac_nhan_luu_nguoi_va_thoi_diem`, `test_FR_SVC_006_quyen_anh_xa` (api/test_library_mapping.py), `test_FR_SVC_006_validate_dong_dau` (nc_section_service_map) |
 | FR-SVC-007 | `test_TC_SVC_02_chi_muc_da_xac_nhan_vao_nguon_ai`, `test_FR_SVC_007_nguon_chi_truong_cho_phep` (api/test_library_mapping.py) |
 | TC-SVC-02 | `test_TC_SVC_02_chi_muc_da_xac_nhan_vao_nguon_ai` |
+# Test ref — FEAT-008 (QA Multica kiểm định, accepted)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-WF-009 | `test_TC_WF_05_sua_doi_giu_ma_buoc`, `test_sua_doi_da_co_ban_nhap_tra_ban_dang_co`, `test_sua_doi_tu_choi_trang_thai_va_quyen`, `test_sua_doi_tu_choi_ban_ban_hanh_cu_hon` (api/test_procedure_revision.py); unit/test_procedure_versioning.py |
+| FR-WF-010 | `test_TC_WF_07_so_sanh_phien_ban`, `test_so_sanh_kiem_quyen_va_cung_quy_trinh` (api/test_procedure_compare.py); `test_TC_WF_07_diff_theo_phan_buoc_nguon_luc` (unit/test_procedure_diff.py); unit/test_feat_008_ui.py. Phần hiển thị loại M: QA kiểm bằng Playwright |
+| FR-WF-011 | `test_TC_WF_06_ban_hanh_gan_co_bo_dinh_muc` (api/test_procedure_norm_flag.py); `test_TC_WF_06_step_changes_them_bo_doi` (unit/test_procedure_diff.py) |
+| FR-WF-012 | `test_FR_WF_012_thu_hoi_co_ly_do`, `test_FR_WF_012_thu_hoi_tu_choi`, `test_FR_WF_012_sai_trang_thai` (api/test_procedure_withdraw.py); `TestWithdraw` (unit/test_procedure_approval.py) |
 ## FEAT-012 (NORM-39, ghi bởi Dev; QA kiểm định lại)
 
 | FR | Test thật |
