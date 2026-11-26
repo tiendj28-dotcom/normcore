@@ -355,6 +355,7 @@ def get_explanation(service_cost):
 			"calculated_price": sc.calculated_price,
 			"rounded_price": sc.rounded_price,
 			"has_allocation": bool(allocation),
+			"is_paraclinical": bool(sc.is_paraclinical),
 		},
 		"structure": structure,
 		"direct_groups": groups,
