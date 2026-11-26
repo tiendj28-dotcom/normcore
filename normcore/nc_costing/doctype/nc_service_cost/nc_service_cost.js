@@ -225,6 +225,11 @@ frappe.ui.form.on("NC Service Cost", {
 		frm.set_df_property("lines", "hidden", 1);
 		frm.set_df_property("test_system_costs", "hidden", 1);
 		if (frm.is_new()) return;
+		frappe.db.get_value("NC Costing Run", frm.doc.costing_run, "status").then((r) => {
+			if (((r.message || {}).status) === "Đã khóa") {
+				frm.add_custom_button(__("Export explanation PDF"), () => normcore.export.open({ service_cost: frm.doc.name }));
+			}
+		});
 		const loading = frm.dashboard.add_section(`<div class="text-muted">${__("Loading explanation…")}</div>`, __("Cost explanation"));
 		frappe.call({
 			method: API + "get_explanation",

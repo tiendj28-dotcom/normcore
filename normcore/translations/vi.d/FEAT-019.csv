@@ -1,0 +1,34 @@
+Assumption - pending confirmation,Giả định — chờ xác nhận
+Circular 21 forms,Biểu Thông tư 21
+"Column layout follows a provisional template, pending the official template of Circular 21/2024/TT-BYT (TBD-01).","Cấu trúc cột theo mẫu tạm, chờ đối chiếu mẫu chính thức Thông tư 21/2024/TT-BYT (TBD-01)."
+Cost explanation (PDF),Bảng giải trình (PDF)
+Costing run,Lần tính giá
+Creating file…,Đang tạo tệp…
+Documents packed.,Đã đóng gói hồ sơ.
+Download,Tải về
+Download Excel,Tải Excel
+Download PDF,Tải PDF
+Download archive,Tải tệp nén
+"Each file records the costing run, parameter set, time and exporter; the export is written to the audit log.","Mỗi tệp ghi mã lần tính giá, bộ tham số, thời điểm và người xuất; việc xuất được ghi vào nhật ký."
+Export PDF,Xuất PDF
+Export documents,Xuất hồ sơ
+Export error,Lỗi xuất
+Export explanation PDF,Xuất PDF giải trình
+Export norm set,Xuất bộ định mức
+Latest archive,Tệp nén gần nhất
+Locked,Đã khóa
+No costing run attached,Không gắn lần tính giá
+No successfully costed service in this run,Chưa có dịch vụ tính thành công trong lần tính này
+Norm set,Bộ định mức
+Not locked,Chưa khóa
+Pack documents,Đóng gói hồ sơ
+Packing documents… You can close this dialog; you will be notified when done.,Đang đóng gói hồ sơ… Bạn có thể đóng hộp thoại; hệ thống sẽ báo khi xong.
+Packing error,Lỗi đóng gói hồ sơ
+"Packs Annexes II-V, every explanation and every norm set into one archive. Runs in the background; you will be notified when done.","Đóng gói Phụ lục II–V, mọi bảng giải trình và bộ định mức thành một tệp nén. Chạy nền; hệ thống báo khi xong."
+See the error log for details.,Chi tiết ở nhật ký lỗi.
+Select a norm set to export,Chọn bộ định mức để xuất
+Select a service to export,Chọn dịch vụ để xuất
+Service,Dịch vụ
+This run has no norm set attached,Lần tính chưa gắn bộ định mức nào
+This run is already being packed.,Hồ sơ của lần tính này đang được đóng gói.
+Whole file set,Toàn bộ hồ sơ

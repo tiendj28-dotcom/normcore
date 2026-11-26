@@ -250,6 +250,10 @@ function add_lock_buttons(frm) {
 	if (["Đã tính", "Đã khóa"].includes(frm.doc.status)) {
 		frm.add_custom_button(__("Compare with another run"), () => compare_dialog(frm));
 	}
+	if (frm.doc.status === "Đã khóa") {
+		// FEAT-019 (SCR-DSK-028): gọi bằng tên đầy đủ, không đưa vào hằng API của form
+		frm.add_custom_button(__("Export documents"), () => normcore.export.open({ run: frm.doc.name }));
+	}
 }
 
 function render_results(frm) {

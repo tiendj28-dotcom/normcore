@@ -35,6 +35,7 @@
 					<button v-if="can('save_line')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openAdd">{{ __("Add line") }}</button>
 					<button v-if="can('copy_norm_set')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openCopy">{{ __("Copy to another system") }}</button>
 					<button type="button" class="btn btn-default btn-sm" :disabled="busy" @click="exportExcel">{{ __("Export Excel") }}</button>
+					<button type="button" class="btn btn-default btn-sm" :disabled="busy" @click="exportPdf">{{ __("Export PDF") }}</button>
 				</div>
 			</header>
 
@@ -673,6 +674,9 @@ onlyAttention: false,
 		},
 		exportExcel() {
 			window.open("/api/method/normcore.api.norm.export_norm_set?name=" + encodeURIComponent(this.name));
+		},
+		exportPdf() {
+			open_url_post("/api/method/normcore.api.export.export_file", { file_type: "norm_set_pdf", norm_set: this.name });
 		},
 		showItem(item) {
 			this.collapsed = {};
