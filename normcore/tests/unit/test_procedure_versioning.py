@@ -23,13 +23,36 @@ def _src():
 		"next_step_seq": 6,
 		"next_resource_seq": 9,
 		"steps": [
-			{"step_id": "S001", "phase": "A", "step_title": "t1", "description": "d", "reference_minutes": 5, "ai_suggested": 1},
-			{"step_id": "S004", "phase": "B", "step_title": "t4", "description": "", "reference_minutes": 3, "ai_suggested": 1},
+			{
+				"step_id": "S001",
+				"phase": "A",
+				"step_title": "t1",
+				"description": "d",
+				"reference_minutes": 5,
+				"ai_suggested": 1,
+			},
+			{
+				"step_id": "S004",
+				"phase": "B",
+				"step_title": "t4",
+				"description": "",
+				"reference_minutes": 3,
+				"ai_suggested": 1,
+			},
 		],
 		"resources": [
-			{"resource_row_id": "R002", "step_id": "S004", "resource_type": "Nhân lực", "quantity": 2, "uom": "phút", "ai_suggested": 1}
+			{
+				"resource_row_id": "R002",
+				"step_id": "S004",
+				"resource_type": "Nhân lực",
+				"quantity": 2,
+				"uom": "phút",
+				"ai_suggested": 1,
+			}
 		],
-		"citations": [{"target_section": "overview", "relation": "Theo hướng dẫn", "quote": "q", "name": "x"}],
+		"citations": [
+			{"target_section": "overview", "relation": "Theo hướng dẫn", "quote": "q", "name": "x"}
+		],
 	}
 
 

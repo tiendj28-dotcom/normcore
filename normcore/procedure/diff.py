@@ -76,7 +76,15 @@ def diff_steps(old_steps, new_steps):
 		sid = s["step_id"]
 		if sid not in old_by:
 			out.append(
-				{"step_id": sid, "status": "added", "fields": [], "old": None, "new": s, "old_idx": None, "new_idx": i}
+				{
+					"step_id": sid,
+					"status": "added",
+					"fields": [],
+					"old": None,
+					"new": s,
+					"old_idx": None,
+					"new_idx": i,
+				}
 			)
 		else:
 			oi, o = old_by[sid]
@@ -106,7 +114,14 @@ def diff_resources(old_res, new_res):
 		o = old_by.get(rid)
 		if o is None:
 			out.append(
-				{"resource_row_id": rid, "step_id": r.get("step_id"), "status": "added", "fields": [], "old": None, "new": r}
+				{
+					"resource_row_id": rid,
+					"step_id": r.get("step_id"),
+					"status": "added",
+					"fields": [],
+					"old": None,
+					"new": r,
+				}
 			)
 			continue
 		fields = _changed_fields(o, r, RESOURCE_COMPARE)
@@ -123,7 +138,14 @@ def diff_resources(old_res, new_res):
 	for rid, o in old_by.items():
 		if rid not in new_by:
 			out.append(
-				{"resource_row_id": rid, "step_id": o.get("step_id"), "status": "removed", "fields": [], "old": o, "new": None}
+				{
+					"resource_row_id": rid,
+					"step_id": o.get("step_id"),
+					"status": "removed",
+					"fields": [],
+					"old": o,
+					"new": None,
+				}
 			)
 	return out
 

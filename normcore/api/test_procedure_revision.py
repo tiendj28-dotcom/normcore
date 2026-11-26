@@ -106,7 +106,9 @@ class TestCreateRevision(RevisionBase):
 		again = self.revise(self.clin)
 		self.assertEqual(again["name"], first["name"])
 		self.assertEqual(again["existing"], 1)
-		self.assertEqual(frappe.db.count(DT, {"technical_service": self.service, "department": self.dept}), count)
+		self.assertEqual(
+			frappe.db.count(DT, {"technical_service": self.service, "department": self.dept}), count
+		)
 
 	def test_sua_doi_tu_choi_trang_thai_va_quyen(self):
 		for role_user in (self.auditor, self.finance, self.director, self.clin_other):
@@ -131,7 +133,9 @@ class TestCreateRevision(RevisionBase):
 	def test_ghi_comment_va_lich_su(self):
 		name = self.revise(self.clin)["name"]
 		comments = frappe.get_all(
-			"Comment", {"reference_doctype": DT, "reference_name": name, "comment_type": "Info"}, pluck="content"
+			"Comment",
+			{"reference_doctype": DT, "reference_name": name, "comment_type": "Info"},
+			pluck="content",
 		)
 		self.assertTrue(any(self.v1.name in c for c in comments))
 

@@ -8,11 +8,23 @@ SECTIONS = [("overview", "Đại cương"), ("indications", "Chỉ định"), ("
 
 
 def _step(i, title=None, minutes=5):
-	return {"step_id": i, "phase": "P", "step_title": title or f"bước {i}", "description": "", "reference_minutes": minutes}
+	return {
+		"step_id": i,
+		"phase": "P",
+		"step_title": title or f"bước {i}",
+		"description": "",
+		"reference_minutes": minutes,
+	}
 
 
 def _res(rid, step, text="vật tư", qty=1):
-	return {"resource_row_id": rid, "step_id": step, "resource_type": "Vật tư", "resource_text": text, "quantity": qty}
+	return {
+		"resource_row_id": rid,
+		"step_id": step,
+		"resource_type": "Vật tư",
+		"resource_text": text,
+		"quantity": qty,
+	}
 
 
 def _v1():
@@ -41,9 +53,13 @@ class TestDiff(unittest.TestCase):
 
 	def test_TC_WF_07_diff_theo_phan_buoc_nguon_luc(self):
 		r = d.diff_procedures(_v1(), _v2(), SECTIONS)
-		self.assertEqual({s["key"]: s["status"] for s in r["sections"]}, {"overview": "same", "indications": "changed"})
+		self.assertEqual(
+			{s["key"]: s["status"] for s in r["sections"]}, {"overview": "same", "indications": "changed"}
+		)
 		st = {s["step_id"]: s["status"] for s in r["steps"]}
-		self.assertEqual(st, {"S001": "same", "S002": "removed", "S003": "same", "S004": "same", "S005": "added"})
+		self.assertEqual(
+			st, {"S001": "same", "S002": "removed", "S003": "same", "S004": "same", "S005": "added"}
+		)
 		rs = {x["resource_row_id"]: x for x in r["resources"]}
 		self.assertEqual(rs["R003"]["status"], "changed")
 		self.assertEqual(rs["R003"]["fields"], ["quantity"])
@@ -97,7 +113,9 @@ class TestDiff(unittest.TestCase):
 		a = {"steps": [_step("S001"), _step("S002")], "resources": []}
 		b = {"steps": [_step("S002", title="mới")], "resources": []}
 		items = d.diff_steps(a["steps"], b["steps"])
-		self.assertEqual([(i["step_id"], i["status"]) for i in items], [("S001", "removed"), ("S002", "changed")])
+		self.assertEqual(
+			[(i["step_id"], i["status"]) for i in items], [("S001", "removed"), ("S002", "changed")]
+		)
 		self.assertEqual(items[1]["fields"], ["step_title"])
 
 	def test_ghi_chu_nhieu_ma(self):

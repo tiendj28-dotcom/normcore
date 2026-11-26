@@ -6,7 +6,9 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FORM = (ROOT / "nc_procedure/doctype/nc_clinical_procedure/nc_clinical_procedure.js").read_text(encoding="utf-8")
+FORM = (ROOT / "nc_procedure/doctype/nc_clinical_procedure/nc_clinical_procedure.js").read_text(
+	encoding="utf-8"
+)
 NORM_JS = (ROOT / "nc_costing/doctype/nc_norm_set/nc_norm_set.js").read_text(encoding="utf-8")
 NORM_LIST = (ROOT / "nc_costing/doctype/nc_norm_set/nc_norm_set_list.js").read_text(encoding="utf-8")
 VUE = (ROOT / "public/js/procedure_editor/ProcedureEditor.vue").read_text(encoding="utf-8")
@@ -78,7 +80,7 @@ class TestFeat008Compare(unittest.TestCase):
 	def test_ba_khoi_va_trang_thai(self):
 		for label in ("Sections", "Steps", "Resource lines"):
 			self.assertIn(f'__("{label}")', CMP)
-		self.assertIn("v-else-if=\"error\"", CMP)
+		self.assertIn('v-else-if="error"', CMP)
 		self.assertIn("versions.length < 2", CMP)
 		self.assertIn("Show differences only", CMP)
 

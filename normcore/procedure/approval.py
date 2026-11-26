@@ -27,7 +27,7 @@ TRANSITIONS = (
 
 # Thu hồi không nằm trong TRANSITIONS/fixture Workflow (ASM-008-02); đi đường hệ thống như "Đã thay thế"
 WITHDRAW = (PUBLISHED, "Thu hồi", WITHDRAWN, "NC Director")
-ACTIONS = TRANSITIONS + (WITHDRAW,)
+ACTIONS = (*TRANSITIONS, WITHDRAW)
 
 _LEVELS = {WAIT_HEAD: "trưởng khoa", WAIT_COUNCIL: "hội đồng", WAIT_PUBLISH: "giám đốc"}
 

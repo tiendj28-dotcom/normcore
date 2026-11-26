@@ -35,7 +35,9 @@ class TestWithdraw(RevisionBase):
 			["from_state", "detail", "user"],
 		)
 		self.assertEqual(len(ev), 1)
-		self.assertEqual((ev[0].from_state, ev[0].detail, ev[0].user), ("Đã ban hành", "Sai quy định mới", self.director))
+		self.assertEqual(
+			(ev[0].from_state, ev[0].detail, ev[0].user), ("Đã ban hành", "Sai quy định mới", self.director)
+		)
 		self.assertTrue(
 			frappe.get_all(
 				"Comment",
