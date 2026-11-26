@@ -7,6 +7,7 @@ from normcore.costing import engine
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
 from normcore.tests.utils import (
 	confirm_norm_set,
+	costing_run_inputs,
 	make_base,
 	make_param_set,
 	make_procedure,
@@ -29,6 +30,7 @@ def _run(params):
 			"fiscal_year": 2026,
 			"costing_date": "2026-12-31",
 			"parameter_set": params.name,
+			**costing_run_inputs(),
 		}
 	)
 	run.insert(ignore_permissions=True)
