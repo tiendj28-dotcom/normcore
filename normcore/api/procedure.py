@@ -7,6 +7,7 @@ tại chỗ để lịch sử có giá trị trước và sau.
 import frappe
 from frappe import _
 
+from normcore.procedure import versioning
 from normcore.procedure.copying import copy_structure
 from normcore.procedure.steps import reorder
 
@@ -169,6 +170,41 @@ def create_procedure(technical_service, department):
 	)
 	doc.insert()
 	return {"name": doc.name, "version_no": doc.version_no}
+
+
+@frappe.whitelist()
+def create_revision(procedure):
+	"""FR-WF-009: bản nháp phiên bản kế tiếp từ quy trình "Đã ban hành" mới nhất; giữ mã bước, mã dòng nguồn lực.
+	Đã có bản đang soạn/duyệt của (dịch vụ, khoa) thì trả bản đó (UC-007 1d)."""
+	_require("create", message=_("Bạn không có quyền sửa đổi quy trình này"))
+	_require("write", doc=procedure, message=_("Bạn không có quyền sửa đổi quy trình này"))
+	src = frappe.get_doc(DT, procedure)
+	draft, published, max_version, _latest = _find_existing(src.technical_service, src.department)
+	if draft:
+		return {"name": draft, "version_no": frappe.db.get_value(DT, draft, "version_no"), "existing": 1}
+	if not versioning.can_revise(src.workflow_state):
+		frappe.throw(_("Chỉ sửa đổi được quy trình đã ban hành"))
+	if published != src.name:
+		frappe.throw(_("Đã có phiên bản ban hành mới hơn: {0}. Sửa đổi từ phiên bản đó.").format(published))
+	data = versioning.build_revision(src.as_dict(), max_version)
+	doc = frappe.get_doc(data)
+	doc.insert()
+	doc.add_comment("Info", _("Tạo phiên bản sửa đổi từ {0}").format(src.name))
+	return {"name": doc.name, "version_no": doc.version_no, "existing": 0}
+
+
+@frappe.whitelist()
+def list_versions(procedure):
+	"""Các phiên bản cùng (dịch vụ, khoa) mà người gọi đọc được, mới nhất trước (bộ chọn SCR-DSK-011)."""
+	_require("read", doc=procedure, message=_("Bạn không có quyền xem quy trình này"))
+	key = frappe.db.get_value(DT, procedure, ["technical_service", "department"], as_dict=True)
+	return frappe.get_list(
+		DT,
+		filters={"technical_service": key.technical_service, "department": key.department},
+		fields=["name", "version_no", "workflow_state", "effective_date", "decision_no"],
+		order_by="version_no desc",
+		limit_page_length=0,
+	)
 
 
 @frappe.whitelist()
