@@ -69,7 +69,7 @@ class TestNCAuditEvent(FrappeTestCase):
 		ns.lock()
 		events = self._events_of("NC Norm Set", ns.name)
 		self.assertEqual(events[-1].event_type, "Khóa")
-		self.assertEqual((events[-1].from_state, events[-1].to_state), ("Nháp", "Đã khóa"))
+		self.assertEqual((events[-1].from_state, events[-1].to_state), ("Đã xác nhận chuyên môn", "Đã khóa"))
 		self.assertEqual(events[-1].user, fin)
 
 	def test_FR_AUD_001_xoa_ban_ghi_nguon_khong_bi_chan(self):

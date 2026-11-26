@@ -118,11 +118,15 @@ class TestKhoiTao(NormBase):
 		ns = frappe.get_doc("NC Norm Set", name)
 		self.assertEqual(ns.status, "Nháp")
 		self.assertEqual(len(ns.lines), 6)
-		rows = {r.resource_row_id: r for r in frappe.get_doc("NC Clinical Procedure", self.proc.name).resources}
+		rows = {
+			r.resource_row_id: r for r in frappe.get_doc("NC Clinical Procedure", self.proc.name).resources
+		}
 		for ln in ns.lines:
 			self.assertTrue(ln.step_id)
 			self.assertEqual(ln.step_id, rows[ln.procedure_resource_row].step_id)
-		self.assertEqual([r.component for r in ns.lines], ["LABOR", "LABOR", "DRUG", "SUPPLY", "EQUIPMENT", "INFRA"])
+		self.assertEqual(
+			[r.component for r in ns.lines], ["LABOR", "LABOR", "DRUG", "SUPPLY", "EQUIPMENT", "INFRA"]
+		)
 		self.assertEqual(sum(1 for r in ns.lines if not r.resource), 3)
 
 	def test_TC_NORM_02_quy_trinh_nhap_tu_choi_qua_api(self):
@@ -149,7 +153,11 @@ class TestSuaDong(NormBase):
 		sup = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.component == "SUPPLY")
 		self.assertRaises(frappe.ValidationError, api.save_line, name, {"is_excluded": 1}, sup.line_id)
 		self.assertRaises(
-			frappe.ValidationError, api.save_line, name, {"is_excluded": 1, "exclude_reason": "Tùy ý"}, sup.line_id
+			frappe.ValidationError,
+			api.save_line,
+			name,
+			{"is_excluded": 1, "exclude_reason": "Tùy ý"},
+			sup.line_id,
 		)
 		res = api.save_line(name, {"is_excluded": 1, "exclude_reason": "Thanh toán riêng"}, sup.line_id)
 		self.assertTrue(res["saved"])
@@ -195,19 +203,30 @@ class TestSuaDong(NormBase):
 		api.save_line(name, {"basis": "Định mức ban hành", "basis_ref": "QĐ 123/QĐ-BYT"}, l03.line_id)
 		row = frappe.db.get_value("NC Norm Line", l03.name, ["basis", "basis_ref"], as_dict=True)
 		self.assertEqual((row.basis, row.basis_ref), ("Định mức ban hành", "QĐ 123/QĐ-BYT"))
-		self.assertRaises(frappe.ValidationError, api.save_line, name, {"basis": "Theo cảm tính"}, l03.line_id)
+		self.assertRaises(
+			frappe.ValidationError, api.save_line, name, {"basis": "Theo cảm tính"}, l03.line_id
+		)
 		self.assertEqual(frappe.db.get_value("NC Norm Line", l03.name, "basis"), "Định mức ban hành")
 
 	def test_truong_khong_duoc_nhap_bi_tu_choi(self):
 		name = self.make_set()
 		line = frappe.get_doc("NC Norm Set", name).lines[0].line_id
-		self.assertRaises(frappe.ValidationError, api.save_line, name, {"confirmed_by": "Administrator"}, line)
+		self.assertRaises(
+			frappe.ValidationError, api.save_line, name, {"confirmed_by": "Administrator"}, line
+		)
 
 	def test_FR_NORM_014_canh_bao_trung(self):
 		name = self.make_set()
 		step = self.proc.steps[0].step_id
-		row = {"step_id": step, "component": "SUPPLY", "resource_doctype": "NC Item", "resource": "VT-N12",
-			"hospital_qty": 1, "uom": "cái", "basis": "Ước tính"}
+		row = {
+			"step_id": step,
+			"component": "SUPPLY",
+			"resource_doctype": "NC Item",
+			"resource": "VT-N12",
+			"hospital_qty": 1,
+			"uom": "cái",
+			"basis": "Ước tính",
+		}
 		res = api.save_line(name, row)
 		self.assertFalse(res["saved"])
 		self.assertEqual(res["duplicates"][0]["resource"], "VT-N12")
@@ -220,8 +239,18 @@ class TestSuaDong(NormBase):
 	def test_xoa_dong(self):
 		name = self.make_set()
 		step = self.proc.steps[0].step_id
-		api.save_line(name, {"step_id": step, "component": "SUPPLY", "resource_doctype": "NC Item",
-			"resource": "DIEN-N12", "hospital_qty": 1, "uom": "cái", "basis": "Ước tính"})
+		api.save_line(
+			name,
+			{
+				"step_id": step,
+				"component": "SUPPLY",
+				"resource_doctype": "NC Item",
+				"resource": "DIEN-N12",
+				"hospital_qty": 1,
+				"uom": "cái",
+				"basis": "Ước tính",
+			},
+		)
 		lines = frappe.get_doc("NC Norm Set", name).lines
 		self.assertRaises(frappe.ValidationError, api.delete_line, name, lines[0].line_id)  # dòng gốc
 		api.delete_line(name, lines[-1].line_id)
@@ -238,7 +267,9 @@ class TestSuaDong(NormBase):
 		thuoc = next(x for g in data["groups"] for x in g["lines"] if x["component"] == "DRUG")
 		self.assertEqual(thuoc["cost"], {"missing": "Chưa có đơn giá"})  # chưa liên kết
 		self.assertTrue(data["summary"]["incomplete"])
-		self.assertEqual(data["summary"]["parameter_set"], frappe.get_all("NC Costing Parameter Set", pluck="name")[0])
+		self.assertEqual(
+			data["summary"]["parameter_set"], frappe.get_all("NC Costing Parameter Set", pluck="name")[0]
+		)
 		self.assertEqual(data["groups"][-1]["title"], "Chung cho cả dịch vụ")
 		self.assertEqual(len(data["steps"]), 1)
 		self.assertIn("save_line", data["actions"])
@@ -270,7 +301,9 @@ class TestXacNhan(NormBase):
 		infra = next(r for r in lines if r.component == "INFRA")  # sẽ chưa xác nhận
 		self.link_all(name, skip=(drug.line_id,))
 		self.confirm_all(name, skip=(infra.line_id, drug.line_id))
-		frappe.db.set_value("NC Norm Line", drug.name, "confirmed_by", self.clin)  # đã xác nhận nhưng chưa liên kết
+		frappe.db.set_value(
+			"NC Norm Line", drug.name, "confirmed_by", self.clin
+		)  # đã xác nhận nhưng chưa liên kết
 		frappe.set_user(self.head)
 		with self.assertRaises(frappe.ValidationError) as cm:
 			api.confirm_set(name)
@@ -281,7 +314,9 @@ class TestXacNhan(NormBase):
 		self.assertEqual(frappe.db.get_value("NC Norm Set", name, "status"), "Nháp")
 		# gỡ hết cản trở
 		frappe.db.set_value("NC Norm Line", drug.name, "resource", "TH-N12")
-		self.confirm_all(name, skip=[r.line_id for r in frappe.get_doc("NC Norm Set", name).lines if r.confirmed_by])
+		self.confirm_all(
+			name, skip=[r.line_id for r in frappe.get_doc("NC Norm Set", name).lines if r.confirmed_by]
+		)
 		frappe.set_user(self.head)
 		out = api.confirm_set(name)
 		self.assertEqual(out["doc"]["status"], "Đã xác nhận chuyên môn")
@@ -318,7 +353,9 @@ class TestKhoa(NormBase):
 		self.assertRaises(
 			frappe.ValidationError, frappe.client.set_value, "NC Norm Set", name, "step_change_note", "x"
 		)
-		self.assertEqual(frappe.db.get_value("NC Norm Line", {"parent": name, "idx": 1}, "hospital_qty"), before)
+		self.assertEqual(
+			frappe.db.get_value("NC Norm Line", {"parent": name, "idx": 1}, "hospital_qty"), before
+		)
 		# phiên bản mới
 		frappe.set_user(self.head)
 		new = api.new_version(name)["name"]

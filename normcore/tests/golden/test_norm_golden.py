@@ -33,7 +33,9 @@ def _rate(ln):
 def _amount(ln):
 	q = engine.applied_qty(ln.qty, ln.authority)
 	reuse = g.ITEM[ln.res]["reuse"] if ln.comp in ("DRUG", "SUPPLY") else 1
-	return line_amount(ln.comp, q, _rate(ln), headcount=ln.headcount, wastage_rate=ln.wastage, reuse_count=reuse)
+	return line_amount(
+		ln.comp, q, _rate(ln), headcount=ln.headcount, wastage_rate=ln.wastage, reuse_count=reuse
+	)
 
 
 class TestNormGolden(unittest.TestCase):

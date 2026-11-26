@@ -41,7 +41,9 @@ class TestLineErrors(unittest.TestCase):
 		self.assertIn("L001", e[0])
 
 	def test_TC_NORM_10_thieu_so_phut(self):
-		e = errs(ln(component="LABOR", resource_doctype="NC Job Title", resource="BS", headcount=1, hospital_qty=0))
+		e = errs(
+			ln(component="LABOR", resource_doctype="NC Job Title", resource="BS", headcount=1, hospital_qty=0)
+		)
 		self.assertIn("Số phút", e[0])
 
 	def test_labor_thieu_so_nguoi(self):
@@ -68,7 +70,9 @@ class TestLineErrors(unittest.TestCase):
 		self.assertIn("Lý do vượt trần", e[0])
 		self.assertEqual(errs(ln(wastage_rate=8, wastage_reason="Hao hụt do cắt")), [])
 		self.assertEqual(errs(ln(wastage_rate=5)), [])
-		self.assertEqual(errs(ln(component="LABOR", resource_doctype="NC Job Title", headcount=1, wastage_rate=8)), [])
+		self.assertEqual(
+			errs(ln(component="LABOR", resource_doctype="NC Job Title", headcount=1, wastage_rate=8)), []
+		)
 
 	def test_hao_hut_ngoai_khoang(self):
 		self.assertTrue(errs(ln(wastage_rate=101, wastage_reason="x")))
@@ -116,7 +120,12 @@ class TestDuplicates(unittest.TestCase):
 
 	def test_bo_qua_chua_lien_ket_va_loai_tru(self):
 		d = duplicates(
-			[ln(line_id="L1", resource=None), ln(line_id="L2", resource=None), ln(line_id="L3", is_excluded=1), ln(line_id="L4")]
+			[
+				ln(line_id="L1", resource=None),
+				ln(line_id="L2", resource=None),
+				ln(line_id="L3", is_excluded=1),
+				ln(line_id="L4"),
+			]
 		)
 		self.assertEqual(d, {})
 
@@ -132,7 +141,9 @@ class TestConfirmBlockers(unittest.TestCase):
 
 	def test_ai_va_thu_tu_ly_do(self):
 		b = confirm_blockers([ln(line_id="L1", resource=None, ai_suggested=1)])
-		self.assertEqual(b[0]["reasons"], ["Chưa xác nhận", "Chưa liên kết danh mục", "Còn đề xuất AI chưa xử lý"])
+		self.assertEqual(
+			b[0]["reasons"], ["Chưa xác nhận", "Chưa liên kết danh mục", "Còn đề xuất AI chưa xử lý"]
+		)
 
 	def test_sach(self):
 		self.assertEqual(confirm_blockers([ln(confirmed_by="a@x")]), [])
@@ -150,4 +161,6 @@ class TestEffectiveParameterSet(unittest.TestCase):
 		self.assertEqual(effective_parameter_set(rows, date(2026, 11, 1))["name"], "D")
 
 	def test_khong_co(self):
-		self.assertIsNone(effective_parameter_set([{"name": "C", "effective_from": date(2027, 1, 1)}], date(2026, 1, 1)))
+		self.assertIsNone(
+			effective_parameter_set([{"name": "C", "effective_from": date(2027, 1, 1)}], date(2026, 1, 1))
+		)

@@ -62,8 +62,12 @@ def line_errors(line: dict, ctx: dict) -> list[str]:
 	if not line.get("procedure_resource_row"):  # FR-NORM-005
 		has_step, general = bool(line.get("step_id")), bool(line.get("service_level"))
 		if has_step == general:
-			errors.append(f"Dòng {lid}: chọn mã bước hoặc \"Chung cho cả dịch vụ\" (một trong hai)")
-	if line.get("step_id") and not line.get("service_level") and line["step_id"] not in ctx.get("step_ids", ()):
+			errors.append(f'Dòng {lid}: chọn mã bước hoặc "Chung cho cả dịch vụ" (một trong hai)')
+	if (
+		line.get("step_id")
+		and not line.get("service_level")
+		and line["step_id"] not in ctx.get("step_ids", ())
+	):
 		errors.append(f"Dòng {lid}: mã bước {line['step_id']} không tồn tại trong quy trình")  # DI-04
 
 	expected = RESOURCE_DOCTYPE_BY_COMPONENT.get(component)
@@ -78,7 +82,11 @@ def line_errors(line: dict, ctx: dict) -> list[str]:
 
 
 def _group_key(line: dict):
-	return ("service" if line.get("service_level") else line.get("step_id"), line.get("resource_doctype"), line.get("resource"))
+	return (
+		"service" if line.get("service_level") else line.get("step_id"),
+		line.get("resource_doctype"),
+		line.get("resource"),
+	)
 
 
 def duplicates(lines) -> dict[str, list[str]]:

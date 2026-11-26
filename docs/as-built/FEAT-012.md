@@ -16,8 +16,8 @@ Người hiện thực: Dev (Multica). Giới hạn: giao diện chưa kiểm b�
 
 ## Nợ kỹ thuật, ghi chú
 - Các trường [1.1] (FEAT-034), FR-NORM-015 (FEAT-013), đề xuất AI (FEAT-025), cờ `needs_update` (FEAT-008) chưa làm; trường đã có để mở rộng.
-- Test đỏ có chủ ý, chờ Lead: `nc_audit_event/test_nc_audit_event.py::test_FR_AUD_001_khoa_bo_dinh_muc` (assert từ-trạng-thái "Nháp"; thực tế "Đã xác nhận chuyên môn" sau Q1).
+- ASM-012-17: `test_FR_AUD_001_khoa_bo_dinh_muc` đổi vế từ-trạng-thái thành "Đã xác nhận chuyên môn" theo Quyết định Lead.
 - Chưa kiểm giao diện bằng mắt.
 
 ## ASM
-ASM-012-01..17 (`docs/decisions/assumptions/FEAT-012.md`); AMD-012-01, CF-012-01. ASM-012-03, 04 theo Quyết định Lead trên NORM-39; ASM-012-17 chờ Lead.
+ASM-012-01..17 (`docs/decisions/assumptions/FEAT-012.md`); AMD-012-01, CF-012-01. ASM-012-03, 04 theo Quyết định Lead trên NORM-39; ASM-012-17 theo Quyết định Lead.

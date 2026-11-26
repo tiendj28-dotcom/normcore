@@ -130,8 +130,15 @@ class TestNCNormSetFeat012(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
 		self.service, self.dept, self.job = make_base()
-		ensure("NC Item", "item_code", "VT-NS01", item_name="Gạc", item_type="Vật tư tiêu hao", uom="cái",
-			norm_units_per_purchase_unit=1)
+		ensure(
+			"NC Item",
+			"item_code",
+			"VT-NS01",
+			item_name="Gạc",
+			item_type="Vật tư tiêu hao",
+			uom="cái",
+			norm_units_per_purchase_unit=1,
+		)
 		proc = _published(self.service, self.dept)
 		self.ns = frappe.get_doc("NC Norm Set", make_norm_set(proc.name))
 		self.ns.append(
@@ -228,8 +235,16 @@ class TestNCNormSetFeat012(FrappeTestCase):
 
 	def test_nhan_luc_chua_gan_chuc_danh_van_tu_choi_con_loai_khac_cho_chua_lien_ket(self):
 		proc = make_procedure(self.service, self.dept, version=7)
-		proc.append("resources", {"step_id": "S001", "resource_type": "Vật tư", "resource_text": "Bơm tiêm",
-			"quantity": 1, "uom": "cái"})
+		proc.append(
+			"resources",
+			{
+				"step_id": "S001",
+				"resource_type": "Vật tư",
+				"resource_text": "Bơm tiêm",
+				"quantity": 1,
+				"uom": "cái",
+			},
+		)
 		proc.save()
 		publish_procedure(proc, "QĐ-07", "2026-12-01")
 		ns = frappe.get_doc("NC Norm Set", make_norm_set(proc.name))

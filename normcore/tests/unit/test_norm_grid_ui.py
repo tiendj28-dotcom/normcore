@@ -63,7 +63,15 @@ class TestNormGridUI(unittest.TestCase):
 		self.assertIn("silent: true", VUE)  # không mở hộp thoại của Desk
 
 	def test_nut_an_theo_actions(self):
-		for action in ("confirm_set", "lock_set", "new_version", "return_set", "save_line", "confirm_line", "delete_line"):
+		for action in (
+			"confirm_set",
+			"lock_set",
+			"new_version",
+			"return_set",
+			"save_line",
+			"confirm_line",
+			"delete_line",
+		):
 			self.assertRegex(VUE, rf"can\('{action}'\)")
 		self.assertIn("this.actions.includes", VUE)
 

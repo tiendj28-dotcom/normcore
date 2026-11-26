@@ -43,7 +43,9 @@ class TestNormInit(unittest.TestCase):
 		lines, errors = lines_from_resources(rows)
 		self.assertEqual(errors, [])
 		self.assertEqual([x["procedure_resource_row"] for x in lines], ["R1", "R2", "R3", "R4", "R5", "R6"])
-		self.assertEqual([x["component"] for x in lines], ["LABOR", "LABOR", "DRUG", "SUPPLY", "EQUIPMENT", "INFRA"])
+		self.assertEqual(
+			[x["component"] for x in lines], ["LABOR", "LABOR", "DRUG", "SUPPLY", "EQUIPMENT", "INFRA"]
+		)
 		self.assertEqual(lines[0]["headcount"], 2)
 		self.assertEqual(lines[1]["headcount"], 1)
 		self.assertIsNone(lines[2]["headcount"])

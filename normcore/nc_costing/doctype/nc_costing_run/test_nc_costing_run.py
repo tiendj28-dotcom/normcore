@@ -5,7 +5,14 @@ from frappe.tests.utils import FrappeTestCase
 
 from normcore.costing import engine
 from normcore.nc_costing.doctype.nc_norm_set.nc_norm_set import make_norm_set
-from normcore.tests.utils import confirm_norm_set, make_base, make_param_set, make_procedure, make_user, publish_procedure
+from normcore.tests.utils import (
+	confirm_norm_set,
+	make_base,
+	make_param_set,
+	make_procedure,
+	make_user,
+	publish_procedure,
+)
 
 
 def _published_norm_set(service, dept, minutes=10):

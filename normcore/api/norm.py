@@ -18,9 +18,7 @@ NS = "NC Norm Set"
 DRAFT, CONFIRMED, LOCKED = workflow.DRAFT, workflow.CONFIRMED, workflow.LOCKED
 # Trường người dùng được nhập qua save_line (không gồm mã dòng, dòng gốc, đề xuất AI, xác nhận)
 SAVE_FIELDS = tuple(
-	f
-	for f in ctl.LINE_INPUTS
-	if f not in ("line_id", "procedure_resource_row", "ai_suggested")
+	f for f in ctl.LINE_INPUTS if f not in ("line_id", "procedure_resource_row", "ai_suggested")
 )
 NO_PRICE = "Chưa có đơn giá"
 
@@ -72,9 +70,7 @@ class _Prices:
 
 	def __init__(self):
 		self.on = getdate(today())
-		rows = frappe.get_all(
-			"NC Costing Parameter Set", fields=["name", "effective_from"], order_by="name"
-		)
+		rows = frappe.get_all("NC Costing Parameter Set", fields=["name", "effective_from"], order_by="name")
 		for r in rows:
 			r["effective_from"] = getdate(r["effective_from"]) if r["effective_from"] else None
 		chosen = validation.effective_parameter_set(rows, self.on)
@@ -105,7 +101,9 @@ class _Prices:
 				)
 				if not room:
 					return None
-				return resources.room_hourly_rate(room.annual_infrastructure_cost, room.available_hours_per_year)
+				return resources.room_hourly_rate(
+					room.annual_infrastructure_cost, room.available_hours_per_year
+				)
 		except (ValueError, frappe.DoesNotExistError):
 			return None
 		return None
@@ -170,7 +168,9 @@ def _cost(prices, row):
 	if rate is None:
 		return None
 	authority = row["authority_qty"] or None  # 0 = không có (ASM-013)
-	q = engine.applied_qty(Decimal(str(row["hospital_qty"] or 0)), Decimal(str(authority)) if authority else None)
+	q = engine.applied_qty(
+		Decimal(str(row["hospital_qty"] or 0)), Decimal(str(authority)) if authority else None
+	)
 	amount = prov.line_amount(
 		row["component"],
 		q,
@@ -253,7 +253,9 @@ def get_norm_set(name):
 		g = [x for x in lines if not x["service_level"] and x["step_id"] == s["step_id"]]
 		groups.append({"step_id": s["step_id"], "title": s["step_title"], "lines": g, "total": _total(g)})
 	general = [x for x in lines if x["service_level"] or x["step_id"] not in step_keys]
-	groups.append({"step_id": None, "title": _("Chung cho cả dịch vụ"), "lines": general, "total": _total(general)})
+	groups.append(
+		{"step_id": None, "title": _("Chung cho cả dịch vụ"), "lines": general, "total": _total(general)}
+	)
 	return {
 		"doc": {
 			"name": ns.name,

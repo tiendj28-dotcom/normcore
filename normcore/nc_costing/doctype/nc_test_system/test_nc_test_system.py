@@ -4,7 +4,14 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from normcore.api import access
-from normcore.tests.utils import confirm_norm_set, ensure, make_base, make_cls_data, make_test_system, make_user
+from normcore.tests.utils import (
+	confirm_norm_set,
+	ensure,
+	make_base,
+	make_cls_data,
+	make_test_system,
+	make_user,
+)
 
 SYS = dict(est_rerun_rate=2, est_wastage_rate=3)
 
