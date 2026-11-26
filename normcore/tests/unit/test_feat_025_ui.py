@@ -7,8 +7,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 EDITOR = (ROOT / "public" / "js" / "procedure_editor" / "ProcedureEditor.vue").read_text(encoding="utf-8")
-GRID = (ROOT / "public" / "js" / "norm_grid" / "NormGrid.vue").read_text(encoding="utf-8")
-CREATE = (ROOT / "public" / "js" / "norm_create.js").read_text(encoding="utf-8")
+FORM = (ROOT / "nc_costing" / "doctype" / "nc_norm_set" / "nc_norm_set.js").read_text(encoding="utf-8")
+BLOCK = FORM.split("FEAT-025, AMD-025-02", 1)[1]
 VI = {r[0]: r[1] for r in csv.reader((ROOT / "translations" / "vi.csv").open(encoding="utf-8")) if len(r) > 1}
 
 
@@ -18,7 +18,7 @@ def strings(text):
 
 class TestFeat025Ui(unittest.TestCase):
 	def test_moi_chuoi_giao_dien_co_ban_dich(self):
-		for text in (EDITOR, GRID, CREATE):
+		for text in (EDITOR, FORM):
 			missing = [s for s in strings(text) if s not in VI]
 			self.assertEqual(missing, [])
 
@@ -42,19 +42,31 @@ class TestFeat025Ui(unittest.TestCase):
 		self.assertNotIn("'disabled'", EDITOR)
 		self.assertIn("consistencyStale", EDITOR)
 
-	def test_luoi_goi_cac_api_de_xuat_lien_ket(self):
-		for fn in ("start_link_suggestion", "get_link_suggestion_status", "accept_link_suggestions", "reject_link_suggestion"):
-			self.assertIn(fn, GRID)
-		self.assertIn("normcore_ai_link", GRID)
-		self.assertIn("ai_confidence", GRID)
-		self.assertIn("can('suggest_links')", GRID)  # ẩn khi AI tắt hoặc không quyền
-		self.assertIn("can('accept_link')", GRID)
-		self.assertIn("ai_pending", GRID)
+	def test_form_goi_cac_api_norm_link(self):
+		for fn in ("start_link_suggestion", "get_link_suggestion_status", "accept_link_suggestions", "reject_link_suggestion", "list_link_suggestions"):
+			self.assertIn(fn, BLOCK)
+		self.assertIn('const API = "normcore.api.norm_link."', BLOCK)
+		self.assertIn("normcore_ai_link", BLOCK)
+		self.assertIn("ai_confidence", BLOCK)
+		# AI tắt: không có nút "Đề xuất liên kết"; vẫn xem và xử lý đề xuất cũ (FR-AI-008)
+		self.assertIn("normcore.ai.enabled()", BLOCK)
+		self.assertIn('frappe.model.can_write("NC Norm Set")', BLOCK)
+		self.assertIn("data.can_edit", BLOCK)  # nút ghi chỉ khi có quyền; Auditor chỉ xem
+		self.assertIn("View link suggestions", BLOCK)
 
-	def test_khoi_tao_truyen_link_job(self):
-		self.assertIn("link_job", CREATE)
+	def test_luoi_va_api_norm_giu_nguyen(self):
+		# AMD-025-02: lưới và api/norm.py không đổi; ba test cũ không sửa
+		import subprocess
+
+		out = subprocess.run(
+			["git", "diff", "origin/develop", "--", "normcore/public/js/norm_grid/", "normcore/api/norm.py"],
+			cwd=ROOT.parent,
+			capture_output=True,
+			text=True,
+		)
+		self.assertEqual(out.stdout, "")
 
 	def test_khong_ma_mau_cung(self):
 		hex_ = re.compile(r"#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(")
 		self.assertIsNone(hex_.search(EDITOR))
-		self.assertIsNone(hex_.search(GRID.split("<style")[0]))
+		self.assertIsNone(hex_.search(FORM))

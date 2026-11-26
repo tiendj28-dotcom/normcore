@@ -64,14 +64,17 @@ def _inputs(row, skip=()) -> tuple:
 
 
 def guard_ai_fields(row, before, flags):
-	"""FEAT-025 (TD 2.2): chỉ đường "ai_link" được đặt `ai_suggested` / `ai_confidence`. Đường khác: khôi phục
-	từ dòng cũ (dòng mới: 0). Ngoại lệ: dòng trong `flags.ai_link_cleared` được 1 -> 0 (người dùng sửa liên kết)."""
+	"""FEAT-025 (TD 2.2, AMD-025-02): chỉ đường "ai_link" đặt `ai_suggested` / `ai_confidence`. Đường khác: dòng mới
+	về 0; dòng đề xuất mà người dùng sửa `resource`/`resource_doctype`/`component` thì mất nhãn (UC-009 bước 4,
+	ASM-025-10); còn lại khôi phục từ dòng cũ."""
 	if flags.norm_action == "ai_link":
 		return
 	if before is None:
 		row.ai_suggested, row.ai_confidence = 0, 0
-	elif row.line_id in (flags.ai_link_cleared or ()) and not cint(row.ai_suggested):
-		row.ai_confidence = 0
+		return
+	link = ("resource_doctype", "resource", "component")
+	if cint(before.ai_suggested) and any(_norm(row.get(f)) != _norm(before.get(f)) for f in link):
+		row.ai_suggested, row.ai_confidence = 0, 0
 	else:
 		row.ai_suggested, row.ai_confidence = before.ai_suggested, before.ai_confidence
 
@@ -255,6 +258,17 @@ class NCNormSet(Document):
 					r.set(f, before.get(f))
 		if errors:
 			frappe.throw("<br>".join(errors), title=_("Dòng định mức chưa hợp lệ"))
+
+	def after_insert(self):
+		"""FR-AI-007, ASM-025-12, AMD-025-02: bộ mới từ quy trình, AI bật, có dòng chưa liên kết → tác vụ nền đề xuất."""
+		if not self.flags.from_procedure:
+			return
+		from normcore.ai import gateway
+		from normcore.api import norm_link
+		from normcore.norm import ai_link
+
+		if gateway.is_enabled() and ai_link.pending_lines([r.as_dict() for r in self.lines]):
+			norm_link.start_link_job(self)
 
 	@frappe.whitelist()
 	def lock(self):

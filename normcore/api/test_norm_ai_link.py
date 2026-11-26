@@ -6,7 +6,8 @@ from unittest.mock import patch
 import frappe
 
 from normcore.ai.providers.base import ProviderError
-from normcore.api import norm as api
+from normcore.api import norm as norm_api
+from normcore.api import norm_link as api
 from normcore.api.test_norm import DEPT, NormBase
 from normcore.api.test_procedure_ai import FakeProvider, enable_ai
 from normcore.tests.utils import ensure, make_equipment, make_procedure, publish_procedure
@@ -109,7 +110,7 @@ class TestAiLinkApi(NormBase):
 	def create(self, proc, provider):
 		frappe.set_user(self.clin)
 		with patch("normcore.ai.gateway.get_provider", return_value=provider):
-			return api.create_norm_set(proc.name)
+			return norm_api.create_norm_set(proc.name)
 
 	def logs(self):
 		return frappe.get_all("NC AI Log", {"ref_doctype": "NC Norm Set"}, pluck="name")
@@ -128,7 +129,7 @@ class TestAiLinkApi(NormBase):
 		before = len(self.logs())
 		prov = FakeProvider(self.full_reply(proc))
 		out = self.create(proc, prov)
-		self.assertTrue(out["link_job"])
+		self.assertNotIn("link_job", out)  # AMD-025-02: after_insert tự khởi tác vụ
 		ns = frappe.get_doc("NC Norm Set", out["name"])
 		by_type = {r.procedure_resource_row: r for r in ns.lines}
 		rows = self.rows(proc)
@@ -144,37 +145,32 @@ class TestAiLinkApi(NormBase):
 		self.assertEqual(by_type[rows["Thuốc"]].ai_confidence, 93)
 		labor = by_type[rows["Nhân lực"]]
 		self.assertEqual((labor.resource, labor.ai_suggested), ("DD", 0))
-		st = api.get_link_suggestion_status(out["link_job"])
-		self.assertEqual((st["status"], st["suggested"]), ("done", 3))
 		self.assertEqual(len(self.logs()) - before, 1)
 		# ứng viên gửi AI: không có vật liệu nội kiểm (FR-NORM-024)
 		sent = json.dumps(prov.calls[0]["variables"], ensure_ascii=False)
 		self.assertNotIn("CC-NOIKIEM", sent)
-		got = api.get_norm_set(ns.name)
-		self.assertEqual(got["ai_pending"], 3)
+		got = api.list_link_suggestions(ns.name)
 		self.assertTrue(got["ai_enabled"])
-		self.assertIn("suggest_links", got["actions"])
-		self.assertIn("accept_link", got["actions"])
-		self.assertEqual(
-			sorted(x["ai_confidence"] for g in got["groups"] for x in g["lines"] if x["ai_suggested"]), [71, 80, 93]
-		)
+		self.assertTrue(got["can_edit"])
+		self.assertEqual(sorted(x["ai_confidence"] for x in got["lines"]), [71, 80, 93])
+		self.assertEqual({x["resource_text"] for x in got["lines"]}, {"Lidocain 2%", "Kim tiêm 23G", "Máy siêu âm tim"})
 
 	def test_UC009_8a_de_xuat_chua_xu_ly_chan_xac_nhan(self):
 		proc, name, _prov = self.suggested_set()
 		ln = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.ai_suggested)
 		with self.assertRaises(frappe.ValidationError) as cm:
-			api.confirm_line(name, ln.line_id)
+			norm_api.confirm_line(name, ln.line_id)
 		self.assertIn("đề xuất AI", str(cm.exception))
 		frappe.set_user(self.head)
 		with self.assertRaises(frappe.ValidationError) as cm:
-			api.confirm_set(name)
+			norm_api.confirm_set(name)
 		self.assertIn("Còn đề xuất AI chưa xử lý", str(cm.exception))
 		frappe.set_user(self.clin)
 		out = api.accept_link_suggestions(name, all=1)
-		self.assertEqual(out["ai_pending"], 0)
+		self.assertEqual(out["lines"], [])
 		self.confirm_all(name)
 		frappe.set_user(self.head)
-		api.confirm_set(name)
+		norm_api.confirm_set(name)
 		self.assertEqual(frappe.db.get_value("NC Norm Set", name, "status"), "Đã xác nhận chuyên môn")
 
 	def test_FR_AI_007_chap_nhan_bo_sua_de_xuat(self):
@@ -183,7 +179,7 @@ class TestAiLinkApi(NormBase):
 		a, b, c = [r for r in lines if r.ai_suggested]
 		# Chấp nhận theo danh sách dòng: giữ liên kết, hết nhãn
 		out = api.accept_link_suggestions(name, [a.line_id])
-		self.assertEqual(out["ai_pending"], 2)
+		self.assertEqual(len(out["lines"]), 2)
 		row = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.line_id == a.line_id)
 		self.assertEqual((row.resource, row.ai_suggested, row.ai_confidence), (a.resource, 0, 0))
 		with self.assertRaises(frappe.ValidationError):
@@ -195,23 +191,33 @@ class TestAiLinkApi(NormBase):
 		row = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.line_id == b.line_id)
 		self.assertEqual((row.resource, row.ai_suggested, row.ai_confidence), (None, 0, 0))
 		self.assertIn(row.component, ("SUPPLY", "EQUIPMENT", "DRUG"))
-		self.assertEqual(out["ai_pending"], 1)
+		self.assertEqual(len(out["lines"]), 1)
 		# sửa liên kết của dòng đề xuất = đã xử lý; sửa lượng thì giữ đề xuất
-		api.save_line(name, {"hospital_qty": 7}, c.line_id)
+		norm_api.save_line(name, {"hospital_qty": 7}, c.line_id)
 		row = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.line_id == c.line_id)
 		self.assertEqual((row.hospital_qty, row.ai_suggested, row.ai_confidence), (7, 1, c.ai_confidence))
 		other = "TB-SA" if row.resource != "TB-SA" else None
 		if other:
-			api.save_line(name, {"resource": other}, c.line_id)
+			norm_api.save_line(name, {"resource": other}, c.line_id)
 		else:  # dòng thiết bị: đổi sang thiết bị khác
 			make_equipment("TB-SA2", department=DEPT, equipment_name="Máy khác")
-			api.save_line(name, {"resource": "TB-SA2"}, c.line_id)
+			norm_api.save_line(name, {"resource": "TB-SA2"}, c.line_id)
 		row = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.line_id == c.line_id)
 		self.assertEqual((row.ai_suggested, row.ai_confidence), (0, 0))
 		# client không tự đặt được đề xuất hay độ tin cậy
 		for field in ("ai_suggested", "ai_confidence"):
 			with self.assertRaises(frappe.ValidationError):
-				api.save_line(name, {field: 1}, c.line_id)
+				norm_api.save_line(name, {field: 1}, c.line_id)
+
+	def test_FR_AI_007_sua_truc_tiep_bo_nhan_de_xuat(self):
+		proc, name, _prov = self.suggested_set()
+		d = frappe.get_doc("NC Norm Set", name)
+		row = next(r for r in d.lines if r.ai_suggested and r.component == "SUPPLY")
+		line_id = row.line_id
+		row.resource = "TH-LIDO"  # đổi nguồn lực trực tiếp (form, frappe.client), không qua save_line
+		d.save()
+		row = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.line_id == line_id)
+		self.assertEqual((row.resource, row.ai_suggested, row.ai_confidence), ("TH-LIDO", 0, 0))
 
 	def test_FR_AI_007_ai_tat_hoac_loi_khong_de_xuat(self):
 		proc = self.proc3()
@@ -219,7 +225,7 @@ class TestAiLinkApi(NormBase):
 		enable_ai(0)
 		prov = FakeProvider(self.full_reply(proc))
 		out = self.create(proc, prov)
-		self.assertIsNone(out["link_job"])
+		self.assertFalse(any(r.ai_suggested for r in frappe.get_doc("NC Norm Set", out["name"]).lines))
 		self.assertEqual(prov.calls, [])
 		self.assertEqual(len(self.logs()), before)
 		with self.assertRaises(frappe.ValidationError):
@@ -253,6 +259,10 @@ class TestAiLinkApi(NormBase):
 				api.accept_link_suggestions(name, all=1)
 			with self.assertRaises(frappe.PermissionError):
 				api.reject_link_suggestion(name, line)
+		frappe.set_user(self.aud)  # Auditor xem được độ tin cậy, không có quyền ghi
+		got = api.list_link_suggestions(name)
+		self.assertEqual(sorted(x["ai_confidence"] for x in got["lines"]), [71, 80, 93])
+		self.assertFalse(got["can_edit"])
 		frappe.set_user(self.clin)
 		with patch("normcore.ai.gateway.get_provider", return_value=FakeProvider({"suggestions": []})):
 			api.accept_link_suggestions(name, all=1)
@@ -264,11 +274,6 @@ class TestAiLinkApi(NormBase):
 			frappe.set_user(user)
 			with self.assertRaises(frappe.PermissionError):
 				api.get_link_suggestion_status(job)
-		frappe.set_user(self.aud)
-		got = api.get_norm_set(name)
-		self.assertIn("ai_confidence", got["groups"][0]["lines"][0])
-		self.assertNotIn("suggest_links", got["actions"])
-		self.assertNotIn("accept_link", got["actions"])
 
 	def test_FR_AI_011_payload_kiem_tra_va_de_xuat(self):
 		proc, name, prov = self.suggested_set()

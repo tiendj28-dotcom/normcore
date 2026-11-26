@@ -17,3 +17,12 @@ Suggest links,Đề xuất liên kết
 {0} lines have AI link suggestions to review,{0} dòng có đề xuất liên kết của AI cần xem
 {0} suggestions added,Đã thêm {0} đề xuất
 Suggestion confidence {0}%,Độ tin cậy của đề xuất {0}%
+Component,Cấu phần
+Confidence,Độ tin cậy
+Line,Dòng
+Link suggestions,Đề xuất liên kết
+Name in procedure,Tên trong quy trình
+No AI link suggestions to review,Không có đề xuất liên kết của AI cần xem
+Step,Bước
+Suggested resource,Nguồn lực đề xuất
+View link suggestions,Xem đề xuất liên kết

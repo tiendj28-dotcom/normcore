@@ -33,7 +33,6 @@
 					<button v-if="can('new_version')" type="button" class="btn btn-sm" :class="data.doc.status === 'Nháp' ? 'btn-default' : 'btn-primary'" :disabled="busy" @click="startAction('new_version')">{{ data.doc.newer_procedure ? __("Create version from new procedure") : __("Create new version") }}</button>
 					<button v-if="can('return_set')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="startAction('return_set')">{{ __("Return to draft") }}</button>
 					<button v-if="can('save_line')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openAdd">{{ __("Add line") }}</button>
-					<button v-if="can('suggest_links')" type="button" class="btn btn-default btn-sm" :disabled="busy || !!linkJob" @click="suggestLinks">{{ __("Suggest links") }}</button>
 					<button v-if="can('copy_norm_set')" type="button" class="btn btn-default btn-sm" :disabled="busy" @click="openCopy">{{ __("Copy to another system") }}</button>
 					<button type="button" class="btn btn-default btn-sm" :disabled="busy" @click="exportExcel">{{ __("Export Excel") }}</button>
 				</div>
@@ -42,13 +41,6 @@
 			<div v-if="data.doc.status === 'Đã xác nhận chuyên môn'" class="nc-ng__notice" role="note">{{ __("Confirmed professionally, waiting for Finance to lock. It cannot be edited.") }}</div>
 			<div v-else-if="closed" class="nc-ng__notice" role="note">{{ __("This record is {0} and cannot be edited. Create a new version.", [__(data.doc.status)]) }}</div>
 			<div v-else-if="!canEdit" class="nc-ng__notice" role="note">{{ __("You can only view this norm set.") }}</div>
-			<div v-if="linkJob" class="alert alert-info nc-ng__linkjob" role="status">{{ __("AI is suggesting catalog links…") }}</div>
-			<div v-if="linkError" class="alert alert-warning" role="alert">{{ __("AI could not suggest links: {0}. You can link lines manually.", [linkError]) }}</div>
-			<div v-if="data.ai_pending > 0" class="alert alert-info nc-ng__aistrip" role="status">
-				{{ __("{0} lines have AI link suggestions to review", [data.ai_pending]) }}
-				<button v-if="can('accept_link')" type="button" class="btn btn-default btn-xs" :disabled="busy" @click="acceptAllLinks">{{ __("Accept all") }}</button>
-				<a href="#" @click.prevent="goFirstSuggestion">{{ __("Go to first") }}</a>
-			</div>
 			<section v-if="changeStrip" class="nc-ng__warn" role="status" :aria-label="__('Changes from new procedure')">
 				<strong>{{ __("Changes from new procedure") }}</strong>
 				<div v-if="removedCount">
@@ -257,7 +249,6 @@
 										<span v-else-if="l.template_item" class="text-muted nc-ng__small">{{ __("Template") }}: {{ l.template_item }}</span>
 										<span v-if="l.unlinked" class="indicator-pill orange">{{ __("Not linked") }}</span>
 										<span v-if="l.ai_suggested" class="indicator-pill purple">{{ __("Suggested") }}</span>
-										<span v-if="l.ai_suggested && l.ai_confidence" class="text-muted nc-ng__small" :title="__('Suggestion confidence {0}%', [l.ai_confidence])" :aria-label="__('Suggestion confidence {0}%', [l.ai_confidence])">{{ l.ai_confidence }}%</span>
 									</td>
 									<td class="num">
 										<input v-if="canEdit && l.component === 'LABOR'" :value="l.headcount" type="number" min="1" class="form-control nc-ng__cell num" :aria-label="__('Headcount')" @change="commit(l, 'headcount', Number($event.target.value))" />
@@ -302,11 +293,7 @@
 									<td>
 										<span v-if="l.confirmed_by" :title="l.confirmed_by + ' ' + (l.confirmed_on || '')">✓ {{ l.confirmed_by.split("@")[0] }}</span>
 										<span v-else-if="l.step_removed" class="text-muted">{{ __("Needs a step") }}</span>
-										<template v-else-if="l.ai_suggested && can('accept_link')">
-											<button type="button" class="btn btn-default btn-xs" :disabled="busy" :aria-label="__('Accept') + ' ' + l.line_id" @click="acceptLink(l)">{{ __("Accept") }}</button>
-											<button type="button" class="btn btn-default btn-xs" :disabled="busy" :aria-label="__('Remove') + ' ' + l.line_id" @click="rejectLink(l)">{{ __("Remove") }}</button>
-										</template>
-										<button v-else-if="can('confirm_line') && !l.ai_suggested" type="button" class="btn btn-default btn-xs" :disabled="busy" @click="confirmLine(l)">{{ __("Confirm") }}</button>
+										<button v-else-if="can('confirm_line')" type="button" class="btn btn-default btn-xs" :disabled="busy" @click="confirmLine(l)">{{ __("Confirm") }}</button>
 									</td>
 									<td>
 										<button type="button" class="btn btn-default btn-xs" :aria-label="__('Line details') + ' ' + l.line_id" @click="detail = detail === l.line_id ? '' : l.line_id">&hellip;</button>
@@ -440,9 +427,6 @@ export default {
 	data() {
 		return {
 			name: this.initialName,
-			linkJob: "",
-			linkError: "",
-			linkTimer: null,
 			data: null,
 			loading: false,
 			error: "",
@@ -527,80 +511,9 @@ onlyAttention: false,
 		},
 	},
 	mounted() {
-		// FEAT-025: create_norm_set có thể trả link_job (norm_create.js đặt vào frappe.route_options)
-		const opts = frappe.route_options || {};
 		if (this.name) this.load(this.name);
-		if (opts.link_job) {
-			frappe.route_options = null;
-			this.watchLink(opts.link_job);
-		}
-		frappe.realtime.on("normcore_ai_link", this.onLinkRealtime);
-	},
-	beforeUnmount() {
-		frappe.realtime.off("normcore_ai_link", this.onLinkRealtime);
-		clearInterval(this.linkTimer);
 	},
 	methods: {
-		// --- đề xuất liên kết của AI (FEAT-025, FR-AI-007, SCR-DSK-014) ---
-		suggestLinks() {
-			this.linkError = "";
-			return this.run(() =>
-				this.call("start_link_suggestion", { norm_set: this.name })
-					.then((r) => {
-						if (r.job_id) this.watchLink(r.job_id);
-						else frappe.show_alert({ message: r.message, indicator: "blue" });
-					})
-					.catch((e) => (this.actionError = { lines: e.lines.length ? e.lines : [e.message] }))
-			);
-		},
-		watchLink(jobId) {
-			this.linkJob = jobId;
-			this.linkError = "";
-			clearInterval(this.linkTimer);
-			this.linkTimer = setInterval(() => this.pollLink(), 3000);
-		},
-		onLinkRealtime(msg) {
-			if (msg && msg.job_id === this.linkJob) this.pollLink();
-		},
-		pollLink() {
-			if (!this.linkJob) return Promise.resolve();
-			return this.call("get_link_suggestion_status", { job_id: this.linkJob })
-				.then((st) => {
-					if (st.status === "done") {
-						this.finishLink();
-						frappe.show_alert({ message: __("{0} suggestions added", [st.suggested || 0]), indicator: "green" });
-						return this.load(this.name);
-					}
-					if (st.status === "failed" || st.status === "unknown") {
-						this.finishLink();
-						this.linkError = st.message || "";
-					}
-				})
-				.catch(() => {});
-		},
-		finishLink() {
-			clearInterval(this.linkTimer);
-			this.linkJob = "";
-		},
-		acceptLink(l) {
-			return this.run(() => this.call("accept_link_suggestions", { norm_set: this.name, line_ids: [l.line_id] }).then((d) => this.show(d)).catch((e) => (this.actionError = { lines: e.lines.length ? e.lines : [e.message] })));
-		},
-		rejectLink(l) {
-			return this.run(() => this.call("reject_link_suggestion", { norm_set: this.name, line_id: l.line_id }).then((d) => this.show(d)).catch((e) => (this.actionError = { lines: e.lines.length ? e.lines : [e.message] })));
-		},
-		acceptAllLinks() {
-			frappe.confirm(__("Accept all {0} AI suggestions?", [this.data.ai_pending]), () =>
-				this.run(() => this.call("accept_link_suggestions", { norm_set: this.name, all: 1 }).then((d) => this.show(d)).catch((e) => (this.actionError = { lines: e.lines.length ? e.lines : [e.message] })))
-			);
-		},
-		goFirstSuggestion() {
-			const el = this.$el.querySelector(".nc-ng__row--ai");
-			if (el) {
-				el.scrollIntoView({ block: "nearest" });
-				const btn = el.querySelector("button");
-				if (btn) btn.focus();
-			}
-		},
 		stateColor: (s) => STATE_COLOR[s] || "gray",
 		compLabel: (c) => COMP_LABEL[c] || c,
 		isMaterial: (l) => MATERIAL.includes(l.component),

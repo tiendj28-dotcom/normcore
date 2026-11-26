@@ -19,7 +19,6 @@ frappe.provide("normcore.norm");
 
 	function open_set(result) {
 		if (result.message) frappe.show_alert({ message: result.message, indicator: "blue" });
-		if (result.link_job) frappe.route_options = { link_job: result.link_job }; // FEAT-025: lưới theo dõi tác vụ đề xuất
 		frappe.set_route("norm-grid", result.name);
 	}
 
