@@ -9,8 +9,8 @@ from frappe import _
 from frappe.utils import cint, getdate, now_datetime, today
 
 from normcore.costing import engine, pricing, qc_plans, resources
-from normcore.exports import norm_set as export
 from normcore.costing import provisional as prov
+from normcore.exports import norm_set as export
 from normcore.nc_costing.doctype.nc_norm_set import nc_norm_set as ctl
 from normcore.norm import copy as norm_copy
 from normcore.norm import templates, validation, workflow
@@ -335,7 +335,9 @@ def get_norm_set(name):
 			"basis": list(validation.BASIS_VALUES),
 			"exclude_reason": list(validation.EXCLUDE_REASONS),
 			"resource_doctype_by_component": RESOURCE_DOCTYPE_BY_COMPONENT,
-			"cost_level": [{"value": v, "label": validation.COST_LEVEL_LABELS[v]} for v in validation.COST_LEVELS],
+			"cost_level": [
+				{"value": v, "label": validation.COST_LEVEL_LABELS[v]} for v in validation.COST_LEVELS
+			],
 			"attach_to": list(validation.ATTACH_TO),
 		},
 		"meta": {
@@ -364,7 +366,9 @@ def _set_blockers(ns, rows, cls) -> list[str]:
 		"qc_items": cls["qc_items"],
 		"mandatory_items": cls["mandatory_items"],
 	}
-	return validation.set_blockers({"test_system": ns.test_system, "tests_per_tube": ns.tests_per_tube}, rows, ctx)
+	return validation.set_blockers(
+		{"test_system": ns.test_system, "tests_per_tube": ns.tests_per_tube}, rows, ctx
+	)
 
 
 def _warnings(ns, cls) -> list[dict]:
@@ -725,7 +729,11 @@ def _latest_k(test_system):
 		["parent", "k_factor", "k_estimated"],
 	):
 		run = frappe.db.get_value("NC Service Cost", r.parent, "costing_run")
-		info = frappe.db.get_value("NC Costing Run", run, ["costing_date", "status"], as_dict=True) if run else None
+		info = (
+			frappe.db.get_value("NC Costing Run", run, ["costing_date", "status"], as_dict=True)
+			if run
+			else None
+		)
 		if info:
 			rows.append({"run": run, **info, "k_factor": r.k_factor, "k_estimated": r.k_estimated})
 	return export.latest_k(rows)
@@ -737,13 +745,13 @@ def _export_data(ns) -> dict:
 	order = list(steps)
 	labels = {}
 	lines = []
-	for r in sorted(ns.lines, key=lambda r: (order.index(r.step_id) if r.step_id in order else len(order))):
+	for r in sorted(ns.lines, key=lambda r: order.index(r.step_id) if r.step_id in order else len(order)):
 		d = _dict(r)
 		d["step_title"] = steps.get(r.step_id) or ("Chung cho cả dịch vụ" if r.service_level else "")
 		d["resource_label"] = _label(r.resource_doctype, r.resource, labels)
 		d["cost_level_label"] = validation.COST_LEVEL_LABELS.get(r.cost_level or "RESULT")
 		d["apply_k_label"] = "Có" if cint(r.apply_k) else ""
-		d["attach_label"] = r.attach_equipment and f"Thiết bị {r.attach_equipment}" or r.attach_to or ""
+		d["attach_label"] = (r.attach_equipment and f"Thiết bị {r.attach_equipment}") or r.attach_to or ""
 		d["applied_qty"] = float(
 			engine.applied_qty(
 				Decimal(str(r.hospital_qty or 0)), Decimal(str(r.authority_qty)) if r.authority_qty else None

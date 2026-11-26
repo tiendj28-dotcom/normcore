@@ -120,7 +120,9 @@ class TestLineErrorsCls(unittest.TestCase):
 		self.assertIn("Dòng L001 thiếu: Gắn với", errs(ln(cost_level="DAY")))
 
 	def test_gan_voi_ngoai_danh_sach(self):
-		self.assertTrue(any("không thuộc danh sách" in x for x in errs(ln(cost_level="DAY", attach_to="Khác"))))
+		self.assertTrue(
+			any("không thuộc danh sách" in x for x in errs(ln(cost_level="DAY", attach_to="Khác")))
+		)
 
 	def test_gan_he_thong_khi_bo_khong_co_he_thong(self):
 		e = errs(ln(cost_level="PERIOD", attach_to="Hệ thống xét nghiệm"), has_test_system=False)
@@ -143,12 +145,16 @@ class TestLineErrorsCls(unittest.TestCase):
 		self.assertEqual(errs(ln(resource="QC_L"), changed=False), [])
 
 	def test_qc_khac_doctype_khong_trung(self):
-		self.assertEqual(errs(ln(resource="QC_L", resource_doctype="NC Equipment", component="EQUIPMENT")), [])
+		self.assertEqual(
+			errs(ln(resource="QC_L", resource_doctype="NC Equipment", component="EQUIPMENT")), []
+		)
 
 	def test_khoan_muc_ngoai_mau(self):
 		self.assertEqual(errs(ln(template_item="Hóa chất chính")), [])
 		self.assertTrue(any("không thuộc mẫu" in x for x in errs(ln(template_item="Lạ"))))
-		self.assertTrue(any("không thuộc mẫu" in x for x in errs(ln(template_item="Thiết bị"), template_items=())))
+		self.assertTrue(
+			any("không thuộc mẫu" in x for x in errs(ln(template_item="Thiết bị"), template_items=()))
+		)
 
 
 class TestPlaceholder(unittest.TestCase):
@@ -187,7 +193,7 @@ class TestPlaceholder(unittest.TestCase):
 
 
 class TestMandatoryStatus(unittest.TestCase):
-	ITEMS = [{"item_name": "Thiết bị", "is_mandatory": 1}, {"item_name": "Hóa chất chính", "is_mandatory": 1}]
+	ITEMS = ({"item_name": "Thiết bị", "is_mandatory": 1}, {"item_name": "Hóa chất chính", "is_mandatory": 1})
 
 	def test_dat_khi_co_luong(self):
 		st = mandatory_status(self.ITEMS, [ln(template_item="Hóa chất chính")])
@@ -202,7 +208,9 @@ class TestMandatoryStatus(unittest.TestCase):
 		self.assertFalse(mandatory_status(self.ITEMS, lines)[0]["satisfied"])
 
 	def test_khong_dat_khi_luong_0(self):
-		self.assertFalse(mandatory_status(self.ITEMS, [ln(template_item="Thiết bị", hospital_qty=0)])[0]["satisfied"])
+		self.assertFalse(
+			mandatory_status(self.ITEMS, [ln(template_item="Thiết bị", hospital_qty=0)])[0]["satisfied"]
+		)
 
 	def test_mau_rong(self):
 		self.assertEqual(mandatory_status(None, []), [])
@@ -246,5 +254,6 @@ class TestSetBlockers(unittest.TestCase):
 		e = set_blockers({"tests_per_tube": 1}, [ln(resource="QC_L")], {"qc_items": {"QC_L"}})
 		self.assertEqual(e, ["Dòng L001 dùng mặt hàng của kế hoạch chất lượng: QC_L"])
 		self.assertEqual(
-			set_blockers({"tests_per_tube": 1}, [ln(resource="QC_L", is_excluded=1)], {"qc_items": {"QC_L"}}), []
+			set_blockers({"tests_per_tube": 1}, [ln(resource="QC_L", is_excluded=1)], {"qc_items": {"QC_L"}}),
+			[],
 		)

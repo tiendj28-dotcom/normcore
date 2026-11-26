@@ -36,7 +36,7 @@ class TestTemplateErrors(unittest.TestCase):
 		self.assertEqual(e, ["Thiếu: Mã mẫu", "Thiếu: Nhóm chuyên ngành"])
 
 	def test_trung_ten(self):
-		items = ITEMS + [{**ITEMS[0], "item_name": " vật tư LẤY MẪU "}]
+		items = [*ITEMS, {**ITEMS[0], "item_name": " vật tư LẤY MẪU "}]
 		self.assertTrue(any("bị trùng" in x for x in template_errors(self.ok(items=items), [])))
 
 	def test_thieu_ten_cau_phan_cap(self):

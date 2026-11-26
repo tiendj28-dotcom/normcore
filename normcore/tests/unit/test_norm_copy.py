@@ -83,7 +83,9 @@ class TestCopyLines(unittest.TestCase):
 
 	def test_mat_hang_ke_hoach_bi_bo(self):
 		out, skipped = self.run_copy(qc_items={"HC_PT"})
-		self.assertEqual(skipped, [{"line_id": "L05", "reason": "Mặt hàng thuộc kế hoạch chất lượng của hệ thống đích"}])
+		self.assertEqual(
+			skipped, [{"line_id": "L05", "reason": "Mặt hàng thuộc kế hoạch chất lượng của hệ thống đích"}]
+		)
 		self.assertEqual(len(out), 6)
 
 	def test_thiet_bi_khac_giu_nguyen(self):

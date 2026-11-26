@@ -51,7 +51,9 @@ HEAD_ROWS = (
 def latest_k(rows):
 	"""ASM-034-16: k của lần tính giá "Đã tính"/"Đã khóa" gần nhất (ngày lớn nhất, hòa thì tên lớn nhất).
 	rows: [{run, costing_date, status, k_factor, k_estimated}] -> dict hoặc None."""
-	ok = [r for r in rows or () if r.get("status") in ("Đã tính", "Đã khóa") and r.get("k_factor") is not None]
+	ok = [
+		r for r in rows or () if r.get("status") in ("Đã tính", "Đã khóa") and r.get("k_factor") is not None
+	]
 	if not ok:
 		return None
 	return max(ok, key=lambda r: (str(r.get("costing_date") or ""), str(r.get("run") or "")))
@@ -102,8 +104,14 @@ def _quality_sheets(wb, data):
 			ws,
 			("Vật liệu", "Số mức", "Lần/ngày", "Lượng/lần", "Số thông số dùng chung", "Ngày chạy/năm"),
 			[
-				(r.get("qc_material"), r.get("levels"), r.get("runs_per_day"), r.get("qty_per_run"),
-				 r.get("shared_parameter_count"), run_days)
+				(
+					r.get("qc_material"),
+					r.get("levels"),
+					r.get("runs_per_day"),
+					r.get("qty_per_run"),
+					r.get("shared_parameter_count"),
+					run_days,
+				)
 				for r in plan.get("iqc_lines") or ()
 			],
 		)
@@ -115,8 +123,13 @@ def _quality_sheets(wb, data):
 			ws,
 			("Chất chuẩn", "Số điểm", "Số lần lặp", "Lần/năm", "Chi phí/lần"),
 			[
-				(r.get("calibrator"), r.get("points"), r.get("replicates"), r.get("calibrations_per_year"),
-				 r.get("cost_per_calibration"))
+				(
+					r.get("calibrator"),
+					r.get("points"),
+					r.get("replicates"),
+					r.get("calibrations_per_year"),
+					r.get("cost_per_calibration"),
+				)
 				for r in plan.get("calibration_lines") or ()
 			],
 		)
@@ -126,11 +139,27 @@ def _quality_sheets(wb, data):
 	if data.get("eqa"):
 		_table(
 			ws,
-			("Mã", "Tên chương trình", "Nhà cung cấp", "Đợt/năm", "Mẫu/đợt", "Phí năm", "Phí vận chuyển",
-			 "Tỷ lệ của dịch vụ (%)"),
+			(
+				"Mã",
+				"Tên chương trình",
+				"Nhà cung cấp",
+				"Đợt/năm",
+				"Mẫu/đợt",
+				"Phí năm",
+				"Phí vận chuyển",
+				"Tỷ lệ của dịch vụ (%)",
+			),
 			[
-				(r.get("eqa_code"), r.get("program_name"), r.get("provider"), r.get("rounds_per_year"),
-				 r.get("samples_per_round"), r.get("annual_fee"), r.get("annual_shipping_fee"), r.get("share_pct"))
+				(
+					r.get("eqa_code"),
+					r.get("program_name"),
+					r.get("provider"),
+					r.get("rounds_per_year"),
+					r.get("samples_per_round"),
+					r.get("annual_fee"),
+					r.get("annual_shipping_fee"),
+					r.get("share_pct"),
+				)
 				for r in data["eqa"]
 			],
 		)
@@ -142,8 +171,15 @@ def _quality_sheets(wb, data):
 	_bold(ws, 1)
 	system = (data.get("head") or {}).get("test_system")
 	if k:
-		ws.append([system, k.get("run"), _text(k.get("costing_date")), float(k["k_factor"]),
-		           ESTIMATED if k.get("k_estimated") else ""])
+		ws.append(
+			[
+				system,
+				k.get("run"),
+				_text(k.get("costing_date")),
+				float(k["k_factor"]),
+				ESTIMATED if k.get("k_estimated") else "",
+			]
+		)
 		ws.cell(ws.max_row, 4).number_format = K_FORMAT
 	else:
 		ws.append([system, None, None, NO_RUN, ""])

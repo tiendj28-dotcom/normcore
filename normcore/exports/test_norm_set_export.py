@@ -47,19 +47,36 @@ def data(system=True, **kw):
 			"tests_per_tube": 4,
 		},
 		"has_test_system": system,
-		"lines": [line("L001"), line("L002", cost_level_label="Theo ống mẫu", apply_k_label="", component="SUPPLY")],
+		"lines": [
+			line("L001"),
+			line("L002", cost_level_label="Theo ống mẫu", apply_k_label="", component="SUPPLY"),
+		],
 		"qc_plan": {
 			"run_days_per_year": 300,
 			"iqc_lines": [
 				dict(qc_material="QC_L", levels=2, runs_per_day=1, qty_per_run=0.2, shared_parameter_count=20)
 			],
 			"calibration_lines": [
-				dict(calibrator="CAL", points=2, replicates=2, calibrations_per_year=12, cost_per_calibration=400000)
+				dict(
+					calibrator="CAL",
+					points=2,
+					replicates=2,
+					calibrations_per_year=12,
+					cost_per_calibration=400000,
+				)
 			],
 		},
 		"eqa": [
-			dict(eqa_code="EQA-HS", program_name="Ngoại kiểm", provider="TT", rounds_per_year=3,
-			     samples_per_round=4, annual_fee=24000000, annual_shipping_fee=1200000, share_pct=5)
+			dict(
+				eqa_code="EQA-HS",
+				program_name="Ngoại kiểm",
+				provider="TT",
+				rounds_per_year=3,
+				samples_per_round=4,
+				annual_fee=24000000,
+				annual_shipping_fee=1200000,
+				share_pct=5,
+			)
 		],
 		"k": None,
 	}
@@ -82,7 +99,11 @@ class TestBuildWorkbook(unittest.TestCase):
 	def test_TC_CLS_33_tep_xuat_co_k_6_chu_so(self):
 		k, _total, estimated = golden_cls.k_factor("GLU-A")
 		self.assertFalse(estimated)
-		wb = load(norm_set.build_workbook(data(k={"run": "TG-1", "costing_date": "2026-11-01", "k_factor": k, "k_estimated": 0})))
+		wb = load(
+			norm_set.build_workbook(
+				data(k={"run": "TG-1", "costing_date": "2026-11-01", "k_factor": k, "k_estimated": 0})
+			)
+		)
 		ws = wb["Hệ số k"]
 		cell = ws.cell(2, 4)
 		self.assertEqual(cell.value, float(k))
@@ -102,9 +123,7 @@ class TestBuildWorkbook(unittest.TestCase):
 
 	def test_TC_CLS_33_trang_dong_co_cap_phat_sinh_dung_gia_tri(self):
 		wb = load(norm_set.build_workbook(data()))
-		self.assertEqual(
-			wb.sheetnames, ["Bộ định mức", "Nội kiểm", "Chuẩn máy", "Ngoại kiểm", "Hệ số k"]
-		)
+		self.assertEqual(wb.sheetnames, ["Bộ định mức", "Nội kiểm", "Chuẩn máy", "Ngoại kiểm", "Hệ số k"])
 		header, rows = table(wb["Bộ định mức"], "Bước")
 		col = {h: i for i, h in enumerate(header)}
 		self.assertEqual([r[col["Cấp phát sinh"]] for r in rows], ["Theo kết quả", "Theo ống mẫu"])

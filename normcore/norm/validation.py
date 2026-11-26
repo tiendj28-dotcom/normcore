@@ -208,11 +208,7 @@ def set_blockers(head: dict, lines, ctx: dict) -> list[str]:
 	if ctx.get("ts_required") and not head.get("test_system"):
 		out.append("Chưa gắn hệ thống xét nghiệm")
 	if _num(head.get("tests_per_tube")) <= 0:
-		tube = [
-			ln.get("line_id")
-			for ln in lines
-			if _level(ln) == "TUBE" and not ln.get("is_excluded")
-		]
+		tube = [ln.get("line_id") for ln in lines if _level(ln) == "TUBE" and not ln.get("is_excluded")]
 		if tube:
 			out.append(
 				"Chưa nhập Số xét nghiệm bình quân trên một ống mẫu "

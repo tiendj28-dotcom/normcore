@@ -9,7 +9,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 VUE = (ROOT / "public" / "js" / "norm_grid" / "NormGrid.vue").read_text(encoding="utf-8")
 CREATE = (ROOT / "public" / "js" / "norm_create.js").read_text(encoding="utf-8")
-LIST_JS = (ROOT / "nc_costing" / "doctype" / "nc_norm_set" / "nc_norm_set_list.js").read_text(encoding="utf-8")
+LIST_JS = (ROOT / "nc_costing" / "doctype" / "nc_norm_set" / "nc_norm_set_list.js").read_text(
+	encoding="utf-8"
+)
 PROC_JS = (
 	ROOT / "nc_procedure" / "doctype" / "nc_clinical_procedure" / "nc_clinical_procedure.js"
 ).read_text(encoding="utf-8")
@@ -30,7 +32,7 @@ class TestNormGridCls(unittest.TestCase):
 	def test_cot_cls_chi_hien_khi_can_lam_sang(self):
 		self.assertIn("meta.is_paraclinical", VUE)
 		for col in ("Cost level", "Apply k"):
-			self.assertRegex(VUE, r'<th v-if="isCls" scope="col">\{\{ __\("%s"\) \}\}</th>' % col)
+			self.assertRegex(VUE, rf'<th v-if="isCls" scope="col">\{{\{{ __\("{col}"\) \}}\}}</th>')
 
 	def test_nhan_k_chi_bat_duoc_theo_dieu_kien_di17(self):
 		self.assertRegex(VUE, r'"RESULT" && MATERIAL\.includes\(component\)')
@@ -60,7 +62,9 @@ class TestNormGridCls(unittest.TestCase):
 class TestCreateDialog(unittest.TestCase):
 	def test_chi_goi_api_norm(self):
 		self.assertIn('const API = "normcore.api.norm."', CREATE)
-		self.assertEqual(set(re.findall(r'method:\s*API \+ "(\w+)"', CREATE)), {"create_options", "create_norm_set"})
+		self.assertEqual(
+			set(re.findall(r'method:\s*API \+ "(\w+)"', CREATE)), {"create_options", "create_norm_set"}
+		)
 		self.assertEqual(len(re.findall(r"method:", CREATE)), 2)
 		self.assertIn("silent: true", CREATE)  # lỗi hiện ở hộp thoại, không mở hộp của Desk
 		self.assertIn('role="alert"', CREATE)

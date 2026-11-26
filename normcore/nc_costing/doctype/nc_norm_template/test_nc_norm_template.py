@@ -53,7 +53,7 @@ class TestNCNormTemplate(FrappeTestCase):
 		frappe.get_doc(values("MDM-T3", cls_group="Miễn dịch", is_active=1)).insert()  # nhóm khác được
 
 	def test_FR_NORM_021_trung_ten_khoan_muc(self):
-		items = ITEMS + [dict(ITEMS[0], item_name=" thiết bị ")]
+		items = [*ITEMS, dict(ITEMS[0], item_name=" thiết bị ")]
 		with self.assertRaises(frappe.ValidationError):
 			frappe.get_doc(values(items=items)).insert()
 

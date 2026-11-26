@@ -13,7 +13,9 @@ def copy_lines(lines, step_ids, resource_rows, equipment_map, qc_items, inputs=N
 	for ln in lines:
 		lid = ln.get("line_id")
 		if not ln.get("service_level") and ln.get("step_id") not in step_ids:
-			skipped.append({"line_id": lid, "reason": f"Mã bước {ln.get('step_id')} không còn trong quy trình"})
+			skipped.append(
+				{"line_id": lid, "reason": f"Mã bước {ln.get('step_id')} không còn trong quy trình"}
+			)
 			continue
 		if (
 			ln.get("resource")

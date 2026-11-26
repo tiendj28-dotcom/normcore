@@ -79,7 +79,11 @@ def apply_template(lines, items, paraclinical: bool) -> list[dict]:
 	for it in items or ():
 		level = (it.get("default_cost_level") or "RESULT") if paraclinical else "RESULT"
 		hit = next(
-			(i for i, ln in enumerate(out) if i not in assigned and ln.get("component") == it.get("component")),
+			(
+				i
+				for i, ln in enumerate(out)
+				if i not in assigned and ln.get("component") == it.get("component")
+			),
 			None,
 		)
 		if hit is not None:

@@ -116,9 +116,7 @@ class NCNormSet(Document):
 	def autoname(self):
 		"""ASM-034-02: bộ có hệ thống mang mã hệ thống trong tên; không có thì dùng `autoname` của JSON."""
 		if self.test_system:
-			self.name = (
-				f"DM-{self.technical_service}-{self.department}-{self.test_system}-v{self.version_no}"
-			)
+			self.name = f"DM-{self.technical_service}-{self.department}-{self.test_system}-v{self.version_no}"
 
 	def validate(self):
 		prev = self.get_doc_before_save()
