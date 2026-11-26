@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["Site sạch: 1530 test OK; pytest 859 passed, cover 99%; golden khớp; TC-COST-02/03/05/08/10/14/16 có test và đạt; quyền clinician/auditor đạt; CI PR xanh; diff test không bị nới; không chạm tài liệu chỉ đọc"], "commit": "a08fe444079e44fa2eca2544061147cc56ec7fc1"}
