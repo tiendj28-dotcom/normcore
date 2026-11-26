@@ -80,7 +80,7 @@ class TestPhysicalReconciliationUI(unittest.TestCase):
 			sorted(r["role"] for r in b["roles"]),
 			["NC Admin", "NC Auditor", "NC Department Head", "NC Director", "NC Finance"],
 		)
-		self.assertEqual((b["ref_doctype"], b["report_type"]), ("NC Costing Run", "Script Report"))
+		self.assertEqual((b["ref_doctype"], b["report_type"]), ("NC Service Cost", "Script Report"))
 
 	def test_bo_loc_va_nut(self):
 		t = _t(JS[0])

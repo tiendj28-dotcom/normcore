@@ -66,3 +66,14 @@ class TestNCPhysicalReconciliationReport(FrappeTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			execute({"costing_run": self.run.name})
 		self.assertFalse(frappe.get_doc("Report", "NC Physical Reconciliation").is_permitted())
+
+	def test_query_report_run_theo_vai_tro(self):
+		from frappe.desk.query_report import run
+
+		for user in (FIN, AUD):
+			frappe.set_user(user)
+			res = run("NC Physical Reconciliation", filters={"costing_run": self.run.name})
+			self.assertTrue(res["result"], user)
+		frappe.set_user(CLIN)
+		with self.assertRaises(frappe.PermissionError):
+			run("NC Physical Reconciliation", filters={"costing_run": self.run.name})

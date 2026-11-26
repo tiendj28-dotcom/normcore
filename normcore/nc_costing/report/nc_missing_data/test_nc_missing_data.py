@@ -78,3 +78,26 @@ class TestNCMissingDataReport(FrappeTestCase):
 		self.assertFalse(frappe.get_doc("Report", "NC Missing Data").is_permitted())
 		frappe.set_user(FIN)
 		self.assertTrue(frappe.get_doc("Report", "NC Missing Data").is_permitted())
+
+	def test_query_report_run_theo_vai_tro(self):
+		"""Qua đường của Desk (`frappe.desk.query_report.run`): quyền `report` của ref_doctype được kiểm."""
+		from frappe.desk.query_report import run
+
+		add_user_permission("NC Department", fx.DEPT, HEAD)
+		users = {
+			role: make_user(f"{key}.qr37@normcore.test", role)
+			for key, role in (
+				("aud", "NC Auditor"),
+				("fin", "NC Finance"),
+				("dir", "NC Director"),
+				("clin", "NC Clinician"),
+			)
+		}
+		users["NC Department Head"] = HEAD
+		for role in ("NC Auditor", "NC Finance", "NC Director", "NC Department Head"):
+			frappe.set_user(users[role])
+			res = run("NC Missing Data", filters=self.filters)
+			self.assertEqual(res["result"], [], role)
+		frappe.set_user(users["NC Clinician"])
+		with self.assertRaises(frappe.PermissionError):
+			run("NC Missing Data", filters=self.filters)
