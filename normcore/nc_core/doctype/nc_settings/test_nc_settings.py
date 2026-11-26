@@ -34,6 +34,8 @@ class TestNCSettings(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		frappe.db.rollback()
+		frappe.db.value_cache.clear()  # cache giá trị single còn giữ phần đã rollback
+		frappe.cache.delete_value("document_cache::NC Settings")
 
 	def test_nc_settings_mac_dinh(self):
 		meta = frappe.get_meta("NC Settings")
@@ -102,3 +104,68 @@ class TestNCSettings(FrappeTestCase):
 			frappe.set_user("Administrator")
 		with self.assertRaises(frappe.PermissionError):
 			_save(auditor, min_time_study_cases=4)
+
+
+class TestApplyImmediately(FrappeTestCase):
+	"""FR-ADM-003: đổi tham số vận hành rồi áp ngay cho thao tác kế tiếp, không clear_cache, không khởi động lại."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def tearDown(self):
+		frappe.flags.pop("normcore_ai_transport", None)
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_TC_ADM_03_doi_so_ca_toi_thieu_ap_ngay(self):
+		# Phần tham số của TC-ADM-03 (ASM-002-13, Lead chọn PA1). Phần "mở kết quả 3 ca → có trung vị,
+		# hết cảnh báo thiếu ca" là test_TC_ADM_03_ket_qua_bam_gio_3_ca của FEAT-014.
+		admin = make_user("adm.set@normcore.test", "NC Admin")
+		self.assertEqual(settings.get("min_time_study_cases"), 5)
+		_save(admin, min_time_study_cases=3)
+		self.assertEqual(settings.get("min_time_study_cases"), 3)
+
+	def test_FR_ADM_003_so_ngay_nhac_ap_ngay(self):
+		from frappe.utils import add_days, nowdate
+
+		from normcore.api import access
+		from normcore.api import procedure_workflow as wf
+		from normcore.tests.utils import make_base, make_procedure
+
+		service, dept, _ = make_base()
+		head = make_user("head.adm3@normcore.test", "NC Department Head")
+		access.assign_department(head, dept)
+		frappe.db.set_value("NC Department", dept, "head_user", head)
+		proc = make_procedure(service, dept)
+		frappe.db.set_value(
+			"NC Clinical Procedure", proc.name, "workflow_state", "Chờ trưởng khoa duyệt"
+		)
+		frappe.db.set_value(
+			"NC Clinical Procedure", proc.name, "modified", add_days(nowdate(), -3), update_modified=False
+		)
+		today = nowdate()
+		_save("Administrator", approval_reminder_days=7)
+		self.assertEqual(wf.send_approval_reminders(today=today), 0)
+		self.assertFalse(wf.pending_for(head)[0]["overdue"])
+		_save("Administrator", approval_reminder_days=2)
+		self.assertEqual(wf.send_approval_reminders(today=today), 1)
+		self.assertTrue(wf.pending_for(head)[0]["overdue"])
+
+	def test_FR_ADM_003_thoi_han_ai_ap_ngay(self):
+		from normcore.ai import gateway
+
+		seen = []
+
+		def post(url, headers, payload, timeout):
+			seen.append(timeout)
+			return {"content": [{"type": "text", "text": "{}"}], "usage": {}}
+
+		ai = frappe.get_doc("NC AI Settings")
+		ai.update({"protocol": "Anthropic Messages", "model": "m", "api_key": "K-1", "timeout_seconds": 180})
+		ai.save(ignore_permissions=True)
+		frappe.flags.normcore_ai_transport = post
+		gateway.get_provider().complete("thử", "T", {}, [])
+		ai.timeout_seconds = 30
+		ai.save(ignore_permissions=True)
+		gateway.get_provider().complete("thử", "T", {}, [])
+		self.assertEqual(seen, [180, 30])

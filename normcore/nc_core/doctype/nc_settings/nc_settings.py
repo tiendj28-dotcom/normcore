@@ -2,6 +2,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from normcore.core import settings
+
 
 POSITIVE = (
 	("min_time_study_cases", "Số ca bấm giờ tối thiểu"),
@@ -21,6 +23,9 @@ class NCSettings(Document):
 			frappe.throw(_("Số ngày nhắc hạn hồ sơ tuân thủ không được âm"))
 		for field, label in POSITIVE:
 			value = self.get(field)
+			if value in (None, ""):  # chưa đặt (site cũ): lưu mặc định, tránh lưu 0 làm hỏng lần lưu sau
+				value = settings.DEFAULTS[field]
+				self.set(field, value)
 			if value is not None and int(value) <= 0:
 				frappe.throw(_("{0} phải lớn hơn 0").format(_(label)))
 		if self.approval_reminder_days is not None and int(self.approval_reminder_days) <= 0:
