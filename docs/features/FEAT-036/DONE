@@ -1,3 +1,3 @@
-verify accepted: 6ccdc05ea5a7132ca4c6a55fa757f48b4c080e6e
-thời điểm: 2026-11-26T18:44:02+07:00
+verify accepted: b4447c3ba83c866d6bf622cf6e6186eadf8d21ad
+thời điểm: 2026-11-26T19:31:10+07:00
 merge và deploy staging: do người merge PR; deploy-staging chạy sau CI của develop
