@@ -45,6 +45,8 @@ LINE_INPUTS = (
 	"attach_equipment",
 	"template_item",
 )
+# FEAT-025: trường do tác vụ đề xuất liên kết / Chấp nhận / Bỏ ghi (cờ norm_action = "ai_link")
+AI_LINK_FIELDS = ("component", "resource_doctype", "resource", "ai_suggested")
 HEAD_FIELDS = ("technical_service", "department", "procedure", "version_no", "test_system", "tests_per_tube")
 CONFIRM_FIELDS = ("confirmed_by", "confirmed_on")
 
@@ -57,8 +59,21 @@ def _norm(v):
 	return v
 
 
-def _inputs(row) -> tuple:
-	return tuple(_norm(row.get(f)) for f in LINE_INPUTS)
+def _inputs(row, skip=()) -> tuple:
+	return tuple(_norm(row.get(f)) for f in LINE_INPUTS if f not in skip)
+
+
+def guard_ai_fields(row, before, flags):
+	"""FEAT-025 (TD 2.2): chỉ đường "ai_link" được đặt `ai_suggested` / `ai_confidence`. Đường khác: khôi phục
+	từ dòng cũ (dòng mới: 0). Ngoại lệ: dòng trong `flags.ai_link_cleared` được 1 -> 0 (người dùng sửa liên kết)."""
+	if flags.norm_action == "ai_link":
+		return
+	if before is None:
+		row.ai_suggested, row.ai_confidence = 0, 0
+	elif row.line_id in (flags.ai_link_cleared or ()) and not cint(row.ai_suggested):
+		row.ai_confidence = 0
+	else:
+		row.ai_suggested, row.ai_confidence = before.ai_suggested, before.ai_confidence
 
 
 def effective_wastage_cap(on=None):
@@ -223,7 +238,9 @@ class NCNormSet(Document):
 				r.as_dict(), before and before.as_dict(), step_ids, creating_version
 			)
 			if prev:
-				changed = before is None or _inputs(before) != _inputs(r)
+				guard_ai_fields(r, before, self.flags)
+				skip = AI_LINK_FIELDS if self.flags.norm_action == "ai_link" else ()
+				changed = before is None or _inputs(before, skip) != _inputs(r, skip)
 			else:  # khởi tạo từ quy trình: dòng chưa liên kết được lưu (AMD-012-01); dòng thêm tay phải đủ
 				changed = not r.procedure_resource_row and not (self.flags.from_procedure and r.template_item)
 			ctx = {"step_ids": step_ids, "wastage_cap": cap, "changed": changed, **base}
