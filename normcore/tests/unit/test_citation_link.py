@@ -66,3 +66,16 @@ class TestConvertRow:
 
 	def test_khong_co_gi_thi_khong_doi(self):
 		assert convert_row(None, "", "q", DOCS, SECS) == (None, None, "q")
+
+	def test_van_ban_khong_khop_nhung_muc_la_ten_LS_van_ban_cu_vao_ghi_chu(self):
+		d, s, q = convert_row("Thông tư cũ không có trong thư viện", "LS-0000001", "q", DOCS, SECS)
+		assert (d, s) == ("LD-00001", "LS-0000001")
+		assert q == f"{LEGACY_PREFIX}Thông tư cũ không có trong thư viện] q"
+
+	def test_van_ban_khop_ra_van_ban_khac_voi_muc_van_ban_cu_vao_ghi_chu(self):
+		d, s, q = convert_row("15/2023/QH15", "LS-0000001", "q", DOCS, SECS)
+		assert (d, s) == ("LD-00001", "LS-0000001")
+		assert q == f"{LEGACY_PREFIX}15/2023/QH15] q"
+
+	def test_van_ban_trung_voi_van_ban_cua_muc_khong_ghi_chu(self):
+		assert convert_row("43/2013/TT-BYT", "LS-0000001", "q", DOCS, SECS) == ("LD-00001", "LS-0000001", "q")

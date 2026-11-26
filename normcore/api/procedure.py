@@ -488,6 +488,10 @@ def _align_legal(row):
 	if not row.legal_section:
 		return
 	owner = frappe.db.get_value("NC Legal Section", row.legal_section, "legal_document")
+	if not owner:
+		frappe.throw(
+			_("Không tìm thấy mục văn bản {0}.").format(row.legal_section), frappe.LinkValidationError
+		)
 	if row.legal_document and row.legal_document != owner:
 		frappe.throw(
 			_("Mục {0} không thuộc văn bản {1}.").format(row.legal_section, row.legal_document),

@@ -56,15 +56,14 @@ def convert_row(legal_document, legal_section, quote, documents, sections):
 	sec_value = (legal_section or "").strip()
 	if not doc_value and not sec_value:
 		return None, None, quote
-	doc = match_document(doc_value, documents)
-	sec, sec_doc = match_section(sec_value, doc, sections)
-	if sec and doc and sec_doc != doc:  # mục thuộc văn bản khác: tin mục (tên LS là khóa chắc chắn)
-		doc = sec_doc
-	elif sec and not doc:
-		doc = sec_doc
+	matched_doc = match_document(doc_value, documents)
+	sec, sec_doc = match_section(sec_value, matched_doc, sections)
+	doc = sec_doc if sec else matched_doc  # mục khớp theo tên LS-: tin mục (ASM-NORM65-03)
 	lost = []
-	if doc_value and not doc:
-		lost.append(doc_value)
+	if (doc_value and doc != matched_doc) or (doc_value and not matched_doc):
+		lost.append(
+			doc_value
+		)  # văn bản cũ không khớp, hoặc khớp ra văn bản khác với văn bản của mục: giữ dấu vết
 	if sec_value and not sec:
 		lost.append(sec_value)
 	if lost:
