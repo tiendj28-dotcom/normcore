@@ -6,7 +6,7 @@ from decimal import Decimal
 import frappe
 from frappe import _
 
-from normcore.costing import allocation, cls, compare, engine, reconcile
+from normcore.costing import allocation, cls, compare, engine, reconcile, resources, sensitivity, snapshot
 
 RUN, COST, RECON = "NC Costing Run", "NC Service Cost", "NC Reconciliation Line"
 CALCULATED, LOCKED = "Đã tính", "Đã khóa"
@@ -663,3 +663,222 @@ def build_comparison(base_run, other_run, only_changed=0) -> dict:
 def compare_runs(base_run, other_run, only_changed=0):
 	"""FR-COST-013 (SCR-DSK-022): chênh lệch = lần so sánh - lần gốc, theo dịch vụ và cấu phần."""
 	return build_comparison(base_run, other_run, only_changed)
+
+
+# ---------------------------------------------------------------------------
+# Phân tích độ nhạy (FEAT-037; FR-COST-030, UC-024). Chỉ đọc: không insert, save, db_set, commit.
+# ---------------------------------------------------------------------------
+
+SENSITIVITY_CACHE_SECONDS = 600
+
+
+def _f(x):
+	return None if x is None else float(x)
+
+
+def _result_view(r: engine.ServiceResult) -> dict:
+	p = r.price
+	return {
+		"status": r.status,
+		"message": r.message,
+		"full_cost": _f(p.full_cost) if p else None,
+		"calculated_price": _f(p.calculated_price) if p else None,
+		"rounded_price": _f(p.rounded_price) if p else None,
+		"direct_total": _f(r.direct_total),
+		"alloc_total": _f(sum(r.alloc_by_category.values(), Decimal(0))),
+		"by_component": {k: _f(v) for k, v in r.direct_by_component.items()},
+		"volume": _f(r.volume),
+	}
+
+
+def _stored_view(sc) -> dict:
+	comp = {
+		k: sc.get(f) or 0
+		for k, f in (
+			("LABOR", "direct_labor"),
+			("DRUG", "direct_drug"),
+			("SUPPLY", "direct_supply"),
+			("EQUIPMENT", "direct_equipment"),
+			("INFRA", "direct_infra"),
+			("UTILITY", "direct_utility"),
+		)
+	}
+	alloc = sum(
+		sc.get(f) or 0
+		for f in ("alloc_labor", "alloc_drug_supply", "alloc_depreciation", "alloc_utility", "alloc_management")
+	)
+	return {
+		"status": sc.calc_status,
+		"message": sc.calc_message,
+		"full_cost": sc.full_cost,
+		"calculated_price": sc.calculated_price,
+		"rounded_price": sc.rounded_price,
+		"direct_total": sum(comp.values()),
+		"alloc_total": alloc,
+		"by_component": comp,
+		"volume": sc.volume,
+	}
+
+
+def _sensitivity_context(service_cost):
+	sc = frappe.get_doc(COST, service_cost)
+	frappe.has_permission(COST, "read", doc=sc, throw=True)
+	run = frappe.get_doc(RUN, sc.costing_run)
+	if run.status not in (CALCULATED, LOCKED):
+		frappe.throw(_("Lần tính chưa có kết quả"))
+	return sc, run
+
+
+def _snapshot_for(run) -> dict:
+	"""Ảnh chụp đầu vào của lần tính: tệp đã lưu (Đã khóa) hoặc dựng chỉ đọc (Đã tính); đệm 10 phút, không ghi CSDL."""
+	from normcore.nc_costing.doctype.nc_costing_run import loader
+
+	key = f"nc_sensitivity_snapshot:{run.name}:{run.modified}"
+	cached = frappe.cache().get_value(key)
+	if cached:
+		return cached
+	if run.status == LOCKED and run.get("snapshot_file"):
+		content = frappe.get_doc("File", {"file_url": run.snapshot_file}).get_content()
+		blob = content.encode() if isinstance(content, str) else content
+		snap = snapshot.unpack(blob, run.snapshot_hash)
+	else:
+		snap = loader.capture_snapshot(run, loader.eligible_from_results(run))
+	frappe.cache().set_value(key, snap, expires_in_sec=SENSITIVITY_CACHE_SECONDS)
+	return snap
+
+
+def _input_of(snap, service, department):
+	for x in snap["inputs"]:
+		i = snapshot.from_plain(x)
+		if (i.service, i.department) == (service, department):
+			return i
+	frappe.throw(_("{0} không có trong lần tính này").format(service))
+
+
+def _units(items) -> dict:
+	rows = frappe.get_all(
+		"NC Item",
+		{"name": ["in", list(items) or [""]]},
+		["name", "item_name", "uom", "norm_units_per_purchase_unit"],
+	)
+	return {r.name: r for r in rows}
+
+
+@frappe.whitelist()
+def get_sensitivity_base(service_cost):
+	"""FR-COST-030 (SCR-DSK-040): giá thành gốc và đầu vào có thể đổi giả định của một dịch vụ."""
+	sc, run = _sensitivity_context(service_cost)
+	inp = _input_of(_snapshot_for(run), sc.technical_service, sc.department)
+	c = inp.paraclinical
+	rates = {}
+	items = {x.resource for x in inp.lines if x.resource}
+	for x in inp.lines:
+		if x.resource and inp.rates.get(x.line_id):
+			rates[x.resource] = inp.rates[x.line_id].rate
+	systems, equipments = [], {}
+	if c is not None:
+		for s in c.systems:
+			eq = c.equipment.get(s.equipment)
+			systems.append(
+				{
+					"test_system": s.code,
+					"qbn": _f(s.qbn),
+					"equipment": s.equipment,
+					"mode": eq.mode if eq else None,
+					"contract_cost": _f(eq.contract_cost) if eq else None,
+				}
+			)
+			for x in s.lines:
+				if x.norm.resource and x.norm.component != "EQUIPMENT":
+					items.add(x.norm.resource)
+					if s.rates.get(x.norm.line_id):
+						rates[x.norm.resource] = s.rates[x.norm.line_id].rate
+			items |= {i.item for i in s.iqc}
+			for i in s.iqc:
+				if i.rate:
+					rates[i.item] = i.rate.rate
+		for code in sorted(sensitivity._used_equipment(c)):
+			eq = c.equipment.get(code)
+			if eq:
+				equipments[code] = {"equipment": code, "mode": eq.mode, "contract_cost": _f(eq.contract_cost)}
+	meta = _units(items)
+	return {
+		"service_cost": sc.name,
+		"run": run.name,
+		"run_status": run.status,
+		"service": sc.technical_service,
+		"service_name": frappe.db.get_value("NC Technical Service", sc.technical_service, "service_name"),
+		"department": sc.department,
+		"is_paraclinical": bool(sc.is_paraclinical),
+		"origin": _stored_view(sc),
+		"inputs": {
+			"volume": _f(inp.volume),
+			"systems": systems,
+			"items": [
+				{
+					"item": i,
+					"item_name": meta[i].item_name if i in meta else i,
+					"uom": meta[i].uom if i in meta else None,
+					"norm_units": meta[i].norm_units_per_purchase_unit if i in meta else None,
+					"purchase_price": _f(rates.get(i, Decimal(0)) * Decimal(str((meta[i].norm_units_per_purchase_unit if i in meta else 1) or 1)))
+					if i in rates
+					else None,
+				}
+				for i in sorted(items)
+			],
+			"equipments": list(equipments.values()),
+		},
+		"modes": list(resources.ACQUISITION_MODES),
+	}
+
+
+@frappe.whitelist()
+def run_sensitivity(service_cost, overrides=None):
+	"""FR-COST-030: tính thử giá thành với giả định; không ghi gì. Giả định sai → ValidationError."""
+	sc, run = _sensitivity_context(service_cost)
+	ov = frappe.parse_json(overrides) if overrides else {}
+	if not isinstance(ov, dict):
+		frappe.throw(_("Giả định không hợp lệ"))
+	snap = _snapshot_for(run)
+	units = {
+		k: Decimal(str(v.norm_units_per_purchase_unit or 1)) for k, v in _units(set(ov.get("prices") or {})).items()
+	}
+	try:
+		trial = sensitivity.trial(snap, sc.technical_service, sc.department, ov, units)
+	except sensitivity.InvalidAssumption as e:
+		frappe.throw(_(str(e)))
+	origin = _stored_view(sc)
+	warnings = []
+	if run.status == CALCULATED:
+		base = next(
+			(r for r in snapshot.recompute(snap).results if (r.service, r.department) == (sc.technical_service, sc.department)),
+			None,
+		)
+		if base is None or base.price is None or _f(base.price.full_cost) != _f(origin["full_cost"]):
+			warnings.append(_("Dữ liệu đầu vào đã đổi sau lần tính; so sánh có thể lệch"))
+	t = _result_view(trial)
+	diff = None
+	if t["full_cost"] is not None:
+		d = t["full_cost"] - (origin["full_cost"] or 0)
+		diff = {
+			"full_cost": round(d, 2),
+			"rounded_price": round((t["rounded_price"] or 0) - (origin["rounded_price"] or 0), 2),
+			"pct": round(d / origin["full_cost"] * 100, 2) if origin["full_cost"] else None,
+		}
+	stored_systems = {
+		x.test_system: x
+		for x in frappe.get_all(
+			"NC Test System Cost", {"parent": sc.name, "parenttype": COST}, ["test_system", "k_factor", "direct_cost"]
+		)
+	}
+	systems = [
+		{
+			"test_system": x.test_system,
+			"k_origin": stored_systems[x.test_system].k_factor if x.test_system in stored_systems else None,
+			"k_trial": _f(x.k_factor),
+			"direct_origin": stored_systems[x.test_system].direct_cost if x.test_system in stored_systems else None,
+			"direct_trial": _f(x.direct_cost),
+		}
+		for x in trial.test_system_costs
+	]
+	return {"trial": t, "origin": origin, "diff": diff, "systems": systems, "warnings": warnings, "note": _("Kết quả thử, không lưu")}
