@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "autoname": "LS-.#######",
+ "creation": "2026-11-26 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "legal_document",
+  "section_no",
+  "heading",
+  "col_right",
+  "page_from",
+  "page_to",
+  "expiry_date",
+  "validity_status",
+  "compare_section",
+  "plain_text",
+  "col_source",
+  "source_view_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "legal_document",
+   "label": "Văn bản",
+   "fieldtype": "Link",
+   "options": "NC Legal Document",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_no",
+   "label": "Số mục",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "heading",
+   "label": "Tiêu đề",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_right",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "page_from",
+   "label": "Trang từ",
+   "fieldtype": "Int",
+   "read_only": 1
+  },
+  {
+   "fieldname": "page_to",
+   "label": "Trang đến",
+   "fieldtype": "Int",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expiry_date",
+   "label": "Ngày hết hiệu lực",
+   "fieldtype": "Date"
+  },
+  {
+   "fieldname": "validity_status",
+   "label": "Hiệu lực",
+   "fieldtype": "Select",
+   "read_only": 1,
+   "no_copy": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "options": "\nChưa hiệu lực\nCòn hiệu lực\nHết hiệu lực"
+  },
+  {
+   "fieldname": "compare_section",
+   "fieldtype": "Section Break",
+   "label": "Đối chiếu"
+  },
+  {
+   "fieldname": "plain_text",
+   "label": "Văn bản thuần",
+   "fieldtype": "Long Text",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_source",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "source_view_html",
+   "label": "Trang gốc",
+   "fieldtype": "HTML"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Library",
+ "name": "NC Legal Section",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1
+  },
+  {
+   "role": "NC Council Member",
+   "read": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1
+  },
+  {
+   "role": "NC Document Controller",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "heading",
+ "track_changes": 1
+}

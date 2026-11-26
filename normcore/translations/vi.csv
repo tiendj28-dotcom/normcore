@@ -30,6 +30,7 @@ Calibration tests,Số test chuẩn máy
 Cancel,Hủy
 Cannot load the import summary.,Không tải được tóm tắt lần nhập.
 Cannot load the indicative values.,Không tải được giá trị tạm tính.,NC Equipment
+Cannot load the original file,Không tải được tệp gốc
 Catalog,Danh mục
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
@@ -72,8 +73,10 @@ Depreciation,Khấu hao
 Description,Mô tả
 Deviations summary,Tóm tắt khác biệt
 Document no.,Số chứng từ,NC Item
+Document number,Số hiệu
 Down,Xuống
 Download DOCX,Tải DOCX
+Download file,Tải tệp
 Download template,Tải tệp mẫu
 Drugs and supplies,Thuốc và vật tư
 Duplicate,Nhân bản,NC Costing Parameter Set
@@ -100,12 +103,16 @@ Finalized: the figures can be used in a costing run.,Đã chốt: số liệu d�
 General comment,Ý kiến chung
 Has error lines,Có dòng lỗi
 Headcount,Số người
+Heading,Tiêu đề
 IQC tests,Số test nội kiểm
 Import data from Excel,Nhập dữ liệu từ Excel
 Import from Excel,Nhập từ Excel
 Import result,Kết quả nhập
 Inactive,Ngừng dùng,NC Technical Service
+Indexing failed: {0},Lập chỉ mục thất bại: {0}
+Indexing in progress. Sections will appear when it finishes.,Đang lập chỉ mục. Các mục sẽ hiện khi hoàn tất.
 Internal QC,Nội kiểm
+"Keyword, phrase, document number or service code","Từ khóa, cụm từ, số hiệu hoặc mã dịch vụ"
 Labor,Nhân công
 Legal document,Văn bản
 Legal section,Mục văn bản
@@ -123,8 +130,10 @@ Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
 Main equipment,Thiết bị chính
 Management,Quản lý
+Matched by,Khớp theo
 Message,Thông báo,Import Excel
 Minutes per person,Số phút / người
+More,Xem thêm
 Move step down,Chuyển bước xuống
 Move step up,Chuyển bước lên
 Moved to,Đã chuyển sang
@@ -137,10 +146,13 @@ Needs review,Cần rà soát
 No citations for this selection.,Chưa có trích dẫn cho mục đang chọn.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
+No matching sections,Không có mục nào khớp
 No participating services yet,Chưa có dịch vụ tham gia
 No permission to view,Không có quyền xem
 No price yet,Chưa có đơn giá,NC Item
 No review comments yet.,Chưa có ý kiến thẩm định.
+No sections found in the file,Không tìm thấy mục nào trong tệp
+No sections yet,Chưa có mục
 No steps yet. Add the first step below.,Chưa có bước nào. Thêm bước đầu tiên ở bên dưới.
 No test system yet,Chưa có hệ thống xét nghiệm
 No users assigned.,Chưa gán người dùng nào.
@@ -150,7 +162,12 @@ Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí the
 Only unresolved,Chỉ chưa xử lý
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
+Open file,Mở tệp
+Original page,Trang gốc
+Original pages are not available for DOCX files.,Tệp DOCX không có trang gốc để đối chiếu.
 "Own shares, total {0}%","Tỷ lệ riêng, tổng {0}%"
+Pages,Trang
+Pages {0}–{1} of {2},Trang {0}–{1} của {2}
 Paraclinical,Cận lâm sàng
 Past useful life,Hết thời gian sử dụng,NC Equipment
 Performing department,Khoa thực hiện
@@ -165,8 +182,11 @@ Procedure editor,Trình soạn quy trình
 Publish,Ban hành
 Quality plan,Kế hoạch chất lượng
 Quantity,Số lượng
+Query,Nội dung tìm
 Quote,Đoạn trích
 Rate per result or minute is computed in the costing run.,Đơn giá theo số kết quả hoặc phút được tính ở lần tính giá.,NC Equipment
+Re-index,Lập lại chỉ mục
+Re-index this document? Manual edits to section text will be overwritten (kept in version history).,Lập lại chỉ mục văn bản này? Chỗ đã sửa tay trong văn bản của mục sẽ bị ghi đè (vẫn còn trong lịch sử phiên bản).
 Reactivate,Dùng lại
 Reapplied {0} lines; manual edits are kept,Đã gán lại {0} dòng; các dòng sửa tay giữ nguyên
 Reapply account mapping,Gán lại theo bảng ánh xạ
@@ -176,6 +196,7 @@ Rejection reason,Lý do từ chối
 Relation,Quan hệ
 Reload file,Đọc lại tệp
 Reloading replaces all lines and drops manual edits. Continue?,Đọc lại tệp sẽ thay toàn bộ dòng và bỏ các sửa tay. Tiếp tục?
+Replace the file or click Re-index.,Hãy thay tệp hoặc bấm Lập lại chỉ mục.
 Rerun tests,Số test chạy lại
 Resolved,Đã xử lý
 Retry,Thử lại
@@ -194,12 +215,17 @@ Save to add test systems,Lưu để thêm hệ thống xét nghiệm
 Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
 Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
+Search,Tìm
+Search in content,Tìm trong nội dung
+Searching…,Đang tìm…
+Section,Mục
 Select a procedure,Chọn quy trình
 Select a section or step,Chọn một phần hoặc một bước
 Select one line in the Lines table first.,Chọn một dòng trong bảng Dòng trước.
 Select only one line to edit.,Chỉ chọn một dòng để sửa.
 Service {0} — department {1} — group {2},Dịch vụ {0} — khoa {1} — nhóm {2}
 Share (%),Tỷ trọng (%)
+Snippet,Đoạn trích
 Some lines are missing figures,Chưa đủ số liệu ở một số dòng
 Source,Nguồn giá,NC Item
 Split equally across {0} services ({1}% each),Chia đều cho {0} dịch vụ (mỗi dịch vụ {1}%)
@@ -208,6 +234,7 @@ Step ID,Mã bước
 Step title,Tên bước
 Technical service,Dịch vụ kỹ thuật
 The file has {0} error lines: fix the file and reload it. Cannot finalize yet.,Tệp có {0} dòng lỗi: sửa tệp rồi Đọc lại tệp. Chưa chốt được.
+The previous text is kept in the version history below.,Văn bản trước được giữ trong lịch sử phiên bản bên dưới.
 The procedure will move to,Quy trình sẽ chuyển sang
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
 This procedure cannot be edited by you or is already issued.,Bạn không sửa được quy trình này hoặc quy trình đã ban hành.
@@ -237,17 +264,23 @@ User assigned to department.,Đã gán người dùng vào khoa.
 Utilities,"Điện, nước, nhiên liệu"
 Valid from,Hiệu lực từ,NC Item
 Valid to,Hiệu lực đến,NC Item
+Validity,Hiệu lực
 Verification,Xác minh,NC Item
 Verified,Đã xác minh,NC Item
 Verified,Đã xác minh,NC Item Price
 Verify,Xác minh,NC Item Price
+View,Xem
 View costing results,Xem kết quả tính giá
 Will be estimated from the plan,Sẽ ước tính từ kế hoạch
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
 You do not have permission to view this procedure,Bạn không có quyền xem quy trình này
 and {0} more errors,và {0} lỗi khác
+content,nội dung
+document number,số hiệu
 open comments,ý kiến chưa xử lý
+service code,mã dịch vụ
 tests,test
 total share,tổng tỷ trọng
 {0} lines still have no cost category.,Còn {0} dòng chưa có loại chi phí.
+{0} results — searched by {1},{0} kết quả — tìm theo {1}
