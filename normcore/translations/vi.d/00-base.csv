@@ -43,8 +43,11 @@ Annual equipment cost,Chi phí thiết bị năm,NC Equipment
 Annual machine cost,Chi phí máy năm,NC Equipment
 Applied qty,Lượng áp dụng
 Applied quantity,Lượng áp dụng
+Apply,Áp
 Apply k,Nhân k
 Apply k factor,Nhân hệ số tiêu hao k
+Apply time study result,Áp kết quả bấm giờ
+Apply to norm set,Áp vào bộ định mức
 Approved price,Giá đã duyệt
 As of date,Ngày xem
 As of today,Tính theo ngày,NC Equipment
@@ -85,6 +88,7 @@ Changes from new procedure,Thay đổi theo quy trình mới
 Check,Kiểm tra
 Check expiry now,Kiểm hạn ngay
 Check result (nothing saved yet),Kết quả kiểm tra (chưa ghi gì)
+Choose a service and department to load the steps of the published procedure.,Chọn dịch vụ và khoa để nạp các bước của quy trình đã ban hành.
 Choose a step,Chọn một bước
 Choose a system,Chọn hệ thống
 Choose test system,Chọn hệ thống xét nghiệm
@@ -139,6 +143,7 @@ Could not load chain status.,Không tải được tình trạng chuỗi.
 Could not load test systems.,Không tải được hệ thống xét nghiệm.
 Could not load the home page. Try again.,Không tải được trang chủ. Thử lại.
 Could not load the status.,Không tải được tình trạng.
+Could not load the study.,Không tải được phiếu bấm giờ.
 Create,Tạo
 Create a draft of the next version from version {0}. Step codes are kept; the draft goes through the approval flow like the first version.,Tạo bản nháp phiên bản kế tiếp từ phiên bản {0}. Mã bước giữ nguyên; bản nháp đi qua luồng duyệt như bản đầu.
 Create a draft of version {0} from procedure {1}? Lines of existing steps are carried over; lines of removed steps are flagged.,Tạo bộ nháp phiên bản {0} theo quy trình {1}? Dòng của bước còn tồn tại được mang sang; dòng của bước đã bỏ được đánh dấu để xử lý.
@@ -250,6 +255,7 @@ Loading…,Đang tải…
 Loading…,Đang tải…,NC Equipment
 Lock,Khóa
 Machine hourly rate,Đơn giá giờ máy,NC Equipment
+Machine minutes,Phút máy
 Main equipment,Thiết bị chính
 Management,Quản lý
 Mandatory,Bắt buộc
@@ -259,6 +265,7 @@ Mapping saved,Đã lưu ánh xạ
 Mappings are available after indexing finishes.,Ánh xạ có sau khi lập chỉ mục xong.
 Matched by,Khớp theo
 Message,Thông báo,Import Excel
+Minutes,Phút
 Minutes per person,Số phút / người
 Missing,Thiếu
 More,Xem thêm
@@ -284,10 +291,13 @@ No costing runs yet.,Chưa có lần tính giá.
 No costing runs yet. Create the first costing run.,Chưa có lần tính giá. Tạo lần tính giá đầu tiên.
 No deviations or unsupported items.,Không có chỗ khác biệt hay chưa có căn cứ.
 No file chosen,Chưa chọn tệp
+No matching norm line,Không có dòng định mức tương ứng
+No matching norm line: {0},Không có dòng định mức tương ứng: {0}
 No matching sections,Không có mục nào khớp
 No participating services yet,Chưa có dịch vụ tham gia
 No permission to view,Không có quyền xem
 No price yet,Chưa có đơn giá,NC Item
+No resource selected,Chưa chọn nguồn lực
 No results yet.,Chưa có kết quả.
 No review comments yet.,Chưa có ý kiến thẩm định.
 No sections found in the file,Không tìm thấy mục nào trong tệp
@@ -305,15 +315,18 @@ Norm grid,Lưới định mức
 Norm line,Dòng định mức
 Norm set,Bộ định mức
 Norm set actions,Thao tác bộ định mức
+Norm set list,Danh sách bộ định mức
 Norm sets,Bộ định mức
 Normcore home,Trang chủ Normcore
 Not available,Chưa có
 Not in use,Không dùng
 Not linked,Chưa liên kết
+Not performed,Không thực hiện
 Only equipment allocated by machine minutes,Chỉ thiết bị chia chi phí theo Phút chiếm máy.
 Only lines needing attention,Chỉ dòng cần xử lý
 "Only lines per result of drug, chemical or supply type","Chỉ dòng Theo kết quả loại thuốc, hóa chất, vật tư"
 Only unresolved,Chỉ chưa xử lý
+"Only {0} cases, fewer than the minimum {1}. Apply the medians to the norm set anyway? The minutes of matching lines will be replaced and the basis set to time study.","Mới có {0} ca, ít hơn mức tối thiểu {1}. Vẫn áp trung vị vào bộ định mức? Số phút các dòng tương ứng sẽ bị thay và căn cứ đặt là ""Bấm giờ""."
 Only {0} eligible services will be costed.,Chỉ tính {0} dịch vụ đủ điều kiện.
 Open comments,Ý kiến chưa xử lý
 Open editor,Mở trình soạn
@@ -350,6 +363,7 @@ Price structure,Cơ cấu giá
 Print PDF,In PDF
 Procedure,Quy trình
 Procedure editor,Trình soạn quy trình
+Procedure version,Phiên bản quy trình
 Provisional amount,Thành tiền tạm tính
 Provisional direct cost,Chi phí trực tiếp tạm tính
 Publish,Ban hành
@@ -369,6 +383,7 @@ Reapply account mapping,Gán lại theo bảng ánh xạ
 Reason,Lý do
 Recalculate suggestions? Confirmed mappings are kept; current suggestions are replaced.,Tính lại đề xuất? Ánh xạ đã xác nhận được giữ; đề xuất hiện có được thay.
 Record,Bản ghi
+Record new study,Ghi ca mới
 Rejected by,Bị từ chối bởi
 Rejection reason,Lý do từ chối
 Relation,Quan hệ
@@ -408,6 +423,7 @@ Save comment,Lưu ý kiến
 Save section,Lưu phần
 Save the form first.,Lưu biểu mẫu trước.
 Save to add test systems,Lưu để thêm hệ thống xét nghiệm
+Save to load the steps of the procedure.,Lưu để nạp các bước của quy trình.
 Save to see the indicative values.,Lưu để xem giá trị tạm tính.,NC Equipment
 Save to see the status,Lưu để xem tình trạng
 Save your changes first,Lưu thay đổi trước
@@ -467,6 +483,7 @@ The procedure will move to,Quy trình sẽ chuyển sang
 The run will go to the background and show progress.,Lần tính sẽ chạy nền và hiện tiến độ.
 "The two versions do not differ in sections, steps or resources.","Hai phiên bản không khác nhau về phần, bước, nguồn lực."
 There are no technical services yet.,Chưa có dịch vụ kỹ thuật nào.
+There is no draft norm set for this procedure.,Chưa có bộ định mức Nháp cho quy trình này.
 This department is outside your scope,Khoa này ngoài phạm vi của bạn
 This norm set has no lines yet.,Bộ định mức chưa có dòng nào.
 This parameter set is used by a locked costing run and is read-only. Use Duplicate to create an editable copy.,Bộ tham số đang được lần tính giá khóa sử dụng nên chỉ đọc. Dùng Nhân bản để tạo bản sửa được.
@@ -500,6 +517,7 @@ Unverified,Chưa xác minh,NC Item
 Unverified,Chưa xác minh,NC Item Price
 Up,Lên
 Updated,Cập nhật,Import Excel
+Updated {0} lines.,Đã cập nhật {0} dòng.
 "Updated {0} records, sent {1} notifications","Đã cập nhật {0} hồ sơ, gửi {1} thông báo"
 "Upload an Excel file by the template (Account code, Account name, Cost center code, Amount) then click Save.","Tải tệp Excel theo mẫu (Mã tài khoản, Tên tài khoản, Mã trung tâm chi phí, Số tiền) rồi bấm Lưu."
 Upload file,Tải tệp lên
@@ -519,6 +537,7 @@ View,Xem
 View all,Xem tất cả
 View costing results,Xem kết quả tính giá
 View these lines,Xem các dòng này
+View time study result,Xem kết quả bấm giờ
 Waiting since,Chờ từ
 Warning,Cảnh báo
 Wastage %,Hao hụt %
@@ -534,6 +553,7 @@ Withdrawal reason is required,Cần nhập lý do thu hồi
 Yes,Có
 You can only view this norm set.,Bạn chỉ xem được bộ định mức này.
 You can only view this procedure.,Bạn chỉ có quyền xem quy trình này.
+You can only view this study.,Bạn chỉ xem được phiếu này.
 You do not have permission to import data.,Bạn không có quyền nhập dữ liệu.
 You do not have permission to view this norm set.,Bạn không có quyền xem bộ định mức này.
 You do not have permission to view this procedure,Bạn không có quyền xem quy trình này

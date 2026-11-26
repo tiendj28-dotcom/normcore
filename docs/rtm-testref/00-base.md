@@ -232,6 +232,18 @@
 | Quyền (FR-ACC-003, FR-ACC-007) | `test_quyen_norm_set_council_khong_co_quyen`, `test_quyen_norm_set_auditor_chi_doc`, `test_quyen_norm_set_finance_khong_sua_khong_xac_nhan`, `test_quyen_norm_set_clinician_khong_confirm_set_lock`, `test_quyen_norm_set_clinician_khoa_khac_khong_ghi` |
 | Giao diện SCR-DSK-013, 014 | `unit/test_norm_grid_ui.py`, `unit/test_form_buttons_i18n.py` |
 
+## FEAT-014 (NORM-49, ghi bởi Dev; QA kiểm định lại)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-TS-001 | `test_TC_TS_04_nap_4_buoc_theo_quy_trinh`, `test_TC_TS_04_quy_trinh_chua_ban_hanh_bi_tu_choi`, `test_quy_trinh_khong_khop_khoa_bi_tu_choi` (nc_time_study), `unit/test_time_study.py::test_lines_from_procedure` |
+| FR-TS-002 | `test_TC_TS_05_luu_theo_buoc_khong_dinh_danh_nguoi_benh`, `test_dong_sai_bi_tu_choi_qua_save` (nc_time_study), `unit/test_time_study.py::test_line_errors_nhanh`, `test_line_errors_trung_va_hop_le` |
+| FR-TS-003 | `unit/test_time_study.py::test_TC_TS_01_trung_vi_5_ca_va_6_ca`, `test_ca_0_phut_bi_bo`, `test_sap_xep_hang`; `api/test_time_study.py::test_get_result_trung_vi`; `test_nc_time_study_result.py` |
+| FR-TS-004 | `api/test_time_study.py::test_TC_TS_02_ap_ket_qua_vao_bo_nhap`, `test_ap_chi_vao_bo_nhap`, `test_ap_mat_xac_nhan_dong_bi_doi`, `test_ap_khoa_khong_khop_di_vao_unmatched`; `unit/test_time_study.py::test_plan_apply`, `test_basis_ref` |
+| FR-TS-005 | `api/test_time_study.py::test_TC_TS_03_thieu_ca_canh_bao_xac_nhan`; `unit/test_time_study_ui.py::TestTimeStudyReportUi` |
+| FR-ADM-003 (phần bấm giờ) | `api/test_time_study.py::test_TC_ADM_03_ket_qua_bam_gio_3_ca` |
+| NFR-USE-003 | `unit/test_time_study_ui.py::TestTimeStudyUi` (tĩnh); TC-NFR-05 kiểm tay Playwright (QA, preview, `faa65ca`/`d8ca627`): 768 px scrollWidth 753, ≤ 3 lần chạm/bước (xem acceptance.md) |
+| Quyền (FR-ACC-003, FR-ACC-007) | `test_quyen_time_study_council_khong_quyen`, `test_quyen_time_study_auditor_chi_doc`, `test_quyen_time_study_clinician_theo_khoa`, `test_quyen_time_study_consultant_tao_duoc`, `test_docperm_khop_bang` (nc_time_study); `api/test_time_study.py::test_quyen_apply_va_result`, `test_get_entry_council_bi_tu_choi`, `test_get_entry_auditor_khong_ghi_duoc`; `test_nc_time_study_result.py::test_council_bi_tu_choi`, `test_vai_tro_doc_khop_bang` |
 ## FEAT-013 (NORM-51, Dev ghi, QA xác nhận)
 
 | FR | Test thật |
