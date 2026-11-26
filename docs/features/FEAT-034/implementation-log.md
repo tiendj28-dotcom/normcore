@@ -11,3 +11,4 @@
 | T07 | cùng lệnh T05 | OK (18 + 32) | 9f9a81a |
 | T08 | `with_bench.sh 'migrate && run-tests --module normcore.exports.test_norm_set_export && normcore.api.test_norm_cls'`; `pytest normcore/exports/test_norm_set_export.py` | OK (8 + 18); pytest 8 passed. k 1,108247 lấy từ golden_cls.k_factor | 86f42d2 |
 | T09 | `with_bench.sh 'migrate && run-tests --module ...nc_norm_template.test_nc_norm_template'`; `bench execute frappe.db.count --kwargs "{'dt':'NC Norm Template'}"` | OK (12 test); count = 2 (done-when ghi kwargs `doctype`, hàm nhận `dt`) | f19e0b2 |
+| T10 | `pytest test_ui_conventions.py test_vi_csv_order.py test_form_buttons_i18n.py test_norm_template_ui.py`; `with_bench.sh 'migrate && bench build --app normcore'`; `check_conventions.py` | 25 passed; build thoát 0; conventions rc 0 | 76121f4 |
