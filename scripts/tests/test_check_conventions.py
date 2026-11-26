@@ -5,6 +5,21 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import check_conventions as cc
+import pytest
+
+# NORM-60 (ASM-NORM60-07, Quyết định Lead): DocType giả của fixture cần một dòng ma trận (NC-08 ra đời sau
+# các test này). Dòng thử: NC Admin ghi, NC Auditor đọc, vai trò System Manager của GOOD đổi thành NC Admin vì NC-08
+# không nhận vai trò ngoài 10 vai trò NC. Không đổi assertion nào.
+FAKE_ROW = "Dòng thử của test_check_conventions"
+FAKE_CODES = "- - - - - - - - W R"
+
+
+@pytest.fixture(autouse=True)
+def _fake_doctype_rows(monkeypatch):
+	monkeypatch.setitem(cc.MATRIX, FAKE_ROW, FAKE_CODES)
+	for name in ("NC Quy Trinh", "Quy Trinh"):
+		monkeypatch.setitem(cc.DOCTYPE_ROW, name, FAKE_ROW)
+
 
 GOOD = {
 	"doctype": "DocType",
@@ -16,7 +31,7 @@ GOOD = {
 	],
 	"permissions": [
 		{"role": "NC Auditor", "read": 1},
-		{"role": "System Manager", "read": 1, "write": 1, "create": 1},
+		{"role": "NC Admin", "read": 1, "write": 1, "create": 1},
 	],
 }
 

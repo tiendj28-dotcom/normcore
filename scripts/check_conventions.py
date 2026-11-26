@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 SKIP_DIRS = {"docs", "tham-khao", ".git", "node_modules"}
 NO_LABEL_TYPES = {"Section Break", "Column Break", "Tab Break", "HTML", "Button"}
@@ -121,6 +122,61 @@ DELETE_ALLOWED = {
 }
 PERM_TYPES = ("read", "write", "create", "delete", "submit", "cancel", "amend")
 SNAKE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
+
+# NORM-60: ma trận quyền của DocType mới nằm ở scripts/conventions/perm_matrix/<ten_doctype>.json, mỗi tệp
+# một DocType, không phải sửa ba bảng literal ở trên (xem README.md trong thư mục đó).
+PERM_MATRIX_DIR = "scripts/conventions/perm_matrix"
+LITERAL_DOCTYPES = frozenset(DOCTYPE_ROW)  # DocType đã khai bằng literal, trước khi nạp tệp
+_ROOT = Path(__file__).resolve().parent.parent
+
+
+def load_perm_matrix(root: Path) -> list:
+	"""Nạp tệp perm_matrix vào MATRIX, DOCTYPE_ROW, DELETE_ALLOWED (idempotent). Trả danh sách lỗi NC-08."""
+	d = root / PERM_MATRIX_DIR
+	if not d.is_dir():
+		return []
+	errors = []
+	for path in sorted(d.glob("*.json")):
+		rel = f"{PERM_MATRIX_DIR}/{path.name}"
+		try:
+			data = json.loads(path.read_text(encoding="utf-8"))
+		except (OSError, ValueError) as e:
+			errors.append(f"{rel}: [NC-08] không đọc được JSON: {e}")
+			continue
+		if not isinstance(data, dict):
+			errors.append(f"{rel}: [NC-08] JSON không phải đối tượng")
+			continue
+		doctype, row, codes = data.get("doctype"), data.get("row"), data.get("codes")
+		delete = data.get("delete") or []
+		if not isinstance(doctype, str) or path.stem != doctype.lower().replace(" ", "_"):
+			errors.append(f"{rel}: [NC-08] trường doctype '{doctype}' không khớp tên tệp")
+			continue
+		if not isinstance(row, str) or not row.strip():
+			errors.append(f"{rel}: [NC-08] thiếu trường row")
+			continue
+		toks = codes.split() if isinstance(codes, str) else []
+		if len(toks) != len(ROLES) or any(t not in ("R", "W", "-") for t in toks):
+			errors.append(f"{rel}: [NC-08] codes cần {len(ROLES)} ký hiệu R, W hoặc - theo thứ tự ROLES")
+			continue
+		if doctype in LITERAL_DOCTYPES:
+			errors.append(
+				f"{rel}: [NC-08] DocType '{doctype}' đã khai trong bảng literal của check_conventions.py"
+			)
+			continue
+		if row in MATRIX and MATRIX[row] != " ".join(toks):
+			errors.append(f"{rel}: [NC-08] codes khác ma trận đã có của dòng '{row}': '{MATRIX[row]}'")
+			continue
+		if not isinstance(delete, list) or any(r not in DELETE_ALLOWED and r != "NC Admin" for r in delete):
+			errors.append(f"{rel}: [NC-08] delete chỉ được chứa NC Admin")
+			continue
+		MATRIX.setdefault(row, " ".join(toks))
+		DOCTYPE_ROW[doctype] = row
+		for role in delete:
+			DELETE_ALLOWED.setdefault(role, set()).add(doctype)
+	return errors
+
+
+load_perm_matrix(_ROOT)
 
 
 def find_doctype_files(root: Path):
@@ -235,6 +291,7 @@ def check_permissions(data: dict, path: str) -> list:
 
 
 VI_CSV = "normcore/translations/vi.csv"
+VI_DIR = "normcore/translations/vi.d"
 
 
 def _csv_key(row):
@@ -261,8 +318,24 @@ def sort_vi_csv(root: Path) -> bool:
 	return True
 
 
+def _git_tracked(root: Path, rel: str) -> bool:
+	import subprocess
+
+	try:
+		r = subprocess.run(
+			["git", "-C", str(root), "ls-files", "--error-unmatch", rel], capture_output=True, text=True
+		)
+	except OSError:
+		return False
+	return r.returncode == 0
+
+
 def check_vi_csv(root: Path) -> list:
-	"""NORM-24: vi.csv xếp theo cột đầu (rồi cột ngữ cảnh) và không trùng khóa (cột 1 + ngữ cảnh)."""
+	"""NORM-24: vi.csv xếp theo cột đầu (rồi cột ngữ cảnh) và không trùng khóa (cột 1 + ngữ cảnh).
+	NORM-60: có thư mục vi.d/ thì kiểm kết quả ghép các mảnh (generated.merge_translations), vi.csv trên đĩa
+	(nếu có) phải đúng bằng kết quả ghép và không được git theo dõi."""
+	if (root / VI_DIR).is_dir():
+		return _check_vi_fragments(root)
 	path = root / VI_CSV
 	if not path.exists():
 		return []
@@ -285,10 +358,50 @@ def check_vi_csv(root: Path) -> list:
 	return errors
 
 
+def _check_vi_fragments(root: Path) -> list:
+	from normcore import generated
+
+	rows, errors = generated.merge_translations(root)
+	keys = [generated.csv_key(r) for r in rows]
+	if keys != sorted(keys):  # sort ổn định nên không xảy ra; giữ để NC-10 vẫn là luật chạy trên kết quả ghép
+		errors.append(f"{VI_CSV}: [NC-10] kết quả ghép chưa sắp xếp theo cột đầu")
+	path = root / VI_CSV
+	if path.exists() and not errors:
+		import io
+
+		buf = io.StringIO()
+		csv.writer(buf, lineterminator="\n").writerows(rows)
+		if path.read_text(encoding="utf-8") != buf.getvalue():
+			errors.append(
+				f"{VI_CSV}: [NC-10] khác kết quả ghép vi.d/; chạy python3 scripts/build_generated.py"
+			)
+	if _git_tracked(root, VI_CSV):
+		errors.append(f"{VI_CSV}: [NC-10] là tệp sinh nhưng đang được git theo dõi; git rm --cached {VI_CSV}")
+	return errors
+
+
 def check_workspace(root: Path) -> list:
-	"""NORM-32: normcore.json phải đúng bằng kết quả sinh từ shortcuts.txt (scripts/build_workspace.py)."""
+	"""NORM-32: normcore.json phải đúng bằng kết quả sinh từ shortcuts.txt (scripts/build_workspace.py).
+	NORM-60: có thư mục shortcuts.d/ thì kiểm các mảnh đọc và dựng được; normcore.json là tệp sinh, không
+	còn phải khớp từng byte, và không được git theo dõi."""
 	import build_workspace as bw
 
+	frag = root / bw.REL / "shortcuts.d"
+	if frag.is_dir():
+		rel = str(bw.REL / "shortcuts.d")
+		errors = []
+		if _git_tracked(root, str(bw.REL / "shortcuts.txt")):
+			errors.append(
+				f"{bw.REL}/shortcuts.txt: [NC-11] shortcuts.txt là tệp sinh nhưng đang được git theo dõi; "
+				"chuyển dòng vào shortcuts.d/ rồi git rm --cached"
+			)
+		try:
+			bw.render(bw.read_sources(root))
+		except ValueError as e:
+			errors.append(f"{rel}: [NC-11] {e}")
+		if _git_tracked(root, str(bw.REL / "normcore.json")):
+			errors.append(f"{bw.REL}/normcore.json: [NC-11] là tệp sinh nhưng đang được git theo dõi")
+		return errors
 	src = root / bw.REL / "shortcuts.txt"
 	dst = root / bw.REL / "normcore.json"
 	if not src.exists() and not dst.exists():
@@ -385,7 +498,7 @@ def check_scope_rules(data: dict, root: Path, rel: str) -> list:
 
 
 def run(root: Path) -> list:
-	errors = check_vi_csv(root) + check_workspace(root) + check_asm_unique(root)
+	errors = load_perm_matrix(root) + check_vi_csv(root) + check_workspace(root) + check_asm_unique(root)
 	for path in find_doctype_files(root):
 		rel = str(path.relative_to(root))
 		try:
