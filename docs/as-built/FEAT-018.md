@@ -1,6 +1,6 @@
 # As-Built: FEAT-018 Khóa, ảnh chụp đầu vào, so sánh hai lần tính
 
-Issue NORM-47. FR-COST-011, 012, 013; NFR-REL-001. UC-012 (bước 8, nhánh 8a, 8c). SCR-DSK-022 (bổ sung). TC-COST-09, 11, 18 (và TC-CLS-38 với khóa thật). Người nghiệm thu: QA (chưa làm).
+Issue NORM-47. FR-COST-011, 012, 013; NFR-REL-001. UC-012 (bước 8, nhánh 8a, 8c). SCR-DSK-022 (bổ sung). TC-COST-09, 11, 18 (và TC-CLS-38 với khóa thật). Người nghiệm thu: QA (Multica).
 
 ## 1. Luồng nghiệp vụ đã xây
 1. **Khóa (FR-COST-011):** sau các kiểm cũ của FEAT-017, hệ thống dựng ảnh chụp toàn bộ đầu vào từ dữ liệu sống trên đúng danh sách dịch vụ đã tính, tính lại từ ảnh chụp và so từng trường với kết quả đã lưu. Trùng hết mới lưu tệp `.json.gz` private gắn lần tính, `snapshot_hash` (sha256 của JSON chuẩn hóa) và chuyển "Đã khóa" (NC Audit Event "Khóa" kèm 12 ký tự đầu mã băm). Đầu vào đã đổi sau lần tính thì từ chối, giữ "Đã tính".
