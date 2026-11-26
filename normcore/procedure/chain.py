@@ -180,3 +180,53 @@ def build_item(key, departments, picked, allowed, names=None):
 	if allowed is not None and (not allowed or (rows and all(r["state"] == "no_permission" for r in rows))):
 		return _item(key, "no_permission", NO_PERMISSION, rows=rows)
 	return _item(key, "empty", EMPTY if allowed is None else EMPTY_SCOPED, rows=rows)
+
+
+STAGES = ("no_procedure", "procedure", "norm_locked", "costed", "price_approved")
+STAGE_LABELS = {
+	"no_procedure": "Chưa có quy trình",
+	"procedure": "Có quy trình",
+	"norm_locked": "Có định mức đã khóa",
+	"costed": "Đã tính giá",
+	"price_approved": "Đã duyệt giá",
+}
+
+
+def stage_of(has_procedure, has_norm, has_cost, has_price=False):
+	"""Mức tình trạng chuỗi cao nhất đã đạt (FR-OUT-010, ASM-002-05)."""
+	if has_price:
+		return "price_approved"
+	if has_cost:
+		return "costed"
+	if has_norm:
+		return "norm_locked"
+	if has_procedure:
+		return "procedure"
+	return "no_procedure"
+
+
+def count_stages(service_flags, readable=STAGES):
+	"""Đếm dịch vụ theo mức. `service_flags`: (service, has_procedure, has_norm, has_cost, has_price).
+
+	Mức không đọc được: cờ coi như False trước khi xếp mức; mục trả count None, no_permission True.
+	"""
+	counts = dict.fromkeys(STAGES, 0)
+	for _service, p, n, c, price in service_flags:
+		p = p and "procedure" in readable
+		n = n and "norm_locked" in readable
+		c = c and "costed" in readable
+		price = price and "price_approved" in readable
+		counts[stage_of(p, n, c, price)] += 1
+	out = []
+	for stage in STAGES:
+		denied = stage not in readable
+		item = {
+			"stage": stage,
+			"label": STAGE_LABELS[stage],
+			"count": None if denied else counts[stage],
+			"no_permission": denied,
+		}
+		if stage == "price_approved":
+			item["assumption"] = True  # ASM-002-06: R1 chưa có phương án giá đã duyệt
+		out.append(item)
+	return out

@@ -6,4 +6,18 @@ frappe.ui.form.on("NC Settings", {
 			filters: { ignore_user_type: 1 },
 		}));
 	},
+	refresh(frm) {
+		if (frappe.model.can_read("NC AI Settings")) {
+			frm.set_intro(
+				`${__("New values apply to the next operation, no restart needed.")} ${__("AI call timeout is set in AI settings.")} <a href="/app/nc-ai-settings">${__("AI settings")}</a>`,
+				"blue"
+			);
+		}
+	},
+	after_save() {
+		frappe.show_alert({
+			message: __("Saved. New values apply to the next operation."),
+			indicator: "green",
+		});
+	},
 });
