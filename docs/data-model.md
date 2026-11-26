@@ -665,6 +665,10 @@ Lần nhập "Nháp" có `error_count` > 0 không chốt được [FR-ACCT-002].
 
 **NC Scenario Change** — Bảng con: `technical_service`, `change_type` (Tham số / Thiết bị / Dòng định mức), `target_ref`, `field`, `old_value`, `new_value`, `source_suggestion` (Link).
 
+**NC Costing Run Department** **[AMD-015-01]** — Bảng con của NC Costing Run (trường `scope_departments`): `department` (Link NC Department, BB). Quyền theo cha.
+
+**NC Costing Run Service** **[AMD-015-01]** — Bảng con của NC Costing Run (trường `scope_services`): `technical_service` (Link NC Technical Service, BB). Quyền theo cha.
+
 **NC Service Cost** — Kết quả một dịch vụ trong một lần tính. Naming: tự động.
 
 | Trường | Nhãn | Kiểu | Ghi chú |

@@ -119,3 +119,47 @@ class TestCostingApi(FrappeTestCase):
 			api.start_costing(self.run.name)
 		with self.assertRaises(frappe.PermissionError):
 			api.check_scope(self.run.name)
+
+
+class TestServiceCostPermission(FrappeTestCase):
+	"""Quyết định Lead Q2 (ASM-015-22): NC Service Cost theo dòng "Bảng giải trình của dịch vụ thuộc khoa"."""
+
+	def setUp(self):
+		from normcore.api import access
+
+		frappe.set_user("Administrator")
+		self.head = make_user("head.costing@normcore.test", "NC Department Head")
+		self.params, self.dept, self.sets = cf.make_golden_world()
+		cf.ensure(
+			"NC Department",
+			"department_code",
+			"KHOA-KHAC",
+			department_name="Khoa khác",
+			department_type="Lâm sàng",
+			cost_center=self.dept,
+		)
+		access.assign_department(self.head, self.dept)
+		self.run = cf.make_golden_run(self.params)
+		self.run.run_costing()
+		self.name = frappe.get_value("NC Service Cost", {"costing_run": self.run.name}, "name")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def test_quyen_bang_giai_trinh_truong_khoa_theo_khoa(self):
+		frappe.set_user(self.head)
+		self.assertTrue(frappe.has_permission("NC Service Cost", "read", self.name))
+		self.assertEqual(len(frappe.get_list("NC Service Cost", {"costing_run": self.run.name})), 2)
+		self.assertEqual(api.get_explanation(self.name)["header"]["department"], self.dept)
+		for ptype in ("write", "create", "delete"):
+			self.assertFalse(frappe.has_permission("NC Service Cost", ptype), ptype)
+		# lần tính (kết quả tổng hợp) vẫn không dành cho trưởng khoa
+		self.assertFalse(frappe.has_permission("NC Costing Run", "read", self.run.name))
+		# khoa khác: không đọc được
+		frappe.set_user("Administrator")
+		frappe.db.set_value("NC Service Cost", self.name, "department", "KHOA-KHAC")
+		frappe.set_user(self.head)
+		self.assertFalse(frappe.has_permission("NC Service Cost", "read", self.name))
+		with self.assertRaises(frappe.PermissionError):
+			api.get_explanation(self.name)

@@ -211,9 +211,11 @@
  "permissions": [
   {
    "role": "NC Finance",
-   "read": 1,
-   "write": 1,
-   "create": 1
+   "read": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1
   },
   {
    "role": "NC Director",
