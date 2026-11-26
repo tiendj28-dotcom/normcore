@@ -1,5 +1,5 @@
 # As-Built: FEAT-008 Sửa đổi, so sánh phiên bản, thu hồi
-- Phiên bản app 0.0.1; Dev: NORM-50; chờ QA kiểm định độc lập
+- Phiên bản app 0.0.1; Dev: NORM-50; Người nghiệm thu: QA (Multica), verify accepted tại b28e6f5b93db0a9bea193c1db75a7ffb0098c90e
 
 ## 1. Luồng nghiệp vụ đã xây
 - **Sửa đổi (FR-WF-009):** từ quy trình "Đã ban hành" mới nhất của (dịch vụ, khoa), `create_revision` tạo bản nháp `version_no` kế tiếp, sao chép 7 phần văn bản, `doctor_request`, bước, nguồn lực, trích dẫn; giữ nguyên `step_id`, `resource_row_id`, `next_step_seq`, `next_resource_seq` nên bước mới không tái dùng mã đã bỏ. Không sao chép `decision_no`, `effective_date`, `copied_from`, `ai_log`; `ai_suggested` = 0. Đã có bản đang soạn/duyệt thì trả bản đó (`existing = 1`). Bản nháp đi qua luồng duyệt FEAT-007.
@@ -28,5 +28,5 @@ TC-WF-05, TC-WF-06 (tích hợp), TC-WF-07 (API; hiển thị loại M do QA ki�
 ## 7. Giới hạn đã biết
 - Chưa làm: UC-007 1c (đề xuất từ phân hệ D), gỡ cờ "Cần cập nhật" (FEAT-012), phục hồi bản "Đã thay thế" khi bản hiện hành bị thu hồi, so sánh trích dẫn (ASM-008-04, 06, 09, 11).
 - Thu hồi không qua Frappe Workflow nên nút workflow chuẩn của Desk không có "Thu hồi"; dùng nút tùy biến.
-- Giao diện SCR-DSK-011 chưa kiểm bằng mắt ở 1366 × 768 trong lượt Dev; QA kiểm bằng Playwright.
+- Giao diện SCR-DSK-011 chưa kiểm bằng trình duyệt: staging chưa có nhánh, QA không có tài khoản test; cần xem mắt trên staging sau merge. TC-WF-07 phủ bằng test API/unit.
 - `ProcedureEditor.vue` không import `ProcedureCompare.vue`: component đăng ký ở `procedure_editor.bundle.js` vì harness Node của test cũ chạy khối script.
