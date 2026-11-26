@@ -63,7 +63,7 @@ Quyền: không đổi (ma trận dòng "Lần tính giá, kết quả, đối s
 | Tên | Loại | Module | ref_doctype | roles |
 | :-- | :-- | :-- | :-- | :-- |
 | NC Physical Reconciliation (SCR-DSK-038, nhãn "Đối soát vật chất và sản lượng") | Script Report | NC Costing | NC Reconciliation Line | NC Finance, NC Director, NC Admin, NC Auditor |
-| NC Missing Data (SCR-DSK-039, nhãn "Báo cáo thiếu dữ liệu") | Script Report | NC Costing | NC Costing Run | NC Finance, NC Director, NC Admin, NC Auditor, NC Department Head (ASM-037-13) |
+| NC Missing Data (SCR-DSK-039, nhãn "Báo cáo thiếu dữ liệu") | Script Report | NC Costing | NC Service Cost (ASM-037-20) | NC Finance, NC Director, NC Admin, NC Auditor, NC Department Head (ASM-037-13) |
 | `sensitivity` (SCR-DSK-040, tiêu đề "Phân tích độ nhạy") | Page, bundle `public/js/sensitivity/` | NC Costing | — | NC Finance, NC Director, NC Admin, NC Auditor, NC Department Head (ASM-037-16) |
 
 ## 3. API (`normcore/api/costing.py`, `@frappe.whitelist()`, kiểm quyền tường minh)

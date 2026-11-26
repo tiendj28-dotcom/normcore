@@ -75,7 +75,7 @@
 
 ## SCR-DSK-039 Báo cáo thiếu dữ liệu (Script Report)
 
-**Quyền vào.** `roles`: NC Finance, NC Director, NC Admin, NC Auditor, NC Department Head; `ref_doctype` NC Costing Run. NC Department Head: bộ lọc `departments` mặc định và bị ép về khoa được phân (máy chủ lọc lại).
+**Quyền vào.** `roles`: NC Finance, NC Director, NC Admin, NC Auditor, NC Department Head; `ref_doctype` NC Service Cost (ASM-037-20). NC Department Head: bộ lọc `departments` mặc định và bị ép về khoa được phân (máy chủ lọc lại).
 
 **Bộ lọc:** `fiscal_year` (Int, bắt buộc, mặc định năm hiện tại), `costing_date` (Date, bắt buộc, mặc định hôm nay), `parameter_set` (Link, bắt buộc, mặc định bộ có `effective_from` gần nhất ≤ ngày tính), `price_category` (Link, bắt buộc), `volume_scenario` (Select, mặc định "Thực tế 12 tháng"), `departments` (MultiSelectList NC Department), `services` (MultiSelectList NC Technical Service), `kind` (Select năm loại, trống = tất cả). Khi mở từ SCR-DSK-022 lấy từ `route_options`.
 
