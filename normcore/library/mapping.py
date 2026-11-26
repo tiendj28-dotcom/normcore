@@ -21,7 +21,7 @@ _PUNCT = re.compile(r"[^\w\s]|_", re.UNICODE)
 
 
 class MappingError(Exception):
-	pass
+	"""Hai dòng cùng dịch vụ trong một mục; `args[0]` là mã dịch vụ."""
 
 
 @lru_cache(maxsize=65536)
@@ -117,6 +117,13 @@ def merge_suggestions(existing_rows, suggestions):
 	return kept
 
 
+def _put(row, key, value):
+	if hasattr(row, "set"):  # frappe Document dòng con
+		row.set(key, value)
+	else:
+		row[key] = value
+
+
 def stamp_rows(rows, before_rows, user, now):
 	"""Quy tắc technical-design 2.4. `rows`/`before_rows`: list dict hoặc đối tượng dạng dict."""
 	seen = set()
@@ -124,14 +131,16 @@ def stamp_rows(rows, before_rows, user, now):
 	for r in rows:
 		svc = r.get("technical_service")
 		if svc in seen:
-			raise MappingError(f"Dịch vụ {svc} đã được ánh xạ với mục này")
+			raise MappingError(svc)
 		seen.add(svc)
 		if r.get("mapping_status") == CONFIRMED:
 			b = prev.get(r.get("name"))
 			if b is None or b.get("mapping_status") != CONFIRMED or b.get("technical_service") != svc:
-				r["confirmed_by"], r["confirmed_on"] = user, now
+				_put(r, "confirmed_by", user)
+				_put(r, "confirmed_on", now)
 		else:
-			r["confirmed_by"], r["confirmed_on"] = None, None
+			_put(r, "confirmed_by", None)
+			_put(r, "confirmed_on", None)
 
 
 def is_draft_source(row):
