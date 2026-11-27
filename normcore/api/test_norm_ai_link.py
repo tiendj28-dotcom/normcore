@@ -283,6 +283,21 @@ class TestAiLinkApi(NormBase):
 		# mã tác vụ lạ
 		self.assertEqual(api.get_link_suggestion_status("khong-co")["status"], "unknown")
 
+	def test_FR_AI_007_tac_vu_nen_khong_goi_duoc_qua_http(self):
+		# run_link_suggestion tự đặt người dùng nên không được whitelist (nếu không, ai cũng chạy được dưới Administrator)
+		self.assertNotIn(api.run_link_suggestion, frappe.whitelisted)
+		for fn in (
+			api.start_link_suggestion,
+			api.accept_link_suggestions,
+			api.reject_link_suggestion,
+			api.list_link_suggestions,
+		):
+			self.assertIn(fn, frappe.whitelisted)
+		frappe.set_user(self.aud)
+		with self.assertRaises(frappe.PermissionError):  # đường gọi qua HTTP (/api/method/...) kiểm whitelist
+			frappe.handler.is_whitelisted(api.run_link_suggestion)
+		frappe.handler.is_whitelisted(api.start_link_suggestion)
+
 	def test_FR_AI_007_quyen_de_xuat_lien_ket(self):
 		_proc, name, _prov = self.suggested_set()
 		line = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.ai_suggested).line_id

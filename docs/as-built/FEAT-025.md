@@ -10,7 +10,7 @@ Không DocType mới. NC Norm Line thêm `ai_confidence` (Percent, chỉ đọc;
 
 ## 3. API, tác vụ nền, hook
 - `api/procedure.py`: `check_consistency`.
-- `api/norm_link.py` (mới; `api/norm.py` và `norm_grid/` giữ nguyên như develop): `start_link_suggestion`, `run_link_suggestion` (nền, hàng đợi `long`), `get_link_suggestion_status`, `accept_link_suggestions`, `reject_link_suggestion`, `list_link_suggestions`.
+- `api/norm_link.py` (mới; `api/norm.py` và `norm_grid/` giữ nguyên như develop): `start_link_suggestion`, `run_link_suggestion` (nền, hàng đợi `long`, không whitelist), `get_link_suggestion_status`, `accept_link_suggestions`, `reject_link_suggestion`, `list_link_suggestions`.
 - `ai/prompts_install.py`: `_ensure_v2`, `ensure_consistency_check_v2`, `ensure_suggest_norm_link_v2` (cài lười, ASM-025-11).
 - Giao diện: `ProcedureEditor.vue`, `nc_norm_set.js`; bản dịch `translations/vi.d/FEAT-025.csv`.
 

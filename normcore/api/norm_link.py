@@ -86,7 +86,6 @@ def _candidates(doctype):
 	return out
 
 
-@frappe.whitelist()
 def run_link_suggestion(link_job, norm_set, user):
 	"""Tác vụ nền (TD 3.5): lọc ứng viên bằng quy tắc, AI chọn trong danh sách, ghi `ai_suggested`. Không ném lỗi."""
 	previous = frappe.session.user
