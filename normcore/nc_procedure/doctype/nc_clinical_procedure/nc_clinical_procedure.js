@@ -117,6 +117,26 @@ function nc_download(frm, method) {
 	window.open("/api/method/" + NC_WF + method + "?procedure=" + encodeURIComponent(frm.doc.name));
 }
 
+// FEAT-029: yêu cầu sửa đổi từ Bàn so sánh giá cho cùng (dịch vụ, khoa) mà người dùng đọc được.
+function nc_change_request_banner(frm) {
+	if (!frappe.model.can_read("NC Procedure Change Request")) return;
+	frappe.db
+		.get_list("NC Procedure Change Request", {
+			filters: { status: ["in", ["Mới", "Đã tiếp nhận"]], procedure: ["in", [frm.doc.name, frm.doc.previous_version].filter(Boolean)] },
+			fields: ["name"],
+			limit: 50,
+		})
+		.then((rows) => {
+			if (!rows || !rows.length) return;
+			const link = `<a href="/app/nc-procedure-change-request?status=Mới">${frappe.utils.escape_html(__("Open list"))}</a>`;
+			frm.dashboard.add_comment(
+				frappe.utils.escape_html(__("There are {0} change requests from price comparison", [rows.length])) + " " + link,
+				"yellow",
+				true
+			);
+		});
+}
+
 frappe.ui.form.on("NC Clinical Procedure", {
 	refresh(frm) {
 		if (frm.is_new()) return;
@@ -127,6 +147,7 @@ frappe.ui.form.on("NC Clinical Procedure", {
 		frm.add_custom_button(__("Print PDF"), () => nc_download(frm, "download_pdf"), __("Export"));
 		frm.add_custom_button(__("Download DOCX"), () => nc_download(frm, "download_docx"), __("Export"));
 
+		nc_change_request_banner(frm); // FEAT-029, UC-007 1c
 		if (frm.doc.needs_review && frm.doc.workflow_state === "Đã ban hành") {
 			// FR-LIB-009 (FEAT-021): cờ "Cần rà soát" do văn bản hoặc mục được trích dẫn hết hiệu lực
 			frm.dashboard.set_headline_alert(

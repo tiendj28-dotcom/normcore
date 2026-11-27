@@ -121,6 +121,28 @@ function render_progress(frm) {
 	poll_progress(frm);
 }
 
+// FEAT-029 (SCR-DSK-026): kịch bản điều chỉnh làm ở Bàn so sánh giá.
+function render_scenario(frm) {
+	frm.dashboard.clear_headline();
+	frm.set_intro(
+		__("Adjustment scenario of {0}. Changes are made on the price comparison page.", [
+			`<a href="/app/nc-costing-run/${encodeURIComponent(frm.doc.based_on_run)}">${frappe.utils.escape_html(frm.doc.based_on_run)}</a>`,
+		]),
+		"yellow"
+	);
+	frm.add_custom_button(__("Open in price comparison"), () => frappe.set_route("price-compare", { run: frm.doc.based_on_run })).addClass("btn-primary");
+	frm.add_custom_button(__("View costing results"), () => frappe.set_route("List", "NC Service Cost", { costing_run: frm.doc.name }));
+	frm.disable_form();
+}
+
+function add_scenarios_button(frm) {
+	if (!["Đã tính", "Đã khóa"].includes(frm.doc.status)) return;
+	frappe.db.count("NC Costing Run", { based_on_run: frm.doc.name }).then((n) => {
+		if (!n) return;
+		frm.add_custom_button(__("Scenarios ({0})", [n]), () => frappe.set_route("List", "NC Costing Run", { based_on_run: frm.doc.name }), __("View"));
+	});
+}
+
 function render_status_banner(frm) {
 	frm.dashboard.clear_headline();
 	if (frm.doc.status === "Tính lỗi") {
@@ -463,7 +485,12 @@ frappe.ui.form.on("NC Costing Run", {
 	refresh(frm) {
 		frm.toggle_display("progress", frm.doc.status === "Đang tính");
 		if (frm.is_new()) return;
+		if (frm.doc.based_on_run) {
+			render_scenario(frm); // FEAT-029: kịch bản điều chỉnh chỉ đọc, không tính, khóa, nhân bản
+			return;
+		}
 		render_status_banner(frm);
+		add_scenarios_button(frm);
 		render_progress(frm);
 
 		if (["Nháp", "Tính lỗi", "Đã tính"].includes(frm.doc.status) && can_write(frm)) {

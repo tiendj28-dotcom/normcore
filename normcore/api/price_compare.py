@@ -50,6 +50,7 @@ def _run_view(run, tolerance):
 		"costing_date": run.costing_date,
 		"price_category": run.price_category,
 		"parameter_set": run.parameter_set,
+		"based_on_run": run.get("based_on_run"),
 		"tolerance": tolerance,
 		"window_months": settings.get("benchmark_window_months"),
 		"min_facilities": settings.get("min_benchmark_facilities"),
@@ -112,6 +113,14 @@ def _suggestions(service_cost) -> list:
 	return out
 
 
+def _empty_counts() -> dict:
+	return {"Mới": 0, "Chấp nhận": 0, "Từ chối": 0, "Đã chuyển yêu cầu sửa quy trình": 0}
+
+
+def _is_scenario_cost(sc_doc) -> bool:
+	return bool(frappe.db.get_value(RUN, sc_doc.costing_run, "based_on_run"))
+
+
 def _can_decide(sc_doc) -> bool:
 	"""Quyền quyết định gợi ý (ASM-028-11): NC Finance, NC Director, Trưởng khoa của khoa dịch vụ."""
 	user = frappe.session.user
@@ -153,7 +162,7 @@ def get_comparison(run, provinces=None, levels=None, ownerships=None, use_adjust
 	for d in frappe.get_all(
 		ADJ, {"service_cost": ["in", [c.name for c in costs] or [""]]}, ["service_cost", "status"]
 	):
-		counts.setdefault(d.service_cost, {"Mới": 0, "Chấp nhận": 0, "Từ chối": 0})
+		counts.setdefault(d.service_cost, _empty_counts())
 		if d.status in counts[d.service_cost]:
 			counts[d.service_cost][d.status] += 1
 	out = []
@@ -173,7 +182,7 @@ def get_comparison(run, provinces=None, levels=None, ownerships=None, use_adjust
 					for k in ("count", "min", "median", "max", "deviation_pct", "sufficient", "label")
 				},
 				"exceeds": stats.exceeds(summary["deviation_pct"], tolerance),
-				"suggestion_counts": counts.get(c.name, {"Mới": 0, "Chấp nhận": 0, "Từ chối": 0}),
+				"suggestion_counts": counts.get(c.name, _empty_counts()),
 			}
 		)
 	out.sort(
@@ -201,6 +210,18 @@ def get_service_detail(service_cost, provinces=None, levels=None, ownerships=Non
 	sc, _run_doc, tolerance, summary, selected, excluded = _detail_base(
 		service_cost, provinces, levels, ownerships, use_adjusted
 	)
+	is_scenario = _is_scenario_cost(sc)
+	suggestions = _suggestions(sc.name)
+	requests = {
+		r.source_suggestion: r.name
+		for r in frappe.get_all(
+			"NC Procedure Change Request",
+			{"source_suggestion": ["in", [x["name"] for x in suggestions] or [""]]},
+			["name", "source_suggestion"],
+		)
+	}
+	for x in suggestions:
+		x["change_request"] = requests.get(x["name"])
 	return {
 		"stats": {
 			**summary,
@@ -210,9 +231,11 @@ def get_service_detail(service_cost, provinces=None, levels=None, ownerships=Non
 		"prices": selected,
 		"excluded": excluded,
 		"breakdown": stats.breakdown(sc.as_dict()),
-		"suggestions": _suggestions(sc.name),
-		"can_generate": bool(frappe.has_permission(ADJ, "create")),
-		"can_decide": _can_decide(sc),
+		"suggestions": suggestions,
+		"is_scenario": is_scenario,
+		"can_generate": bool(frappe.has_permission(ADJ, "create")) and not is_scenario,
+		"can_decide": _can_decide(sc) and not is_scenario,
+		"can_request_change": _can_decide(sc) and not is_scenario,
 	}
 
 
@@ -448,6 +471,8 @@ def generate_suggestions(service_cost, provinces=None, levels=None, ownerships=N
 	sc, run_doc, tolerance, summary, _sel, _exc = _detail_base(
 		service_cost, provinces, levels, ownerships, use_adjusted
 	)
+	if run_doc.based_on_run:
+		frappe.throw(_("Kịch bản không sinh gợi ý; mở lần tính gốc"))
 	found = rules.generate(_facts(sc, run_doc), summary["deviation_pct"], tolerance)
 	existing = {
 		(d.rule_code, d.target_ref): d
@@ -506,7 +531,12 @@ def decide_suggestion(name, decision, reason=None):
 	if decision == "Từ chối" and not reason:
 		frappe.throw(_("Từ chối gợi ý phải nêu lý do"))
 	if decision == "Chấp nhận" and doc.requires_procedure_change:
-		frappe.throw(_("Gợi ý cần sửa quy trình, chưa áp trực tiếp được (FEAT-029)"))
+		frappe.throw(_("Gợi ý cần sửa quy trình, không áp trực tiếp được: dùng Chuyển yêu cầu sửa quy trình"))
+	if decision == "Chấp nhận":  # FR-ADJ-006: mọi đường chấp nhận đều ghi vào kịch bản (ASM-029-09)
+		from normcore.api import scenario
+
+		scenario._accept(doc, sc, reason)
+		return _suggestion_view(frappe.get_doc(ADJ, name).as_dict())
 	doc.status = decision
 	doc.decision_reason = reason or None
 	doc.decided_by = frappe.session.user
