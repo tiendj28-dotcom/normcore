@@ -1,7 +1,5 @@
 """FEAT-038: phần thuần của AI đề xuất định mức từ tài liệu của hãng (FR-AI-016..018; TC-CLS-42, TC-CLS-43)."""
 
-import pytest
-
 from normcore.ai import guard
 from normcore.norm import ai_cls_norm as m
 
@@ -269,9 +267,9 @@ def test_FR_AI_016_basis_ref_va_nhan():
 	assert m.TYPE_CODE["Hạn dùng sau mở"] == "OPEN_STABILITY"
 
 
-@pytest.mark.parametrize("src", ["import frappe", "from frappe"])
-def test_module_thuan_khong_import_frappe(src):
+def test_module_thuan_khong_import_frappe():
 	import pathlib
 
 	text = pathlib.Path(m.__file__).read_text(encoding="utf-8")
-	assert src not in text
+	assert "import frappe" not in text
+	assert "from frappe" not in text
