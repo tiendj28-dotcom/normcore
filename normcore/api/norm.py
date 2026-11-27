@@ -738,12 +738,8 @@ def new_version(norm_set):
 	}
 
 
-def _new_version_same_procedure(src):
-	if src.status != LOCKED:
-		frappe.throw(_("Chỉ tạo phiên bản mới từ bộ Đã khóa"))
-	open_set = _open_set(src.technical_service, src.department, src.test_system)  # ASM-012-09, 034-14
-	if open_set:
-		return {"name": open_set, "message": _("Đã có bộ định mức đang soạn: {0}").format(open_set)}
+def _build_new_version(src):
+	"""Bộ "Nháp" kế tiếp của `src` cùng quy trình, giữ line_id, chưa insert (dùng chung với FEAT-029)."""
 	new = frappe.new_doc(NS)
 	new.update(
 		{
@@ -762,8 +758,74 @@ def _new_version_same_procedure(src):
 	for r in src.lines:  # giữ line_id; bỏ xác nhận (DI-03 giữ nguyên ở lock)
 		new.append("lines", {f: r.get(f) for f in ctl.LINE_INPUTS})
 	new.flags.from_procedure = True  # dòng giữ chỗ chưa sửa không bị kiểm đầy đủ (ASM-034-05)
+	return new
+
+
+def _new_version_same_procedure(src):
+	if src.status != LOCKED:
+		frappe.throw(_("Chỉ tạo phiên bản mới từ bộ Đã khóa"))
+	open_set = _open_set(src.technical_service, src.department, src.test_system)  # ASM-012-09, 034-14
+	if open_set:
+		return {"name": open_set, "message": _("Đã có bộ định mức đang soạn: {0}").format(open_set)}
+	new = _build_new_version(src)
 	new.insert()
 	return {"name": new.name}
+
+
+ADJUSTABLE_FIELDS = ("hospital_qty", "wastage_rate")
+
+
+def version_for_adjustment(service, department, test_system, line_id, field, value, note):
+	"""FR-ADJ-009 (FEAT-029, ASM-029-08): đặt `field` của dòng `line_id` ở bộ định mức "Nháp" kế tiếp, bỏ xác nhận
+	dòng đó để chờ xác nhận lại (FR-NORM-009..011). Không whitelisted; người gọi (API kịch bản) đã kiểm quyền.
+	Trả {"name", "created": 0|1}."""
+	if field not in ADJUSTABLE_FIELDS:
+		frappe.throw(_("Trường {0} không đổi được qua kịch bản điều chỉnh").format(field))
+	open_name = _open_set(service, department, test_system)
+	created = 0
+	if open_name:
+		doc = frappe.get_doc(NS, open_name)
+		if doc.status == CONFIRMED:
+			frappe.throw(
+				_("Bộ định mức {0} đang chờ khóa; khóa hoặc trả về trước khi áp thay đổi").format(open_name)
+			)
+	else:
+		src_name = frappe.get_all(
+			NS,
+			{
+				"technical_service": service,
+				"department": department,
+				"test_system": test_system or ["is", "not set"],
+				"status": LOCKED,
+			},
+			pluck="name",
+			order_by="version_no desc, name desc",
+			limit=1,
+		)
+		if not src_name:
+			frappe.throw(_("Chưa có bộ định mức Đã khóa của {0}").format(service))
+		doc = _build_new_version(frappe.get_doc(NS, src_name[0]))
+		doc.insert(ignore_permissions=True)  # NC Finance chỉ có R, A trên bộ định mức; bộ do hệ thống tạo
+		created = 1
+	row = next((r for r in doc.lines if r.line_id == line_id), None)
+	if row is None:
+		frappe.throw(_("Dòng {0} không còn trong bộ định mức mới").format(line_id))
+	row.set(field, value)
+	row.confirmed_by = row.confirmed_on = None
+	doc.flags.norm_action = "adjustment"
+	doc.flags.from_procedure = True
+	doc.save(ignore_permissions=True)
+	doc.add_comment("Info", note)
+	head = frappe.db.get_value("NC Department", department, "head_user")
+	from normcore.core import notify
+
+	notify.notify(
+		[head],
+		_("Bộ định mức {0} cần xác nhận lại sau điều chỉnh giá").format(doc.name),
+		NS,
+		doc.name,
+	)
+	return {"name": doc.name, "created": created}
 
 
 @frappe.whitelist()
