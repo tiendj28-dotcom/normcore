@@ -1,0 +1,191 @@
+{
+ "actions": [],
+ "autoname": "format:ADJ-{YYYY}-{#####}",
+ "creation": "2026-11-27 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "suggestion_section",
+  "service_cost",
+  "rule_code",
+  "direction",
+  "component",
+  "suggestion_col",
+  "target_ref",
+  "current_value",
+  "suggested_value",
+  "estimated_impact",
+  "requires_procedure_change",
+  "decision_section",
+  "status",
+  "decision_reason",
+  "decision_col",
+  "decided_by",
+  "decided_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "suggestion_section",
+   "label": "Gợi ý",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "service_cost",
+   "label": "Kết quả dịch vụ",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "options": "NC Service Cost",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "rule_code",
+   "label": "Quy tắc",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "BR-ADJ-001 … BR-ADJ-007"
+  },
+  {
+   "fieldname": "direction",
+   "label": "Hướng",
+   "fieldtype": "Select",
+   "read_only": 1,
+   "options": "Giảm\nTăng",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "component",
+   "label": "Cấu phần",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "suggestion_col",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "target_ref",
+   "label": "Đối tượng",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_value",
+   "label": "Giá trị hiện tại",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "suggested_value",
+   "label": "Giá trị đề xuất",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "estimated_impact",
+   "label": "Tác động ước tính đến giá",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "in_list_view": 1,
+   "description": "Âm = giảm giá tính toán; ước tính, chưa tính lại phân bổ cấp 2"
+  },
+  {
+   "fieldname": "requires_procedure_change",
+   "label": "Cần sửa quy trình",
+   "fieldtype": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decision_section",
+   "label": "Quyết định",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "read_only": 1,
+   "options": "Mới\nChấp nhận\nTừ chối\nĐã chuyển yêu cầu sửa quy trình",
+   "reqd": 1,
+   "default": "Mới",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "decision_reason",
+   "label": "Lý do",
+   "fieldtype": "Small Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decision_col",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "decided_by",
+   "label": "Người quyết định",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "options": "User"
+  },
+  {
+   "fieldname": "decided_on",
+   "label": "Thời điểm quyết định",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Benchmark",
+ "name": "NC Adjustment Suggestion",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "rule_code",
+ "track_changes": 1
+}
