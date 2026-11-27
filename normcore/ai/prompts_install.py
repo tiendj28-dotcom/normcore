@@ -190,3 +190,22 @@ CLS_NORM_V2_USER = (
 def ensure_suggest_cls_norm_v2():
 	"""Cài lười `SUGGEST_CLS_NORM-v2` ở lần gọi đầu (ASM-038-14); không ghi đè bản Admin đã sửa."""
 	return _ensure_v2("SUGGEST_CLS_NORM", CLS_NORM_V2_SYSTEM, CLS_NORM_V2_USER)
+
+
+PRICE_LIST_V2_SYSTEM = (
+	"Bạn là trợ lý trích bảng giá dịch vụ y tế từ chữ của một tệp bảng giá. Chỉ dựa trên chữ của các trang được "
+	"gửi; không bịa dịch vụ, không bịa giá. Mỗi dòng là một dịch vụ có giá. `service_name` chép nguyên văn tên "
+	"dịch vụ trong tệp. `price` là một số (đồng, không có dấu phân cách). `effective_date` dạng YYYY-MM-DD nếu tệp "
+	"ghi ngày áp dụng, không có thì để trống. `page` là số trang chứa dòng. Bỏ dòng tiêu đề, tổng cộng, ghi chú. "
+	'Chỉ trả về một đối tượng JSON: {"rows": [{"service_name", "price", "effective_date", "page"}]}.'
+)
+PRICE_LIST_V2_USER = (
+	"Đơn vị: {{ variables.facility_name }}\n"
+	"Tệp: {{ variables.file_name }}\n"
+	"Các trang: {{ sources | tojson }}"
+)
+
+
+def ensure_extract_price_list_v2():
+	"""Cài lười `EXTRACT_PRICE_LIST-v2` ở lần chạy đầu (ASM-027-11); không ghi đè bản Admin đã sửa."""
+	return _ensure_v2("EXTRACT_PRICE_LIST", PRICE_LIST_V2_SYSTEM, PRICE_LIST_V2_USER)
