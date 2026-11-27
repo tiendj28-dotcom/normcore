@@ -1,4 +1,4 @@
-"""Gợi ý điều chỉnh theo quy tắc BR-ADJ-001..007 (FEAT-028): logic thuần, không import frappe, không dùng AI.
+"""Gợi ý điều chỉnh theo quy tắc BR-ADJ-001..007 (FEAT-028): logic thuần, không phụ thuộc framework, không dùng AI.
 
 FR-ADJ-005, ADR-008. Giả định ASM-028-05..07 (docs/decisions/assumptions/FEAT-028.md).
 Tác động ước tính chỉ gọi lại hàm bộ máy tính giá (engine.direct_line, engine.price_service,

@@ -1,4 +1,4 @@
-"""Thống kê so sánh giá (FEAT-028): logic thuần, không import frappe.
+"""Thống kê so sánh giá (FEAT-028): logic thuần, không phụ thuộc framework.
 
 FR-ADJ-001..004, 010; BR-ADJ-008. Giả định ASM-028-01..04, 10 (docs/decisions/assumptions/FEAT-028.md).
 """
