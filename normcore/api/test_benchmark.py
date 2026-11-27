@@ -284,6 +284,23 @@ class TestBenchmarkApi(FrappeTestCase):
 		# names dạng chuỗi JSON
 		self.assertEqual(api.confirm_prices(f'["{p1.name}"]')["confirmed"], [p1.name])
 
+	def test_FR_BM_007_mo_lai_dong_trung_tra_loi(self):
+		from normcore.api import benchmark as api
+
+		a = _mk(technical_service="GTC-DV-01")
+		self.assertEqual(api.reject_prices([a.name])["rejected"], [a.name])
+		b = _mk(technical_service="GTC-DV-01")  # nhập lại đúng khóa, a đã Loại bỏ nên không trùng
+		res = api.reopen_prices([a.name])
+		self.assertEqual(res["reopened"], [])
+		self.assertEqual([e["name"] for e in res["errors"]], [a.name])
+		self.assertIn("Trùng", res["errors"][0]["message"])
+		self.assertIn(b.name, res["errors"][0]["message"])
+		self.assertEqual(frappe.db.get_value(DT, a.name, "status"), "Loại bỏ")
+		# reject cũng trả errors (dòng đã Loại bỏ không loại bỏ lại được)
+		res = api.reject_prices([a.name])
+		self.assertEqual(res["rejected"], [])
+		self.assertEqual([e["name"] for e in res["errors"]], [a.name])
+
 	def test_quyen_feat_026_api(self):
 		from normcore.api import benchmark as api
 

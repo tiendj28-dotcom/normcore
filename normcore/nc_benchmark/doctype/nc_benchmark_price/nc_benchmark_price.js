@@ -2,13 +2,31 @@
 const API = "normcore.api.benchmark.";
 
 frappe.ui.form.on("NC Benchmark Price", {
+	technical_service(frm) {
+		// ASM-026-04: chọn mã dịch vụ mà chưa có tên gốc thì điền tên dịch vụ (Desk chặn trường bắt buộc trước khi lưu)
+		if (!frm.doc.technical_service || frm.doc.service_name_raw) return;
+		frappe.db.get_value("NC Technical Service", frm.doc.technical_service, "service_name").then((r) => {
+			if (r.message && r.message.service_name) frm.set_value("service_name_raw", r.message.service_name);
+		});
+	},
 	refresh(frm) {
 		if (frm.is_new()) return;
 		frm.trigger("render_headline");
 		frm.trigger("render_adjusted");
 		if (!frm.perm[0] || !frm.perm[0].write) return;
 		const call = (method, args) =>
-			frappe.call({ method: API + method, args, freeze: true, callback: () => frm.reload_doc() });
+			frappe.call({
+				method: API + method,
+				args,
+				freeze: true,
+				callback(r) {
+					const errors = (r.message && r.message.errors) || [];
+					if (errors.length) {
+						frappe.msgprint({ title: __("Some rows were not updated"), message: errors.map((e) => frappe.utils.escape_html(e.message)).join("<br>"), indicator: "red" });
+					}
+					frm.reload_doc();
+				},
+			});
 		if (frm.doc.status === "Đề xuất") {
 			frm.add_custom_button(__("Confirm"), () => {
 				const go = () => call("confirm_prices", { names: [frm.doc.name], technical_service: frm.doc.technical_service });

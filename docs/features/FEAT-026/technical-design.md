@@ -149,8 +149,8 @@ NC_BENCHMARK_PRICE = ImportSet(
 | Hàm | Tham số | Kết quả | Kiểm quyền / lỗi |
 | :-- | :-- | :-- | :-- |
 | `confirm_prices(names, technical_service=None)` | `names`: list hoặc JSON; `technical_service` chỉ khi một dòng (đổi cặp khớp trước khi xác nhận) | `{"confirmed": [names], "errors": [{"name", "message"}]}` | `has_permission("NC Benchmark Price", "write", doc)` từng dòng, thiếu → `PermissionError`. Dòng "Loại bỏ" hoặc chưa có mã → lỗi dòng, các dòng khác vẫn xác nhận. Mỗi dòng `doc.status = "Đã xác nhận"; doc.save()` |
-| `reject_prices(names)` | list | `{"rejected": [names]}` | quyền ghi; đặt "Loại bỏ" |
-| `reopen_prices(names)` | list | `{"reopened": [names]}` | quyền ghi; "Đã xác nhận"/"Loại bỏ" → "Đề xuất" (đảo ngược) |
+| `reject_prices(names)` | list | `{"rejected": [names], "errors": [{"name", "message"}]}` | quyền ghi; đặt "Loại bỏ" |
+| `reopen_prices(names)` | list | `{"reopened": [names], "errors": [{"name", "message"}]}` | quyền ghi; "Đã xác nhận"/"Loại bỏ" → "Đề xuất" (đảo ngược) |
 | `get_comparable_prices(technical_service, price_category=None, target_month=None)` | mã dịch vụ; tùy chọn | `{"rows": [{"name", "facility", "facility_name", "province", "ownership", "facility_level", "price", "price_category", "effective_date", "source_doc_no", "source_url", "adjusted": <adjust()>}], "target_month"}`. Chỉ dòng "Đã xác nhận" qua `reference.comparable_prices` (FR-BM-005). `target_month` mặc định = tháng có chỉ số mới nhất | `has_permission(..., "read")`; thiếu → `PermissionError`. FEAT-028 dùng hàm này |
 | `get_adjusted_price(name, target_month=None)` | một dòng | `adjust()` + `price`, `effective_date` | quyền đọc dòng đó |
 | `download_price_survey(facility, price_category, specialty=None, services=None)` | đơn vị khảo sát; loại giá; nhóm dịch vụ = một chuyên khoa **hoặc** danh sách mã | tệp `phieu-khao-sat-gia-<facility>.xlsx` (`frappe.response` binary) | `has_permission("NC Benchmark Price", "create")`; không có dịch vụ nào → lỗi "Nhóm dịch vụ trống". Chỉ dịch vụ `is_active = 1` |

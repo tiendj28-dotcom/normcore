@@ -96,14 +96,14 @@ def confirm_prices(names, technical_service=None):
 
 @frappe.whitelist()
 def reject_prices(names):
-	done, _errors = _set_status(names, ref.STATUS_REJECTED, (ref.STATUS_PROPOSED, ref.STATUS_CONFIRMED))
-	return {"rejected": done}
+	done, errors = _set_status(names, ref.STATUS_REJECTED, (ref.STATUS_PROPOSED, ref.STATUS_CONFIRMED))
+	return {"rejected": done, "errors": errors}
 
 
 @frappe.whitelist()
 def reopen_prices(names):
-	done, _errors = _set_status(names, ref.STATUS_PROPOSED, (ref.STATUS_CONFIRMED, ref.STATUS_REJECTED))
-	return {"reopened": done}
+	done, errors = _set_status(names, ref.STATUS_PROPOSED, (ref.STATUS_CONFIRMED, ref.STATUS_REJECTED))
+	return {"reopened": done, "errors": errors}
 
 
 def _cpi_by_month():
