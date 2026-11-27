@@ -133,7 +133,7 @@ frappe.provide("normcore.export");
 					const ns = d.get_value("norm_set");
 					if (!ns) return frappe.msgprint({ title: __("Export error"), message: __("Select a norm set to export"), indicator: "red" });
 					const a = { file_type: type, norm_set: ns };
-					if (state.run) a.run = state.run;
+					if (state.run && o.source.run_readable !== false) a.run = state.run; // không đọc được lần tính thì xuất bộ không gắn lần tính (NORM-78)
 					download(a, $(type === "norm_set_pdf" ? d.fields_dict.get_norm_pdf.input : d.fields_dict.get_norm_xlsx.input));
 				};
 				d.fields_dict.get_norm_xlsx.input.onclick = norm("norm_set_xlsx");

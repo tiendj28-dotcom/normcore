@@ -415,6 +415,11 @@ def get_export_options(run=None, service_cost=None, norm_set=None):
 			if sc.norm_set and frappe.has_permission(NS, "read", sc.norm_set)
 			else None,
 		}
+		if not run_readable and out["own_service"]["norm_set"]:
+			# bộ định mức của dịch vụ đọc được thì xuất được, không gắn lần tính (ASM-019-05)
+			for o in out["options"]:
+				if o["file_type"] in ("norm_set_xlsx", "norm_set_pdf"):
+					o["enabled"], o["reason"] = True, ""
 	if run and enabled and run_readable:
 		costs = frappe.get_all(
 			COST,
