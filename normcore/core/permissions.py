@@ -69,17 +69,20 @@ def _is_scoped(doctype, ptype, user):
 
 
 def has_permission(doc, ptype=None, user=None, debug=False):
-	"""Hook `has_permission`: chỉ từ chối, không bao giờ cấp thêm."""
+	"""Hook `has_permission`: chỉ từ chối, không bao giờ cấp thêm.
+
+	Trả True (không phải None) khi không chặn: Frappe v16 coi None là từ chối (NORM-76); v15 coi True như bỏ qua.
+	"""
 	rule = SCOPE_RULES.get(doc.doctype)
 	user = user or frappe.session.user
 	if not rule or not _is_scoped(doc.doctype, ptype, user):
-		return None
+		return True
 	depts = get_user_departments(user)
 	if not ptype or ptype in READ_TYPES:
 		if _doc_department(rule, doc) in depts:
-			return None
+			return True
 		if rule.public_read and all(doc.get(k) == v for k, v in rule.public_read.items()):
-			return None
+			return True
 		return False
 	if _doc_department(rule, doc) not in depts:
 		return False
@@ -89,7 +92,7 @@ def has_permission(doc, ptype=None, user=None, debug=False):
 		stored = frappe.db.get_value(doc.doctype, doc.name, rule.department_field)
 		if stored and stored not in depts:
 			return False
-	return None
+	return True
 
 
 def permission_query_conditions(user=None, doctype=None):
