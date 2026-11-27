@@ -11,6 +11,7 @@ Quy tắc (ASM-039, ASM-042, ASM-043):
 - Đọc: bản ghi thuộc khoa được gán, hoặc bản ghi "công khai" theo `public_read` (quy trình "Đã ban hành").
 """
 
+import json
 from dataclasses import dataclass, field
 
 import frappe
@@ -23,6 +24,7 @@ SCOPED_ROLES = frozenset({"NC Clinician", "NC Department Head"})
 # User Permission của khoa gán với applicable_for này: bộ lọc mặc định của Frappe (lọc đọc mọi DocType có
 # Link tới NC Department, kể cả NC Department) không kích hoạt; phạm vi do hook ở đây quyết định.
 UP_APPLICABLE_FOR = "NC Cost Center"
+DENY_LOG_TITLE = "NC hook quyền từ chối"  # tiêu đề Error Log khi hook phạm vi từ chối (NORM-66, chẩn đoán)
 READ_TYPES = frozenset({"read", "select", "print", "email", "export", "report", "share"})
 
 
@@ -68,10 +70,37 @@ def _is_scoped(doctype, ptype, user):
 	return True
 
 
+def _log_deny(doc, ptype, user):
+	"""Ghi Error Log khi hook từ chối, để chẩn đoán 403 trên staging; lỗi khi ghi không đổi kết quả quyền."""
+	try:
+		frappe.log_error(
+			title=DENY_LOG_TITLE,
+			message=json.dumps(
+				{
+					"user": user,
+					"ptype": ptype,
+					"doctype": doc.doctype,
+					"name": doc.get("name"),
+					"roles": sorted(frappe.get_roles(user)),
+					"departments": sorted(get_user_departments(user)),
+				},
+				ensure_ascii=False,
+			),
+		)
+	except Exception:
+		pass
+
+
 def has_permission(doc, ptype=None, user=None, debug=False):
-	"""Hook `has_permission`: chỉ từ chối, không bao giờ cấp thêm."""
+	"""Hook `has_permission`: chỉ từ chối, không bao giờ cấp thêm. Mỗi lần từ chối ghi Error Log (NORM-66)."""
+	result = _decide(doc, ptype, user or frappe.session.user)
+	if result is False:
+		_log_deny(doc, ptype, user or frappe.session.user)
+	return result
+
+
+def _decide(doc, ptype, user):
 	rule = SCOPE_RULES.get(doc.doctype)
-	user = user or frappe.session.user
 	if not rule or not _is_scoped(doc.doctype, ptype, user):
 		return None
 	depts = get_user_departments(user)

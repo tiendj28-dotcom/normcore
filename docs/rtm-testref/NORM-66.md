@@ -1,0 +1,1 @@
+| FR-ACC-007 (NORM-66) | `TestPermissionDiagnostic` (core/test_permission_diagnostic.py: hook phạm vi từ chối thì ghi Error Log đủ user, ptype, doctype, roles, khoa; cho phép thì không ghi và kết quả quyền Auditor không đổi) |
