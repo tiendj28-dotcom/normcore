@@ -447,3 +447,42 @@ NC_STOCK_ISSUE_ACTUAL = ImportSet(
 )
 
 register(NC_STOCK_ISSUE_ACTUAL)
+
+# FEAT-026, FR-BM-002, UC-013 bước 2: giá tham chiếu. Không có cột trạng thái: `before_insert` quyết (ASM-026-02).
+# `prepare` từ chối dòng trùng để khung không cập nhật đè (FR-BM-007, ASM-026-06).
+NC_BENCHMARK_PRICE = ImportSet(
+	key="nc_benchmark_price",
+	label="Giá tham chiếu",
+	doctype="NC Benchmark Price",
+	key_field="service_name_raw",
+	key_fields=("facility", "technical_service", "service_name_raw", "price_category", "effective_date"),
+	prepare="normcore.api.benchmark.prepare_benchmark_price",
+	columns=(
+		Column(
+			"facility",
+			"Đơn vị",
+			"Link",
+			link_doctype="NC Benchmark Facility",
+			required=True,
+			example="Bệnh viện mẫu",
+		),
+		Column(
+			"technical_service", "Mã dịch vụ", "Link", link_doctype="NC Technical Service", example="VD-DV01"
+		),
+		Column("service_name_raw", "Tên dịch vụ gốc", "Data", example="Định lượng Glucose"),
+		Column("price", "Giá", "Float", required=True, example=25000),
+		Column(
+			"price_category",
+			"Loại giá",
+			"Link",
+			link_doctype="NC Price Category",
+			required=True,
+			example="VD-LG01",
+		),
+		Column("effective_date", "Ngày hiệu lực", "Date", required=True, example="2026-01-01"),
+		Column("source_doc_no", "Số văn bản nguồn", "Data", example="123/QĐ-BV"),
+		Column("source_url", "Đường dẫn nguồn", "Data"),
+	),
+)
+
+register(NC_BENCHMARK_PRICE)

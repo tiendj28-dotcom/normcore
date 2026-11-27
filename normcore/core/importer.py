@@ -76,7 +76,7 @@ class ImportSet:
 	def key_of(self, values: dict):
 		"""Khóa của một dòng: chuỗi/giá trị khi một khóa, tuple khi khóa ghép."""
 		if self.composite:
-			return tuple(values[k] for k in self.keys)
+			return tuple(values.get(k) for k in self.keys)  # khóa ghép có thành phần tùy chọn (ASM-026-13)
 		return values[self.key_field]
 
 	def column(self, fieldname):
@@ -327,7 +327,7 @@ def parse(import_set: ImportSet, content: bytes, filename=None, unique=True):
 			except ValueError as e:
 				row_errors.append(RowError(line, col.label, str(e)))
 		if unique and not row_errors:
-			key = " / ".join(str(values[k]) for k in import_set.keys)
+			key = " / ".join(str(values.get(k, "")) for k in import_set.keys)
 			norm_key = key.casefold()
 			if norm_key in seen:
 				label = import_set.column(import_set.key_field).label
