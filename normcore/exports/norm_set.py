@@ -5,6 +5,8 @@ import io
 from openpyxl import Workbook
 from openpyxl.styles import Font
 
+from normcore.exports import meta as meta_mod
+
 NO_RUN = "Chưa có lần tính giá"
 NO_PLAN = "Chưa có kế hoạch chất lượng"
 ESTIMATED = "Ước tính từ kế hoạch"
@@ -75,7 +77,7 @@ def _table(ws, headers, rows):
 		ws.append(list(r))
 
 
-def build_workbook(data: dict) -> bytes:
+def build_workbook(data: dict, meta: dict | None = None) -> bytes:
 	wb = Workbook()
 	ws = wb.active
 	ws.title = "Bộ định mức"
@@ -90,6 +92,8 @@ def build_workbook(data: dict) -> bytes:
 	_table(ws, [c[0] for c in cols], [[_text(ln.get(c[1])) for c in cols] for ln in data.get("lines") or ()])
 	if data.get("has_test_system"):
 		_quality_sheets(wb, data)
+	if meta:
+		meta_mod.add_info_sheet(wb, meta)  # trang cuối, không đổi trang cũ (FR-OUT-008)
 	buf = io.BytesIO()
 	wb.save(buf)
 	return buf.getvalue()
@@ -183,3 +187,38 @@ def _quality_sheets(wb, data):
 		ws.cell(ws.max_row, 4).number_format = K_FORMAT
 	else:
 		ws.append([system, None, None, NO_RUN, ""])
+
+
+GENERAL_STEP = "Chung cho cả dịch vụ"
+
+
+def pdf_context(data: dict, meta: dict) -> dict:
+	"""Ngữ cảnh Jinja cho PDF bộ định mức (FR-OUT-006, 008): cùng cột và thứ tự dòng với Excel."""
+	has_ts = bool(data.get("has_test_system"))
+	cols = [c for c in LINE_COLUMNS if has_ts or not c[2]]
+	head = data.get("head") or {}
+	groups = []
+	for ln in data.get("lines") or ():
+		sid = ln.get("step_id") or ""
+		if not groups or groups[-1]["step_id"] != sid:
+			title = ln.get("step_title") or (GENERAL_STEP if not sid else "")
+			groups.append(
+				{"step_id": sid, "title": f"{sid} — {title}" if sid and title else (title or sid), "rows": []}
+			)
+		groups[-1]["rows"].append([_text(ln.get(c[1])) for c in cols])
+	return {
+		"head": [
+			(label, _text(head.get(key)))
+			for label, key in HEAD_ROWS
+			if has_ts or key not in ("test_system", "tests_per_tube")
+		],
+		"columns": [c[0] for c in cols],
+		"groups": groups,
+		"has_test_system": has_ts,
+		"qc_plan": data.get("qc_plan"),
+		"eqa": data.get("eqa") or [],
+		"k": data.get("k"),
+		"k_estimated_label": ESTIMATED,
+		"info": meta_mod.info_rows(meta),
+		"footer": meta_mod.footer_text(meta),
+	}

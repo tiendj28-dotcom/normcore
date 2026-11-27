@@ -29,6 +29,7 @@ frappe.ui.form.on("NC Norm Set", {
 				__("This record is {0} and cannot be edited. Create a new version in the norm grid.", [__(frm.doc.status)])
 			);
 		}
+		frm.add_custom_button(__("Export norm set"), () => normcore.export.open({ norm_set: frm.doc.name }));
 		frm.add_custom_button(__("Open norm grid"), () => frappe.set_route("norm-grid", frm.doc.name)).addClass(
 			"btn-primary"
 		);
