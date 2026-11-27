@@ -12,8 +12,8 @@ import frappe
 from frappe import _
 
 from normcore.api import costing as costing_api
-from normcore.api import norm as norm_api
 from normcore.api import price_compare as pc
+from normcore.api import scenario_norm as norm_api
 from normcore.benchmark import scenario as sc_logic
 from normcore.core import notify, permissions
 from normcore.costing import snapshot
