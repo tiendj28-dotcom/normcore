@@ -45,6 +45,17 @@ class TestExportUi(unittest.TestCase):
 		self.assertIn("costs.length === 1", js)
 		self.assertIn("o.norm_sets || []).length === 1", js)
 
+	def test_mot_lua_chon_ghi_thang_vao_dom_va_chuoi(self):
+		# NORM-77: set_value có thể chạy khi <option> chưa dựng (selectedIndex = -1) nên phải ghi DOM + ép chuỗi
+		js = text(DIALOG)
+		self.assertIn("function select_value(", js)
+		self.assertIn("f.$input.val(v)", js)
+		self.assertIn("v = String(v)", js)
+		self.assertIn("select_value(f.service_cost,", js)
+		self.assertIn("select_value(f.norm_set,", js)
+		self.assertNotIn("f.service_cost.set_value(", js)
+		self.assertNotIn("f.norm_set.set_value(", js)
+
 	def test_khong_ma_mau_cung(self):
 		self.assertIsNone(re.search(r"#[0-9a-fA-F]{3,8}\b|rgba?\(", text(DIALOG)))
 
