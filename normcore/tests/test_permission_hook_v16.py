@@ -15,10 +15,21 @@ DOCTYPES = ("NC Clinical Procedure", "NC Service Cost", "NC Norm Set")
 class TestPermissionHookNoneIsDeny(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
-		ensure("NC Cost Center", "cost_center_code", "KHOA-N76-A", cost_center_name="A", center_type="Lâm sàng")
-		ensure("NC Cost Center", "cost_center_code", "KHOA-N76-B", cost_center_name="B", center_type="Lâm sàng")
+		ensure(
+			"NC Cost Center", "cost_center_code", "KHOA-N76-A", cost_center_name="A", center_type="Lâm sàng"
+		)
+		ensure(
+			"NC Cost Center", "cost_center_code", "KHOA-N76-B", cost_center_name="B", center_type="Lâm sàng"
+		)
 		for code in ("KHOA-N76-A", "KHOA-N76-B"):
-			ensure("NC Department", "department_code", code, department_name=code, department_type="Lâm sàng", cost_center=code)
+			ensure(
+				"NC Department",
+				"department_code",
+				code,
+				department_name=code,
+				department_type="Lâm sàng",
+				cost_center=code,
+			)
 		self.users = {
 			role: make_user(f"{role.split()[-1].lower()}.n76@normcore.test", role)
 			for role in ("NC Auditor", "NC Finance", "NC Director")
@@ -43,7 +54,15 @@ class TestPermissionHookNoneIsDeny(FrappeTestCase):
 
 	def test_clinician_dung_khoa_true_khac_khoa_false(self):
 		for dt in DOCTYPES:
-			self.assertIs(permissions.has_permission(self._doc(dt, "KHOA-N76-A"), "read", self.clin), True, dt)
-			self.assertIs(permissions.has_permission(self._doc(dt, "KHOA-N76-A"), "write", self.clin), True, dt)
-			self.assertIs(permissions.has_permission(self._doc(dt, "KHOA-N76-B"), "read", self.clin), False, dt)
-			self.assertIs(permissions.has_permission(self._doc(dt, "KHOA-N76-B"), "write", self.clin), False, dt)
+			self.assertIs(
+				permissions.has_permission(self._doc(dt, "KHOA-N76-A"), "read", self.clin), True, dt
+			)
+			self.assertIs(
+				permissions.has_permission(self._doc(dt, "KHOA-N76-A"), "write", self.clin), True, dt
+			)
+			self.assertIs(
+				permissions.has_permission(self._doc(dt, "KHOA-N76-B"), "read", self.clin), False, dt
+			)
+			self.assertIs(
+				permissions.has_permission(self._doc(dt, "KHOA-N76-B"), "write", self.clin), False, dt
+			)
