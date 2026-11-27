@@ -1,4 +1,11 @@
 {
- "after_install": ["normcore.benchmark.proposal_setup.after_install"],
- "after_migrate": ["normcore.benchmark.proposal_setup.after_migrate"]
+ "after_install": [
+  "normcore.benchmark.proposal_setup.after_install"
+ ],
+ "after_migrate": [
+  "normcore.benchmark.proposal_setup.after_migrate"
+ ],
+ "normcore_pending_sources": [
+  "normcore.api.price_proposal.pending_for"
+ ]
 }
