@@ -16,3 +16,16 @@
 | CI PR #71 | 2 job pass (trên commit trước khi merge develop lần cuối) | Đạt |
 
 Giới hạn: chưa kiểm giao diện bằng trình duyệt (Playwright); giao diện chỉ có test_export_ui.py. TBD-01: mẫu Phụ lục là mẫu tạm (ASM-019-01). DEF-019-01 do Lead quyết, không chặn FEAT này.
+
+## Kiểm lại NORM-77 / PR #82 (AMD-019-02, bundle chống cache) — commit d280047
+
+| Tiêu chí | Bằng chứng | Kết quả |
+| :-- | :-- | :-- |
+| Site sạch normcore-verify.test, toàn bộ test | `bench run-tests --app normcore` in OK; `bench build` ra `normcore_export.bundle.PUCLAKKQ.js` trong assets.json | Đạt |
+| pytest unit + golden + độ phủ | 1143 passed, độ phủ 99% | Đạt |
+| golden, build_rtm, check_conventions | rc=0, VAN DE: 0 | Đạt |
+| Diff test | chỉ đổi giá trị mong đợi `test_hook_registry_khai_bao_tep` (ASM-019-18, Lead quyết), thêm `test_bundle_nap_hop_thoai_chong_cache`, bỏ test dò chuỗi của PR #79; test 1 lựa chọn giữ nguyên; không skip | Đạt |
+| Tài liệu chỉ đọc | diff với origin/develop rỗng | Đạt |
+| CI PR #82 | 2 job pass | Đạt |
+
+Giới hạn: chưa kiểm trình duyệt trên staging vì PR #82 chưa merge. Sau khi merge và staging deploy, kiểm lại trên NORM-73 (không Ctrl+Shift+R) bằng tài khoản không phải Administrator.
