@@ -238,7 +238,12 @@ frappe.ui.form.on("NC Service Cost", {
 			method: API + "get_explanation",
 			args: { service_cost: frm.doc.name },
 			callback(r) {
-				if (r.message) render(loading, r.message);
+				if (!r.message) return;
+				render(loading, r.message);
+				// FEAT-019: trạng thái lần tính cha lấy từ get_explanation (Trưởng khoa không đọc được NC Costing Run)
+				if (r.message.header.run_status === "Đã khóa") {
+					frm.add_custom_button(__("Export explanation PDF"), () => normcore.export.open({ service_cost: frm.doc.name }));
+				}
 			},
 		});
 	},
