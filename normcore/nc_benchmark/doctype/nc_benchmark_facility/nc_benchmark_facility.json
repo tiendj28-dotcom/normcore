@@ -46,7 +46,13 @@
   }
  ],
  "index_web_pages_for_search": 0,
- "links": [],
+ "links": [
+  {
+   "link_doctype": "NC Benchmark Price",
+   "link_fieldname": "facility",
+   "group": "Giá tham chiếu"
+  }
+ ],
  "modified": "2026-11-27 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "NC Benchmark",

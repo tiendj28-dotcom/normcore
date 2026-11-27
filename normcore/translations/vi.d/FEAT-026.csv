@@ -1,0 +1,16 @@
+Adjusted to {0}: {1} (index {2} → {3}),Giá hiệu chỉnh đến tháng {0}: {1} (chỉ số {2} → {3})
+Choose a specialty or services,Chọn chuyên khoa hoặc dịch vụ
+Confirm {0} reference prices?,Xác nhận {0} giá tham chiếu?
+Confirmed,Đã xác nhận
+No CPI for month {0}; price not adjusted,Chưa có chỉ số giá tháng {0}; chưa hiệu chỉnh
+"No matching service found. Choose a service, then confirm.",Chưa tìm được dịch vụ khớp. Chọn dịch vụ rồi xác nhận.
+No service code,Chưa gắn mã
+Price survey,Lập phiếu khảo sát giá
+Proposed,Đề xuất
+Proposed match: {0}. Check and confirm.,Đề xuất khớp: {0}. Kiểm tra rồi xác nhận.
+Reject,Loại bỏ
+Rejected,Loại bỏ
+Reopen,Mở lại để rà soát
+Some rows were not updated,Một số dòng chưa được cập nhật
+Specialty,Chuyên khoa
+{0} rows updated,Đã cập nhật {0} dòng

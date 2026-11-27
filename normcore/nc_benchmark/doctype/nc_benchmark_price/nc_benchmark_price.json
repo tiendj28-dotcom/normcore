@@ -5,25 +5,35 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "service_section",
   "facility",
   "service_name_raw",
+  "service_col",
   "technical_service",
+  "status",
+  "price_section",
   "price",
   "price_category",
+  "price_col",
   "effective_date",
   "source_section",
   "source_doc_no",
   "source_url",
+  "source_col",
   "source_file",
-  "status_section",
-  "status",
+  "adjusted_section",
+  "adjusted_html",
+  "verify_section",
   "verified_by",
   "verified_on",
-  "ai_log",
-  "adjusted_section",
-  "adjusted_html"
+  "ai_log"
  ],
  "fields": [
+  {
+   "fieldname": "service_section",
+   "label": "Dịch vụ",
+   "fieldtype": "Section Break"
+  },
   {
    "fieldname": "facility",
    "label": "Đơn vị",
@@ -42,12 +52,34 @@
    "description": "Để trống mà có mã dịch vụ thì lấy tên dịch vụ"
   },
   {
+   "fieldname": "service_col",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "technical_service",
    "label": "Dịch vụ",
    "fieldtype": "Link",
    "options": "NC Technical Service",
    "in_list_view": 1,
    "in_standard_filter": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "options": "Đề xuất\nĐã xác nhận\nLoại bỏ",
+   "default": "Đề xuất",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "price_section",
+   "label": "Giá",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "price",
@@ -63,6 +95,11 @@
    "options": "NC Price Category",
    "reqd": 1,
    "in_standard_filter": 1
+  },
+  {
+   "fieldname": "price_col",
+   "label": "",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "effective_date",
@@ -88,25 +125,30 @@
    "fieldtype": "Data"
   },
   {
+   "fieldname": "source_col",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "source_file",
    "label": "Tệp nguồn",
    "fieldtype": "Attach"
   },
   {
-   "fieldname": "status_section",
-   "label": "Trạng thái",
+   "fieldname": "adjusted_section",
+   "label": "Giá hiệu chỉnh",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "status",
-   "label": "Trạng thái",
-   "fieldtype": "Select",
-   "options": "Đề xuất\nĐã xác nhận\nLoại bỏ",
-   "default": "Đề xuất",
-   "reqd": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "no_copy": 1
+   "fieldname": "adjusted_html",
+   "label": "Giá hiệu chỉnh (BR-ADJ-009)",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "verify_section",
+   "label": "Xác nhận",
+   "fieldtype": "Section Break",
+   "collapsible": 1
   },
   {
    "fieldname": "verified_by",
@@ -130,16 +172,6 @@
    "options": "NC AI Log",
    "read_only": 1,
    "no_copy": 1
-  },
-  {
-   "fieldname": "adjusted_section",
-   "label": "Giá hiệu chỉnh",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "adjusted_html",
-   "label": "Giá hiệu chỉnh (BR-ADJ-009)",
-   "fieldtype": "HTML"
   }
  ],
  "index_web_pages_for_search": 0,
