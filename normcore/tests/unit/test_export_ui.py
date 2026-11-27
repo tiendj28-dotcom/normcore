@@ -45,6 +45,14 @@ class TestExportUi(unittest.TestCase):
 		self.assertIn("costs.length === 1", js)
 		self.assertIn("o.norm_sets || []).length === 1", js)
 
+	def test_NORM_78_hop_thoai_cho_truong_khoa(self):
+		js = text(DIALOG)
+		self.assertIn("o.own_service", js)  # danh sách dịch vụ/bộ định mức khi không đọc được lần tính
+		self.assertIn("run_locked", js)  # trạng thái khóa từ máy chủ, không suy từ nút
+		self.assertIn("!state.service_cost", js)  # không hiện cost_empty khi đã có dịch vụ
+		sc = text(FORMS["nc_service_cost"])
+		self.assertNotIn('frappe.db.get_value("NC Costing Run"', sc)  # tránh popup quyền
+
 	def test_khong_ma_mau_cung(self):
 		self.assertIsNone(re.search(r"#[0-9a-fA-F]{3,8}\b|rgba?\(", text(DIALOG)))
 

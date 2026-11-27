@@ -274,6 +274,10 @@ class TestExportApi(FrappeTestCase):
 		self.assertTrue(by["explanation_pdf"]["enabled"])
 		self.assertFalse(by["annex_v"]["enabled"])
 		self.assertEqual((opts["service_costs"], opts["norm_sets"], opts["bundle"]), ([], [], None))
+		# NORM-78: dịch vụ đang mở và trạng thái khóa có sẵn dù không đọc được lần tính
+		self.assertEqual(opts["own_service"]["name"], self.cost_a)
+		self.assertIs(opts["source"]["run_locked"], True)
+		self.assertIs(opts["source"]["run_readable"], False)
 		frappe.set_user(FIN)
 		with self.assertRaisesRegex(frappe.ValidationError, "Loại tệp không hợp lệ"):
 			api.export_file("zzz", run=self.run.name)

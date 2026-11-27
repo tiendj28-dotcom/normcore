@@ -27,7 +27,8 @@ frappe.provide("normcore.export");
 		if (s.run) parts.push(`${__("Costing run")} <b>${esc(s.run)}</b>`);
 		else parts.push(`${__("Norm set")} <b>${esc(s.norm_set)}</b> · ${__("No costing run attached")}`);
 		if (s.service_cost) parts.push(esc(s.service_cost));
-		const locked = o.options.every((x) => x.enabled) || (!s.run && s.norm_set);
+		// trạng thái khóa lấy từ máy chủ (run_locked), không suy từ các nút để người không đọc được lần tính không thấy "Not locked" sai
+		const locked = s.run_locked !== undefined ? s.run_locked : o.options.every((x) => x.enabled);
 		if (s.run) parts.push(`<span class="indicator-pill ${locked ? "green" : "yellow"}">${esc(locked ? __("Locked") : __("Not locked"))}</span>`);
 		return `<div>${parts.join(" · ")}</div>`;
 	}
@@ -35,7 +36,7 @@ frappe.provide("normcore.export");
 	function render(d, o, state) {
 		const opt = {};
 		o.options.forEach((x) => (opt[x.file_type] = x));
-		const blocked = o.options.find((x) => !x.enabled && x.reason && state.run);
+		const blocked = o.source.run_locked === false && o.options.find((x) => !x.enabled && x.reason && state.run);
 		const f = d.fields_dict;
 		f.source.$wrapper.html(source_html(o) + (blocked ? `<div class="alert alert-warning" role="alert">${esc(blocked.reason)}</div>` : ""));
 		if (state.run) {
@@ -52,7 +53,10 @@ frappe.provide("normcore.export");
 				download({ file_type: $(this).attr("data-type"), run: state.run }, $(this));
 			});
 		}
+		// Người chỉ đọc được bản ghi dịch vụ (Trưởng khoa) không có danh sách của lần tính: dùng own_service
+		const own = o.own_service;
 		const costs = (o.service_costs || []).filter((x) => x.calc_status !== "Lỗi");
+		if (!costs.length && own && own.calc_status !== "Lỗi") costs.push(own);
 		f.service_cost.df.options = costs.map((x) => ({ value: x.name, label: `${x.service_code} — ${x.service_name || ""} · ${x.department}` }));
 		f.service_cost.refresh();
 		// Select chỉ có một lựa chọn thì tự chọn (ô không được để trống)
@@ -61,10 +65,15 @@ frappe.provide("normcore.export");
 		f.norm_set.df.options = (o.norm_sets || []).map((x) => ({ value: x.name, label: `${x.name} · ${x.service_code}` }));
 		if (state.norm_set && !(o.norm_sets || []).some((x) => x.name === state.norm_set)) f.norm_set.df.options.push({ value: state.norm_set, label: state.norm_set });
 		f.norm_set.refresh();
-		const only_norm = (o.norm_sets || []).length === 1 ? o.norm_sets[0].name : null;
+		const only_norm = (o.norm_sets || []).length === 1 ? o.norm_sets[0].name : own && own.norm_set ? own.norm_set : null;
+		if (!(o.norm_sets || []).length && own && own.norm_set) {
+			f.norm_set.df.options = [{ value: own.norm_set, label: `${own.norm_set} · ${own.service_code}` }];
+			f.norm_set.refresh();
+		}
 		if (state.norm_set || only_norm) f.norm_set.set_value(state.norm_set || only_norm);
-		f.cost_empty.$wrapper.toggle(!costs.length && !!state.run).html(`<div class="text-muted">${__("No successfully costed service in this run")}</div>`);
-		f.norm_empty.$wrapper.toggle(!(o.norm_sets || []).length && !state.norm_set).html(`<div class="text-muted">${__("This run has no norm set attached")}</div>`);
+		const has_norm = (o.norm_sets || []).length || (own && own.norm_set);
+		f.cost_empty.$wrapper.toggle(!costs.length && !!state.run && !state.service_cost).html(`<div class="text-muted">${__("No successfully costed service in this run")}</div>`);
+		f.norm_empty.$wrapper.toggle(!has_norm && !state.norm_set).html(`<div class="text-muted">${__("This run has no norm set attached")}</div>`);
 		f.bundle_info.$wrapper.html(
 			(o.bundle ? `<a href="${esc(o.bundle.file_url)}">${__("Latest archive")} (${esc(frappe.datetime.str_to_user(o.bundle.creation))})</a>` : "")
 		);
