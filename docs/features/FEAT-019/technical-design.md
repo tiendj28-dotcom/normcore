@@ -192,6 +192,7 @@ API whitelisted:
 
 ## 5. Giao diện (chi tiết ở `ui-design.md`)
 - SCR-DSK-028 hộp thoại "Xuất hồ sơ" dùng chung (`normcore/public/js/export_dialog.js`, `normcore.export.open({run|service_cost|norm_set})`), mở từ: form NC Costing Run (nút "Xuất hồ sơ"), form NC Service Cost / SCR-DSK-023 (nút "Xuất PDF giải trình"), form NC Norm Set và lưới định mức (nút "Xuất PDF" cạnh "Xuất Excel" có sẵn).
+- Nạp hộp thoại **[AMD-019-02]**: `hook_registry/FEAT-019.json` khai báo bundle `"normcore_export.bundle.js"` (import `./export_dialog.js`), Frappe trả URL có hash qua `assets.json`; không dùng URL cố định `/assets/normcore/js/export_dialog.js` (bị nginx cache 1 năm, NORM-77).
 - Tải tệp bằng `open_url_post("/api/method/normcore.api.export.export_file", args)` (không đặt tham số lên URL GET).
 - Chuỗi qua `__()`/`_()`, bản dịch `normcore/translations/vi.d/FEAT-019.csv`.
 
