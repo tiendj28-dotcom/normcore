@@ -1,0 +1,9 @@
+{
+	"doctype": "NC Procedure Change Request",
+	"department_field": "department",
+	"public_read": {},
+	"via": [
+		"procedure",
+		"NC Clinical Procedure"
+	]
+}

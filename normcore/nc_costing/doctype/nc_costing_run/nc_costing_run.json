@@ -14,6 +14,9 @@
   "compliance_allocation_mode",
   "scope_departments",
   "scope_services",
+  "scenario_section",
+  "based_on_run",
+  "scenario_changes",
   "status",
   "progress",
   "run_warnings",
@@ -145,6 +148,31 @@
    "read_only": 1,
    "no_copy": 1,
    "description": "sha256 của JSON chuẩn hóa trước khi nén"
+  },
+  {
+   "fieldname": "scenario_section",
+   "label": "Kịch bản điều chỉnh",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.based_on_run"
+  },
+  {
+   "fieldname": "based_on_run",
+   "label": "Kịch bản của lần tính",
+   "fieldtype": "Link",
+   "options": "NC Costing Run",
+   "read_only": 1,
+   "in_standard_filter": 1,
+   "search_index": 1,
+   "no_copy": 1,
+   "description": "Có giá trị khi là kịch bản điều chỉnh (FR-ADJ-006)"
+  },
+  {
+   "fieldname": "scenario_changes",
+   "label": "Thay đổi của kịch bản",
+   "fieldtype": "Table",
+   "options": "NC Scenario Change",
+   "read_only": 1,
+   "no_copy": 1
   }
  ],
  "index_web_pages_for_search": 0,
