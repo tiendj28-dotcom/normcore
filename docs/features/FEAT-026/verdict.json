@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["Site sạch: 2029 test OK; pytest 1192 passed, độ phủ 99%; conventions exit 0; build_rtm VAN DE 0", "TC-BM-01,02,03,04,06 có test cùng mã, assertion đúng yêu cầu", "Diff test chỉ sửa 2 test cũ theo thiết kế BA duyệt; không đụng tài liệu chỉ đọc; CI PR xanh"], "commit": "8b26db29d52bbd047dba2788f0da28ed5b12ef39"}

@@ -1,0 +1,3 @@
+nc-bmf-s|Đơn vị tham chiếu|NC Benchmark Facility|DocType|List
+nc-bmp-s|Giá tham chiếu|NC Benchmark Price|DocType|List
+nc-cpi-s|Chỉ số giá tiêu dùng|NC CPI Index|DocType|List
