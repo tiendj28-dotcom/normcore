@@ -1,6 +1,6 @@
 # Nghiệm thu FEAT-030 (NORM-84)
 
-Người nghiệm thu: QA (Multica). Commit kiểm: 9cede4db3ff54a51132e6f9c07defc5b31e0ddf4. Verdict: **accepted**.
+Người nghiệm thu: QA (Multica). Commit kiểm: 9cede4db3ff54a51132e6f9c07defc5b31e0ddf4. Verdict: **rework** (thu hồi accepted sau ghi chú 1 của Reviewer; xem verdict.json).
 
 | Tiêu chí | Bằng chứng | Kết quả |
 | :-- | :-- | :-- |
@@ -22,3 +22,6 @@ Người nghiệm thu: QA (Multica). Commit kiểm: 9cede4db3ff54a51132e6f9c07de
 
 ## Giới hạn
 Chưa kiểm bằng trình duyệt (Playwright) màn hình SCR-DSK-027: không có tài khoản test theo vai trò cho staging trong run này. Luồng được kiểm qua test API/DocType trên site sạch; giao diện chỉ có test unit (test_feat_030_ui.py).
+
+## Lỗi còn lại
+Máy chủ không khóa trường read_only của dòng ở Nháp (rounded_price, full_cost, department...), nên FR-PRICE-002/003/004 né được qua REST. Xem verdict.json để biết chỗ sửa. DONE đã gỡ.
