@@ -161,3 +161,138 @@ class TestPriceCompare(PriceCompareBase):
 		frappe.set_user(self.fin)
 		with self.assertRaises(frappe.ValidationError):
 			api.get_comparison(self.run.name)
+
+
+class TestSuggestions(PriceCompareBase):
+	def over_tolerance(self):
+		# DV-TEST-A trong TC-ADJ-04: hệ số sử dụng EQ1 = 0,4 (golden mặc định 0,5)
+		frappe.db.set_value("NC Equipment", "EQ1", "utilization_rate", 0.4)
+		_price("BV-N81-0", 250000, "2026-06-01")
+		_price("BV-N81-1", 250000, "2026-06-02")
+		_price("BV-N81-2", 250000, "2026-06-03")
+
+	def test_TC_ADJ_03_khong_sinh_goi_y_khi_chua_du_du_lieu(self):
+		_price("BV-N81-0", 250000, "2026-06-01")
+		_price("BV-N81-1", 250000, "2026-06-02")
+		frappe.set_user(self.fin)
+		self.assertEqual(api.generate_suggestions(self.cost), [])
+		self.assertEqual(frappe.db.count("NC Adjustment Suggestion"), 0)
+
+	def test_FR_ADJ_005_trong_nguong_khong_goi_y(self):
+		for i, p in enumerate((300000, 301000, 302000)):
+			_price(f"BV-N81-{i}", p, f"2026-06-0{i + 1}")
+		frappe.set_user(self.fin)
+		self.assertEqual(api.generate_suggestions(self.cost), [])
+
+	def test_FR_ADJ_005_sinh_goi_y_vuot_nguong(self):
+		self.over_tolerance()
+		frappe.set_user(self.fin)
+		out = api.generate_suggestions(self.cost)
+		by = {s["rule_code"]: s for s in out}
+		eq1 = by["BR-ADJ-001"]
+		self.assertEqual((eq1["target_ref"], eq1["current_value"], eq1["suggested_value"]), ("EQ1", "0,4", "0,5"))
+		self.assertLess(eq1["estimated_impact"], 0)
+		self.assertEqual(eq1["status"], "Mới")
+		self.assertTrue(eq1["text"])
+		impacts = [abs(s["estimated_impact"]) for s in out if s["estimated_impact"] is not None]
+		self.assertEqual(impacts, sorted(impacts, reverse=True))
+
+	def test_FR_ADJ_005_sinh_lai_khong_trung(self):
+		self.over_tolerance()
+		frappe.set_user(self.fin)
+		first = api.generate_suggestions(self.cost)
+		n = frappe.db.count("NC Adjustment Suggestion", {"service_cost": self.cost})
+		api.decide_suggestion(first[0]["name"], "Từ chối", "Không khả thi")
+		again = api.generate_suggestions(self.cost)
+		self.assertEqual(frappe.db.count("NC Adjustment Suggestion", {"service_cost": self.cost}), n)
+		self.assertEqual(len(again), len(first))
+		decided = next(s for s in again if s["name"] == first[0]["name"])
+		self.assertEqual(decided["status"], "Từ chối")
+		# đủ trong ngưỡng sau khi giá tham chiếu đổi: bản "Mới" không còn kích hoạt bị xóa, bản đã quyết giữ
+		for name in frappe.get_all(PRICE, pluck="name"):
+			frappe.db.set_value(PRICE, name, "price", 300000)
+		left = api.generate_suggestions(self.cost)
+		self.assertEqual([s["name"] for s in left], [first[0]["name"]])
+
+	def test_FR_ADJ_008_tu_choi_can_ly_do(self):
+		self.over_tolerance()
+		frappe.set_user(self.fin)
+		s = api.generate_suggestions(self.cost)[0]
+		for reason in (None, "  "):
+			with self.assertRaises(frappe.ValidationError):
+				api.decide_suggestion(s["name"], "Từ chối", reason)
+		with self.assertRaises(frappe.ValidationError):
+			api.decide_suggestion(s["name"], "Không rõ")
+		d = api.decide_suggestion(s["name"], "Từ chối", "Máy mới nhập")
+		self.assertEqual((d["status"], d["decision_reason"], d["decided_by"]), ("Từ chối", "Máy mới nhập", self.fin))
+		self.assertTrue(d["decided_on"])
+		with self.assertRaises(frappe.ValidationError):  # đã quyết, không quyết lại
+			api.decide_suggestion(s["name"], "Chấp nhận")
+
+	def test_FR_ADJ_008_chap_nhan_luu_nguoi_va_thoi_diem(self):
+		self.over_tolerance()
+		frappe.set_user(self.fin)
+		s = api.generate_suggestions(self.cost)[0]
+		d = api.decide_suggestion(s["name"], "Chấp nhận")
+		self.assertEqual((d["status"], d["decided_by"]), ("Chấp nhận", self.fin))
+
+	def test_FR_ADJ_008_chap_nhan_can_sua_quy_trinh_bi_chan(self):
+		self.over_tolerance()
+		frappe.set_user("Administrator")
+		doc = frappe.get_doc(
+			{
+				"doctype": "NC Adjustment Suggestion",
+				"service_cost": self.cost,
+				"rule_code": "BR-ADJ-003",
+				"direction": "Giảm",
+				"component": "DRUG",
+				"target_ref": "L05",
+				"requires_procedure_change": 1,
+			}
+		)
+		doc.flags.adj_system = True
+		doc.insert()
+		frappe.set_user(self.fin)
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			api.decide_suggestion(doc.name, "Chấp nhận")
+		self.assertIn("sửa quy trình", str(ctx.exception))
+		self.assertEqual(api.decide_suggestion(doc.name, "Từ chối", "Chưa phù hợp")["status"], "Từ chối")
+
+	def test_quyen_quyet_dinh_goi_y(self):
+		self.over_tolerance()
+		frappe.set_user(self.fin)
+		names = [s["name"] for s in api.generate_suggestions(self.cost)]
+		self.assertGreaterEqual(len(names), 2)
+		extra = frappe.get_doc(
+			{
+				"doctype": "NC Adjustment Suggestion",
+				"service_cost": self.cost,
+				"rule_code": "BR-ADJ-004",
+				"direction": "Giảm",
+				"component": "DRUG",
+				"target_ref": "L05",
+			}
+		)
+		extra.flags.adj_system = True
+		extra.insert(ignore_permissions=True)
+		names = names[:2] + [extra.name]
+		# Director, Trưởng khoa khoa mình: được; không có Sinh gợi ý
+		frappe.set_user(self.dir)
+		self.assertEqual(api.decide_suggestion(names[0], "Chấp nhận")["decided_by"], self.dir)
+		with self.assertRaises(frappe.PermissionError):
+			api.generate_suggestions(self.cost)
+		frappe.set_user("Administrator")
+		permissions.assign_department(self.head, self.dept)
+		frappe.set_user(self.head)
+		self.assertEqual(api.decide_suggestion(names[1], "Chấp nhận")["decided_by"], self.head)
+		# Trưởng khoa khoa khác, Consultant, Auditor: bị từ chối
+		make_base("DV-N81-X", "KHOA-N81-X")
+		frappe.set_user("Administrator")
+		head2 = make_user("head2.n81b@normcore.test", "NC Department Head")
+		permissions.assign_department(head2, "KHOA-N81-X")
+		for user in (head2, self.cons, self.aud):
+			frappe.set_user(user)
+			with self.assertRaises(frappe.PermissionError):
+				api.decide_suggestion(names[2], "Từ chối", "x")
+			with self.assertRaises(frappe.PermissionError):
+				api.generate_suggestions(self.cost)
