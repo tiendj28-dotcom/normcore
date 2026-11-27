@@ -24,6 +24,7 @@ SCOPED = {
 	"NC EQA Program",  # FEAT-032, ASM-032-11
 	"NC Time Study",  # FEAT-014, ASM-014-11
 	"NC Service Cost",  # FEAT-015, ASM-015-22 (Quyết định Lead Q2)
+	"NC AI Norm Suggestion",  # FEAT-038, AMD-038-01, ASM-038-15
 }
 
 

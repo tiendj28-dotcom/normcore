@@ -25,6 +25,8 @@
   "supersession_section",
   "supersessions",
   "superseded_by_html",
+  "related_section",
+  "related_resources",
   "mapping_doc_section",
   "mapping_html"
  ],
@@ -35,7 +37,8 @@
    "fieldtype": "Data",
    "reqd": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "description": "Với tài liệu của hãng: mã tài liệu của hãng kèm phiên bản"
   },
   {
    "fieldname": "title",
@@ -50,7 +53,7 @@
    "fieldtype": "Select",
    "reqd": 1,
    "in_standard_filter": 1,
-   "options": "Luật\nNghị định\nThông tư\nQuyết định\nCông văn\nTài liệu nội bộ"
+   "options": "Luật\nNghị định\nThông tư\nQuyết định\nCông văn\nTài liệu nội bộ\nTài liệu của hãng"
   },
   {
    "fieldname": "issuer",
@@ -156,6 +159,19 @@
    "fieldname": "superseded_by_html",
    "label": "Bị thay thế bởi",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "related_section",
+   "fieldtype": "Section Break",
+   "label": "Mặt hàng, thiết bị liên quan",
+   "depends_on": "eval:doc.doc_type=='Tài liệu của hãng'"
+  },
+  {
+   "fieldname": "related_resources",
+   "label": "Mặt hàng, thiết bị liên quan",
+   "fieldtype": "Table",
+   "options": "NC Document Resource Link",
+   "description": "Bắt buộc với tài liệu của hãng. AI chỉ dùng tài liệu này cho hệ thống xét nghiệm có các mặt hàng, thiết bị ở đây."
   },
   {
    "fieldname": "mapping_doc_section",

@@ -88,6 +88,8 @@ frappe.ui.form.on("NC QC Plan", {
 		render_estimate(frm);
 		show_system_info(frm);
 		show_warning(frm);
+		// FEAT-038: đề xuất định mức của AI từ tài liệu của hãng (SCR-DSK-033)
+		normcore.cls_norm_ai.attach(frm, frm.doc.test_system);
 	},
 	test_system(frm) {
 		show_system_info(frm);

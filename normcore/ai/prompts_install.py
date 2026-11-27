@@ -162,3 +162,31 @@ def ensure_consistency_check_v2():
 
 def ensure_suggest_norm_link_v2():
 	return _ensure_v2("SUGGEST_NORM_LINK", LINK_V2_SYSTEM, LINK_V2_USER)
+
+
+CLS_NORM_V2_SYSTEM = (
+	"Bạn là trợ lý đề xuất định mức vật tư, hóa chất cho hệ thống xét nghiệm của bệnh viện từ tài liệu của hãng. "
+	"Chỉ dựa trên các mục nguồn được cung cấp; không bịa số liệu, không bịa trích dẫn. "
+	'Mỗi đề xuất có `citations`: danh sách {"section": <`name` của mục nguồn>, "quote": <đoạn chép đúng nguyên văn '
+	"của mục đó>}; không có căn cứ trong nguồn thì để `citations` rỗng. "
+	"`suggestion_type` thuộc: REAGENT_PER_TEST (lượng hóa chất mỗi test), CALIBRATION_FREQ (tần suất chuẩn máy), "
+	"IQC_FREQ (tần suất nội kiểm), OPEN_STABILITY (hạn dùng sau mở). "
+	"`item_code` chỉ được chọn trong `items` hoặc `equipment` đã gửi; không có trong đó thì để trống và ghi tên vào "
+	"`item_text`. `value` là một số lớn hơn 0 và `uom` là đơn vị. Đơn vị của `value`: lượng mỗi test theo đơn vị "
+	"của mặt hàng; chuẩn máy = số lần mỗi năm; nội kiểm = số lần chạy mỗi ngày; hạn dùng sau mở = số ngày. "
+	"Chỉ trả về một đối tượng JSON: "
+	'{"suggestions": [{"suggestion_type", "item_code", "item_text", "value", "uom", "citations": '
+	'[{"section", "quote"}]}]}.'
+)
+CLS_NORM_V2_USER = (
+	"Hệ thống: {{ variables.service | tojson }}\n"
+	"Quy trình: {{ variables.procedure | tojson }}\n"
+	"Mặt hàng: {{ variables.items | tojson }}\n"
+	"Thiết bị: {{ variables.equipment | tojson }}\n"
+	"Các mục nguồn: {{ sources | tojson }}"
+)
+
+
+def ensure_suggest_cls_norm_v2():
+	"""Cài lười `SUGGEST_CLS_NORM-v2` ở lần gọi đầu (ASM-038-14); không ghi đè bản Admin đã sửa."""
+	return _ensure_v2("SUGGEST_CLS_NORM", CLS_NORM_V2_SYSTEM, CLS_NORM_V2_USER)

@@ -79,7 +79,11 @@ boot_session = "normcore.api.ai.boot_session"  # FR-AI-015
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"NC Technical Service": "public/js/ai_draft_dialog.js"}  # FEAT-024: SCR-DSK-008
+doctype_js = {
+	"NC Technical Service": "public/js/ai_draft_dialog.js",  # FEAT-024: SCR-DSK-008
+	"NC QC Plan": "public/js/cls_norm_suggest.js",  # FEAT-038: SCR-DSK-033
+	"NC Norm Set": "public/js/cls_norm_suggest.js",  # FEAT-038: SCR-DSK-014
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

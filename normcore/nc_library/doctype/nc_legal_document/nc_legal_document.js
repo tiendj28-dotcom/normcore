@@ -444,8 +444,26 @@ function setup_supersession(frm) {
 	}
 }
 
+// SCR-DSK-003 (FEAT-038, FR-LIB-013): tài liệu của hãng gắn với mặt hàng, thiết bị.
+const MANUFACTURER_TYPE = "Tài liệu của hãng";
+
+function setup_manufacturer(frm) {
+	const is_mfr = frm.doc.doc_type === MANUFACTURER_TYPE;
+	frm.set_query("linked_doctype", "related_resources", () => ({
+		filters: { name: ["in", ["NC Item", "NC Equipment"]] },
+	}));
+	frm.set_df_property("doc_number", "description", is_mfr ? __("Manufacturer document code with version") : "");
+}
+
 frappe.ui.form.on("NC Legal Document", {
+	setup(frm) {
+		setup_manufacturer(frm);
+	},
+	doc_type(frm) {
+		setup_manufacturer(frm);
+	},
 	refresh(frm) {
+		setup_manufacturer(frm);
 		frm.set_intro("");
 		if (frm.doc.validity_status) {
 			frm.page.set_indicator(__(frm.doc.validity_status), VALIDITY_COLOR[frm.doc.validity_status] || "gray");
