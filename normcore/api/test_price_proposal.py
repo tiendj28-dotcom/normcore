@@ -486,3 +486,56 @@ class TestComparisonExport(ActionCase):
 		with self.assertRaises(frappe.PermissionError):
 			self._file(export_api.export_file, clin, "price_comparison", run=self.run.name)
 		self._file(api.export_price_comparison, self.aud, prop)
+
+
+class TestDirectSaveBypass(ActionCase):
+	"""QA rework: save trực tiếp ở "Nháp" không được né FR-PRICE-002/003/004."""
+
+	def _direct(self, name, mutate):
+		doc = frappe.get_doc(DT, name)
+		mutate(doc)
+		frappe.set_user(self.fin)
+		try:
+			doc.save()
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_TC_PRICE_02_khong_ne_can_cu_bang_cach_sua_gia_lam_tron(self):
+		name = self._create(apply_from="2027-01-01")
+
+		def evade(doc):
+			row = next(i for i in doc.items if i.technical_service == "DV-TEST-A")
+			row.proposed_price = 295000
+			row.rounded_price = 295000  # định né FR-PRICE-002
+
+		with self.assertRaises(frappe.ValidationError):
+			self._direct(name, evade)
+		row = self._item(name, "DV-TEST-A")
+		self.assertEqual(float(row.rounded_price), 302100.0)
+		self.assertEqual(float(row.proposed_price), 302100.0)
+
+	def test_TC_PRICE_03_khong_ne_xac_nhan_bang_cach_ha_gia_thanh(self):
+		name = self._create(apply_from="2027-01-01")
+
+		def evade(doc):
+			row = next(i for i in doc.items if i.technical_service == "DV-TEST-A")
+			row.proposed_price = 280000
+			row.adjustment_basis = "x"
+			row.full_cost = 1  # định né FR-PRICE-003
+
+		with self.assertRaises(frappe.ValidationError):
+			self._direct(name, evade)
+		self.assertEqual(self._item(name, "DV-TEST-A").below_cost, 0)
+		self.assertAlmostEqual(float(self._item(name, "DV-TEST-A").full_cost), 287745.46, places=2)
+
+	def test_TC_PRICE_04_khong_doi_khoa_xac_nhan_bang_save(self):
+		self._two_departments()
+		name = self._create(apply_from="2027-01-01")
+		with self.assertRaises(frappe.ValidationError):
+			self._direct(
+				name,
+				lambda d: setattr(
+					next(i for i in d.items if i.technical_service == "DV-TEST-B"), "department", self.dept
+				),
+			)
+		self.assertEqual(self._item(name, "DV-TEST-B").department, "KHOA-TEST-2")

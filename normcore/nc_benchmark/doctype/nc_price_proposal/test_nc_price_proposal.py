@@ -138,3 +138,60 @@ class TestNCPriceProposal(FrappeTestCase):
 		doc = frappe.get_doc(vals).insert(ignore_permissions=True)
 		flags = {r.technical_service: r.below_cost for r in doc.items}
 		self.assertEqual(flags, {"DV-TEST-A": 1, "DV-TEST-B": 0})
+
+	# ---- trường dòng chỉ máy chủ ghi (QA rework: save trực tiếp ở "Nháp") ----
+	def test_dong_nhap_khong_sua_truong_chi_may_chu_ghi(self):
+		doc = self._make()
+		frappe.set_user(self.fin)
+		for field, value in (
+			("rounded_price", 1),
+			("full_cost", 1),
+			("calculated_price", 1),
+			("benchmark_median", 123),
+			("benchmark_count", 9),
+			("department", "KHOA-N84-KHAC"),
+			("director_ack", 1),
+			("authority_price", 5),
+		):
+			d = frappe.get_doc(DOCTYPE, doc.name)
+			d.items[0].set(field, value)
+			with self.assertRaises(frappe.ValidationError, msg=field):
+				d.save()
+		d = frappe.get_doc(DOCTYPE, doc.name)  # không đổi gì: lưu được
+		d.save()
+
+	def test_dong_nhap_khong_them_xoa_dong(self):
+		doc = self._make()
+		frappe.set_user(self.fin)
+		d = frappe.get_doc(DOCTYPE, doc.name)
+		d.remove(d.items[0])
+		with self.assertRaises(frappe.ValidationError):
+			d.save()
+		d = frappe.get_doc(DOCTYPE, doc.name)
+		d.append("items", {"technical_service": "DV-TEST-A", "proposed_price": 1})
+		with self.assertRaises(frappe.ValidationError):
+			d.save()
+
+	def test_dong_nhap_van_sua_duoc_gia_de_xuat_va_can_cu(self):
+		doc = self._make()
+		frappe.set_user(self.fin)
+		d = frappe.get_doc(DOCTYPE, doc.name)
+		d.items[0].proposed_price = 295000
+		d.items[0].adjustment_basis = "Theo hội đồng giá"
+		d.save()
+		self.assertEqual(frappe.get_doc(DOCTYPE, doc.name).items[0].adjustment_basis, "Theo hội đồng giá")
+
+	def test_tao_truc_tiep_gia_tri_gia_bi_chan(self):
+		for field, value in (("rounded_price", 1), ("full_cost", 1), ("department", "KHOA-N84-KHAC")):
+			vals = self._values()
+			vals["items"][0][field] = value
+			with self.assertRaises(frappe.ValidationError, msg=field):
+				frappe.get_doc(vals).insert(ignore_permissions=True)
+		vals = self._values()
+		vals["items"][0]["technical_service"] = "DV-KHONG-CO"
+		with self.assertRaises(frappe.ValidationError):
+			frappe.get_doc(vals).insert(ignore_permissions=True)
+		vals = self._values()
+		vals["items"][0]["director_ack"], vals["items"][0]["authority_price"] = 1, 5
+		doc = frappe.get_doc(vals).insert(ignore_permissions=True)
+		self.assertEqual((doc.items[0].director_ack, doc.items[0].authority_price or 0), (0, 0))
