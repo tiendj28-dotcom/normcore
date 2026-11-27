@@ -159,6 +159,11 @@ class TestBuild(unittest.TestCase):
 		self.assertIn("CR-1", ws.oddFooter.center.text)
 		self.assertIn("Lần tính giá CR-1", ws["A4"].value)
 
+	def test_cot_dinh_khung_duoi_tieu_de_cot(self):
+		for code, build in (("II", a.build_annex_ii), ("III", a.build_annex_iii), ("IV", a.build_annex_iv)):
+			wb = wb_of(build(data(svc("A"))))
+			self.assertEqual(wb.worksheets[0].freeze_panes, f"A{a.ANNEX[code]['header_row'] + 1}", code)
+
 	def test_ii_ten_trang_trung_va_dai(self):
 		long = "X" * 40
 		wb = wb_of(a.build_annex_ii(data(svc(long), svc(long))))

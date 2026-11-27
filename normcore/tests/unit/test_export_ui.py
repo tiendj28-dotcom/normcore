@@ -40,6 +40,11 @@ class TestExportUi(unittest.TestCase):
 		self.assertIn('role="alert"', js)
 		self.assertIn("aria-live", js)
 
+	def test_o_chon_mot_lua_chon_tu_chon(self):
+		js = text(DIALOG)
+		self.assertIn("costs.length === 1", js)
+		self.assertIn("o.norm_sets || []).length === 1", js)
+
 	def test_khong_ma_mau_cung(self):
 		self.assertIsNone(re.search(r"#[0-9a-fA-F]{3,8}\b|rgba?\(", text(DIALOG)))
 

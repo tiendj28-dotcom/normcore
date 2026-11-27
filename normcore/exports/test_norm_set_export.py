@@ -117,6 +117,11 @@ class TestBuildWorkbook(unittest.TestCase):
 		wb = load(norm_set.build_workbook(data(k={"run": "TG-1", "k_factor": k, "k_estimated": 1})))
 		self.assertEqual(wb["Hệ số k"].cell(2, 5).value, "Ước tính từ kế hoạch")
 
+	def test_cot_dinh_khung_duoi_tieu_de_cot(self):
+		ws = load(norm_set.build_workbook(data())).worksheets[0]
+		head = next(r[0].row for r in ws.iter_rows() if r[0].value == norm_set.LINE_COLUMNS[0][0])
+		self.assertEqual(ws.freeze_panes, f"A{head + 1}")
+
 	def test_TC_CLS_33_chua_co_lan_tinh_gia(self):
 		wb = load(norm_set.build_workbook(data()))
 		self.assertEqual(wb["Hệ số k"].cell(2, 4).value, "Chưa có lần tính giá")
