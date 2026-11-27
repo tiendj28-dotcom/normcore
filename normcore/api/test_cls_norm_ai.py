@@ -334,6 +334,180 @@ class TestSuggestions(ClsAiBase):
 		self.assertEqual(api.get_cls_norm_suggestion_status("khong-co")["status"], "unknown")
 
 
+class TestAccept(ClsAiBase):
+	def make(self, *items, user=None):
+		self.run_ai(FakeProvider(self.reply(*items)), user=user)
+		return {(r["suggestion_type"], r["resource_text"]): r["name"] for r in self.listed(user=user)["rows"]}
+
+	def one(self, **kw):
+		return next(iter(self.make(self.sug(**kw)).values()))
+
+	def line(self, resource="HC_GLU"):
+		ns = frappe.get_doc("NC Norm Set", self.ns_name)
+		return [r for r in ns.lines if r.resource == resource]
+
+	def as_user(self, user, fn, *a):
+		frappe.set_user(user)
+		return fn(*a)
+
+	def test_TC_CLS_43_mat_hang_ngoai_danh_muc(self):
+		items_before = (frappe.db.count("NC Item"), frappe.db.count("NC Equipment"))
+		name = self.one(code="HC_KHONG_CO", text="Hóa chất X")
+		self.assertEqual((frappe.db.count("NC Item"), frappe.db.count("NC Equipment")), items_before)
+		row = self.listed()["rows"][0]
+		self.assertEqual(
+			(row["not_in_catalog"], row["resource"], row["resource_text"], row["can_accept"]),
+			(1, None, "Hóa chất X", False),
+		)
+		frappe.set_user(self.head)
+		with self.assertRaisesRegex(frappe.ValidationError, "Liên kết mặt hàng"):
+			api.accept_cls_norm_suggestion(name)
+		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", name, "status"), "Đề xuất")
+		# liên kết thủ công: loại sai, bản ghi không tồn tại
+		with self.assertRaises(frappe.ValidationError):
+			api.link_cls_norm_suggestion(name, "NC Room", "P1")
+		with self.assertRaises(frappe.ValidationError):
+			api.link_cls_norm_suggestion(name, "NC Item", "KHONG_CO")
+		linked = api.link_cls_norm_suggestion(name, "NC Item", "HC_GLU")
+		self.assertEqual((linked["resource"], linked["not_in_catalog"], linked["can_accept"]), ("HC_GLU", 0, True))
+		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", name, "resource_text"), "Hóa chất X")
+		self.assertEqual(api.accept_cls_norm_suggestion(name)["status"], "Đã chấp nhận")
+		self.assertEqual((frappe.db.count("NC Item"), frappe.db.count("NC Equipment")), items_before)
+
+	def test_FR_AI_016_chap_nhan_luong_hoa_chat(self):
+		row = self.line()[0]
+		frappe.db.set_value(
+			"NC Norm Line", row.name, {"confirmed_by": "Administrator", "confirmed_on": frappe.utils.now()}
+		)
+		name = self.one(value=0.025)
+		frappe.set_user(self.head)
+		out = api.accept_cls_norm_suggestion(name)
+		self.assertEqual((out["status"], out["norm_set"], out["applied_ref"]), ("Đã chấp nhận", self.ns_name, row.line_id))
+		after = self.line()[0]
+		self.assertEqual((after.hospital_qty, after.basis), (0.025, "Ước tính"))
+		self.assertIn("HG-GLU-1.0", after.basis_ref)
+		self.assertFalse(after.confirmed_by)  # đổi lượng phải xác nhận lại
+		sug = frappe.get_doc("NC AI Norm Suggestion", name)
+		self.assertEqual((sug.status, sug.processed_by, sug.applied_ref), ("Đã chấp nhận", self.head, row.line_id))
+		self.assertEqual(self.listed()["pending"], 0)
+		# hóa chất chưa có dòng trong bộ: thêm dòng chung
+		name = self.one(code="HC_KHAC", value=5)
+		frappe.set_user(self.head)
+		out = api.accept_cls_norm_suggestion(name)
+		new = self.line("HC_KHAC")[0]
+		self.assertEqual(
+			(new.line_id, new.service_level, new.component, new.cost_level, new.hospital_qty, new.uom),
+			(out["applied_ref"], 1, "DRUG", "RESULT", 5, "ml"),
+		)
+
+	def test_FR_AI_016_chap_nhan_khong_ap_duoc_giu_de_xuat(self):
+		name = self.one()
+		frappe.db.set_value("NC Norm Set", self.ns_name, "status", "Đã xác nhận chuyên môn")
+		frappe.set_user(self.head)
+		with self.assertRaisesRegex(frappe.ValidationError, "Chưa có bộ định mức Nháp cho hệ thống GLU-A"):
+			api.accept_cls_norm_suggestion(name)
+		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", name, "status"), "Đề xuất")
+		frappe.db.set_value("NC Norm Set", self.ns_name, "status", "Nháp")
+		eq = self.one(code="EQ_A")
+		frappe.set_user(self.head)
+		with self.assertRaisesRegex(frappe.ValidationError, "chỉ áp cho hóa chất"):
+			api.accept_cls_norm_suggestion(eq)
+		cal = self.one(kind="CALIBRATION_FREQ", code="HC_GLU", value=4)
+		frappe.set_user(self.head)
+		with self.assertRaisesRegex(frappe.ValidationError, "chưa có dòng chuẩn máy cho HC_GLU"):
+			api.accept_cls_norm_suggestion(cal)
+		iqc = self.one(kind="IQC_FREQ", code="HC_GLU", value=2)
+		frappe.set_user(self.head)
+		with self.assertRaisesRegex(frappe.ValidationError, "chưa có dòng nội kiểm cho HC_GLU"):
+			api.accept_cls_norm_suggestion(iqc)
+		# lần chạy mới đổi đề xuất chờ cũ sang "Đã bỏ" (ASM-038-11); đề xuất lỗi không đổi trạng thái
+		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", iqc, "status"), "Đề xuất")
+
+	def test_FR_AI_016_chap_nhan_ke_hoach_va_han_dung(self):
+		names = self.make(
+			self.sug(kind="CALIBRATION_FREQ", code="CAL", value=4, uom="lần"),
+			self.sug(kind="IQC_FREQ", code="QC_L", value=2, uom="lần"),
+			self.sug(kind="OPEN_STABILITY", value=27.6, uom="ngày"),
+		)
+		cal, iqc, opn = (
+			names[("Tần suất chuẩn máy", "CAL")],
+			names[("Tần suất nội kiểm", "QC_L")],
+			names[("Hạn dùng sau mở", "HC_GLU")],
+		)
+		frappe.set_user(self.head)
+		self.assertEqual(api.accept_cls_norm_suggestion(cal)["status"], "Đã chấp nhận")
+		self.assertEqual(api.accept_cls_norm_suggestion(iqc)["status"], "Đã chấp nhận")
+		plan = frappe.get_doc("NC QC Plan", "KHCL-GLU-A")
+		self.assertEqual(plan.calibration_lines[0].calibrations_per_year, 4)
+		self.assertEqual(plan.iqc_lines[0].runs_per_day, 2)
+		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", cal, "applied_ref"), plan.calibration_lines[0].name)
+		# hạn dùng sau mở: Clinician, Dept Head không có quyền ghi NC Item
+		for user in (self.head, self.clin):
+			frappe.set_user(user)
+			with self.assertRaisesRegex(frappe.PermissionError, "Quản lý nguồn lực hoặc Tài chính"):
+				api.accept_cls_norm_suggestion(opn)
+		frappe.set_user(self.res)
+		res = api.list_cls_norm_suggestions("GLU-A")
+		self.assertEqual([(r["suggestion_type"], r["can_accept"]) for r in res["rows"]], [("Hạn dùng sau mở", True)])
+		self.assertFalse(res["can_edit"])
+		self.assertEqual(api.accept_cls_norm_suggestion(opn)["status"], "Đã chấp nhận")
+		self.assertEqual(frappe.db.get_value("NC Item", "HC_GLU", "open_stability_days"), 28)
+		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", opn, "processed_by"), self.res)
+
+	def test_FR_AI_017_bo_va_xu_ly_lan_hai(self):
+		before = frappe.get_doc("NC Norm Set", self.ns_name).as_dict()["lines"]
+		name = self.one()
+		frappe.set_user(self.head)
+		self.assertEqual(api.reject_cls_norm_suggestion(name)["status"], "Đã bỏ")
+		for fn in (api.reject_cls_norm_suggestion, api.accept_cls_norm_suggestion):
+			with self.assertRaisesRegex(frappe.ValidationError, "đã được xử lý"):
+				fn(name)
+		self.assertEqual(frappe.get_doc("NC Norm Set", self.ns_name).as_dict()["lines"], before)
+		self.assertEqual(self.listed()["pending"], 0)
+		self.assertEqual(len(self.listed("Đã bỏ")["rows"]), 1)
+
+	def test_FR_AI_008_ai_tat_van_xu_ly(self):
+		a, b = self.make(self.sug(), self.sug(kind="OPEN_STABILITY", value=28)).values()
+		enable_ai(0)
+		frappe.set_user(self.head)
+		with self.assertRaisesRegex(frappe.ValidationError, "AI đang tắt"):
+			api.start_cls_norm_suggestion("GLU-A")
+		res = api.list_cls_norm_suggestions("GLU-A")
+		self.assertEqual((len(res["rows"]), res["ai_enabled"]), (2, False))
+		self.assertEqual(api.reject_cls_norm_suggestion(b)["status"], "Đã bỏ")
+		self.assertEqual(api.accept_cls_norm_suggestion(a)["status"], "Đã chấp nhận")
+
+	def test_quyen_nc_ai_norm_suggestion(self):
+		name = self.one()
+		meta = frappe.get_meta("NC AI Norm Suggestion")
+		self.assertFalse(meta.istable)
+		# NC Auditor: đọc được, mọi API ghi bị từ chối
+		for fn, args in (
+			(api.accept_cls_norm_suggestion, (name,)),
+			(api.reject_cls_norm_suggestion, (name,)),
+			(api.link_cls_norm_suggestion, (name, "NC Item", "HC_GLU")),
+		):
+			for user in (self.aud, self.council, self.clin_other, self.fin):
+				frappe.set_user(user)
+				with self.subTest(fn=fn.__name__, user=user), self.assertRaises(frappe.PermissionError):
+					fn(*args)
+		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", name, "status"), "Đề xuất")
+		frappe.set_user(self.aud)
+		self.assertTrue(frappe.has_permission("NC AI Norm Suggestion", "read", doc=name))
+		self.assertFalse(frappe.has_permission("NC AI Norm Suggestion", "write", doc=name))
+		self.assertFalse(frappe.has_permission("NC AI Norm Suggestion", "create"))
+		# Finance đọc được, không bỏ được
+		frappe.set_user(self.fin)
+		self.assertTrue(frappe.has_permission("NC AI Norm Suggestion", "read", doc=name))
+		# Council, Clinician khoa khác không đọc được
+		for user in (self.council, self.clin_other):
+			frappe.set_user(user)
+			self.assertFalse(frappe.has_permission("NC AI Norm Suggestion", "read", doc=name), user)
+		# không ai xóa (kể cả quản trị vai trò)
+		frappe.set_user(self.head)
+		self.assertFalse(frappe.has_permission("NC AI Norm Suggestion", "delete", doc=name))
+
+
 class TestPromptTemplate(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")

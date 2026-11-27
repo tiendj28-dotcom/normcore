@@ -305,3 +305,151 @@ def list_cls_norm_suggestions(test_system, status=PENDING):
 		"ai_enabled": bool(gateway.is_enabled()),
 		"pending": frappe.db.count(SUG, {"test_system": ts.name, "status": PENDING}),
 	}
+
+
+# ---------------------------------------------------------------- xử lý đề xuất (TD 3.3, 3.4)
+
+
+def _load_pending(name, perm="read"):
+	sug = frappe.get_doc(SUG, name)
+	frappe.has_permission(SUG, perm, doc=sug, throw=True)
+	if sug.status != PENDING:
+		frappe.throw(_("Đề xuất đã được xử lý"))
+	return sug
+
+
+def _finish(sug, **values):
+	"""Ghi trạng thái đề xuất. Người chỉ có quyền đọc (Finance, Resource Mgr, Admin chấp nhận hạn dùng sau mở) đã được
+	kiểm quyền ghi trên bản ghi đích; khi đó ghi bằng `ignore_permissions` và ghi `processed_by` (ASM-038-07)."""
+	sug.update(values)
+	sug.processed_by, sug.processed_on = frappe.session.user, now_datetime()
+	sug.save(ignore_permissions=not frappe.has_permission(SUG, "write", doc=sug))
+
+
+def _basis_ref(sug):
+	if not sug.legal_section:
+		return logic.NO_BASIS_REF
+	sec = frappe.db.get_value("NC Legal Section", sug.legal_section, ["legal_document", "section_no"], as_dict=True)
+	number = frappe.db.get_value("NC Legal Document", sec.legal_document, "doc_number") if sec else None
+	return logic.basis_ref(number, sec and sec.section_no)
+
+
+def _plain(sug):
+	return {
+		"test_system": sug.test_system,
+		"suggestion_type": sug.suggestion_type,
+		"resource_doctype": sug.resource_doctype,
+		"resource": sug.resource,
+		"not_in_catalog": cint(sug.not_in_catalog),
+		"value": sug.value,
+	}
+
+
+def _draft_norm_set(test_system):
+	return frappe.db.get_value(
+		"NC Norm Set", {"test_system": test_system, "status": "Nháp"}, "name", order_by="version_no desc"
+	)
+
+
+def _apply_norm_line(sug, plan, ns):
+	frappe.has_permission("NC Norm Set", "write", doc=ns, throw=True)
+	basis_ref = _basis_ref(sug)
+	if plan["line_id"]:
+		row = next(r for r in ns.lines if r.line_id == plan["line_id"])
+		row.hospital_qty, row.basis, row.basis_ref = plan["value"], "Ước tính", basis_ref
+	else:
+		uom = sug.uom or frappe.db.get_value("NC Item", sug.resource, "uom")
+		ns.append(
+			"lines",
+			{
+				"service_level": 1,
+				"component": "DRUG",
+				"resource_doctype": "NC Item",
+				"resource": sug.resource,
+				"cost_level": "RESULT",
+				"uom": uom,
+				"hospital_qty": plan["value"],
+				"basis": "Ước tính",
+				"basis_ref": basis_ref,
+			},
+		)
+	ns.save()  # controller kiểm DI-17, FR-NORM-*, quyền, phạm vi khoa; xóa xác nhận dòng đã đổi
+	row = next(r for r in ns.lines if r.line_id == plan["line_id"]) if plan["line_id"] else ns.lines[-1]
+	return {"norm_set": ns.name, "applied_ref": row.line_id}
+
+
+def _apply_plan_row(sug, plan, field):
+	doc = frappe.get_doc("NC QC Plan", {"test_system": sug.test_system})
+	frappe.has_permission("NC QC Plan", "write", doc=doc, throw=True)
+	table = "iqc_lines" if field == "runs_per_day" else "calibration_lines"
+	row = next(r for r in doc.get(table) if r.name == plan["row"])
+	row.set(field, plan["value"])
+	doc.save()
+	return {"applied_ref": row.name}
+
+
+@frappe.whitelist()
+def accept_cls_norm_suggestion(name):
+	sug = _load_pending(name)
+	if sug.not_in_catalog or not sug.resource:  # FR-AI-018
+		frappe.throw(_("Liên kết mặt hàng hoặc thiết bị trong danh mục trước khi chấp nhận"))
+	kind = sug.suggestion_type
+	is_item_only = kind == logic.TYPE_LABELS["OPEN_STABILITY"]
+	if is_item_only and not frappe.has_permission("NC Item", "write"):
+		frappe.throw(
+			_(
+				"Hạn dùng sau mở thuộc danh mục mặt hàng; cần Quản lý nguồn lực hoặc Tài chính chấp nhận"
+			),
+			frappe.PermissionError,
+		)
+	ns = ns_lines = plan_doc = None
+	if kind == logic.TYPE_LABELS["REAGENT_PER_TEST"]:
+		name_ns = _draft_norm_set(sug.test_system)
+		if name_ns:
+			ns = frappe.get_doc("NC Norm Set", name_ns)
+			ns_lines = [r.as_dict() for r in ns.lines]
+	elif kind in (logic.TYPE_LABELS["CALIBRATION_FREQ"], logic.TYPE_LABELS["IQC_FREQ"]):
+		plan_doc = _qc_plan(sug.test_system)
+	plan = logic.plan_accept(
+		_plain(sug),
+		ns_lines,
+		[r.as_dict() for r in plan_doc.iqc_lines] if plan_doc else None,
+		[r.as_dict() for r in plan_doc.calibration_lines] if plan_doc else None,
+	)
+	if plan.get("error"):
+		frappe.throw(_(plan["error"]))
+	target = plan["target"]
+	if target == "norm_line":
+		result = _apply_norm_line(sug, plan, ns)
+	elif target == "calibration":
+		result = _apply_plan_row(sug, plan, "calibrations_per_year")
+	elif target == "iqc":
+		result = _apply_plan_row(sug, plan, "runs_per_day")
+	else:
+		item = frappe.get_doc("NC Item", sug.resource)
+		item.open_stability_days = plan["value"]
+		item.save()
+		result = {"applied_ref": item.name}
+	_finish(sug, status=ACCEPTED, norm_set=result.get("norm_set"), applied_ref=result["applied_ref"])
+	return {"status": ACCEPTED, "applied_ref": result["applied_ref"], "norm_set": result.get("norm_set")}
+
+
+@frappe.whitelist()
+def reject_cls_norm_suggestion(name):
+	sug = _load_pending(name, "write")
+	_finish(sug, status=REJECTED)
+	return {"status": REJECTED}
+
+
+@frappe.whitelist()
+def link_cls_norm_suggestion(name, resource_doctype, resource):
+	"""FR-AI-018: người dùng liên kết thủ công đề xuất ngoài danh mục với mặt hàng hoặc thiết bị có thật."""
+	sug = _load_pending(name, "write")
+	if resource_doctype not in logic.CATALOG_DOCTYPES:
+		frappe.throw(_("Chỉ liên kết được với mặt hàng hoặc thiết bị"))
+	if not resource or not frappe.db.exists(resource_doctype, resource):
+		frappe.throw(_("Không có {0} {1} trong danh mục").format(_(CATALOG_LABEL[resource_doctype]), resource))
+	sug.resource_doctype, sug.resource, sug.not_in_catalog = resource_doctype, resource, 0
+	sug.save()
+	ts = frappe.get_doc(TS, sug.test_system)
+	return _row(sug, ts, True, {})
