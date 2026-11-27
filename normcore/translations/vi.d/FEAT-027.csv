@@ -1,0 +1,20 @@
+AI extraction failed,Trích bằng AI thất bại
+AI reads the file; every row is created as Proposed and must be checked against the original page before it is used for comparison.,"AI đọc tệp; mọi dòng tạo ở trạng thái ""Đề xuất"", cần đối chiếu với trang gốc trước khi dùng để so sánh."
+Default effective date,Ngày hiệu lực mặc định
+Enter manually,Nhập tay
+Extract,Trích
+Extract price list from PDF,Trích bảng giá từ tệp PDF
+Extract price list from PDF (AI),Trích bảng giá PDF (AI)
+Extracted by AI from the source file. Check against the original page before confirming.,Do AI trích từ tệp nguồn. Đối chiếu với trang gốc trước khi xác nhận.
+Extracting price list… You can keep working; the result will appear here.,Đang trích bảng giá… Có thể làm việc khác; kết quả sẽ hiện ở đây.
+No price rows found in the file.,Không tìm thấy dòng giá nào trong tệp.
+Open original page,Mở trang gốc
+PDF file,Tệp PDF
+Price list,Bảng giá
+Review rows,Rà soát các dòng
+Service name,Tên dịch vụ
+Some rows were not created,Một số dòng không được tạo
+Source document no.,Số văn bản nguồn
+Used for rows without a date in the file,Dùng cho dòng không ghi ngày trong tệp
+{0} reference prices created as Proposed.,"Đã tạo {0} giá tham chiếu ở trạng thái ""Đề xuất""."
+{0} rows were not found in the file and were dropped.,{0} dòng không thấy trong tệp. Đã bỏ.
