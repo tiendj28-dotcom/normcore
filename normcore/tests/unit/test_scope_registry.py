@@ -45,7 +45,7 @@ def test_hooks_sinh_tu_so():
 
 	assert set(hooks.has_permission) == SCOPED == set(hooks.permission_query_conditions)
 	assert set(reg.load_delete_guard()) <= set(hooks.doc_events)
-	assert len(reg.load_delete_guard()) == 9
+	assert len(reg.load_delete_guard()) == 10  # FEAT-026: thêm NC Benchmark Facility (ASM-026-15)
 
 
 def test_them_tep_la_them_doctype(tmp_path):

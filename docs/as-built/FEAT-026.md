@@ -17,7 +17,7 @@ Ba DocType mới, module NC Benchmark: NC Benchmark Facility, NC Benchmark Price
 - `benchmark/reference.py` (thuần), `exports/price_survey.py` (thuần). Độ phủ `normcore/benchmark/` 100%.
 - Hợp đồng cho **FEAT-027** (AI trích PDF): tạo dòng bằng `NC Benchmark Price` với `ai_log` đặt thì `before_insert` giữ "Đề xuất"; `flags.keep_status = True` cũng giữ "Đề xuất".
 - Hợp đồng cho **FEAT-028**: dùng `get_comparable_prices`.
-- Bộ nhập `nc_benchmark_price` ở `core/import_sets.py`. Sửa tối thiểu khung nhập (`core/importer.py`: `key_of`, `parse` dùng `values.get`) để khóa ghép có thành phần tùy chọn (ASM-026-13). Hành vi cũ không đổi.
+- Bộ nhập `nc_benchmark_price` ở `core/import_sets.py`. Sửa tối thiểu khung nhập (`core/importer.py`: `key_of`, `parse` dùng `values.get`) để khóa ghép có thành phần tùy chọn (ASM-026-13). Khung FEAT-004 đổi hai dòng; hành vi cũ không đổi (BA chấp nhận trên NORM-80).
 - Chặn xóa đơn vị còn giá: `core/delete_guard/nc_benchmark_facility.json`.
 - Giao diện: `nc_benchmark_price_list.js`, `nc_benchmark_price.js`, `nc_benchmark_facility.js`, `nc_cpi_index_list.js`; bản dịch `translations/vi.d/FEAT-026.csv`; lối tắt `shortcuts.d/FEAT-026.txt`.
 - Ma trận quyền: `scripts/conventions/perm_matrix/` ba tệp (dòng "Giá tham chiếu, chỉ số giá").
