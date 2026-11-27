@@ -177,8 +177,20 @@ function add_draft_button(frm) {
 	});
 }
 
+// FEAT-030: section "Giá đã duyệt" chỉ đọc, ngày áp dụng giảm dần, không thêm/xóa dòng
+function show_approved_prices(frm) {
+	const grid = frm.fields_dict.approved_prices && frm.fields_dict.approved_prices.grid;
+	if (!grid) return;
+	grid.cannot_add_rows = true;
+	grid.cannot_delete_rows = true;
+	frm.set_df_property("prices_section", "collapsible", 1);
+	grid.refresh();
+	if (!(frm.doc.approved_prices || []).length) frm.fields_dict.approved_prices.$wrapper.append(`<div class="text-muted nc-no-price">${__("No approved price yet")}</div>`);
+}
+
 frappe.ui.form.on("NC Technical Service", {
 	refresh(frm) {
+		show_approved_prices(frm);
 		load_chain(frm);
 		load_systems(frm);
 		add_draft_button(frm);
