@@ -16,6 +16,7 @@ from normcore.costing import (
 	pricing,
 	qc_plans,
 	rates,
+	reconcile,
 	resources,
 	runner,
 	snapshot,
@@ -777,7 +778,12 @@ def stored_rows(run) -> list[dict]:
 						"values": writer.canonical(dt, {k: ch[k] for k in fields}),
 					}
 				)
-	for r in frappe.get_all("NC Reconciliation Line", {"costing_run": run.name}, list(writer.RECON_FIELDS)):
+	# FEAT-037 (ASM-037-09): chỉ dòng Tài chính vào so khớp tái lập
+	for r in frappe.get_all(
+		"NC Reconciliation Line",
+		{"costing_run": run.name, "recon_type": ["in", [reconcile.FINANCIAL, "", None]]},
+		list(writer.RECON_FIELDS),
+	):
 		rows.append(
 			{
 				"key": ("recon", r.cost_center, r.cost_category),
@@ -825,3 +831,65 @@ def allocation_context(run, ctx) -> AllocCtx:
 	a.drivers = {}
 	a.outcome = None
 	return a
+
+
+PHYS_ITEM_CATEGORY = "DRUG_SUPPLY"
+
+
+class PhysCtx:
+	"""Dữ liệu đối soát vật chất, sản lượng của một lần tính (FEAT-037); chỉ đọc."""
+
+
+def physical_context(run, results, inputs) -> PhysCtx:
+	"""technical-design 4.2. `results`: ServiceResult; `inputs`: {(dịch vụ, khoa): ServiceInput}.
+	Chỉ lập khi kịch bản là "Thực tế 12 tháng" (ASM-037-02) và dịch vụ cận lâm sàng tính không lỗi."""
+	x = PhysCtx()
+	x.available = (run.get("volume_scenario") or VOLUME_SCENARIO) == VOLUME_SCENARIO
+	x.inputs = [
+		inputs[(r.service, r.department)]
+		for r in results
+		if r.is_paraclinical and r.status != engine.STATUS_ERROR and (r.service, r.department) in inputs
+	]
+	x.results = {
+		(r.service, r.department): r.volume
+		for r in results
+		if r.is_paraclinical and r.status != engine.STATUS_ERROR and r.volume is not None
+	}
+	x.issued, x.departments_with_data, x.units, x.item_meta, x.his, x.dept_center = {}, set(), {}, {}, {}, {}
+	x.calc = {}
+	ps = frappe.get_doc("NC Costing Parameter Set", run.parameter_set)
+	x.material_tol = flt(ps.get("material_recon_tolerance")) if ps.get("material_recon_tolerance") else 5
+	x.volume_tol = flt(ps.get("volume_recon_tolerance")) if ps.get("volume_recon_tolerance") else 2
+	if not x.available:
+		return x
+	depts = sorted({i.department for i in x.inputs} | {d for _, d in x.results})
+	if not depts:
+		return x
+	x.dept_center = {
+		r.name: r.cost_center
+		for r in frappe.get_all("NC Department", {"name": ["in", depts]}, ["name", "cost_center"])
+	}
+	for r in frappe.get_all(
+		"NC Stock Issue Actual",
+		{"fiscal_year": run.fiscal_year, "department": ["in", depts]},
+		["department", "item", "issued_qty"],
+	):
+		x.departments_with_data.add(r.department)
+		key = (r.department, r.item)
+		x.issued[key] = x.issued.get(key, Decimal(0)) + _d(r.issued_qty)
+	x.calc = reconcile.material_quantities(x.inputs)
+	items = sorted({i for _, i in x.issued} | {i for _, i in x.calc})
+	for r in frappe.get_all(
+		"NC Item",
+		{"name": ["in", items]},
+		["name", "item_type", "norm_units_per_purchase_unit"],
+	):
+		x.units[r.name] = _d(r.norm_units_per_purchase_unit) if r.norm_units_per_purchase_unit else None
+		x.item_meta[r.name] = {"norm_required": r.item_type in pricing.NORM_ITEM_TYPES}
+	for r in frappe.get_all(
+		"NC Service Volume",
+		{"fiscal_year": run.fiscal_year, "scenario": VOLUME_SCENARIO, "department": ["in", depts]},
+		["technical_service", "department", "volume"],
+	):
+		x.his[(r.technical_service, r.department)] = _d(r.volume)
+	return x

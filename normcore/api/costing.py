@@ -6,7 +6,7 @@ from decimal import Decimal
 import frappe
 from frappe import _
 
-from normcore.costing import allocation, cls, compare, engine, reconcile
+from normcore.costing import allocation, cls, compare, engine, reconcile, resources, sensitivity, snapshot
 
 RUN, COST, RECON = "NC Costing Run", "NC Service Cost", "NC Reconciliation Line"
 CALCULATED, LOCKED = "Đã tính", "Đã khóa"
@@ -124,6 +124,8 @@ def get_run_results(run):
 	depts = _names("NC Department", "department_name", {r["department"] for r in rows})
 	counts: dict = {}
 	systems: dict = {}
+	recon = _recon_lines(run) if frappe.has_permission(RECON, "read") else []
+	blockers = reconcile.lock_blockers(recon)
 	if rows:
 		for t in frappe.get_all(
 			"NC Test System Cost",
@@ -163,7 +165,12 @@ def get_run_results(run):
 	return {
 		"results": rows,
 		"counts": counts,
-		"recon_blocked": len(_blockers(run)),
+		"recon_blocked": len(blockers),
+		"physical_unreconciled": sum(
+			1
+			for r in recon
+			if _kind(r) == reconcile.MATERIAL and not r.item and r.recon_status == reconcile.UNRECONCILED
+		),
 		"snapshot_hash": run_doc.get("snapshot_hash"),
 		"can_duplicate": bool(frappe.has_permission(RUN, "create")),
 		"can_verify": run_doc.status == LOCKED and bool(run_doc.get("snapshot_file")),
@@ -179,10 +186,7 @@ def _blockers(run) -> list[str]:
 	"""Dòng đối soát vượt ngưỡng chưa có giải trình (FR-COST-009)."""
 	if not frappe.has_permission(RECON, "read"):
 		return []
-	lines = frappe.get_all(
-		RECON, {"costing_run": run}, ["cost_center", "cost_category", "over_tolerance", "explanation"]
-	)
-	return reconcile.lock_blockers(lines)
+	return reconcile.lock_blockers(_recon_lines(run))
 
 
 def _cost_line(ln) -> engine.CostLine:
@@ -408,8 +412,36 @@ def _recon_view(row) -> dict:
 		"remainder": max(acc - costed, 0),
 		"over_tolerance": row.over_tolerance,
 		"explanation": row.explanation,
-		"needs_explanation": bool(row.over_tolerance and not (row.explanation or "").strip()),
+		"needs_explanation": reconcile.needs_explanation(row),
 	}
+
+
+RECON_FIELDS = [
+	"name",
+	"cost_center",
+	"cost_category",
+	"costed_amount",
+	"accounting_amount",
+	"variance",
+	"variance_pct",
+	"over_tolerance",
+	"explanation",
+	"recon_type",
+	"recon_status",
+	"department",
+	"item",
+	"technical_service",
+	"calculated_qty",
+	"actual_qty",
+]
+
+
+def _kind(row) -> str:
+	return row.get("recon_type") or reconcile.FINANCIAL
+
+
+def _recon_lines(run):
+	return frappe.get_all(RECON, {"costing_run": run}, RECON_FIELDS)
 
 
 @frappe.whitelist()
@@ -417,21 +449,8 @@ def get_reconciliation(run):
 	"""FR-COST-008, 009 (SCR-DSK-024): bảng đối soát của một lần tính."""
 	doc = _run(run, "read")
 	frappe.has_permission(RECON, "read", throw=True)
-	rows = frappe.get_all(
-		RECON,
-		{"costing_run": run},
-		[
-			"name",
-			"cost_center",
-			"cost_category",
-			"costed_amount",
-			"accounting_amount",
-			"variance",
-			"variance_pct",
-			"over_tolerance",
-			"explanation",
-		],
-	)
+	all_rows = _recon_lines(run)
+	rows = [r for r in all_rows if _kind(r) == reconcile.FINANCIAL]
 	order = {c: i for i, c in enumerate(allocation.CATEGORIES)}
 	rows.sort(key=lambda r: (r.cost_center, order.get(r.cost_category, len(order))))
 	centers = _names("NC Cost Center", "cost_center_name", {r.cost_center for r in rows})
@@ -440,7 +459,14 @@ def get_reconciliation(run):
 		v = _recon_view(r)
 		v["cost_center_name"] = centers.get(r.cost_center)
 		lines.append(v)
-	blocked = sum(1 for v in lines if v["needs_explanation"])
+	blocked = sum(1 for r in all_rows if reconcile.needs_explanation(r))
+	material = [r for r in all_rows if _kind(r) == reconcile.MATERIAL]
+	physical = {
+		"available": _physical_available(doc),
+		"material_blocked": sum(1 for r in material if reconcile.needs_explanation(r)),
+		"unreconciled": sum(1 for r in material if r.recon_status == reconcile.UNRECONCILED),
+		"volume_warnings": sum(1 for r in all_rows if _kind(r) == reconcile.VOLUME and r.over_tolerance),
+	}
 	include_depr = bool(frappe.db.get_value("NC Price Category", doc.price_category, "include_depreciation"))
 	tolerance = frappe.db.get_value("NC Costing Parameter Set", doc.parameter_set, "reconciliation_tolerance")
 	calculated = doc.status == CALCULATED
@@ -452,6 +478,87 @@ def get_reconciliation(run):
 		"partial_scope": bool(doc.scope_departments or doc.scope_services),
 		"warnings": [w for w in (doc.allocation_warnings or "").split("\n") if w],
 		"lines": lines,
+		"physical": physical,
+		"blocked": blocked,
+		"can_explain": calculated and bool(frappe.has_permission(RECON, "write")),
+		"can_lock": calculated and bool(frappe.has_permission(RUN, "write", doc=doc)) and blocked == 0,
+	}
+
+
+def _physical_available(doc) -> int:
+	"""ASM-037-02: chỉ lập đối soát vật chất, sản lượng khi kịch bản là "Thực tế 12 tháng"."""
+	return int((doc.get("volume_scenario") or "Thực tế 12 tháng") == "Thực tế 12 tháng")
+
+
+@frappe.whitelist()
+def get_physical_reconciliation(run):
+	"""FR-COST-026..029 (SCR-DSK-038): đối soát vật chất theo (khoa, mặt hàng), sản lượng theo (dịch vụ, khoa)."""
+	doc = _run(run, "read")
+	frappe.has_permission(RECON, "read", throw=True)
+	rows = _recon_lines(run)
+	items = _names("NC Item", "item_name", {r.item for r in rows if r.item})
+	norm_uom = _names("NC Item", "norm_uom", {r.item for r in rows if r.item})
+	services = _names(
+		"NC Technical Service", "service_name", {r.technical_service for r in rows if r.technical_service}
+	)
+	depts = _names("NC Department", "department_name", {r.department for r in rows if r.department})
+
+	def view(r):
+		diff = None
+		# Frappe lưu số trống thành 0: lượng thực tế 0 = thiếu số liệu (xuất kho, sản lượng HIS)
+		if r.recon_status != reconcile.UNRECONCILED and r.actual_qty:
+			diff = (r.actual_qty or 0) - (r.calculated_qty or 0)
+		out = {
+			"name": r.name,
+			"department": r.department,
+			"department_name": depts.get(r.department),
+			"calculated_qty": r.calculated_qty,
+			"actual_qty": r.actual_qty,
+			"diff_qty": diff,
+			"variance_pct": r.variance_pct if diff is not None else None,
+			"over_tolerance": r.over_tolerance,
+			"explanation": r.explanation,
+			"needs_explanation": reconcile.needs_explanation(r),
+		}
+		if _kind(r) == reconcile.MATERIAL:
+			out.update(
+				item=r.item,
+				item_name=items.get(r.item),
+				norm_uom=norm_uom.get(r.item),
+				recon_status=r.recon_status,
+			)
+		else:
+			out.update(technical_service=r.technical_service, service_name=services.get(r.technical_service))
+		return out
+
+	material = sorted(
+		(view(r) for r in rows if _kind(r) == reconcile.MATERIAL),
+		key=lambda v: (v["department"] or "", v["item"] is not None, v["item"] or ""),
+	)
+	volume = sorted(
+		(view(r) for r in rows if _kind(r) == reconcile.VOLUME),
+		key=lambda v: (v["technical_service"] or "", v["department"] or ""),
+	)
+	blocked = sum(1 for r in rows if reconcile.needs_explanation(r))
+	calculated = doc.status == CALCULATED
+	tol = (
+		frappe.db.get_value(
+			"NC Costing Parameter Set",
+			doc.parameter_set,
+			["material_recon_tolerance", "volume_recon_tolerance"],
+			as_dict=True,
+		)
+		or {}
+	)
+	return {
+		"run": doc.name,
+		"status": doc.status,
+		"scenario": doc.get("volume_scenario"),
+		"available": _physical_available(doc),
+		"material_tolerance": tol.get("material_recon_tolerance") or 5,
+		"volume_tolerance": tol.get("volume_recon_tolerance") or 2,
+		"material": material,
+		"volume": volume,
 		"blocked": blocked,
 		"can_explain": calculated and bool(frappe.has_permission(RECON, "write")),
 		"can_lock": calculated and bool(frappe.has_permission(RUN, "write", doc=doc)) and blocked == 0,
@@ -468,7 +575,7 @@ def save_explanation(line, explanation):
 	return {
 		"name": doc.name,
 		"explanation": doc.explanation,
-		"needs_explanation": bool(doc.over_tolerance and not (doc.explanation or "").strip()),
+		"needs_explanation": reconcile.needs_explanation(doc.as_dict()),
 		"blocked": len(_blockers(doc.costing_run)),
 	}
 
@@ -564,3 +671,247 @@ def build_comparison(base_run, other_run, only_changed=0) -> dict:
 def compare_runs(base_run, other_run, only_changed=0):
 	"""FR-COST-013 (SCR-DSK-022): chênh lệch = lần so sánh - lần gốc, theo dịch vụ và cấu phần."""
 	return build_comparison(base_run, other_run, only_changed)
+
+
+# ---------------------------------------------------------------------------
+# Phân tích độ nhạy (FEAT-037; FR-COST-030, UC-024). Chỉ đọc: không insert, save, db_set, commit.
+# ---------------------------------------------------------------------------
+
+SENSITIVITY_CACHE_SECONDS = 600
+
+
+def _f(x):
+	return None if x is None else float(x)
+
+
+def _result_view(r: engine.ServiceResult) -> dict:
+	p = r.price
+	return {
+		"status": r.status,
+		"message": r.message,
+		"full_cost": _f(p.full_cost) if p else None,
+		"calculated_price": _f(p.calculated_price) if p else None,
+		"rounded_price": _f(p.rounded_price) if p else None,
+		"direct_total": _f(r.direct_total),
+		"alloc_total": _f(sum(r.alloc_by_category.values(), Decimal(0))),
+		"by_component": {k: _f(v) for k, v in r.direct_by_component.items()},
+		"volume": _f(r.volume),
+	}
+
+
+def _stored_view(sc) -> dict:
+	comp = {
+		k: sc.get(f) or 0
+		for k, f in (
+			("LABOR", "direct_labor"),
+			("DRUG", "direct_drug"),
+			("SUPPLY", "direct_supply"),
+			("EQUIPMENT", "direct_equipment"),
+			("INFRA", "direct_infra"),
+			("UTILITY", "direct_utility"),
+		)
+	}
+	alloc = sum(
+		sc.get(f) or 0
+		for f in (
+			"alloc_labor",
+			"alloc_drug_supply",
+			"alloc_depreciation",
+			"alloc_utility",
+			"alloc_management",
+		)
+	)
+	return {
+		"status": sc.calc_status,
+		"message": sc.calc_message,
+		"full_cost": sc.full_cost,
+		"calculated_price": sc.calculated_price,
+		"rounded_price": sc.rounded_price,
+		"direct_total": sum(comp.values()),
+		"alloc_total": alloc,
+		"by_component": comp,
+		"volume": sc.volume,
+	}
+
+
+def _sensitivity_context(service_cost):
+	sc = frappe.get_doc(COST, service_cost)
+	frappe.has_permission(COST, "read", doc=sc, throw=True)
+	run = frappe.get_doc(RUN, sc.costing_run)
+	if run.status not in (CALCULATED, LOCKED):
+		frappe.throw(_("Lần tính chưa có kết quả"))
+	return sc, run
+
+
+def _snapshot_for(run) -> dict:
+	"""Ảnh chụp đầu vào của lần tính: tệp đã lưu (Đã khóa) hoặc dựng chỉ đọc (Đã tính); đệm 10 phút, không ghi CSDL."""
+	from normcore.nc_costing.doctype.nc_costing_run import loader
+
+	key = f"nc_sensitivity_snapshot:{run.name}:{run.modified}"
+	cached = frappe.cache().get_value(key)
+	if cached:
+		return cached
+	if run.status == LOCKED and run.get("snapshot_file"):
+		content = frappe.get_doc("File", {"file_url": run.snapshot_file}).get_content()
+		blob = content.encode() if isinstance(content, str) else content
+		snap = snapshot.unpack(blob, run.snapshot_hash)
+	else:
+		snap = loader.capture_snapshot(run, loader.eligible_from_results(run))
+	frappe.cache().set_value(key, snap, expires_in_sec=SENSITIVITY_CACHE_SECONDS)
+	return snap
+
+
+def _input_of(snap, service, department):
+	for x in snap["inputs"]:
+		i = snapshot.from_plain(x)
+		if (i.service, i.department) == (service, department):
+			return i
+	frappe.throw(_("{0} không có trong lần tính này").format(service))
+
+
+def _units(items) -> dict:
+	rows = frappe.get_all(
+		"NC Item",
+		{"name": ["in", list(items) or [""]]},
+		["name", "item_name", "uom", "norm_units_per_purchase_unit"],
+	)
+	return {r.name: r for r in rows}
+
+
+@frappe.whitelist()
+def get_sensitivity_base(service_cost):
+	"""FR-COST-030 (SCR-DSK-040): giá thành gốc và đầu vào có thể đổi giả định của một dịch vụ."""
+	sc, run = _sensitivity_context(service_cost)
+	inp = _input_of(_snapshot_for(run), sc.technical_service, sc.department)
+	c = inp.paraclinical
+	rates = {}
+	items = {x.resource for x in inp.lines if x.resource}
+	for x in inp.lines:
+		if x.resource and inp.rates.get(x.line_id):
+			rates[x.resource] = inp.rates[x.line_id].rate
+	systems, equipments = [], {}
+	if c is not None:
+		for s in c.systems:
+			eq = c.equipment.get(s.equipment)
+			systems.append(
+				{
+					"test_system": s.code,
+					"qbn": _f(s.qbn),
+					"equipment": s.equipment,
+					"mode": eq.mode if eq else None,
+					"contract_cost": _f(eq.contract_cost) if eq else None,
+				}
+			)
+			for x in s.lines:
+				if x.norm.resource and x.norm.component != "EQUIPMENT":
+					items.add(x.norm.resource)
+					if s.rates.get(x.norm.line_id):
+						rates[x.norm.resource] = s.rates[x.norm.line_id].rate
+			items |= {i.item for i in s.iqc}
+			for i in s.iqc:
+				if i.rate:
+					rates[i.item] = i.rate.rate
+		for code in sorted(sensitivity._used_equipment(c)):
+			eq = c.equipment.get(code)
+			if eq:
+				equipments[code] = {"equipment": code, "mode": eq.mode, "contract_cost": _f(eq.contract_cost)}
+	meta = _units(items)
+	return {
+		"service_cost": sc.name,
+		"run": run.name,
+		"run_status": run.status,
+		"service": sc.technical_service,
+		"service_name": frappe.db.get_value("NC Technical Service", sc.technical_service, "service_name"),
+		"department": sc.department,
+		"is_paraclinical": bool(sc.is_paraclinical),
+		"origin": _stored_view(sc),
+		"inputs": {
+			"volume": _f(inp.volume),
+			"systems": systems,
+			"items": [
+				{
+					"item": i,
+					"item_name": meta[i].item_name if i in meta else i,
+					"uom": meta[i].uom if i in meta else None,
+					"norm_units": meta[i].norm_units_per_purchase_unit if i in meta else None,
+					"purchase_price": _f(
+						rates.get(i, Decimal(0))
+						* Decimal(str((meta[i].norm_units_per_purchase_unit if i in meta else 1) or 1))
+					)
+					if i in rates
+					else None,
+				}
+				for i in sorted(items)
+			],
+			"equipments": list(equipments.values()),
+		},
+		"modes": list(resources.ACQUISITION_MODES),
+	}
+
+
+@frappe.whitelist()
+def run_sensitivity(service_cost, overrides=None):
+	"""FR-COST-030: tính thử giá thành với giả định; không ghi gì. Giả định sai → ValidationError."""
+	sc, run = _sensitivity_context(service_cost)
+	ov = frappe.parse_json(overrides) if overrides else {}
+	if not isinstance(ov, dict):
+		frappe.throw(_("Giả định không hợp lệ"))
+	snap = _snapshot_for(run)
+	units = {
+		k: Decimal(str(v.norm_units_per_purchase_unit or 1))
+		for k, v in _units(set(ov.get("prices") or {})).items()
+	}
+	try:
+		trial = sensitivity.trial(snap, sc.technical_service, sc.department, ov, units)
+	except sensitivity.InvalidAssumption as e:
+		frappe.throw(_(str(e)))
+	origin = _stored_view(sc)
+	warnings = []
+	if run.status == CALCULATED:
+		base = next(
+			(
+				r
+				for r in snapshot.recompute(snap).results
+				if (r.service, r.department) == (sc.technical_service, sc.department)
+			),
+			None,
+		)
+		if base is None or base.price is None or _f(base.price.full_cost) != _f(origin["full_cost"]):
+			warnings.append(_("Dữ liệu đầu vào đã đổi sau lần tính; so sánh có thể lệch"))
+	t = _result_view(trial)
+	diff = None
+	if t["full_cost"] is not None:
+		d = t["full_cost"] - (origin["full_cost"] or 0)
+		diff = {
+			"full_cost": round(d, 2),
+			"rounded_price": round((t["rounded_price"] or 0) - (origin["rounded_price"] or 0), 2),
+			"pct": round(d / origin["full_cost"] * 100, 2) if origin["full_cost"] else None,
+		}
+	stored_systems = {
+		x.test_system: x
+		for x in frappe.get_all(
+			"NC Test System Cost",
+			{"parent": sc.name, "parenttype": COST},
+			["test_system", "k_factor", "direct_cost"],
+		)
+	}
+	systems = [
+		{
+			"test_system": x.test_system,
+			"k_origin": stored_systems[x.test_system].k_factor if x.test_system in stored_systems else None,
+			"k_trial": _f(x.k_factor),
+			"direct_origin": stored_systems[x.test_system].direct_cost
+			if x.test_system in stored_systems
+			else None,
+			"direct_trial": _f(x.direct_cost),
+		}
+		for x in trial.test_system_costs
+	]
+	return {
+		"trial": t,
+		"origin": origin,
+		"diff": diff,
+		"systems": systems,
+		"warnings": warnings,
+		"note": _("Kết quả thử, không lưu"),
+	}

@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "costing_run",
+  "recon_type",
   "cost_center",
   "cost_category",
   "costed_amount",
@@ -13,7 +14,14 @@
   "variance",
   "variance_pct",
   "over_tolerance",
-  "explanation"
+  "explanation",
+  "physical_section",
+  "department",
+  "item",
+  "technical_service",
+  "calculated_qty",
+  "actual_qty",
+  "recon_status"
  ],
  "fields": [
   {
@@ -27,23 +35,33 @@
    "read_only": 1
   },
   {
+   "fieldname": "recon_type",
+   "label": "Loại đối soát",
+   "fieldtype": "Select",
+   "options": "Tài chính\nVật chất\nSản lượng",
+   "default": "Tài chính",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "cost_center",
    "label": "Trung tâm chi phí",
    "fieldtype": "Link",
    "options": "NC Cost Center",
-   "reqd": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "read_only": 1
+   "read_only": 1,
+   "mandatory_depends_on": "eval:!doc.recon_type || doc.recon_type=='Tài chính'"
   },
   {
    "fieldname": "cost_category",
    "label": "Loại chi phí",
    "fieldtype": "Select",
    "options": "LABOR\nDRUG_SUPPLY\nDEPRECIATION\nUTILITY",
-   "reqd": 1,
    "in_list_view": 1,
-   "read_only": 1
+   "read_only": 1,
+   "mandatory_depends_on": "eval:!doc.recon_type || doc.recon_type=='Tài chính'"
   },
   {
    "fieldname": "costed_amount",
@@ -84,11 +102,66 @@
    "fieldname": "explanation",
    "label": "Giải trình",
    "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "physical_section",
+   "label": "Đối soát vật chất, sản lượng",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.recon_type!='Tài chính'"
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1,
+   "depends_on": "eval:doc.recon_type!='Tài chính'"
+  },
+  {
+   "fieldname": "item",
+   "label": "Mặt hàng",
+   "fieldtype": "Link",
+   "options": "NC Item",
+   "read_only": 1,
+   "depends_on": "eval:doc.recon_type=='Vật chất'"
+  },
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "options": "NC Technical Service",
+   "read_only": 1,
+   "depends_on": "eval:doc.recon_type=='Sản lượng'"
+  },
+  {
+   "fieldname": "calculated_qty",
+   "label": "Lượng tính được",
+   "fieldtype": "Float",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_qty",
+   "label": "Lượng thực tế",
+   "fieldtype": "Float",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recon_status",
+   "label": "Tình trạng",
+   "fieldtype": "Select",
+   "options": "Đã đối soát\nChưa đối soát",
+   "default": "Đã đối soát",
+   "read_only": 1,
+   "depends_on": "eval:doc.recon_type!='Tài chính'"
   }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-26 00:00:00.000000",
+ "modified": "2026-11-27 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "NC Costing",
  "name": "NC Reconciliation Line",
@@ -99,19 +172,23 @@
    "role": "NC Finance",
    "read": 1,
    "write": 1,
-   "create": 1
+   "create": 1,
+   "report": 1
   },
   {
    "role": "NC Director",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Admin",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Auditor",
-   "read": 1
+   "read": 1,
+   "report": 1
   }
  ],
  "sort_field": "cost_center",

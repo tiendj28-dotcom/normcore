@@ -226,7 +226,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-26 00:00:00.000000",
+ "modified": "2026-11-27 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "NC Costing",
  "name": "NC Service Cost",
@@ -234,23 +234,28 @@
  "permissions": [
   {
    "role": "NC Finance",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Department Head",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Director",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Admin",
-   "read": 1
+   "read": 1,
+   "report": 1
   },
   {
    "role": "NC Auditor",
-   "read": 1
+   "read": 1,
+   "report": 1
   }
  ],
  "sort_field": "modified",
