@@ -207,3 +207,34 @@ def reset_for_draft(items, confirmations) -> list:
 	for it in items:
 		it["director_ack"] = 0
 	return []
+
+
+def source_error(status, based_on_run, origin_status):
+	"""FR-PRICE-001, ASM-030-01: lỗi khi nguồn không hợp lệ; None nếu được.
+
+	Nguồn hợp lệ: lần tính "Đã khóa", hoặc kịch bản FEAT-029 (`based_on_run`) ở "Đã tính" mà lần gốc "Đã khóa".
+	"""
+	if not based_on_run:
+		return None if status == "Đã khóa" else "Chỉ lập phương án từ lần tính giá đã khóa"
+	if origin_status != "Đã khóa":
+		return "Chỉ lập phương án từ kịch bản của lần tính giá đã khóa"
+	if status != "Đã tính":
+		return "Chỉ lập phương án từ kịch bản đã tính xong"
+	return None
+
+
+def source_changed(items, costs) -> list[str]:
+	"""ASM-030-19: dịch vụ mà giá của nguồn hiện tại khác dòng phương án (hoặc nguồn không còn dịch vụ đó)."""
+	now = {c["technical_service"]: c for c in costs if c.get("calc_status") != "Lỗi"}
+	changed = []
+	for it in items:
+		c = now.get(it["technical_service"])
+		if c is None or any(
+			_money(it.get(f)) != _money(c.get(f)) for f in ("full_cost", "calculated_price", "rounded_price")
+		):
+			changed.append(it["technical_service"])
+	return sorted(set(changed))
+
+
+def _money(value):
+	return None if value in (None, "") else _dec(value).quantize(Decimal("0.01"))

@@ -233,3 +233,47 @@ class TestHistory(unittest.TestCase):
 
 if __name__ == "__main__":
 	unittest.main()
+
+
+class TestSource(unittest.TestCase):
+	def test_FR_PRICE_001_source_error(self):
+		self.assertIsNone(pr.source_error("Đã khóa", None, None))
+		self.assertIn("đã khóa", pr.source_error("Đã tính", None, None))
+		# kịch bản: lần gốc phải khóa, kịch bản phải "Đã tính"
+		self.assertIsNone(pr.source_error("Đã tính", "TG-1", "Đã khóa"))
+		self.assertIn("kịch bản của lần tính giá đã khóa", pr.source_error("Đã tính", "TG-1", "Đã tính"))
+		self.assertIn("kịch bản của lần tính giá đã khóa", pr.source_error("Đã tính", "TG-1", None))
+		self.assertIn("đã tính xong", pr.source_error("Nháp", "TG-1", "Đã khóa"))
+
+	def test_source_changed(self):
+		items = [
+			_item("r1", "DV-TEST-A", "K", "287745.46", 302100),
+			_item("r2", "DV-TEST-B", "K", 50000, 92600),
+		]
+		for it in items:
+			it["calculated_price"] = it["rounded_price"]
+		costs = [
+			{
+				"technical_service": "DV-TEST-A",
+				"full_cost": D("287745.46"),
+				"calculated_price": D("302100.00"),
+				"rounded_price": D("302100"),
+			},
+			{
+				"technical_service": "DV-TEST-B",
+				"full_cost": D("50000"),
+				"calculated_price": D("92600"),
+				"rounded_price": D("92600"),
+			},
+		]
+		self.assertEqual(pr.source_changed(items, costs), [])
+		costs[0]["rounded_price"] = D("302000")
+		self.assertEqual(pr.source_changed(items, costs), ["DV-TEST-A"])
+		costs[0]["rounded_price"] = D("302100")
+		costs[1]["full_cost"] = D("50000.02")
+		self.assertEqual(pr.source_changed(items, costs), ["DV-TEST-B"])
+		# nguồn mất dịch vụ hoặc dịch vụ lỗi
+		self.assertEqual(pr.source_changed(items, costs[:1]), ["DV-TEST-B"])
+		costs[1]["full_cost"] = D("50000")
+		costs[1]["calc_status"] = "Lỗi"
+		self.assertEqual(pr.source_changed(items, costs), ["DV-TEST-B"])

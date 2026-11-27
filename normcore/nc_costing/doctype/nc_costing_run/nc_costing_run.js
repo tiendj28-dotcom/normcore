@@ -513,8 +513,9 @@ frappe.ui.form.on("NC Costing Run", {
 			frm.add_custom_button(__("Price comparison"), () => frappe.set_route("price-compare", { run: frm.doc.name }), __("View"));
 		}
 		frm.add_custom_button(__("Missing data report"), () => open_missing(frm));
-		if (frm.doc.status === "Đã khóa" && frappe.model.can_create("NC Price Proposal")) {
-			// FEAT-030, SCR-DSK-027: chỉ lập phương án từ lần tính đã khóa
+		const proposal_source = frm.doc.status === "Đã khóa" || (frm.doc.based_on_run && frm.doc.status === "Đã tính");
+		if (proposal_source && frappe.model.can_create("NC Price Proposal")) {
+			// FEAT-030, SCR-DSK-027: lần tính đã khóa, hoặc kịch bản đã tính (lần gốc đã khóa do máy chủ kiểm)
 			frm.add_custom_button(__("Create price proposal"), () => create_price_proposal(frm), __("Create"));
 		}
 		if (frm.doc.status === "Đã tính" && can_write(frm)) {

@@ -25,8 +25,9 @@ function pp_pill(label, color) {
 
 function pp_summary_html(data) {
 	const s = data.summary;
+	const src = data.source && data.source.based_on_run ? ` · ${pp_esc(__("Scenario of {0}", [data.source.based_on_run]))}` : "";
 	let html =
-		`<div class="text-muted">${__("{0} services · {1} adjusted · {2} below full cost · {3} awaiting director acknowledgement", [s.count, s.adjusted, s.below_cost, s.unacked])}</div>`;
+		`<div class="text-muted">${__("{0} services · {1} adjusted · {2} below full cost · {3} awaiting director acknowledgement", [s.count, s.adjusted, s.below_cost, s.unacked])}${src}</div>`;
 	if (s.below_cost) {
 		html += `<div class="alert alert-warning" role="alert">${pp_esc(__("Some proposed prices are below full cost; the director must acknowledge each of these lines when approving"))}</div>`;
 	}

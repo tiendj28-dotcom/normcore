@@ -49,8 +49,10 @@ def create_proposal(costing_run, title=None, apply_from=None):
 	if not frappe.has_permission(DT, "create"):
 		_deny(_("Bạn không có quyền lập phương án giá"))
 	run = frappe.get_doc(RUN, costing_run)
-	if run.status != "Đã khóa":
-		frappe.throw(_("Chỉ lập phương án từ lần tính giá đã khóa"))
+	origin_status = frappe.db.get_value(RUN, run.based_on_run, "status") if run.based_on_run else None
+	error = logic.source_error(run.status, run.based_on_run, origin_status)
+	if error:
+		frappe.throw(_(error))
 	costs = [dict(c) for c in _cost_rows(run.name)]
 	items = logic.build_items(costs, price_compare.benchmark_summary(run, costs))
 	if not items:
@@ -70,6 +72,18 @@ def create_proposal(costing_run, title=None, apply_from=None):
 
 
 # ---- quyền thao tác ---------------------------------------------------------------------------------------
+
+
+def _check_source_unchanged(doc, items):
+	"""ASM-030-19: kịch bản không bị khóa; "Gửi duyệt", "Phê duyệt" chặn khi giá của nguồn đã khác dòng phương án."""
+	changed = logic.source_changed(items, _cost_rows(doc.costing_run))
+	if changed:
+		frappe.throw(
+			_("Kịch bản {0} đã thay đổi sau khi lập phương án ({1}); lập phương án mới").format(
+				doc.costing_run, ", ".join(changed)
+			),
+			title=_("Nguồn đã thay đổi"),
+		)
 
 
 def _approval_authority(doc):
@@ -171,6 +185,10 @@ def get_proposal(proposal):
 		"items": items,
 		"confirmations": confirmations,
 		"approval_authority": _approval_authority(doc),
+		"source": {
+			"run": doc.costing_run,
+			"based_on_run": frappe.db.get_value(RUN, doc.costing_run, "based_on_run"),
+		},
 		"actions": _available_actions(doc, user),
 		"my_departments": _my_departments(doc, user) if doc.workflow_state == logic.WAIT_DEPT else [],
 		"summary": {
@@ -291,6 +309,9 @@ def apply_action(proposal, action, reason=None, acknowledged=None, department=No
 	reason = (reason or "").strip()
 	items = [i.as_dict() for i in doc.items]
 	authority = _approval_authority(doc)
+
+	if action in (logic.ACT_SUBMIT, logic.ACT_APPROVE):
+		_check_source_unchanged(doc, items)
 
 	if action == logic.ACT_SUBMIT:
 		errors = logic.submit_errors(items, authority, doc.apply_from)

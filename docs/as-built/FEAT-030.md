@@ -2,7 +2,7 @@
 - Phiên bản app 0.0.1, ngày hoàn tất mã 2026-11-27, người nghiệm thu: chờ QA (Multica)
 
 ## 1. Luồng nghiệp vụ đã xây
-UC-015 bước 1–7, 2a, 7a, 4a, 6a và UC-016 phần bảng so sánh giá. Tài chính lập phương án từ lần tính "Đã khóa" (nút "Tạo phương án giá" trên NC Costing Run): mỗi dịch vụ một dòng, giá đề xuất mặc định là giá làm tròn của bộ máy (golden 302.100 và 92.600), kèm giá thành toàn bộ, giá tính toán, trung vị và số đơn vị tham chiếu chụp từ thống kê FEAT-028. Sửa giá đề xuất khác giá làm tròn thì phải ghi căn cứ, nếu không "Gửi duyệt" bị từ chối. Gửi duyệt chuyển "Chờ khoa xác nhận" và thông báo trưởng khoa; khi mọi khoa xác nhận thì "Chờ phê duyệt" và thông báo Giám đốc. Dòng dưới giá thành phải được Giám đốc tích xác nhận riêng khi phê duyệt. Loại giá "Bệnh viện": "Đã duyệt", ghi giá và ngày áp dụng vào lịch sử giá từng dịch vụ. Loại giá "Cơ quan có thẩm quyền": "Đã duyệt nội bộ, chờ trình"; sau đó Tài chính ghi số văn bản, ngày, giá được duyệt (lưu cạnh giá đã trình) và lịch sử giá. Từ chối ở cấp khoa hoặc Giám đốc cần lý do, trả về "Nháp", thông báo người lập. Bảng so sánh giá Excel xuất từ hộp thoại "Xuất hồ sơ" (lần tính đã khóa) hoặc từ form phương án giá.
+UC-015 bước 1–7, 2a, 7a, 4a, 6a và UC-016 phần bảng so sánh giá. Tài chính lập phương án từ lần tính "Đã khóa" hoặc kịch bản đã tính của lần khóa (nút "Tạo phương án giá" trên NC Costing Run): mỗi dịch vụ một dòng, giá đề xuất mặc định là giá làm tròn của bộ máy (golden 302.100 và 92.600), kèm giá thành toàn bộ, giá tính toán, trung vị và số đơn vị tham chiếu chụp từ thống kê FEAT-028. Sửa giá đề xuất khác giá làm tròn thì phải ghi căn cứ, nếu không "Gửi duyệt" bị từ chối. Gửi duyệt chuyển "Chờ khoa xác nhận" và thông báo trưởng khoa; khi mọi khoa xác nhận thì "Chờ phê duyệt" và thông báo Giám đốc. Dòng dưới giá thành phải được Giám đốc tích xác nhận riêng khi phê duyệt. Loại giá "Bệnh viện": "Đã duyệt", ghi giá và ngày áp dụng vào lịch sử giá từng dịch vụ. Loại giá "Cơ quan có thẩm quyền": "Đã duyệt nội bộ, chờ trình"; sau đó Tài chính ghi số văn bản, ngày, giá được duyệt (lưu cạnh giá đã trình) và lịch sử giá. Từ chối ở cấp khoa hoặc Giám đốc cần lý do, trả về "Nháp", thông báo người lập. Bảng so sánh giá Excel xuất từ hộp thoại "Xuất hồ sơ" (lần tính đã khóa) hoặc từ form phương án giá.
 
 ## 2. DocType tạo mới hoặc thay đổi
 Mới: NC Price Proposal, NC Price Proposal Item, NC Proposal Dept Confirmation (module NC Benchmark); NC Service Price History (module NC Procedure, bảng con). Thay đổi: NC Technical Service thêm `approved_prices` (chỉ đọc, ghi qua phê duyệt; controller chặn sửa/xóa/thêm tay, ASM-030-15, không cần patch). Trạng thái chỉ đổi qua API; ngoài "Nháp" nội dung bị khóa (DI-07).
@@ -20,7 +20,7 @@ Loại giá phải khai `approval_authority` (TBD-05). Mỗi NC Department cần
 TC-PRICE-01..07 và TC-OUT-05 có test cùng mã (xem `docs/rtm-testref/FEAT-030.md` và `implementation-log.md`); kết quả QA ở `acceptance.md`.
 
 ## 7. Giới hạn đã biết và nợ kỹ thuật
-- Chưa lập phương án từ kịch bản điều chỉnh: chờ FEAT-029 (ASM-030-01); nhận kịch bản qua `costing_run`.
+- Nguồn kịch bản FEAT-029 (ASM-030-01, 19): kịch bản không bị khóa; nếu kịch bản đổi sau khi lập phương án thì "Gửi duyệt" và "Phê duyệt" báo "đã thay đổi", phải lập phương án mới.
 - Bảng so sánh giá chưa nằm trong hồ sơ nén (ASM-030-14).
 - Trung vị tham chiếu chụp lúc lập phương án, không tự cập nhật (ASM-030-10).
 - Lưới "Giá đã duyệt" hiển thị theo thứ tự ghi, không sắp giảm dần ở phía khách.

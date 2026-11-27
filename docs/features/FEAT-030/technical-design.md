@@ -12,7 +12,7 @@ Giả định: `docs/decisions/assumptions/FEAT-030.md` (ASM-030-01..16). Không
 
 | FR | Làm | Ghi chú |
 | :-- | :-- | :-- |
-| FR-PRICE-001 | Đủ với nguồn lần tính "Đã khóa" | Mỗi NC Service Cost `calc_status ≠ Lỗi` một dòng: `full_cost`, `calculated_price`, `rounded_price`, `benchmark_median`, `benchmark_count`, `proposed_price = rounded_price`. Kịch bản điều chỉnh (FEAT-029, chưa DONE): chưa làm, xem ASM-030-01 |
+| FR-PRICE-001 | Đủ | Nguồn: lần tính "Đã khóa" hoặc kịch bản FEAT-029 (`based_on_run`, "Đã tính", lần gốc "Đã khóa"), xem ASM-030-01, 19. Mỗi NC Service Cost `calc_status ≠ Lỗi` một dòng: `full_cost`, `calculated_price`, `rounded_price`, `benchmark_median`, `benchmark_count`, `proposed_price = rounded_price` |
 | FR-PRICE-002 | Đủ | `proposed_price ≠ rounded_price` mà `adjustment_basis` rỗng → chặn "Gửi duyệt", nêu mã dịch vụ |
 | FR-PRICE-003 | Đủ | `below_cost = proposed_price < full_cost` (máy chủ đặt); Giám đốc phê duyệt phải tích `director_ack` từng dòng `below_cost` |
 | FR-PRICE-004 | Đủ | Gửi duyệt → "Chờ khoa xác nhận", sinh một dòng NC Proposal Dept Confirmation cho mỗi khoa có dòng; thông báo `head_user` của từng khoa |
@@ -24,7 +24,7 @@ Giả định: `docs/decisions/assumptions/FEAT-030.md` (ASM-030-01..16). Không
 | FR-PRICE-010 | Đủ | Lịch sử chỉ thêm dòng, không sửa, không xóa; giá cũ giữ nguyên |
 | FR-OUT-007 | Đủ | Bảng so sánh giá Excel (đơn vị, giá, ngày hiệu lực, nguồn, thống kê) qua khung FEAT-019; từ lần tính đã khóa (hộp thoại SCR-DSK-028) và từ phương án giá |
 
-Ngoài phạm vi: lập phương án từ kịch bản điều chỉnh (FEAT-029); đưa bảng so sánh giá vào hồ sơ nén (ASM-030-14); trích bảng giá cho HIS (FEAT-027 phần R3 khác).
+Ngoài phạm vi: đưa bảng so sánh giá vào hồ sơ nén (ASM-030-14); trích bảng giá cho HIS (FEAT-027 phần R3 khác).
 
 ## 2. DocType
 

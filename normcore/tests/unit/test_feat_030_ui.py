@@ -87,10 +87,11 @@ class TestFeat030Ui(unittest.TestCase):
 		):
 			self.assertRegex(LIST, rf'"{state}": \[__\("[^"]+"\), "{color}"\]')
 
-	def test_nut_tao_phuong_an_chi_khi_da_khoa(self):
-		block = RUN_FORM.split('__("Create price proposal"), () =>')[0].rsplit("if (", 1)[1]
+	def test_nut_tao_phuong_an_chi_khi_da_khoa_hoac_kich_ban_da_tinh(self):
+		block = RUN_FORM.split("const proposal_source =")[1].split("\n")[0]
 		self.assertIn('"Đã khóa"', block)
-		self.assertNotIn('"Đã tính"', block)
+		self.assertIn("based_on_run", block)
+		self.assertIn('"Đã tính"', block)  # chỉ đi cùng based_on_run (kịch bản)
 		self.assertIn("normcore.api.price_proposal.create_proposal", RUN_FORM)
 
 	def test_giao_dien_dich_vu_va_hop_thoai_xuat(self):

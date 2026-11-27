@@ -5,7 +5,6 @@ from frappe.model.document import Document
 from normcore.benchmark import proposal
 
 RUN = "NC Costing Run"
-LOCKED = "Đã khóa"
 _DATA_FIELDS = ("title", "apply_from", "price_category", "costing_run")
 # Trường dòng chỉ máy chủ ghi (read_only trên form): chặn sửa trực tiếp qua REST/`frappe.client.save` (FR-PRICE-002..004)
 _SERVER_ITEM_FIELDS = (
@@ -70,9 +69,16 @@ class NCPriceProposal(Document):
 		self.mark_below_cost()
 
 	def check_run(self):
-		status, category = frappe.db.get_value(RUN, self.costing_run, ["status", "price_category"])
-		if status != LOCKED:
-			frappe.throw(_("Chỉ lập phương án từ lần tính giá đã khóa"))
+		"""Nguồn: lần tính "Đã khóa" hoặc kịch bản FEAT-029 (ASM-030-01). Chỉ kiểm khi tạo; sau đó nguồn đổi thì
+		"Gửi duyệt" và "Phê duyệt" báo (ASM-030-19)."""
+		status, category, based_on = frappe.db.get_value(
+			RUN, self.costing_run, ["status", "price_category", "based_on_run"]
+		)
+		if self.is_new():
+			origin_status = frappe.db.get_value(RUN, based_on, "status") if based_on else None
+			error = proposal.source_error(status, based_on, origin_status)
+			if error:
+				frappe.throw(_(error))
 		self.price_category = category  # ASM-030-02
 
 	def check_server_fields(self):

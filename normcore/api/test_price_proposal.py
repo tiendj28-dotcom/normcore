@@ -26,9 +26,9 @@ class ProposalCase(FrappeTestCase):
 		frappe.set_user("Administrator")
 		frappe.db.rollback()
 
-	def _create(self, **kw):
+	def _create(self, costing_run=None, **kw):
 		frappe.set_user(self.fin)
-		name = api.create_proposal(self.run.name, **kw)["name"]
+		name = api.create_proposal(costing_run or self.run.name, **kw)["name"]
 		frappe.set_user("Administrator")
 		return name
 
@@ -539,3 +539,115 @@ class TestDirectSaveBypass(ActionCase):
 				),
 			)
 		self.assertEqual(self._item(name, "DV-TEST-B").department, "KHOA-TEST-2")
+
+
+class TestScenarioSource(ActionCase):
+	"""FR-PRICE-001: nguồn là kịch bản điều chỉnh của FEAT-029 (ASM-030-01, 19)."""
+
+	def _suggest(self, rule, target, current, suggested, component):
+		cost = frappe.db.get_value(
+			"NC Service Cost", {"costing_run": self.run.name, "technical_service": "DV-TEST-A"}
+		)
+		doc = frappe.get_doc(
+			{
+				"doctype": "NC Adjustment Suggestion",
+				"service_cost": cost,
+				"rule_code": rule,
+				"direction": "Giảm",
+				"component": component,
+				"target_ref": target,
+				"current_value": current,
+				"suggested_value": suggested,
+			}
+		)
+		doc.flags.adj_system = True
+		return doc.insert(ignore_permissions=True).name
+
+	def _accept(self, adj):
+		from normcore.api import scenario
+
+		frappe.set_user(self.fin)
+		try:
+			return scenario.accept_suggestion(adj)
+		finally:
+			frappe.set_user("Administrator")
+
+	def _scenario(self):
+		out = self._accept(self._suggest("BR-ADJ-001", "EQ1", "0,5", "0,4", "EQUIPMENT"))
+		self.assertEqual(out["outcome"], "scenario")
+		return out["scenario"]
+
+	def test_FR_PRICE_001_lap_tu_kich_ban(self):
+		scenario = self._scenario()
+		self.assertEqual(frappe.db.get_value("NC Costing Run", scenario, "status"), "Đã tính")
+		name = self._create(costing_run=scenario)
+		doc = frappe.get_doc(DT, name)
+		self.assertEqual(doc.costing_run, scenario)
+		costs = {
+			c.technical_service: c
+			for c in frappe.get_all(
+				"NC Service Cost",
+				{"costing_run": scenario},
+				["technical_service", "rounded_price", "full_cost"],
+			)
+		}
+		self.assertEqual(len(doc.items), len(costs))
+		self.assertEqual(len(doc.items), 2)
+		for i in doc.items:  # giá đề xuất đọc từ CSDL của kịch bản, không đặt số mới
+			self.assertEqual(float(i.proposed_price), float(costs[i.technical_service].rounded_price))
+			self.assertEqual(float(i.full_cost), float(costs[i.technical_service].full_cost))
+		# giá kịch bản khác giá lần gốc đã khóa
+		origin = frappe.db.get_value(
+			"NC Service Cost",
+			{"costing_run": self.run.name, "technical_service": "DV-TEST-A"},
+			"rounded_price",
+		)
+		self.assertNotEqual(float(self._item(name, "DV-TEST-A").proposed_price), float(origin))
+		frappe.set_user(self.fin)
+		data = api.get_proposal(name)
+		frappe.set_user("Administrator")
+		self.assertEqual(data["source"], {"run": scenario, "based_on_run": self.run.name})
+
+	def test_FR_PRICE_001_kich_ban_tren_lan_chua_khoa_bi_tu_choi(self):
+		scenario = self._scenario()
+		frappe.db.set_value("NC Costing Run", self.run.name, "status", "Đã tính")
+		frappe.set_user(self.fin)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			api.create_proposal(scenario)
+		self.assertIn("kịch bản của lần tính giá đã khóa", str(cm.exception))
+
+	def test_FR_PRICE_001_kich_ban_chua_tinh_xong_bi_tu_choi(self):
+		scenario = self._scenario()
+		frappe.db.set_value("NC Costing Run", scenario, "status", "Nháp")
+		frappe.set_user(self.fin)
+		with self.assertRaises(frappe.ValidationError):
+			api.create_proposal(scenario)
+
+	def test_FR_PRICE_001_kich_ban_doi_sau_khi_lap_chan_gui_duyet(self):
+		scenario = self._scenario()
+		name = self._create(costing_run=scenario, apply_from="2027-01-01")
+		# chấp nhận thêm gợi ý vào kịch bản sau khi lập phương án
+		out = self._accept(self._suggest("BR-ADJ-005", self.params.name, "5%", "4%", "PARAMETER"))
+		self.assertEqual(out["scenario"], scenario)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			self._act(self.fin, name, "Gửi duyệt")
+		self.assertIn(scenario, str(cm.exception))
+		self.assertIn("lập phương án mới", str(cm.exception))
+		self.assertEqual(self._state(name), pr.DRAFT)
+
+	def test_FR_PRICE_001_kich_ban_doi_sau_gui_duyet_chan_phe_duyet(self):
+		scenario = self._scenario()
+		name = self._create(costing_run=scenario, apply_from="2027-01-01")
+		self._act(self.fin, name, "Gửi duyệt")
+		self._act(self.head, name, "Xác nhận")
+		self.assertEqual(self._state(name), pr.WAIT_DIRECTOR)
+		self._accept(self._suggest("BR-ADJ-005", self.params.name, "5%", "4%", "PARAMETER"))
+		with self.assertRaises(frappe.ValidationError) as cm:
+			self._act(self.dir, name, "Phê duyệt")
+		self.assertIn("lập phương án mới", str(cm.exception))
+		self.assertEqual(self._state(name), pr.WAIT_DIRECTOR)
+		self.assertEqual(len(frappe.get_doc("NC Technical Service", "DV-TEST-A").approved_prices), 0)
+
+	def test_nguon_lan_khoa_khong_doi_van_gui_duoc(self):
+		name = self._create(apply_from="2027-01-01")
+		self.assertEqual(self._act(self.fin, name, "Gửi duyệt"), {"workflow_state": pr.WAIT_DEPT})
