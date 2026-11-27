@@ -46,7 +46,11 @@ class PriceCompareBase(FrappeTestCase):
 		self.assertEqual(self.run.run_costing(), "Đã tính")
 		self.cost = frappe.get_value(COST, {"costing_run": self.run.name, "technical_service": "DV-TEST-A"})
 		for i, (prov, level, own) in enumerate(
-			[("Hà Nội", "Hạng I", "Công lập"), ("Hà Nội", "Hạng II", "Tư nhân"), ("Huế", "Hạng I", "Công lập")]
+			[
+				("Hà Nội", "Hạng I", "Công lập"),
+				("Hà Nội", "Hạng II", "Tư nhân"),
+				("Huế", "Hạng I", "Công lập"),
+			]
 		):
 			make_facility(f"BV-N81-{i}", province=prov, facility_level=level, ownership=own)
 
@@ -108,7 +112,9 @@ class TestPriceCompare(PriceCompareBase):
 		self.assertEqual((row["count"], float(row["median"])), (3, 280000))
 		# lọc Hạng I: còn 2 đơn vị -> chưa đủ dữ liệu
 		row = next(
-			r for r in api.get_comparison(self.run.name, levels='["Hạng I"]')["rows"] if r["service_cost"] == self.cost
+			r
+			for r in api.get_comparison(self.run.name, levels='["Hạng I"]')["rows"]
+			if r["service_cost"] == self.cost
 		)
 		self.assertEqual((row["count"], row["sufficient"]), (2, False))
 		# lọc Hà Nội + tỉnh qua chi tiết
@@ -190,7 +196,9 @@ class TestSuggestions(PriceCompareBase):
 		out = api.generate_suggestions(self.cost)
 		by = {s["rule_code"]: s for s in out}
 		eq1 = by["BR-ADJ-001"]
-		self.assertEqual((eq1["target_ref"], eq1["current_value"], eq1["suggested_value"]), ("EQ1", "0,4", "0,5"))
+		self.assertEqual(
+			(eq1["target_ref"], eq1["current_value"], eq1["suggested_value"]), ("EQ1", "0,4", "0,5")
+		)
 		self.assertLess(eq1["estimated_impact"], 0)
 		self.assertEqual(eq1["status"], "Mới")
 		self.assertTrue(eq1["text"])
@@ -224,7 +232,9 @@ class TestSuggestions(PriceCompareBase):
 		with self.assertRaises(frappe.ValidationError):
 			api.decide_suggestion(s["name"], "Không rõ")
 		d = api.decide_suggestion(s["name"], "Từ chối", "Máy mới nhập")
-		self.assertEqual((d["status"], d["decision_reason"], d["decided_by"]), ("Từ chối", "Máy mới nhập", self.fin))
+		self.assertEqual(
+			(d["status"], d["decision_reason"], d["decided_by"]), ("Từ chối", "Máy mới nhập", self.fin)
+		)
 		self.assertTrue(d["decided_on"])
 		with self.assertRaises(frappe.ValidationError):  # đã quyết, không quyết lại
 			api.decide_suggestion(s["name"], "Chấp nhận")
@@ -275,7 +285,7 @@ class TestSuggestions(PriceCompareBase):
 		)
 		extra.flags.adj_system = True
 		extra.insert(ignore_permissions=True)
-		names = names[:2] + [extra.name]
+		names = [*names[:2], extra.name]
 		# Director, Trưởng khoa khoa mình: được; không có Sinh gợi ý
 		frappe.set_user(self.dir)
 		self.assertEqual(api.decide_suggestion(names[0], "Chấp nhận")["decided_by"], self.dir)

@@ -14,7 +14,9 @@ PAGE = json.loads((PAGE_DIR / "price_compare.json").read_text(encoding="utf-8"))
 ADJ = ROOT / "nc_benchmark" / "doctype" / "nc_adjustment_suggestion"
 FORM = (ADJ / "nc_adjustment_suggestion.js").read_text(encoding="utf-8")
 LIST = (ADJ / "nc_adjustment_suggestion_list.js").read_text(encoding="utf-8")
-RUN_FORM = (ROOT / "nc_costing" / "doctype" / "nc_costing_run" / "nc_costing_run.js").read_text(encoding="utf-8")
+RUN_FORM = (ROOT / "nc_costing" / "doctype" / "nc_costing_run" / "nc_costing_run.js").read_text(
+	encoding="utf-8"
+)
 FRAGMENT = {
 	r[0]: r[1]
 	for r in csv.reader((ROOT / "translations" / "vi.d" / "FEAT-028.csv").open(encoding="utf-8"))

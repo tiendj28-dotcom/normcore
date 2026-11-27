@@ -52,7 +52,9 @@ class ServiceFacts:
 	line_rates: dict  # line_id -> engine.LineRate (đơn giá đã dùng trong lần tính)
 	costing_date: date | str | None = None
 	price_valid_months: int = 12
-	equipment: dict = field(default_factory=dict)  # code -> {annual_cost, planned_hours, utilization, maintenance}
+	equipment: dict = field(
+		default_factory=dict
+	)  # code -> {annual_cost, planned_hours, utilization, maintenance}
 	time_study: dict = field(default_factory=dict)  # (step_id, resource) -> trung vị phút
 	wastage_cap: Decimal = Decimal(0)
 	equivalents: dict = field(default_factory=dict)  # line_id -> [(item, LineRate)] đang dùng
@@ -73,7 +75,9 @@ def _text(rule_code, target, current, suggested) -> str:
 
 
 def _price(facts, direct_total, pricing=None):
-	return engine.price_service(direct_total, facts.alloc_by_category, pricing or facts.pricing).calculated_price
+	return engine.price_service(
+		direct_total, facts.alloc_by_category, pricing or facts.pricing
+	).calculated_price
 
 
 def impact(facts: ServiceFacts, delta_direct, pricing=None) -> Decimal:
@@ -87,12 +91,16 @@ def _amount(line, rate) -> Decimal:
 
 
 def _make(rule, direction, component, target, cur, sug, impact_value, proc=False):
-	return Suggestion(rule, direction, component, target, cur, sug, impact_value, proc, _text(rule, target, cur, sug))
+	return Suggestion(
+		rule, direction, component, target, cur, sug, impact_value, proc, _text(rule, target, cur, sug)
+	)
 
 
 def rule_001_utilization(facts):
 	out = []
-	for code in sorted({ln.resource for ln in facts.norm_lines if ln.component == "EQUIPMENT" and not ln.excluded}):
+	for code in sorted(
+		{ln.resource for ln in facts.norm_lines if ln.component == "EQUIPMENT" and not ln.excluded}
+	):
 		eq = facts.equipment.get(code)
 		if not eq or Decimal(str(eq["utilization"])) >= UTILIZATION_TARGET:
 			continue
@@ -105,7 +113,9 @@ def rule_001_utilization(facts):
 				cur = facts.line_rates[ln.line_id]
 				delta += _amount(ln, replace(cur, rate=new)) - _amount(ln, replace(cur, rate=old))
 		out.append(
-			_make("BR-ADJ-001", DOWN, "EQUIPMENT", code, _fmt(u), _fmt(UTILIZATION_TARGET), impact(facts, delta))
+			_make(
+				"BR-ADJ-001", DOWN, "EQUIPMENT", code, _fmt(u), _fmt(UTILIZATION_TARGET), impact(facts, delta)
+			)
 		)
 	return out
 
@@ -147,7 +157,16 @@ def rule_003_equivalent(facts):
 		item, rate = min(cheaper, key=lambda x: (x[1].rate, x[0]))
 		delta = _amount(ln, rate) - _amount(ln, cur)
 		out.append(
-			_make("BR-ADJ-003", DOWN, ln.component, ln.line_id, ln.resource, item, impact(facts, delta), proc=True)
+			_make(
+				"BR-ADJ-003",
+				DOWN,
+				ln.component,
+				ln.line_id,
+				ln.resource,
+				item,
+				impact(facts, delta),
+				proc=True,
+			)
 		)
 	return out
 
@@ -199,10 +218,22 @@ def rule_005_accumulation(facts, direction):
 def rule_006_missing(facts):
 	out = []
 	comps = {ln.component for ln in facts.norm_lines if not ln.excluded}
-	for code in sorted({ln.resource for ln in facts.norm_lines if ln.component == "EQUIPMENT" and not ln.excluded}):
+	for code in sorted(
+		{ln.resource for ln in facts.norm_lines if ln.component == "EQUIPMENT" and not ln.excluded}
+	):
 		eq = facts.equipment.get(code)
 		if eq and Decimal(str(eq.get("maintenance") or 0)) == 0:
-			out.append(_make("BR-ADJ-006", UP, "EQUIPMENT", code, "Chưa có chi phí bảo trì", "Bổ sung chi phí bảo trì", None))
+			out.append(
+				_make(
+					"BR-ADJ-006",
+					UP,
+					"EQUIPMENT",
+					code,
+					"Chưa có chi phí bảo trì",
+					"Bổ sung chi phí bảo trì",
+					None,
+				)
+			)
 	for comp, label in (("INFRA", "hạ tầng"), ("UTILITY", "tiện ích")):
 		if comp not in comps:
 			out.append(_make("BR-ADJ-006", UP, comp, comp, "Chưa có", f"Bổ sung dòng {label}", None))
@@ -222,11 +253,27 @@ def rule_007_stale(facts):
 			valid_from = stats._d(info["valid_from"])
 			if valid_from < limit:
 				out.append(
-					_make("BR-ADJ-007", UP, "ITEM", info["item"], valid_from.isoformat(), "Cập nhật đơn giá", None)
+					_make(
+						"BR-ADJ-007",
+						UP,
+						"ITEM",
+						info["item"],
+						valid_from.isoformat(),
+						"Cập nhật đơn giá",
+						None,
+					)
 				)
 	if facts.latest_parameter_set and facts.latest_parameter_set != facts.parameter_set:
 		out.append(
-			_make("BR-ADJ-007", UP, "PARAMETER", facts.parameter_set, facts.parameter_set, facts.latest_parameter_set, None)
+			_make(
+				"BR-ADJ-007",
+				UP,
+				"PARAMETER",
+				facts.parameter_set,
+				facts.parameter_set,
+				facts.latest_parameter_set,
+				None,
+			)
 		)
 	return out
 

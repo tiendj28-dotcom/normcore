@@ -38,7 +38,14 @@ def _facts(**kw):
 		line_rates=rates,
 		costing_date="2026-12-31",
 		price_valid_months=12,
-		equipment={"EQ1": {"annual_cost": D("186000000"), "planned_hours": D("2112"), "utilization": D("0.4"), "maintenance": D("1")}},
+		equipment={
+			"EQ1": {
+				"annual_cost": D("186000000"),
+				"planned_hours": D("2112"),
+				"utilization": D("0.4"),
+				"maintenance": D("1"),
+			}
+		},
 		time_study={("S002", "DD"): D("15")},
 		wastage_cap=D("0.10"),
 		parameter_set="PS1",
@@ -88,13 +95,20 @@ class TestBenchmarkRules(unittest.TestCase):
 		assert rules.rule_002_time_study(_facts(time_study={})) == []
 
 	def test_rule_003_mat_hang_tuong_duong(self):
-		cheap = {"L05": [("THUOCZ", engine.LineRate(D("500"), "t")), ("THUOCW", engine.LineRate(D("2000"), "t"))]}
+		cheap = {
+			"L05": [("THUOCZ", engine.LineRate(D("500"), "t")), ("THUOCW", engine.LineRate(D("2000"), "t"))]
+		}
 		out = rules.rule_003_equivalent(_facts(equivalents=cheap))
 		assert len(out) == 1
 		s = out[0]
 		assert (s.target_ref, s.current_value, s.suggested_value) == ("L05", "THUOCX", "THUOCZ")
 		assert s.requires_procedure_change and s.estimated_impact < 0
-		assert rules.rule_003_equivalent(_facts(equivalents={"L05": [("THUOCW", engine.LineRate(D("2000"), "t"))]})) == []
+		assert (
+			rules.rule_003_equivalent(
+				_facts(equivalents={"L05": [("THUOCW", engine.LineRate(D("2000"), "t"))]})
+			)
+			== []
+		)
 		assert rules.rule_003_equivalent(_facts()) == []
 
 	def test_rule_004_hao_hut(self):
@@ -113,26 +127,40 @@ class TestBenchmarkRules(unittest.TestCase):
 		assert down.component == "PARAMETER" and down.target_ref == "PS1"
 
 	def test_rule_005_khong_kich_hoat(self):
-		assert rules.rule_005_accumulation(_facts(pricing=replace(PRICING, accumulation_mode=None)), rules.DOWN) == []
-		assert rules.rule_005_accumulation(_facts(pricing=replace(PRICING, accumulation_rate=D(0))), rules.UP) == []
+		assert (
+			rules.rule_005_accumulation(_facts(pricing=replace(PRICING, accumulation_mode=None)), rules.DOWN)
+			== []
+		)
+		assert (
+			rules.rule_005_accumulation(_facts(pricing=replace(PRICING, accumulation_rate=D(0))), rules.UP)
+			== []
+		)
 
 	def test_rule_005_khong_am(self):
 		p = replace(PRICING, accumulation_rate=D("0.005"))
 		assert rules.rule_005_accumulation(_facts(pricing=p), rules.DOWN) == []
 
 	def test_rule_006_khong_kich_hoat_khi_du(self):
-		lines = _facts().norm_lines + (_line("L09", "UTILITY", "DIEN", 1),)
+		lines = (*_facts().norm_lines, _line("L09", "UTILITY", "DIEN", 1))
 		assert rules.rule_006_missing(_facts(norm_lines=lines)) == []
 
 	def test_rule_007_don_gia_cu_va_bo_tham_so(self):
-		stale = {"L05": {"item": "THUOCX", "valid_from": "2025-01-01"}, "L04": {"item": "NEW", "valid_from": "2026-06-01"}}
+		stale = {
+			"L05": {"item": "THUOCX", "valid_from": "2025-01-01"},
+			"L04": {"item": "NEW", "valid_from": "2026-06-01"},
+		}
 		out = rules.rule_007_stale(_facts(stale_prices=stale, latest_parameter_set="PS2"))
 		assert [(s.component, s.target_ref) for s in out] == [("ITEM", "THUOCX"), ("PARAMETER", "PS1")]
 		assert all(s.estimated_impact is None and s.direction == rules.UP for s in out)
 
 	def test_rule_007_khong_kich_hoat(self):
 		assert rules.rule_007_stale(_facts(stale_prices={}, latest_parameter_set="PS1")) == []
-		assert rules.rule_007_stale(_facts(costing_date=None, stale_prices={"L05": {"item": "X", "valid_from": "2020-01-01"}})) == []
+		assert (
+			rules.rule_007_stale(
+				_facts(costing_date=None, stale_prices={"L05": {"item": "X", "valid_from": "2020-01-01"}})
+			)
+			== []
+		)
 
 	def test_tac_dong_bang_khong_bi_bo_va_sap_xep_khong_tac_dong_sau(self):
 		a = rules._make("BR-ADJ-006", rules.UP, "INFRA", "INFRA", "a", "b", None)
@@ -145,4 +173,6 @@ class TestBenchmarkRules(unittest.TestCase):
 		assert rules.impact(f, 0) == 0
 
 	def test_fmt(self):
-		assert rules._fmt(D("0.40")) == "0,4" and rules._fmt(D("20")) == "20" and rules._fmt(D("5.5")) == "5,5"
+		assert (
+			rules._fmt(D("0.40")) == "0,4" and rules._fmt(D("20")) == "20" and rules._fmt(D("5.5")) == "5,5"
+		)

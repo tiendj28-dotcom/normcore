@@ -25,7 +25,11 @@ def _list(value):
 
 
 def _flag(value) -> bool:
-	return bool(int(value)) if isinstance(value, (int, str)) and str(value).lstrip("-").isdigit() else bool(value)
+	return (
+		bool(int(value))
+		if isinstance(value, (int, str)) and str(value).lstrip("-").isdigit()
+		else bool(value)
+	)
 
 
 def _run_info(run_name):
@@ -70,7 +74,9 @@ def _filters(provinces, levels, ownerships):
 
 
 def _suggestion_view(d) -> dict:
-	text = rules._text(d["rule_code"], d["target_ref"], d.get("current_value") or "", d.get("suggested_value") or "")
+	text = rules._text(
+		d["rule_code"], d["target_ref"], d.get("current_value") or "", d.get("suggested_value") or ""
+	)
 	return {**d, "text": text}
 
 
@@ -132,7 +138,9 @@ def get_comparison(run, provinces=None, levels=None, ownerships=None, use_adjust
 	services = [c.technical_service for c in costs]
 	names = {
 		s.name: s.service_name
-		for s in frappe.get_all("NC Technical Service", {"name": ["in", services or [""]]}, ["name", "service_name"])
+		for s in frappe.get_all(
+			"NC Technical Service", {"name": ["in", services or [""]]}, ["name", "service_name"]
+		)
 	}
 	prices = benchmark_api.comparable_prices_bulk(services, run_doc.price_category, run_doc.costing_date)
 	all_rows = [r for rows in prices.values() for r in rows]
@@ -150,7 +158,9 @@ def get_comparison(run, provinces=None, levels=None, ownerships=None, use_adjust
 			counts[d.service_cost][d.status] += 1
 	out = []
 	for c in costs:
-		summary, _sel, _exc = _stats_for(c, prices.get(c.technical_service, []), run_doc, filters, use_adjusted)
+		summary, _sel, _exc = _stats_for(
+			c, prices.get(c.technical_service, []), run_doc, filters, use_adjusted
+		)
 		out.append(
 			{
 				"service_cost": c.name,
@@ -158,12 +168,17 @@ def get_comparison(run, provinces=None, levels=None, ownerships=None, use_adjust
 				"service_name": names.get(c.technical_service),
 				"department": c.department,
 				"calculated_price": c.calculated_price,
-				**{k: summary[k] for k in ("count", "min", "median", "max", "deviation_pct", "sufficient", "label")},
+				**{
+					k: summary[k]
+					for k in ("count", "min", "median", "max", "deviation_pct", "sufficient", "label")
+				},
 				"exceeds": stats.exceeds(summary["deviation_pct"], tolerance),
 				"suggestion_counts": counts.get(c.name, {"Mới": 0, "Chấp nhận": 0, "Từ chối": 0}),
 			}
 		)
-	out.sort(key=lambda r: (r["deviation_pct"] is None, -abs(r["deviation_pct"] or 0), r["technical_service"]))
+	out.sort(
+		key=lambda r: (r["deviation_pct"] is None, -abs(r["deviation_pct"] or 0), r["technical_service"])
+	)
 	return {"run": _run_view(run_doc, tolerance), "filter_options": options, "rows": out}
 
 
@@ -183,11 +198,15 @@ def _detail_base(service_cost, provinces, levels, ownerships, use_adjusted):
 @frappe.whitelist()
 def get_service_detail(service_cost, provinces=None, levels=None, ownerships=None, use_adjusted=0):
 	"""Chi tiết một dịch vụ: giá tham chiếu, giá bị loại, cơ cấu giá, gợi ý (FR-ADJ-001, 010)."""
-	sc, run_doc, tolerance, summary, selected, excluded = _detail_base(
+	sc, _run_doc, tolerance, summary, selected, excluded = _detail_base(
 		service_cost, provinces, levels, ownerships, use_adjusted
 	)
 	return {
-		"stats": {**summary, "exceeds": stats.exceeds(summary["deviation_pct"], tolerance), "tolerance": tolerance},
+		"stats": {
+			**summary,
+			"exceeds": stats.exceeds(summary["deviation_pct"], tolerance),
+			"tolerance": tolerance,
+		},
 		"prices": selected,
 		"excluded": excluded,
 		"breakdown": stats.breakdown(sc.as_dict()),
@@ -311,7 +330,11 @@ def _material_facts(norm_lines, rates, run):
 	from normcore.costing import rates as costing_rates
 
 	as_of = getdate(run.costing_date)
-	lines = [ln for ln in norm_lines if ln.component in ("DRUG", "SUPPLY", "UTILITY") and ln.resource and not ln.excluded]
+	lines = [
+		ln
+		for ln in norm_lines
+		if ln.component in ("DRUG", "SUPPLY", "UTILITY") and ln.resource and not ln.excluded
+	]
 	items = {
 		i.name: i
 		for i in frappe.get_all(
@@ -326,10 +349,19 @@ def _material_facts(norm_lines, rates, run):
 		for c in frappe.get_all(
 			"NC Item",
 			{"equivalent_group": ["in", list(groups)], "is_active": 1},
-			["name", "equivalent_group", "item_type", "norm_units_per_purchase_unit", "reuse_count", "billed_separately"],
+			[
+				"name",
+				"equivalent_group",
+				"item_type",
+				"norm_units_per_purchase_unit",
+				"reuse_count",
+				"billed_separately",
+			],
 		):
 			candidates.setdefault(c.equivalent_group, []).append(c)
-	prices = _price_records({ln.resource for ln in lines} | {c.name for cs in candidates.values() for c in cs})
+	prices = _price_records(
+		{ln.resource for ln in lines} | {c.name for cs in candidates.values() for c in cs}
+	)
 	stale, equivalents = {}, {}
 	for ln in lines:
 		chosen = pricing.select_price(prices.get(ln.resource, []), as_of)
@@ -367,7 +399,13 @@ def _facts(sc, run) -> rules.ServiceFacts:
 
 	inp = costing_api._input_of(costing_api._snapshot_for(run), sc.technical_service, sc.department)
 	pricing_params = loader.pricing_params(run)
-	alloc_fields = ("alloc_labor", "alloc_drug_supply", "alloc_depreciation", "alloc_utility", "alloc_management")
+	alloc_fields = (
+		"alloc_labor",
+		"alloc_drug_supply",
+		"alloc_depreciation",
+		"alloc_utility",
+		"alloc_management",
+	)
 	alloc = {f: Decimal(str(sc.get(f) or 0)) for f in alloc_fields}
 	direct_total = Decimal(str(sc.full_cost or 0)) - sum(alloc.values(), Decimal(0))
 	norm_lines = tuple(inp.lines)
@@ -435,7 +473,14 @@ def generate_suggestions(service_cost, provinces=None, levels=None, ownerships=N
 			doc.update(values)
 		else:
 			doc = frappe.get_doc(
-				{"doctype": ADJ, "service_cost": sc.name, "rule_code": s.rule_code, "target_ref": s.target_ref, "status": "Mới", **values}
+				{
+					"doctype": ADJ,
+					"service_cost": sc.name,
+					"rule_code": s.rule_code,
+					"target_ref": s.target_ref,
+					"status": "Mới",
+					**values,
+				}
 			)
 		doc.flags.adj_system = True
 		doc.save(ignore_permissions=True)

@@ -10,7 +10,13 @@ D = Decimal
 
 
 def _row(facility, price, eff, name=None, **kw):
-	return {"name": name or f"{facility}-{eff}", "facility": facility, "price": price, "effective_date": eff, **kw}
+	return {
+		"name": name or f"{facility}-{eff}",
+		"facility": facility,
+		"price": price,
+		"effective_date": eff,
+		**kw,
+	}
 
 
 class TestBenchmarkStats(unittest.TestCase):
@@ -57,7 +63,7 @@ class TestBenchmarkStats(unittest.TestCase):
 		assert s["sufficient"] and s["count"] == 3
 		assert (s["min"], s["median"], s["max"]) == (D(250000), D(280000), D(300000))
 		assert s["deviation_pct"] == D("7.90")
-		s4 = stats.summarize(D("302132.73"), rows + [{"price": 320000}], 3)
+		s4 = stats.summarize(D("302132.73"), [*rows, {"price": 320000}], 3)
 		assert s4["median"] == D(290000) and s4["deviation_pct"] == D("4.18")
 
 	def test_FR_ADJ_003_duoi_nguong_chua_du_du_lieu(self):
