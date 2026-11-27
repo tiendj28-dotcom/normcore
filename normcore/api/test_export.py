@@ -268,12 +268,29 @@ class TestExportApi(FrappeTestCase):
 			api.export_file("explanation_pdf", service_cost=self.cost_a)
 		with self.assertRaises(frappe.PermissionError):
 			api.get_export_options(service_cost=self.cost_a)
+		with self.assertRaises(frappe.PermissionError):  # khoa khác không đọc được bộ định mức
+			api.export_file(
+				"norm_set_xlsx", norm_set=frappe.db.get_value("NC Service Cost", self.cost_a, "norm_set")
+			)
 		frappe.set_user(HEAD)  # Trưởng khoa không đọc được lần tính cha nhưng mở được hộp thoại giải trình
 		opts = api.get_export_options(service_cost=self.cost_a)
 		by = {o["file_type"]: o for o in opts["options"]}
 		self.assertTrue(by["explanation_pdf"]["enabled"])
 		self.assertFalse(by["annex_v"]["enabled"])
 		self.assertEqual((opts["service_costs"], opts["norm_sets"], opts["bundle"]), ([], [], None))
+		# NORM-78: dịch vụ đang mở và trạng thái khóa có sẵn dù không đọc được lần tính
+		self.assertEqual(opts["own_service"]["name"], self.cost_a)
+		self.assertIs(opts["source"]["run_locked"], True)
+		self.assertIs(opts["source"]["run_readable"], False)
+		ns = frappe.db.get_value("NC Service Cost", self.cost_a, "norm_set")
+		self.assertTrue(ns)
+		self.assertEqual(opts["own_service"]["norm_set"], ns)  # khoa HEAD đọc được bộ của dịch vụ
+		self.assertTrue(by["norm_set_xlsx"]["enabled"] and by["norm_set_pdf"]["enabled"])
+		# đúng tham số hộp thoại gửi: không kèm run khi không đọc được lần tính
+		for ft in ("norm_set_xlsx", "norm_set_pdf"):
+			name, content = self._export(ft, user=HEAD, norm_set=ns)
+			self.assertTrue(name.startswith(ns) and content)
+			frappe.set_user(HEAD)
 		frappe.set_user(FIN)
 		with self.assertRaisesRegex(frappe.ValidationError, "Loại tệp không hợp lệ"):
 			api.export_file("zzz", run=self.run.name)
