@@ -1,6 +1,6 @@
 """API phương án giá (FEAT-030; FR-PRICE-001..010, FR-OUT-007). Logic thuần ở `normcore/benchmark/logic.py`.
 
-Kiểm quyền tường minh trong từng hàm. Giả định ASM-030-01..17 (docs/decisions/assumptions/FEAT-030.md).
+Kiểm quyền tường minh trong từng hàm. Giả định ASM-030-01..18 (docs/decisions/assumptions/FEAT-030.md).
 """
 
 import frappe

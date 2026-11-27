@@ -15,5 +15,5 @@
 | FR-OUT-007 | `test_TC_OUT_05_cot_va_du_lieu_tu_lan_tinh`, `test_TC_OUT_05_nguon_phuong_an_co_cot_gia_de_xuat_va_thong_tin`, `test_dinh_dang_tien_ngay`, `test_khong_co_gia_tham_chieu_van_xuat_duoc` (tests/unit/test_exports_price_comparison.py); `test_TC_OUT_05_xuat_bang_so_sanh_gia` (api/test_price_proposal.py) |
 | Quyền DocType | `test_quyen_clinician_khong_doc`, `test_quyen_auditor_chi_doc`, `test_quyen_truong_khoa_theo_khoa`, `test_quyen_consultant_chi_doc`, `test_quyen_finance_tao_xoa_nhap`, `test_sua_ngoai_api_bi_chan`, `test_auditor_khong_co_transition` (nc_price_proposal/test_nc_price_proposal.py); `test_quyen_hanh_dong` (api/test_price_proposal.py) |
 | Workflow | `test_workflow_khop_transitions` (nc_price_proposal/test_nc_price_proposal.py) |
-| Phạm vi khoa theo bảng con | tests/unit/test_scope_child.py, tests/unit/test_scope_registry.py |
+| Phạm vi khoa theo bảng con | tests/unit/test_scope_child.py, tests/unit/test_scope_registry.py; `test_scope_rule_mac_dinh_khong_co_child`, `test_doc_departments_tu_dong_con` (core/test_scope_child.py, chạy trong bench) |
 | Giao diện | tests/unit/test_feat_030_ui.py |
