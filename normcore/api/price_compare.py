@@ -50,6 +50,7 @@ def _run_view(run, tolerance):
 		"costing_date": run.costing_date,
 		"price_category": run.price_category,
 		"parameter_set": run.parameter_set,
+		"based_on_run": run.get("based_on_run"),
 		"tolerance": tolerance,
 		"window_months": settings.get("benchmark_window_months"),
 		"min_facilities": settings.get("min_benchmark_facilities"),

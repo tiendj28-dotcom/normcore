@@ -11,6 +11,20 @@
 		<div v-if="error" class="alert alert-warning" role="alert">{{ error }}</div>
 
 		<template v-if="data">
+			<section class="nc-pc__scenario" :aria-busy="scenarioLoading ? 'true' : 'false'">
+				<div v-if="data.run.based_on_run" class="alert alert-warning" role="status">
+					{{ __("This is an adjustment scenario of {0}; suggestions are handled on the original run", [data.run.based_on_run]) }}
+					<a href="#" @click.prevent="load(data.run.based_on_run)">{{ __("Open original run") }}</a>
+				</div>
+				<div v-if="scenario" class="alert alert-info" role="status">
+					{{ __("Open scenario {0} · {1} changes · calculated {2}", [scenario.name, scenario.change_count, date(scenario.created_on)]) }}
+					<button type="button" class="btn btn-default btn-xs" :aria-pressed="showScenario ? 'true' : 'false'" @click="showScenario = !showScenario">{{ __("Show scenario") }}</button>
+					<button v-if="scenario.can_create" type="button" class="btn btn-default btn-xs" @click="newScenario">{{ __("New scenario") }}</button>
+				</div>
+				<div v-for="w in (scenario ? scenario.warnings : [])" :key="w" class="alert alert-warning nc-pc__small" role="status">{{ w }}</div>
+				<a v-if="!scenario && canCreateScenario" href="#" class="nc-pc__small" @click.prevent="newScenario">{{ __("Create scenario") }}</a>
+			</section>
+
 			<header class="nc-pc__head">
 				<strong>{{ data.run.title }}</strong>
 				<span class="indicator-pill" :class="data.run.status === 'Đã khóa' ? 'gray' : 'blue'">{{ data.run.status }}</span>
@@ -41,6 +55,7 @@
 								<th v-for="c in columns" :key="c.key" scope="col" :class="{ 'text-right': c.num }">
 									<a href="#" @click.prevent="sortBy(c.key)">{{ c.label }}</a>
 								</th>
+								<th v-if="scenario" scope="col" class="text-right">{{ __("Scenario price") }}</th>
 								<th scope="col">{{ __("Price comparison bar") }}</th>
 								<th scope="col" class="text-right">{{ __("Suggestions") }}</th>
 							</tr>
@@ -67,22 +82,60 @@
 									<td class="text-right">—</td>
 									<td><span class="indicator-pill gray">{{ __("Not enough comparison data") }}</span></td>
 								</template>
+								<td v-if="scenario" class="text-right">
+									<template v-if="scenarioPrice(r) !== null">
+										{{ money(scenarioPrice(r)) }}
+										<span v-if="scenarioDiff(r)" class="text-muted nc-pc__small">{{ signedMoney(scenarioDiff(r)) }}</span>
+									</template>
+									<span v-else>—</span>
+								</td>
 								<td>
 									<div v-if="r.sufficient" class="nc-pc__bar" role="img" :aria-label="__('Min {0}, median {1}, max {2}, hospital {3}', [money(r.min), money(r.median), money(r.max), money(r.calculated_price)])">
 										<span class="nc-pc__tick" :style="{ left: pos(r, r.median) + '%' }"></span>
 										<span class="nc-pc__dot" :style="{ left: pos(r, r.calculated_price) + '%' }"></span>
 									</div>
 								</td>
-								<td class="text-right">{{ r.suggestion_counts["Mới"] }}</td>
+								<td class="text-right">{{ r.suggestion_counts["Mới"] }}<span v-if="r.suggestion_counts[FORWARDED]" class="text-muted nc-pc__small"> · {{ __("Sent as procedure change request") }}: {{ r.suggestion_counts[FORWARDED] }}</span></td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 
 				<div class="nc-pc__detail" role="region" aria-live="polite" :aria-busy="detailLoading ? 'true' : 'false'">
+					<section v-if="showScenario && scenario" role="region" :aria-label="__('Scenario')">
+						<h6>{{ __("Scenario") }} {{ scenario.name }}</h6>
+						<table class="table table-bordered nc-pc__table">
+							<thead><tr>
+								<th scope="col">{{ __("Type") }}</th><th scope="col">{{ __("Service") }}</th><th scope="col">{{ __("Target") }}</th><th scope="col">{{ __("Field") }}</th>
+								<th scope="col">{{ __("Old") }} → {{ __("New") }}</th><th scope="col">{{ __("Source suggestion") }}</th>
+							</tr></thead>
+							<tbody>
+								<tr v-if="!scenario.changes.length"><td colspan="6" class="text-muted">{{ __("No changes yet") }}</td></tr>
+								<tr v-for="(c, i) in scenario.changes" :key="i">
+									<td>{{ c.change_type }}</td><td>{{ c.technical_service || __("Whole run") }}</td><td>{{ c.target_ref }}</td><td>{{ fieldLabel(c.field) }}</td>
+									<td>{{ c.old_value }} → {{ c.new_value }}</td>
+									<td><a v-if="c.source_suggestion" :href="'/app/nc-adjustment-suggestion/' + encodeURIComponent(c.source_suggestion)">{{ c.source_suggestion }}</a></td>
+								</tr>
+							</tbody>
+						</table>
+						<label class="nc-pc__check"><input v-model="showAllServices" type="checkbox" /> {{ __("Show all services") }}</label>
+						<table class="table table-bordered nc-pc__table">
+							<thead><tr>
+								<th scope="col">{{ __("Service") }}</th><th scope="col">{{ __("Department") }}</th><th scope="col" class="text-right">{{ __("Original price") }}</th>
+								<th scope="col" class="text-right">{{ __("Scenario price") }}</th><th scope="col" class="text-right">{{ __("Difference") }}</th><th scope="col" class="text-right">{{ __("Difference %") }}</th>
+							</tr></thead>
+							<tbody>
+								<tr v-for="r in scenarioRows" :key="r.technical_service + r.department">
+									<td>{{ r.technical_service }}</td><td>{{ r.department }}</td><td class="text-right">{{ money(r.base_price) }}</td>
+									<td class="text-right">{{ money(r.scenario_price) }}</td><td class="text-right">{{ signedMoney(r.diff) }}</td><td class="text-right">{{ pct(r.diff_pct) }}</td>
+								</tr>
+							</tbody>
+						</table>
+						<a v-if="canCompareRuns" href="#" @click.prevent="compareRuns">{{ __("Compare runs") }}</a>
+					</section>
 					<div v-if="detailError" class="alert alert-danger" role="alert">{{ detailError }}</div>
-					<div v-if="!detail && !detailError" class="text-muted">{{ __("Select a service to see details") }}</div>
-					<template v-if="detail">
+					<div v-if="!detail && !detailError && !showScenario" class="text-muted">{{ __("Select a service to see details") }}</div>
+					<template v-if="detail && !showScenario">
 						<section>
 							<h6>{{ __("Reference prices") }}</h6>
 							<table class="table table-bordered nc-pc__table">
@@ -144,13 +197,18 @@
 								<div class="text-muted nc-pc__small">{{ __("Target") }}: {{ s.target_ref }} · {{ __("Current") }}: {{ s.current_value }} → {{ __("Suggested") }}: {{ s.suggested_value }}</div>
 								<div>{{ __("Impact") }}: <span v-if="s.estimated_impact !== null && s.estimated_impact !== undefined">{{ money(s.estimated_impact) }}</span><span v-else class="text-muted">{{ __("Not estimated") }}</span></div>
 								<div v-if="s.status !== 'Mới'" class="text-muted nc-pc__small">{{ s.decided_by }} · {{ s.decided_on }}<span v-if="s.decision_reason"> · {{ s.decision_reason }}</span></div>
+								<div v-if="s.status === FORWARDED && s.change_request" class="text-muted nc-pc__small">
+									<a :href="'/app/nc-procedure-change-request/' + encodeURIComponent(s.change_request)">{{ s.change_request }}</a>
+								</div>
+								<div v-if="s.status === 'Chấp nhận' && scenario && !s.requires_procedure_change" class="text-muted nc-pc__small">{{ __("In scenario {0}", [scenario.name]) }}</div>
 								<div v-if="s.status === 'Mới' && detail.can_decide" class="nc-pc__actions">
-									<button v-if="!s.requires_procedure_change" type="button" class="btn btn-default btn-sm" @click="decide(s, 'Chấp nhận')">{{ __("Accept") }}</button>
-									<span v-else class="text-muted nc-pc__small">{{ __("Handled in procedure change request (coming)") }}</span>
+									<button v-if="!s.requires_procedure_change" type="button" class="btn btn-default btn-sm" :disabled="accepting === s.name" :aria-busy="accepting === s.name ? 'true' : 'false'" @click="accept(s)">{{ accepting === s.name ? __("Recalculating scenario…") : __("Accept") }}</button>
+									<button v-else type="button" class="btn btn-default btn-sm" @click="sendRequest(s)">{{ __("Send procedure change request") }}</button>
 									<button type="button" class="btn btn-default btn-sm" @click="reject(s)">{{ __("Reject") }}</button>
 								</div>
 							</div>
 							<div v-if="detail.suggestions.length" class="text-muted nc-pc__small">{{ __("Estimated impact, level-2 allocation not recomputed") }}</div>
+							<button v-if="detail.can_request_change" type="button" class="btn btn-default btn-sm" @click="proposeChange">{{ __("Propose procedure change") }}</button>
 						</section>
 					</template>
 				</div>
@@ -161,6 +219,8 @@
 
 <script>
 const API = "normcore.api.price_compare.";
+const SCENARIO_API = "normcore.api.scenario.";
+const FORWARDED = "Đã chuyển yêu cầu sửa quy trình";
 const PALETTE = ["--blue-500", "--green-500", "--orange-500", "--purple-500", "--cyan-500", "--yellow-500", "--red-400", "--pink-500", "--teal-500", "--gray-500", "--blue-300", "--green-300"];
 
 function serverMessage(r) {
@@ -198,6 +258,12 @@ export default {
 			detailError: "",
 			generating: false,
 			timer: null,
+			FORWARDED,
+			scenario: null,
+			scenarioLoading: false,
+			showScenario: false,
+			showAllServices: false,
+			accepting: "",
 		};
 	},
 	computed: {
@@ -234,6 +300,16 @@ export default {
 			});
 			return rows;
 		},
+		canCreateScenario() {
+			return !!frappe.model.can_create("NC Costing Run") && !(this.data && this.data.run.based_on_run);
+		},
+		canCompareRuns() {
+			return ["NC Finance", "NC Director", "NC Admin", "NC Auditor"].some((r) => frappe.user.has_role(r));
+		},
+		scenarioRows() {
+			const rows = this.scenario ? this.scenario.rows : [];
+			return this.showAllServices ? rows : rows.filter((r) => r.diff);
+		},
 		positive() {
 			return (this.detail ? this.detail.breakdown.rows : []).filter((r) => r.share_pct > 0);
 		},
@@ -263,6 +339,115 @@ export default {
 		},
 		statusColor(s) {
 			return { "Mới": "blue", "Chấp nhận": "green", "Từ chối": "gray" }[s] || "purple";
+		},
+		signedMoney(v) {
+			const n = Number(v || 0);
+			return (n < 0 ? "−" : n > 0 ? "+" : "") + this.money(Math.abs(n));
+		},
+		fieldLabel(f) {
+			return { utilization_rate: __("Utilization rate"), hospital_qty: __("Minutes"), wastage_rate: __("Wastage %"), accumulation_rate: __("Accumulation rate %") }[f] || f;
+		},
+		scenarioRow(r) {
+			return this.scenario && this.scenario.rows.find((x) => x.technical_service === r.technical_service && x.department === r.department);
+		},
+		scenarioPrice(r) {
+			const x = this.scenarioRow(r);
+			return x ? x.scenario_price : null;
+		},
+		scenarioDiff(r) {
+			const x = this.scenarioRow(r);
+			return x ? x.diff : 0;
+		},
+		callApi(method, args, failure) {
+			let serverError = null;
+			return frappe
+				.call({ method, args, freeze: false, silent: true, error(r) { serverError = r; } })
+				.then((r) => {
+					if (!r || !r.message) throw new Error(serverMessage(serverError) || failure);
+					return r.message;
+				})
+				.catch((e) => {
+					throw new Error(serverMessage(serverError) || (e && e.message) || failure);
+				});
+		},
+		loadScenario(run) {
+			this.scenarioLoading = true;
+			return this.callApi(SCENARIO_API + "get_open_scenario", { run }, "")
+				.then((m) => (this.scenario = m))
+				.catch(() => (this.scenario = null))
+				.finally(() => (this.scenarioLoading = false));
+		},
+		newScenario() {
+			frappe.confirm(__("Start a new empty scenario? The current one is kept."), () =>
+				this.callApi(SCENARIO_API + "create_scenario", { run: this.run }, __("Cannot create the scenario."))
+					.then(() => this.loadScenario(this.run).then(() => (this.showScenario = true)))
+					.catch((e) => frappe.msgprint({ message: e.message, indicator: "red" }))
+			);
+		},
+		compareRuns() {
+			frappe.set_route("query-report", "NC Costing Run Comparison", { base_run: this.run, other_run: this.scenario.name });
+		},
+		accept(s) {
+			if (this.accepting) return;
+			this.accepting = s.name;
+			this.callApi(SCENARIO_API + "accept_suggestion", { name: s.name }, __("Cannot save the decision."))
+				.then((m) => {
+					this.accepting = "";
+					if (m.outcome === "scenario") {
+						frappe.show_alert({ message: __("Added to scenario {0}; new price {1}", [m.scenario, this.money(m.scenario_price)]), indicator: "green" });
+						if (m.norm_set) {
+							const text = m.norm_set_created
+								? __("Draft norm set {0} created with the new value, waiting for re-confirmation", [m.norm_set])
+								: __("Applied to draft norm set {0}", [m.norm_set]);
+							frappe.msgprint({ message: text + ` <a href="/app/norm-grid/${encodeURIComponent(m.norm_set)}">${__("Open norm set")}</a>`, indicator: "blue" });
+						}
+					} else {
+						frappe.show_alert({ message: (m.warnings || []).join(" "), indicator: "orange" });
+					}
+					this.afterDecision();
+				})
+				.catch((e) => {
+					this.accepting = "";
+					frappe.msgprint({ message: e.message, indicator: "red" });
+				});
+		},
+		sendRequest(s) {
+			const dialog = new frappe.ui.Dialog({
+				title: __("Send procedure change request"),
+				fields: [
+					{ fieldtype: "HTML", options: `<p>${frappe.utils.escape_html(__("The change will not be applied to the scenario or norm set; a request is sent to the department in charge"))}</p><p>${frappe.utils.escape_html(s.text)}</p>` },
+					{ fieldname: "note", fieldtype: "Small Text", label: __("Note") },
+				],
+				primary_action_label: __("Send procedure change request"),
+				primary_action: (v) => {
+					this.callApi(SCENARIO_API + "accept_suggestion", { name: s.name, note: v.note }, __("Cannot save the decision."))
+						.then((m) => {
+							dialog.hide();
+							frappe.show_alert({ message: __("Request {0} sent", [m.change_request]), indicator: "green" });
+							(m.warnings || []).forEach((w) => frappe.show_alert({ message: w, indicator: "orange" }));
+							this.afterDecision();
+						})
+						.catch((e) => frappe.msgprint({ message: e.message, indicator: "red" }));
+				},
+			});
+			dialog.show();
+		},
+		proposeChange() {
+			frappe.prompt(
+				[
+					{ fieldname: "proposed_change", fieldtype: "Text", label: __("Proposed change (add, remove or change steps/resources)"), reqd: 1 },
+					{ fieldname: "reason", fieldtype: "Small Text", label: __("Reason"), reqd: 1 },
+				],
+				(v) =>
+					this.callApi(SCENARIO_API + "request_procedure_change", { service_cost: this.selected, ...v }, __("Cannot save the decision."))
+						.then((m) => frappe.show_alert({ message: __("Request {0} sent", [m.change_request]), indicator: "green" }))
+						.catch((e) => frappe.msgprint({ message: e.message, indicator: "red" })),
+				__("Propose procedure change"),
+				__("Send")
+			);
+		},
+		afterDecision() {
+			this.load(this.run); // tải lại bảng, dải kịch bản và chi tiết dịch vụ đang chọn
 		},
 		pos(r, v) {
 			const span = Number(r.max) - Number(r.min);
@@ -296,6 +481,7 @@ export default {
 						return;
 					}
 					this.data = r.message;
+					this.loadScenario(run);
 					const keep = this.data.rows.find((x) => x.service_cost === this.selected);
 					if (keep) this.openDetail(keep.service_cost);
 					else {
@@ -386,7 +572,7 @@ export default {
 		refreshCounts() {
 			const row = this.data.rows.find((x) => x.service_cost === this.selected);
 			if (!row || !this.detail) return;
-			const c = { "Mới": 0, "Chấp nhận": 0, "Từ chối": 0 };
+			const c = { "Mới": 0, "Chấp nhận": 0, "Từ chối": 0, [FORWARDED]: 0 };
 			this.detail.suggestions.forEach((s) => {
 				if (s.status in c) c[s.status] += 1;
 			});
