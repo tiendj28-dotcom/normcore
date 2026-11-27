@@ -1,0 +1,9 @@
+{
+	"doctype": "NC Adjustment Suggestion",
+	"department_field": "department",
+	"public_read": {},
+	"via": [
+		"service_cost",
+		"NC Service Cost"
+	]
+}

@@ -461,6 +461,8 @@ frappe.ui.form.on("NC Costing Run", {
 			});
 			frm.add_custom_button(__("Reconciliation table"), () => open_reconciliation(frm));
 			frm.add_custom_button(__("Material and volume reconciliation"), () => open_physical(frm));
+			// FEAT-028, SCR-DSK-026
+			frm.add_custom_button(__("Price comparison"), () => frappe.set_route("price-compare", { run: frm.doc.name }), __("View"));
 		}
 		frm.add_custom_button(__("Missing data report"), () => open_missing(frm));
 		if (frm.doc.status === "Đã tính" && can_write(frm)) {
