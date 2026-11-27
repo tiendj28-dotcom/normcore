@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["TC-CLS-41..43 có test cùng mã, assertion kiểm đúng yêu cầu (provider giả)", "Site sạch: 1967 test bench OK; pytest 1164 passed, độ phủ 99%", "Không test bị nới, không chạm tài liệu chỉ đọc; CI PR #83 xanh"], "commit": "0541907c1605c19c046a0bd40e23c542207e530e"}
