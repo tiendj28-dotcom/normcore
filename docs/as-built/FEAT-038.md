@@ -17,4 +17,4 @@ Giới hạn: giao diện (`cls_norm_suggest.js`, khối `// FEAT-038` ở `nc_q
 - Lần chạy thành công đổi đề xuất chờ cũ của hệ thống sang "Đã bỏ" (ASM-038-11).
 
 ## Test đã chạy
-Site sạch sau merge develop: `bench run-tests --app normcore` 1966 test OK. pytest unit + golden 1164 passed, độ phủ `normcore/costing` + `normcore/benchmark` 98,89%; `ai_cls_norm.py` 100%. `check_conventions.py` thoát 0; `build_rtm.py` VAN DE: 0. TC-CLS-41..43: `test_TC_CLS_41_noi_dung_gui_chi_gom_muc_da_gan`, `test_TC_CLS_42_trich_dan_va_nhan_de_xuat` (và `test_TC_CLS_42_hai_dung_mot_sai`), `test_TC_CLS_43_mat_hang_ngoai_danh_muc`.
+Site sạch sau merge develop: `bench run-tests --app normcore` 1966 test OK. pytest unit + golden 1164 passed, độ phủ `normcore/costing` + `normcore/benchmark` 98,89%; `ai_cls_norm.py` 100%. `check_conventions.py` thoát 0; `build_rtm.py` VAN DE: 0. TC-CLS-41..43: `test_TC_CLS_41_noi_dung_gui_chi_gom_muc_da_gan`, `test_TC_CLS_42_trich_dan_va_nhan_de_xuat`, `test_TC_CLS_43_mat_hang_ngoai_danh_muc`.
