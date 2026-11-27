@@ -30,5 +30,5 @@ TC-BM-05: xanh. Phần giá tham chiếu của TC-AI-07 (ASM-023-16): `test_FR_A
 ## 7. Giới hạn đã biết
 - ASM-027-01..12 (`docs/decisions/assumptions/FEAT-027.md`).
 - PDF dạng bảng: `pypdf` có thể tách tên và giá thành các dòng rời; AI vẫn đọc được nhưng tên đứt dòng có thể bị loại "Không thấy trong tệp".
-- Giao diện chưa kiểm bằng trình duyệt trong lượt Dev (chỉ test tĩnh và build).
+- Giao diện SCR-DSK-025 chưa kiểm bằng trình duyệt (không có tài khoản vai trò thường); phủ bằng test_feat_027_ui.py và test quyền API.
 - Tệp mẫu test dùng wkhtmltopdf nên có lớp văn bản chuẩn; PDF thực tế có thể khác.
