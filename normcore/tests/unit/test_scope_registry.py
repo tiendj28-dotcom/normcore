@@ -26,6 +26,7 @@ SCOPED = {
 	"NC Service Cost",  # FEAT-015, ASM-015-22 (Quyết định Lead Q2)
 	"NC AI Norm Suggestion",  # FEAT-038, AMD-038-01, ASM-038-15
 	"NC Adjustment Suggestion",  # FEAT-028, ASM-028-12
+	"NC Price Proposal",  # FEAT-030, ASM-030-06
 	"NC Procedure Change Request",  # FEAT-029, ASM-029-15
 }
 

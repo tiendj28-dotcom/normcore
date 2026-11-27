@@ -29,6 +29,7 @@ FILE_TYPES = {
 	"explanation_pdf": ("Bảng giải trình (PDF)", "giai-trinh-{service_code}-{run}.pdf", "service_cost"),
 	"norm_set_xlsx": ("Bộ định mức (Excel)", "{norm_set}.xlsx", "norm_set"),
 	"norm_set_pdf": ("Bộ định mức (PDF)", "{norm_set}.pdf", "norm_set"),
+	"price_comparison": ("Bảng so sánh giá", "so-sanh-gia-{run}.xlsx", None),  # FEAT-030, FR-OUT-007
 	"bundle": ("Hồ sơ nén", "ho-so-{run}.zip", None),
 }
 ANNEX_BUILDERS = {
@@ -224,6 +225,16 @@ def export_file(file_type, run=None, service_cost=None, norm_set=None):
 	if not need and not run:
 		frappe.throw(_("Chọn lần tính giá để xuất"), frappe.ValidationError)
 	template = FILE_TYPES[file_type][1]
+	if file_type == "price_comparison":  # FEAT-030, ASM-030-13, 14
+		doc = _locked_run(run)
+		filename = template.format(run=run)
+		try:
+			from normcore.api import price_proposal
+
+			content = price_proposal.build_comparison_file(doc, _meta(file_type, f"{RUN} {run}", run))
+		except Exception as e:
+			_generation_error(filename, e)
+		return _send(filename, content, file_type, RUN, run)
 	if file_type in ANNEX_BUILDERS:
 		doc = _locked_run(run)
 		filename = template.format(run=run)

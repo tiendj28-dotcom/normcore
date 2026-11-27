@@ -4,7 +4,7 @@ frappe.provide("normcore.export");
 
 (function () {
 	const API = "normcore.api.export.";
-	const ANNEX = ["annex_ii", "annex_iii", "annex_iv", "annex_v"];
+	const ANNEX = ["annex_ii", "annex_iii", "annex_iv", "annex_v", "price_comparison"]; // FEAT-030: bảng so sánh giá
 	const esc = (v) => frappe.utils.escape_html(v === null || v === undefined ? "" : String(v));
 
 	function download(args, btn) {

@@ -33,6 +33,9 @@ class ScopeRule:
 	public_read: dict = field(default_factory=dict)
 	# (trường Link, DocType đích): DocType không có trường khoa, khoa lấy từ bản ghi được Link tới (FEAT-032, ASM-032-01)
 	via: tuple | None = None
+	# (DocType con, trường khoa của dòng con): DocType cha không có trường khoa, khoa là tập khoa của các dòng con
+	# (FEAT-030, ASM-030-06). Rule không có `child` chạy như cũ.
+	child: tuple | None = None
 
 
 # Dựng từ tệp normcore/core/scope_rules/*.json (NORM-37): thêm DocType = thêm một tệp, không sửa tệp này
@@ -46,6 +49,19 @@ def _doc_department(rule, doc):
 		target = doc.get(link_field)
 		return frappe.db.get_value(link_doctype, target, rule.department_field) if target else None
 	return doc.get(rule.department_field)
+
+
+def _doc_departments(rule, doc):
+	"""Tập khoa của bản ghi: một khoa (như `_doc_department`), hoặc khoa của mọi dòng con khi rule có `child`."""
+	if rule.child:
+		child_doctype, child_field = rule.child
+		out = set()
+		for table in frappe.get_meta(doc.doctype).get_table_fields():
+			if table.options == child_doctype:
+				out |= {r.get(child_field) for r in doc.get(table.fieldname) or [] if r.get(child_field)}
+		return out
+	dept = _doc_department(rule, doc)
+	return {dept} if dept else set()
 
 
 def get_user_departments(user=None):
@@ -78,6 +94,14 @@ def has_permission(doc, ptype=None, user=None, debug=False):
 	if not rule or not _is_scoped(doc.doctype, ptype, user):
 		return True
 	depts = get_user_departments(user)
+	if rule.child:
+		if _doc_departments(rule, doc) & depts:
+			return True
+		return bool(
+			(not ptype or ptype in READ_TYPES)
+			and rule.public_read
+			and all(doc.get(k) == v for k, v in rule.public_read.items())
+		)
 	if not ptype or ptype in READ_TYPES:
 		if _doc_department(rule, doc) in depts:
 			return True
@@ -106,7 +130,13 @@ def permission_query_conditions(user=None, doctype=None):
 	depts = sorted(get_user_departments(user))
 	if depts:
 		in_list = ", ".join(frappe.db.escape(d) for d in depts)
-		if rule.via:
+		if rule.child:
+			child_doctype, child_field = rule.child
+			conds.append(
+				f"{table}.`name` in (select `parent` from `tab{child_doctype}` "
+				f"where `parenttype` = {frappe.db.escape(doctype)} and `{child_field}` in ({in_list}))"
+			)
+		elif rule.via:
 			link_field, link_doctype = rule.via
 			conds.append(
 				f"{table}.`{link_field}` in (select `name` from `tab{link_doctype}` "

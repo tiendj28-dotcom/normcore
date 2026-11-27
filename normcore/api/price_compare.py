@@ -544,3 +544,18 @@ def decide_suggestion(name, decision, reason=None):
 	doc.flags.adj_decision = True
 	doc.save(ignore_permissions=True)
 	return _suggestion_view(doc.as_dict())
+
+
+def benchmark_summary(run_doc, costs) -> dict:
+	"""FEAT-030 (FR-PRICE-001, ASM-030-10): {dịch vụ: (trung vị nếu đủ đơn vị, số đơn vị)} cho các dòng `costs`.
+
+	Dùng đúng thống kê của `get_comparison` (giá gốc, không bộ lọc); không phải API công khai.
+	"""
+	services = [c["technical_service"] for c in costs]
+	prices = benchmark_api.comparable_prices_bulk(services, run_doc.price_category, run_doc.costing_date)
+	filters = _filters(None, None, None)
+	out = {}
+	for c in costs:
+		summary, _sel, _exc = _stats_for(c, prices.get(c["technical_service"], []), run_doc, filters, False)
+		out[c["technical_service"]] = (summary["median"] if summary["sufficient"] else None, summary["count"])
+	return out

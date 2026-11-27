@@ -8,6 +8,7 @@ const MISSING_REPORT = "NC Missing Data"; // FEAT-037
 const DUPLICATE_METHOD = "normcore.api.costing.duplicate_run"; // FEAT-018
 const VERIFY_METHOD = "normcore.api.costing.verify_snapshot";
 const COMPARE_REPORT = "NC Costing Run Comparison";
+const PROPOSAL_METHOD = "normcore.api.price_proposal.create_proposal"; // FEAT-030
 const RESULT_COLOR = { "Thành công": "green", "Cảnh báo": "yellow", "Lỗi": "red" };
 
 function esc(v) {
@@ -54,6 +55,26 @@ function render_systems(rows) {
 		`<div class="table-responsive"><table class="table table-bordered"><thead><tr>` +
 		`<th>${__("Test system")}</th><th>${__("Norm set")}</th><th class="text-right">${__("Patient results")}</th><th class="text-right">${__("Share")}</th>` +
 		`<th class="text-right">${__("k factor")}</th><th class="text-right">${__("Direct cost per result")}</th><th>${__("Warning")}</th></tr></thead><tbody>${body}</tbody></table></div></details>`
+	);
+}
+
+// FEAT-030: SCR-DSK-027, hộp thoại tạo phương án giá từ lần tính đã khóa
+function create_price_proposal(frm) {
+	frappe.prompt(
+		[
+			{ fieldtype: "Data", fieldname: "title", label: __("Proposal name"), default: __("Price proposal {0}", [frm.doc.title || frm.doc.name]) },
+			{ fieldtype: "Date", fieldname: "apply_from", label: __("Apply from") },
+		],
+		(v) =>
+			frappe.call({
+				method: PROPOSAL_METHOD,
+				args: { costing_run: frm.doc.name, title: v.title, apply_from: v.apply_from },
+				callback(r) {
+					if (r.message) frappe.set_route("Form", "NC Price Proposal", r.message.name);
+				},
+			}),
+		__("Create price proposal"),
+		__("Create")
 	);
 }
 
@@ -492,6 +513,11 @@ frappe.ui.form.on("NC Costing Run", {
 			frm.add_custom_button(__("Price comparison"), () => frappe.set_route("price-compare", { run: frm.doc.name }), __("View"));
 		}
 		frm.add_custom_button(__("Missing data report"), () => open_missing(frm));
+		const proposal_source = frm.doc.status === "Đã khóa" || (frm.doc.based_on_run && frm.doc.status === "Đã tính");
+		if (proposal_source && frappe.model.can_create("NC Price Proposal")) {
+			// FEAT-030, SCR-DSK-027: lần tính đã khóa, hoặc kịch bản đã tính (lần gốc đã khóa do máy chủ kiểm)
+			frm.add_custom_button(__("Create price proposal"), () => create_price_proposal(frm), __("Create"));
+		}
 		if (frm.doc.status === "Đã tính" && can_write(frm)) {
 			frm.add_custom_button(__("Lock"), () => lock_run(frm)).addClass("btn-primary");
 		}

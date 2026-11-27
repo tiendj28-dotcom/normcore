@@ -41,6 +41,8 @@ def load_scope_rules(directory=None) -> dict:
 		}
 		if data.get("via"):  # FEAT-032: khoa lấy qua bản ghi Link: [trường Link, DocType đích]
 			rules[data["doctype"]]["via"] = tuple(data["via"])
+		if data.get("child"):  # FEAT-030: khoa lấy từ bảng con: [DocType con, trường khoa của dòng con]
+			rules[data["doctype"]]["child"] = tuple(data["child"])
 	return rules
 
 
