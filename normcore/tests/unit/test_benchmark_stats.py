@@ -112,5 +112,7 @@ class TestBenchmarkStats(unittest.TestCase):
 		lab = next(r for r in b["rows"] if r["field"] == "direct_labor")
 		assert lab["share_pct"] == D("50.00") and lab["group"] == "Trực tiếp"
 		sc["eqa_cost"] = 0
+		assert "eqa_cost" not in [r["field"] for r in stats.breakdown(sc)["rows"]]
+		sc["eqa_cost"] = 5
 		assert "eqa_cost" in [r["field"] for r in stats.breakdown(sc)["rows"]]
 		assert stats.breakdown({"full_cost": 0})["rows"][0]["share_pct"] is None

@@ -171,6 +171,62 @@ def get_comparable_prices(technical_service, price_category=None, target_month=N
 	return {"rows": out, "target_month": target}
 
 
+def comparable_prices_bulk(technical_services, price_category, target_month=None):
+	"""FEAT-028 (TD 3.4): giá "Đã xác nhận" của nhiều dịch vụ, cùng loại giá, một truy vấn. Không whitelisted.
+
+	Trả {dịch vụ: [dòng]} cùng dạng với `get_comparable_prices(...)["rows"]`; kiểm quyền ở nơi gọi.
+	"""
+	services = list(technical_services or [])
+	if not services:
+		return {}
+	rows = frappe.get_all(
+		PRICE,
+		filters={"technical_service": ["in", services], "price_category": price_category},
+		fields=[
+			"name",
+			"facility",
+			"price",
+			"price_category",
+			"effective_date",
+			"source_doc_no",
+			"source_url",
+			"status",
+			"technical_service",
+		],
+		order_by="effective_date desc, name asc",
+	)
+	rows = ref.comparable_prices(rows)
+	cpi = _cpi_by_month()
+	target = _target_month(target_month, cpi)
+	facilities = {
+		f.name: f
+		for f in frappe.get_all(
+			"NC Benchmark Facility",
+			fields=["name", "facility_name", "province", "ownership", "facility_level"],
+		)
+	}
+	out = {svc: [] for svc in services}
+	for r in rows:
+		f = facilities.get(r.facility) or {}
+		out[r.technical_service].append(
+			{
+				"name": r.name,
+				"facility": r.facility,
+				"facility_name": f.get("facility_name"),
+				"province": f.get("province"),
+				"ownership": f.get("ownership"),
+				"facility_level": f.get("facility_level"),
+				"price": r.price,
+				"price_category": r.price_category,
+				"effective_date": r.effective_date,
+				"source_doc_no": r.source_doc_no,
+				"source_url": r.source_url,
+				"adjusted": _adjust(r, cpi, target),
+			}
+		)
+	return out
+
+
 def _adjust(row, cpi, target):
 	if target is None:
 		return {"adjusted_price": None, "missing": []}

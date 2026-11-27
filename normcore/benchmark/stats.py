@@ -151,7 +151,7 @@ def breakdown(service_cost) -> dict:
 		if group not in (compare.DIRECT, compare.ALLOC):
 			continue
 		value = service_cost.get(field)
-		if value is None and field in compare.OPTIONAL:
+		if not value and field in compare.OPTIONAL:  # None hoặc 0: không có ngoại kiểm
 			continue
 		v = _dec(value or 0)
 		total += v
