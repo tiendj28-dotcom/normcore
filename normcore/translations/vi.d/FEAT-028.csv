@@ -1,0 +1,54 @@
+Accepted,Đã chấp nhận
+Adjusted price,Giá hiệu chỉnh
+Adjustment suggestions,Gợi ý điều chỉnh
+Cannot generate suggestions.,Không sinh được gợi ý.
+Cannot open the price comparison.,Không mở được Bàn so sánh giá.
+Cannot open the service detail.,Không mở được chi tiết dịch vụ.
+Cannot save the decision.,Không lưu được quyết định.
+Cost structure,Cơ cấu giá thành
+Current,Hiện tại
+Deviation %,Độ lệch %
+"Estimated impact, level-2 allocation not recomputed","Ước tính, chưa tính lại phân bổ cấp 2"
+Excluded prices ({0}),Giá bị loại ({0})
+Facilities,Số đơn vị
+Facility,Đơn vị
+Filters,Bộ lọc
+Generate suggestions,Sinh gợi ý
+Group,Nhóm
+Handled in procedure change request (coming),Xử lý bằng yêu cầu sửa quy trình
+Highest,Cao nhất
+Impact,Tác động
+Level,Hạng
+Lowest,Thấp nhất
+Median,Trung vị
+"Min {0}, median {1}, max {2}, hospital {3}","Thấp nhất {0}, trung vị {1}, cao nhất {2}, bệnh viện {3}"
+Missing price index,Thiếu chỉ số giá
+New,Mới
+No suggestions generated yet,Chưa sinh gợi ý
+Not enough comparison data,Chưa đủ dữ liệu so sánh
+Not enough comparison data: no comparison-based suggestions,Chưa đủ dữ liệu so sánh: không có gợi ý dựa trên so sánh
+Not estimated,Chưa ước tính được
+Only over tolerance,Chỉ dịch vụ vượt ngưỡng
+Open in price comparison,Mở ở Bàn so sánh giá
+Over tolerance,Vượt ngưỡng
+Ownership,Loại hình
+Price,Giá
+Price comparison,So sánh giá
+Price comparison bar,Thanh so sánh giá
+Province/City,Tỉnh/thành phố
+Reference prices,Giá tham chiếu
+Regenerate,Sinh lại
+Reject suggestion,Từ chối gợi ý
+Requires procedure change,Cần sửa quy trình
+Search service,Tìm dịch vụ
+Select a costing run,Chọn lần tính giá
+Select a service to see details,Chọn một dịch vụ để xem chi tiết
+Sent to procedure change,Đã chuyển yêu cầu sửa quy trình
+Service name,Tên dịch vụ
+Suggestions,Gợi ý
+Target,Đối tượng
+This costing run has no service results,Lần tính chưa có kết quả dịch vụ
+Use CPI-adjusted prices,Dùng giá hiệu chỉnh
+Value,Giá trị
+Window {0} months · at least {1} facilities · tolerance {2}%,Cửa sổ {0} tháng · tối thiểu {1} đơn vị · ngưỡng lệch {2}%
+"Within tolerance, no adjustment needed","Trong ngưỡng lệch, không cần điều chỉnh"
