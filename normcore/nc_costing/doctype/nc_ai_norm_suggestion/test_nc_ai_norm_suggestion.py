@@ -28,9 +28,7 @@ class TestNCAINormSuggestion(FrappeTestCase):
 		frappe.db.rollback()
 
 	def _cited(self, **kw):
-		return suggestion_values(
-			relation="Theo hướng dẫn", legal_section=self.sec.name, quote=QUOTE_A, **kw
-		)
+		return suggestion_values(relation="Theo hướng dẫn", legal_section=self.sec.name, quote=QUOTE_A, **kw)
 
 	def test_FR_AI_005_trich_dan_de_xuat_nguyen_van(self):
 		doc = frappe.get_doc(self._cited()).insert(ignore_permissions=True)
@@ -72,14 +70,23 @@ class TestNCAINormSuggestion(FrappeTestCase):
 
 	def test_quyen_nc_ai_norm_suggestion_doctype(self):
 		meta = json.loads(
-			(ROOT / "normcore/nc_costing/doctype/nc_ai_norm_suggestion/nc_ai_norm_suggestion.json").read_text()
+			(
+				ROOT / "normcore/nc_costing/doctype/nc_ai_norm_suggestion/nc_ai_norm_suggestion.json"
+			).read_text()
 		)
 		perms = {p["role"]: p for p in meta["permissions"]}
 		self.assertNotIn("NC Council Member", perms)
 		self.assertNotIn("NC Document Controller", perms)
 		for role in ("NC Clinician", "NC Department Head"):
 			self.assertTrue(perms[role].get("write") and perms[role].get("create"))
-		for role in ("NC Finance", "NC Resource Manager", "NC Director", "NC Consultant", "NC Admin", "NC Auditor"):
+		for role in (
+			"NC Finance",
+			"NC Resource Manager",
+			"NC Director",
+			"NC Consultant",
+			"NC Admin",
+			"NC Auditor",
+		):
 			self.assertEqual(perms[role].get("read"), 1, role)
 			self.assertFalse(perms[role].get("write") or perms[role].get("create"), role)
 		self.assertFalse(any(p.get("delete") for p in meta["permissions"]))

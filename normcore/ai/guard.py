@@ -125,9 +125,7 @@ def manufacturer_sections(sections, doc_names_in_scope):
 
 	Mục của tài liệu khác, kể cả tài liệu của hãng không gắn với hệ thống, không bao giờ vào nguồn."""
 	allowed = set(doc_names_in_scope or ())
-	return [
-		build_source("NC Legal Section", s) for s in sections or [] if s.get("legal_document") in allowed
-	]
+	return [build_source("NC Legal Section", s) for s in sections or [] if s.get("legal_document") in allowed]
 
 
 def budget_exceeded(used: int, budget: int) -> bool:

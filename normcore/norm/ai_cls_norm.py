@@ -188,5 +188,5 @@ def plan_accept(suggestion, norm_lines, iqc_lines, calibration_lines):
 	if kind == TYPE_LABELS["OPEN_STABILITY"]:
 		if doctype != "NC Item":
 			return {"error": "Hạn dùng sau mở chỉ áp cho mặt hàng"}
-		return {"target": "item", "value": int(math.floor(value + 0.5))}
+		return {"target": "item", "value": math.floor(value + 0.5)}
 	return {"error": "Loại đề xuất không hợp lệ"}

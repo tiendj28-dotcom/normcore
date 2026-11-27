@@ -233,7 +233,9 @@ class TestSuggestions(ClsAiBase):
 
 	def test_TC_CLS_42_trich_dan_va_nhan_de_xuat(self):
 		out = self.run_ai(FakeProvider(self.three()))
-		self.assertEqual((out["status"], out["created"], out["unsupported"], out["rejected"]), ("done", 3, 1, 1))
+		self.assertEqual(
+			(out["status"], out["created"], out["unsupported"], out["rejected"]), ("done", 3, 1, 1)
+		)
 		rows = self.listed()["rows"]
 		self.assertEqual(len(rows), 3)
 		self.assertEqual({r["label"] for r in rows}, {"Đề xuất"})
@@ -369,7 +371,9 @@ class TestAccept(ClsAiBase):
 		with self.assertRaises(frappe.ValidationError):
 			api.link_cls_norm_suggestion(name, "NC Item", "KHONG_CO")
 		linked = api.link_cls_norm_suggestion(name, "NC Item", "HC_GLU")
-		self.assertEqual((linked["resource"], linked["not_in_catalog"], linked["can_accept"]), ("HC_GLU", 0, True))
+		self.assertEqual(
+			(linked["resource"], linked["not_in_catalog"], linked["can_accept"]), ("HC_GLU", 0, True)
+		)
 		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", name, "resource_text"), "Hóa chất X")
 		self.assertEqual(api.accept_cls_norm_suggestion(name)["status"], "Đã chấp nhận")
 		self.assertEqual((frappe.db.count("NC Item"), frappe.db.count("NC Equipment")), items_before)
@@ -382,13 +386,17 @@ class TestAccept(ClsAiBase):
 		name = self.one(value=0.025)
 		frappe.set_user(self.head)
 		out = api.accept_cls_norm_suggestion(name)
-		self.assertEqual((out["status"], out["norm_set"], out["applied_ref"]), ("Đã chấp nhận", self.ns_name, row.line_id))
+		self.assertEqual(
+			(out["status"], out["norm_set"], out["applied_ref"]), ("Đã chấp nhận", self.ns_name, row.line_id)
+		)
 		after = self.line()[0]
 		self.assertEqual((after.hospital_qty, after.basis), (0.025, "Ước tính"))
 		self.assertIn("HG-GLU-1.0", after.basis_ref)
 		self.assertFalse(after.confirmed_by)  # đổi lượng phải xác nhận lại
 		sug = frappe.get_doc("NC AI Norm Suggestion", name)
-		self.assertEqual((sug.status, sug.processed_by, sug.applied_ref), ("Đã chấp nhận", self.head, row.line_id))
+		self.assertEqual(
+			(sug.status, sug.processed_by, sug.applied_ref), ("Đã chấp nhận", self.head, row.line_id)
+		)
 		self.assertEqual(self.listed()["pending"], 0)
 		# hóa chất chưa có dòng trong bộ: thêm dòng chung
 		name = self.one(code="HC_KHAC", value=5)
@@ -440,7 +448,9 @@ class TestAccept(ClsAiBase):
 		plan = frappe.get_doc("NC QC Plan", "KHCL-GLU-A")
 		self.assertEqual(plan.calibration_lines[0].calibrations_per_year, 4)
 		self.assertEqual(plan.iqc_lines[0].runs_per_day, 2)
-		self.assertEqual(frappe.db.get_value("NC AI Norm Suggestion", cal, "applied_ref"), plan.calibration_lines[0].name)
+		self.assertEqual(
+			frappe.db.get_value("NC AI Norm Suggestion", cal, "applied_ref"), plan.calibration_lines[0].name
+		)
 		# hạn dùng sau mở: Clinician, Dept Head không có quyền ghi NC Item
 		for user in (self.head, self.clin):
 			frappe.set_user(user)
@@ -448,7 +458,9 @@ class TestAccept(ClsAiBase):
 				api.accept_cls_norm_suggestion(opn)
 		frappe.set_user(self.res)
 		res = api.list_cls_norm_suggestions("GLU-A")
-		self.assertEqual([(r["suggestion_type"], r["can_accept"]) for r in res["rows"]], [("Hạn dùng sau mở", True)])
+		self.assertEqual(
+			[(r["suggestion_type"], r["can_accept"]) for r in res["rows"]], [("Hạn dùng sau mở", True)]
+		)
 		self.assertFalse(res["can_edit"])
 		self.assertEqual(api.accept_cls_norm_suggestion(opn)["status"], "Đã chấp nhận")
 		self.assertEqual(frappe.db.get_value("NC Item", "HC_GLU", "open_stability_days"), 28)
@@ -525,7 +537,9 @@ class TestPromptTemplate(FrappeTestCase):
 		self.assertEqual(prompts_install.ensure_suggest_cls_norm_v2(), "SUGGEST_CLS_NORM-v2")
 		self.assertEqual(prompts_install.ensure_suggest_cls_norm_v2(), "SUGGEST_CLS_NORM-v2")
 		self.assertEqual(
-			frappe.get_all("NC Prompt Template", {"template_code": "SUGGEST_CLS_NORM"}, pluck="name", order_by="name"),
+			frappe.get_all(
+				"NC Prompt Template", {"template_code": "SUGGEST_CLS_NORM"}, pluck="name", order_by="name"
+			),
 			["SUGGEST_CLS_NORM-v1", "SUGGEST_CLS_NORM-v2"],
 		)
 		self.assertEqual(frappe.db.get_value("NC Prompt Template", "SUGGEST_CLS_NORM-v1", "is_active"), 0)

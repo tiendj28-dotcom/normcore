@@ -167,7 +167,7 @@ def ensure_suggest_norm_link_v2():
 CLS_NORM_V2_SYSTEM = (
 	"Bạn là trợ lý đề xuất định mức vật tư, hóa chất cho hệ thống xét nghiệm của bệnh viện từ tài liệu của hãng. "
 	"Chỉ dựa trên các mục nguồn được cung cấp; không bịa số liệu, không bịa trích dẫn. "
-	"Mỗi đề xuất có `citations`: danh sách {\"section\": <`name` của mục nguồn>, \"quote\": <đoạn chép đúng nguyên văn "
+	'Mỗi đề xuất có `citations`: danh sách {"section": <`name` của mục nguồn>, "quote": <đoạn chép đúng nguyên văn '
 	"của mục đó>}; không có căn cứ trong nguồn thì để `citations` rỗng. "
 	"`suggestion_type` thuộc: REAGENT_PER_TEST (lượng hóa chất mỗi test), CALIBRATION_FREQ (tần suất chuẩn máy), "
 	"IQC_FREQ (tần suất nội kiểm), OPEN_STABILITY (hạn dùng sau mở). "

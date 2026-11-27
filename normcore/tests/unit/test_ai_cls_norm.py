@@ -7,7 +7,12 @@ from normcore.norm import ai_cls_norm as m
 
 QUOTE = "Mỗi test glucose dùng 0,02 ml thuốc thử"
 SOURCES = [
-	{"name": "LS-1", "section_no": "1", "heading": "TH", "plain_text": f"1. Thuốc thử. {QUOTE}. Hạn 28 ngày."},
+	{
+		"name": "LS-1",
+		"section_no": "1",
+		"heading": "TH",
+		"plain_text": f"1. Thuốc thử. {QUOTE}. Hạn 28 ngày.",
+	},
 	{"name": "LS-2", "section_no": "2", "heading": "CM", "plain_text": "Chuẩn máy mỗi 90 ngày."},
 ]
 CATALOG = {"HC_GLU": "NC Item", "EQ_A": "NC Equipment"}
@@ -64,7 +69,14 @@ def test_FR_AI_016_pham_vi_tai_lieu():
 	assert m.docs_in_scope(docs, keys) == ["LD-A", "LD-B", "LD-TB"]
 	# guard: chỉ mục của tài liệu trong phạm vi, và chỉ bốn khóa
 	secs = [
-		{"legal_document": "LD-A", "name": "S1", "section_no": "1", "heading": "h", "plain_text": "t", "x": 1},
+		{
+			"legal_document": "LD-A",
+			"name": "S1",
+			"section_no": "1",
+			"heading": "h",
+			"plain_text": "t",
+			"x": 1,
+		},
 		{"legal_document": "LD-KHAC", "name": "S2", "section_no": "1", "heading": "h", "plain_text": "t"},
 	]
 	out = guard.manufacturer_sections(secs, ["LD-A"])
@@ -78,8 +90,18 @@ def test_TC_CLS_42_phan_loai_trich_dan():
 	data = {
 		"suggestions": [
 			_sug(),
-			_sug(suggestion_type="OPEN_STABILITY", value=28, uom="ngày", citations=[{"section": "LS-1", "quote": "Hạn 28 ngày"}]),
-			_sug(item_code="EQ_A", suggestion_type="CALIBRATION_FREQ", value=4, citations=[{"section": "LS-1", "quote": "không có trong tài liệu"}]),
+			_sug(
+				suggestion_type="OPEN_STABILITY",
+				value=28,
+				uom="ngày",
+				citations=[{"section": "LS-1", "quote": "Hạn 28 ngày"}],
+			),
+			_sug(
+				item_code="EQ_A",
+				suggestion_type="CALIBRATION_FREQ",
+				value=4,
+				citations=[{"section": "LS-1", "quote": "không có trong tài liệu"}],
+			),
 		]
 	}
 	rows, rejected = m.parse_suggestions(data, SOURCES, CATALOG)
@@ -91,12 +113,23 @@ def test_TC_CLS_42_phan_loai_trich_dan():
 	assert rows[0]["suggestion_type"] == "Lượng hóa chất mỗi test"
 	# trích dẫn rỗng, mục lạ
 	rows, rejected = m.parse_suggestions(
-		{"suggestions": [_sug(citations=[]), _sug(citations=[{"section": "LS-9", "quote": QUOTE}])]}, SOURCES, CATALOG
+		{"suggestions": [_sug(citations=[]), _sug(citations=[{"section": "LS-9", "quote": QUOTE}])]},
+		SOURCES,
+		CATALOG,
 	)
 	assert [r["relation"] for r in rows] == ["Chưa có căn cứ"] * 2 and rejected == 1
 	# nhiều trích dẫn: lấy trích dẫn đúng đầu tiên
 	rows, _ = m.parse_suggestions(
-		{"suggestions": [_sug(citations=[{"section": "LS-1", "quote": "sai"}, {"section": "LS-2", "quote": "Chuẩn máy mỗi 90 ngày"}])]},
+		{
+			"suggestions": [
+				_sug(
+					citations=[
+						{"section": "LS-1", "quote": "sai"},
+						{"section": "LS-2", "quote": "Chuẩn máy mỗi 90 ngày"},
+					]
+				)
+			]
+		},
 		SOURCES,
 		CATALOG,
 	)
@@ -124,16 +157,31 @@ def test_TC_CLS_42_cau_truc_sai_va_dau_ra_rong():
 
 def test_TC_CLS_43_ma_ngoai_danh_muc():
 	rows, rejected = m.parse_suggestions(
-		{"suggestions": [_sug(item_code="HC_KHONG_CO", item_text="Hóa chất X"), _sug(item_code=None, item_text=None)]},
+		{
+			"suggestions": [
+				_sug(item_code="HC_KHONG_CO", item_text="Hóa chất X"),
+				_sug(item_code=None, item_text=None),
+			]
+		},
 		SOURCES,
 		CATALOG,
 	)
 	assert rejected == 0
 	r = rows[0]
-	assert (r["not_in_catalog"], r["resource"], r["resource_doctype"], r["resource_text"]) == (1, None, None, "Hóa chất X")
+	assert (r["not_in_catalog"], r["resource"], r["resource_doctype"], r["resource_text"]) == (
+		1,
+		None,
+		None,
+		"Hóa chất X",
+	)
 	assert rows[1]["not_in_catalog"] == 1 and rows[1]["resource_text"] == "—"
 	rows, _ = m.parse_suggestions({"suggestions": [_sug(item_code="HC_GLU", item_text="")]}, SOURCES, CATALOG)
-	assert (rows[0]["not_in_catalog"], rows[0]["resource"], rows[0]["resource_doctype"], rows[0]["resource_text"]) == (
+	assert (
+		rows[0]["not_in_catalog"],
+		rows[0]["resource"],
+		rows[0]["resource_doctype"],
+		rows[0]["resource_text"],
+	) == (
 		0,
 		"HC_GLU",
 		"NC Item",
@@ -171,20 +219,46 @@ def test_FR_AI_016_plan_accept():
 	]
 	assert m.plan_accept(_s("REAGENT_PER_TEST"), other, None, None)["line_id"] is None
 	assert "2 dòng cùng hóa chất" in m.plan_accept(_s("REAGENT_PER_TEST"), lines * 2, None, None)["error"]
-	assert "Chưa có bộ định mức Nháp cho hệ thống GLU-A" in m.plan_accept(_s("REAGENT_PER_TEST"), None, None, None)["error"]
-	assert "chỉ áp cho hóa chất" in m.plan_accept(_s("REAGENT_PER_TEST", resource_doctype="NC Equipment"), [], None, None)["error"]
+	assert (
+		"Chưa có bộ định mức Nháp cho hệ thống GLU-A"
+		in m.plan_accept(_s("REAGENT_PER_TEST"), None, None, None)["error"]
+	)
+	assert (
+		"chỉ áp cho hóa chất"
+		in m.plan_accept(_s("REAGENT_PER_TEST", resource_doctype="NC Equipment"), [], None, None)["error"]
+	)
 	# ngoài danh mục
-	assert "Liên kết mặt hàng" in m.plan_accept(_s("REAGENT_PER_TEST", not_in_catalog=1, resource=None), lines, None, None)["error"]
+	assert (
+		"Liên kết mặt hàng"
+		in m.plan_accept(_s("REAGENT_PER_TEST", not_in_catalog=1, resource=None), lines, None, None)["error"]
+	)
 	# chuẩn máy, nội kiểm
 	cal = [{"name": "r1", "calibrator": "CAL"}]
-	assert m.plan_accept(_s("CALIBRATION_FREQ", resource="CAL", value=4), None, [], cal) == {"target": "calibration", "row": "r1", "value": 4}
-	assert "dòng chuẩn máy cho CAL" in m.plan_accept(_s("CALIBRATION_FREQ", resource="CAL"), None, None, None)["error"]
+	assert m.plan_accept(_s("CALIBRATION_FREQ", resource="CAL", value=4), None, [], cal) == {
+		"target": "calibration",
+		"row": "r1",
+		"value": 4,
+	}
+	assert (
+		"dòng chuẩn máy cho CAL"
+		in m.plan_accept(_s("CALIBRATION_FREQ", resource="CAL"), None, None, None)["error"]
+	)
 	iqc = [{"idx": 2, "qc_material": "QC_L"}]
-	assert m.plan_accept(_s("IQC_FREQ", resource="QC_L", value=2), None, iqc, []) == {"target": "iqc", "row": 2, "value": 2}
+	assert m.plan_accept(_s("IQC_FREQ", resource="QC_L", value=2), None, iqc, []) == {
+		"target": "iqc",
+		"row": 2,
+		"value": 2,
+	}
 	assert "dòng nội kiểm cho QC_L" in m.plan_accept(_s("IQC_FREQ", resource="QC_L"), None, [], [])["error"]
 	# hạn dùng sau mở: làm tròn
-	assert m.plan_accept(_s("OPEN_STABILITY", value=27.6), None, None, None) == {"target": "item", "value": 28}
-	assert "chỉ áp cho mặt hàng" in m.plan_accept(_s("OPEN_STABILITY", resource_doctype="NC Equipment"), None, None, None)["error"]
+	assert m.plan_accept(_s("OPEN_STABILITY", value=27.6), None, None, None) == {
+		"target": "item",
+		"value": 28,
+	}
+	assert (
+		"chỉ áp cho mặt hàng"
+		in m.plan_accept(_s("OPEN_STABILITY", resource_doctype="NC Equipment"), None, None, None)["error"]
+	)
 	assert m.plan_accept({"resource": "X", "suggestion_type": "?"}, None, None, None)["error"]
 
 

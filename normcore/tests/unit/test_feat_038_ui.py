@@ -49,7 +49,9 @@ class TestFeat038Ui(unittest.TestCase):
 		self.assertIn("normcore.ai.enabled() && data.can_edit", SHARED)
 		self.assertIn("row.can_accept", SHARED)
 		self.assertIn("row.can_edit", SHARED)
-		self.assertIn("if (data.pending)", SHARED)  # nút "Xem đề xuất AI" cho mọi người đọc được (gồm NC Auditor)
+		self.assertIn(
+			"if (data.pending)", SHARED
+		)  # nút "Xem đề xuất AI" cho mọi người đọc được (gồm NC Auditor)
 		self.assertNotIn("Accept all", SHARED)  # không có "Chấp nhận tất cả" (ASM-038-08)
 
 	def test_trang_thai_va_nhan_theo_thiet_ke(self):
@@ -78,7 +80,7 @@ class TestFeat038Ui(unittest.TestCase):
 
 	def test_hooks_doctype_js(self):
 		ns = {}
-		exec(re.search(r"doctype_js = \{.*?\n\}", HOOKS, re.S).group(0), ns)  # noqa: S102
+		exec(re.search(r"doctype_js = \{.*?\n\}", HOOKS, re.S).group(0), ns)
 		js = ns["doctype_js"]
 		self.assertEqual(js["NC Technical Service"], "public/js/ai_draft_dialog.js")
 		self.assertEqual(js["NC QC Plan"], "public/js/cls_norm_suggest.js")

@@ -112,7 +112,9 @@ def _catalog(codes):
 
 def _items_equipment(keys):
 	items = [
-		guard.build_source("NC Item", frappe.db.get_value("NC Item", n, ["item_code", "item_name", "uom"], as_dict=True))
+		guard.build_source(
+			"NC Item", frappe.db.get_value("NC Item", n, ["item_code", "item_name", "uom"], as_dict=True)
+		)
 		for dt, n in sorted(keys)
 		if dt == "NC Item" and frappe.db.exists("NC Item", n)
 	]
@@ -211,7 +213,14 @@ def _replace_pending(ts, rows, log_name):
 		old.save(ignore_permissions=True)
 	for r in rows:
 		frappe.get_doc(
-			{"doctype": SUG, "test_system": ts.name, "department": ts.department, "status": PENDING, "ai_log": log_name, **r}
+			{
+				"doctype": SUG,
+				"test_system": ts.name,
+				"department": ts.department,
+				"status": PENDING,
+				"ai_log": log_name,
+				**r,
+			}
 		).insert(ignore_permissions=True)  # chỉ tác vụ đề xuất tạo bản ghi
 
 
@@ -222,7 +231,11 @@ def get_cls_norm_suggestion_status(job_id):
 		return {"status": "unknown"}
 	if state.get("user") != frappe.session.user and frappe.session.user != "Administrator":
 		frappe.throw(_("Bạn không có quyền xem tiến độ này"), frappe.PermissionError)
-	out = {k: state.get(k) for k in ("status", "created", "unsupported", "not_in_catalog", "rejected") if k in state}
+	out = {
+		k: state.get(k)
+		for k in ("status", "created", "unsupported", "not_in_catalog", "rejected")
+		if k in state
+	}
 	if state.get("error"):
 		out["message"] = state["error"]
 	elif state.get("message"):
@@ -240,12 +253,23 @@ def _can_accept(sug, ts):
 	kind = sug.suggestion_type
 	if kind == logic.TYPE_LABELS["REAGENT_PER_TEST"]:
 		name = frappe.db.get_value(
-			"NC Norm Set", {"test_system": ts.name, "status": ["!=", "Đã thay thế"]}, "name", order_by="version_no desc"
+			"NC Norm Set",
+			{"test_system": ts.name, "status": ["!=", "Đã thay thế"]},
+			"name",
+			order_by="version_no desc",
 		)
-		return bool(frappe.has_permission("NC Norm Set", "write", doc=name) if name else frappe.has_permission("NC Norm Set", "write"))
+		return bool(
+			frappe.has_permission("NC Norm Set", "write", doc=name)
+			if name
+			else frappe.has_permission("NC Norm Set", "write")
+		)
 	if kind in (logic.TYPE_LABELS["CALIBRATION_FREQ"], logic.TYPE_LABELS["IQC_FREQ"]):
 		plan = frappe.db.get_value("NC QC Plan", {"test_system": ts.name}, "name")
-		return bool(frappe.has_permission("NC QC Plan", "write", doc=plan) if plan else frappe.has_permission("NC QC Plan", "write"))
+		return bool(
+			frappe.has_permission("NC QC Plan", "write", doc=plan)
+			if plan
+			else frappe.has_permission("NC QC Plan", "write")
+		)
 	return bool(frappe.has_permission("NC Item", "write"))
 
 
@@ -253,11 +277,23 @@ def _row(sug, ts, can_edit, cache):
 	sec = None
 	if sug.legal_section:
 		if sug.legal_section not in cache:
-			s = frappe.db.get_value("NC Legal Section", sug.legal_section, ["legal_document", "section_no"], as_dict=True)
-			d = frappe.db.get_value("NC Legal Document", s.legal_document, ["doc_number", "title"], as_dict=True) if s else None
+			s = frappe.db.get_value(
+				"NC Legal Section", sug.legal_section, ["legal_document", "section_no"], as_dict=True
+			)
+			d = (
+				frappe.db.get_value(
+					"NC Legal Document", s.legal_document, ["doc_number", "title"], as_dict=True
+				)
+				if s
+				else None
+			)
 			cache[sug.legal_section] = (s, d)
 		s, d = cache[sug.legal_section]
-		sec = {"section_no": s.section_no, "doc_number": d.doc_number if d else None, "title": d.title if d else None}
+		sec = {
+			"section_no": s.section_no,
+			"doc_number": d.doc_number if d else None,
+			"title": d.title if d else None,
+		}
 	label = None
 	if sug.resource:
 		field = "item_name" if sug.resource_doctype == "NC Item" else "equipment_name"
@@ -329,7 +365,9 @@ def _finish(sug, **values):
 def _basis_ref(sug):
 	if not sug.legal_section:
 		return logic.NO_BASIS_REF
-	sec = frappe.db.get_value("NC Legal Section", sug.legal_section, ["legal_document", "section_no"], as_dict=True)
+	sec = frappe.db.get_value(
+		"NC Legal Section", sug.legal_section, ["legal_document", "section_no"], as_dict=True
+	)
 	number = frappe.db.get_value("NC Legal Document", sec.legal_document, "doc_number") if sec else None
 	return logic.basis_ref(number, sec and sec.section_no)
 
@@ -397,9 +435,7 @@ def accept_cls_norm_suggestion(name):
 	is_item_only = kind == logic.TYPE_LABELS["OPEN_STABILITY"]
 	if is_item_only and not frappe.has_permission("NC Item", "write"):
 		frappe.throw(
-			_(
-				"Hạn dùng sau mở thuộc danh mục mặt hàng; cần Quản lý nguồn lực hoặc Tài chính chấp nhận"
-			),
+			_("Hạn dùng sau mở thuộc danh mục mặt hàng; cần Quản lý nguồn lực hoặc Tài chính chấp nhận"),
 			frappe.PermissionError,
 		)
 	ns = ns_lines = plan_doc = None
@@ -448,7 +484,9 @@ def link_cls_norm_suggestion(name, resource_doctype, resource):
 	if resource_doctype not in logic.CATALOG_DOCTYPES:
 		frappe.throw(_("Chỉ liên kết được với mặt hàng hoặc thiết bị"))
 	if not resource or not frappe.db.exists(resource_doctype, resource):
-		frappe.throw(_("Không có {0} {1} trong danh mục").format(_(CATALOG_LABEL[resource_doctype]), resource))
+		frappe.throw(
+			_("Không có {0} {1} trong danh mục").format(_(CATALOG_LABEL[resource_doctype]), resource)
+		)
 	sug.resource_doctype, sug.resource, sug.not_in_catalog = resource_doctype, resource, 0
 	sug.save()
 	ts = frappe.get_doc(TS, sug.test_system)

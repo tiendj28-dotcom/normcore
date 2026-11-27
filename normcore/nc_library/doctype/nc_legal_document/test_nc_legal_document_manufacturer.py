@@ -28,9 +28,9 @@ class TestManufacturerDocument(FrappeTestCase):
 	def test_FR_LIB_013_tai_lieu_hang_phai_gan(self):
 		with self.assertRaisesRegex(frappe.ValidationError, "phải gắn ít nhất một mặt hàng"):
 			frappe.get_doc(self._values([])).insert(ignore_permissions=True)
-		doc = frappe.get_doc(
-			self._values([{"linked_doctype": "NC Item", "linked_name": "HC_GLU"}])
-		).insert(ignore_permissions=True)
+		doc = frappe.get_doc(self._values([{"linked_doctype": "NC Item", "linked_name": "HC_GLU"}])).insert(
+			ignore_permissions=True
+		)
 		self.assertEqual(doc.doc_type, "Tài liệu của hãng")
 		self.assertEqual(doc.index_status, "Chưa lập")
 		self.assertEqual(doc.related_resources[0].linked_name, "HC_GLU")
@@ -56,6 +56,8 @@ class TestManufacturerDocument(FrappeTestCase):
 			frappe.get_doc(self._values([row, dict(row)])).insert(ignore_permissions=True)
 
 	def test_FR_LIB_013_loai_khac_giu_bang_khong_loi(self):
-		values = legal_values("TT-1/2026", related_resources=[{"linked_doctype": "NC Item", "linked_name": "HC_GLU"}])
+		values = legal_values(
+			"TT-1/2026", related_resources=[{"linked_doctype": "NC Item", "linked_name": "HC_GLU"}]
+		)
 		doc = frappe.get_doc(values).insert(ignore_permissions=True)
 		self.assertEqual(len(doc.related_resources), 1)
