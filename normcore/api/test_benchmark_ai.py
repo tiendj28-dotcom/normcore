@@ -254,3 +254,59 @@ class TestPromptTemplate(FrappeTestCase):
 		).insert(ignore_permissions=True)
 		self.assertEqual(prompts_install.ensure_extract_price_list_v2(), custom.name)
 		self.assertEqual(frappe.db.count("NC Prompt Template", {"template_code": "EXTRACT_PRICE_LIST"}), 2)
+
+
+class TestPermissionAndAiOff(BenchAiBase):
+	def test_quyen_feat_027(self):
+		prov = FakeProvider(reply())
+		for user in (self.clin, self.auditor):
+			url = self.upload(user, name=f"q-{user[:7]}.pdf")
+			logs = frappe.db.count(LOG)
+			frappe.set_user(user)
+			with patch("normcore.ai.gateway.get_provider", return_value=prov):
+				with self.assertRaises(frappe.PermissionError):
+					api.start_price_list_extraction(FACILITY, CATEGORY, url, "BG")
+			self.assertEqual(frappe.db.count(LOG), logs)
+		self.assertEqual(prov.calls, [])
+		out = self.run_ai(prov, user=self.consultant)
+		self.assertEqual(out["status"], "done", out)
+		fin = self.run_ai(FakeProvider(reply(date="2026-02-15")), user=self.finance)
+		frappe.set_user(self.consultant)
+		with self.assertRaises(frappe.PermissionError):
+			api.get_price_list_extraction_status(fin["job_id"])
+		frappe.set_user("Administrator")
+		self.assertEqual(api.get_price_list_extraction_status(fin["job_id"])["status"], "done")
+		self.assertEqual(api.get_price_list_extraction_status("khong-co")["status"], "unknown")
+
+	def test_FR_AI_015_tat_ai_gia_tham_chieu_thu_cong(self):
+		url = self.upload()
+		frappe.set_user("Administrator")
+		enable_ai(0)
+		logs = frappe.db.count(LOG)
+		frappe.set_user(self.finance)
+		with self.assertRaisesRegex(frappe.ValidationError, "Tính năng AI đang tắt"):
+			api.start_price_list_extraction(FACILITY, CATEGORY, url, "BG")
+		self.assertEqual(frappe.db.count(LOG), logs)
+		# nhập tay vẫn được
+		row = frappe.get_doc(
+			{
+				"doctype": DT,
+				"facility": FACILITY,
+				"service_name_raw": "Định lượng Glucose máu",
+				"price": 25000,
+				"price_category": CATEGORY,
+				"effective_date": "2026-03-01",
+				"source_doc_no": "TAY-1",
+			}
+		).insert()
+		self.assertTrue(frappe.db.exists(DT, row.name))
+		# Excel vẫn chạy (bộ nhập FEAT-026)
+		from normcore.api import importer as importer_api
+		from normcore.api.test_benchmark import head, row as xrow, xlsx
+
+		data = xlsx([head(), xrow(service_name_raw="Siêu âm ổ bụng tổng quát", price=120000)])
+		before = frappe.db.count(DT)
+		res = importer_api.run_import("nc_benchmark_price", data, "ghi")
+		self.assertTrue(res.get("ok", True), res)
+		self.assertEqual(frappe.db.count(DT), before + 1)
+		self.assertEqual(frappe.db.count(LOG), logs)
