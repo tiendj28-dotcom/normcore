@@ -45,7 +45,7 @@ def parse_price(value):
 	if isinstance(value, int | float | Decimal):
 		d = Decimal(str(value))
 	elif isinstance(value, str):
-		s = _CURRENCY.sub("", value).replace(" ", "").replace(" ", "")
+		s = _CURRENCY.sub("", value).replace(" ", "").replace("\u00a0", "")
 		if _THOUSANDS.match(s):
 			s = s.replace(".", "").replace(",", "")
 		elif _DECIMAL.match(s):

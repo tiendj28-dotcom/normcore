@@ -144,7 +144,9 @@ def run_price_list_extraction(
 				else:
 					skipped.append({"service_name": r["service_name_raw"], "reason": msg})
 		# Trong tác vụ nền, Frappe commit khi hàm trả về; không commit tay (giữ được rollback trong test)
-		job_set(price_job, status="done", user=user, log=res.log_name, **px.summary(created, duplicates, skipped))
+		job_set(
+			price_job, status="done", user=user, log=res.log_name, **px.summary(created, duplicates, skipped)
+		)
 	except Exception as e:  # không để tác vụ nền ném lỗi
 		if saved:
 			frappe.db.rollback(save_point="nc_price_all")

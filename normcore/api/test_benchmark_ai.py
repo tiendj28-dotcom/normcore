@@ -75,7 +75,12 @@ class BenchAiBase(FrappeTestCase):
 		user = user or self.finance
 		file_url = file_url or self.upload(user)
 		frappe.set_user(user)
-		args = {"facility": FACILITY, "price_category": CATEGORY, "file_url": file_url, "source_doc_no": "BG-1"}
+		args = {
+			"facility": FACILITY,
+			"price_category": CATEGORY,
+			"file_url": file_url,
+			"source_doc_no": "BG-1",
+		}
 		args.update(kw)
 		with patch("normcore.ai.gateway.get_provider", return_value=provider):
 			out = api.start_price_list_extraction(**args)
@@ -218,7 +223,9 @@ class TestPromptTemplate(FrappeTestCase):
 		frappe.db.rollback()
 
 	def _reset_v1(self):
-		for name in frappe.get_all("NC Prompt Template", {"template_code": "EXTRACT_PRICE_LIST"}, pluck="name"):
+		for name in frappe.get_all(
+			"NC Prompt Template", {"template_code": "EXTRACT_PRICE_LIST"}, pluck="name"
+		):
 			frappe.db.sql("delete from `tabNC Prompt Template` where name=%s", name)
 		prompts_install.ensure_default_templates()
 
@@ -235,7 +242,9 @@ class TestPromptTemplate(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("NC Prompt Template", "EXTRACT_PRICE_LIST-v1", "is_active"), 0)
 		tpl = frappe.get_doc("NC Prompt Template", "EXTRACT_PRICE_LIST-v2")
 		out = prompts.render(
-			tpl.user_prompt, {"facility_name": "BV Mẫu", "file_name": "bg.pdf"}, [{"page": 1, "text": "Glucose"}]
+			tpl.user_prompt,
+			{"facility_name": "BV Mẫu", "file_name": "bg.pdf"},
+			[{"page": 1, "text": "Glucose"}],
 		)
 		self.assertIn("BV Mẫu", out)
 		self.assertIn("Glucose", out)
@@ -302,7 +311,8 @@ class TestPermissionAndAiOff(BenchAiBase):
 		self.assertTrue(frappe.db.exists(DT, row.name))
 		# Excel vẫn chạy (bộ nhập FEAT-026)
 		from normcore.api import importer as importer_api
-		from normcore.api.test_benchmark import head, row as xrow, xlsx
+		from normcore.api.test_benchmark import head, xlsx
+		from normcore.api.test_benchmark import row as xrow
 
 		data = xlsx([head(), xrow(service_name_raw="Siêu âm ổ bụng tổng quát", price=120000)])
 		before = frappe.db.count(DT)

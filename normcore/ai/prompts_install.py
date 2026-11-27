@@ -200,9 +200,7 @@ PRICE_LIST_V2_SYSTEM = (
 	'Chỉ trả về một đối tượng JSON: {"rows": [{"service_name", "price", "effective_date", "page"}]}.'
 )
 PRICE_LIST_V2_USER = (
-	"Đơn vị: {{ variables.facility_name }}\n"
-	"Tệp: {{ variables.file_name }}\n"
-	"Các trang: {{ sources | tojson }}"
+	"Đơn vị: {{ variables.facility_name }}\nTệp: {{ variables.file_name }}\nCác trang: {{ sources | tojson }}"
 )
 
 
