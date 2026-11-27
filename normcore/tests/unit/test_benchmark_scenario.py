@@ -58,7 +58,13 @@ class TestScenario(unittest.TestCase):
 		self.assertEqual(_price(snapshot.recompute(snap)), _price(base))
 
 	def test_FR_ADJ_006_parse_value(self):
-		for text, want in (("0,5", "0.5"), ("15 phút", "15"), ("5%", "5"), ("0.5", "0.5"), (" 4,25% ", "4.25")):
+		for text, want in (
+			("0,5", "0.5"),
+			("15 phút", "15"),
+			("5%", "5"),
+			("0.5", "0.5"),
+			(" 4,25% ", "4.25"),
+		):
 			self.assertEqual(sc.parse_value(text), D(want), text)
 		for bad in ("", None, "abc", "NaN"):
 			with self.assertRaises(sc.InvalidChange):
@@ -66,9 +72,15 @@ class TestScenario(unittest.TestCase):
 
 	def test_FR_ADJ_006_change_for_moi_quy_tac(self):
 		c = sc.change_for("BR-ADJ-001", "EQ1", "0,4", "0,5", None, None)
-		self.assertEqual((c.change_type, c.field, c.new_value, c.old_value), (sc.EQUIPMENT, "utilization_rate", D("0.5"), D("0.4")))
+		self.assertEqual(
+			(c.change_type, c.field, c.new_value, c.old_value),
+			(sc.EQUIPMENT, "utilization_rate", D("0.5"), D("0.4")),
+		)
 		c = sc.change_for("BR-ADJ-002", "L04", "20 phút", "15 phút", "DV-TEST-A", "K01")
-		self.assertEqual((c.change_type, c.field, c.new_value, c.service, c.department), (sc.NORM_LINE, "hospital_qty", D(15), "DV-TEST-A", "K01"))
+		self.assertEqual(
+			(c.change_type, c.field, c.new_value, c.service, c.department),
+			(sc.NORM_LINE, "hospital_qty", D(15), "DV-TEST-A", "K01"),
+		)
 		c = sc.change_for("BR-ADJ-004", "L05", "10%", "5%", "DV-TEST-A", "K01")
 		self.assertEqual((c.field, c.new_value, c.old_value), ("wastage_rate", D(5), D(10)))
 		c = sc.change_for("BR-ADJ-005", "PS1", "5%", "4%", None, None)
@@ -104,16 +116,16 @@ class TestScenario(unittest.TestCase):
 		self.assertLess(_price(snapshot.recompute(new)), base)
 		ch = sc.Change(sc.NORM_LINE, "L05", "wastage_rate", D(5), None, "DV-TEST-A", "K01")
 		inp = next(
-			snapshot.from_plain(i)
-			for i in sc.apply(snap, [ch], {})["inputs"]
-			if i["service"] == "DV-TEST-A"
+			snapshot.from_plain(i) for i in sc.apply(snap, [ch], {})["inputs"] if i["service"] == "DV-TEST-A"
 		)
 		self.assertEqual(next(x for x in inp.lines if x.line_id == "L05").wastage_rate, D("0.05"))
 
 	def test_FR_ADJ_006_khong_sua_anh_chup_vao(self):
 		snap = _golden_snap("0.4")
 		before = json.dumps(snap, sort_keys=True)
-		sc.apply(snap, [_eq_change(), sc.Change(sc.PARAM, "PS1", "accumulation_rate", D(4), None)], _eq1_facts())
+		sc.apply(
+			snap, [_eq_change(), sc.Change(sc.PARAM, "PS1", "accumulation_rate", D(4), None)], _eq1_facts()
+		)
 		self.assertEqual(json.dumps(snap, sort_keys=True), before)
 
 	def test_FR_ADJ_006_loi_thay_doi(self):
@@ -121,7 +133,9 @@ class TestScenario(unittest.TestCase):
 		with self.assertRaises(sc.InvalidChange):
 			sc.apply(snap, [_eq_change()], {})  # thiếu chi phí năm thiết bị
 		with self.assertRaises(sc.InvalidChange):
-			sc.apply(snap, [sc.Change(sc.NORM_LINE, "L99", "hospital_qty", D(1), None, "DV-TEST-A", "K01")], {})
+			sc.apply(
+				snap, [sc.Change(sc.NORM_LINE, "L99", "hospital_qty", D(1), None, "DV-TEST-A", "K01")], {}
+			)
 		with self.assertRaises(sc.InvalidChange):
 			sc.apply(snap, [sc.Change(sc.NORM_LINE, "L01", "hospital_qty", D(1), None, "DV-NONE", "K01")], {})
 		with self.assertRaises(sc.InvalidChange):

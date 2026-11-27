@@ -131,7 +131,12 @@ def _apply_equipment(snap, c, equipment):
 		rates = dict(inp.rates)
 		for ln in inp.lines:
 			old = rates.get(ln.line_id)
-			if ln.component == "EQUIPMENT" and ln.resource == c.target_ref and not ln.excluded and old is not None:
+			if (
+				ln.component == "EQUIPMENT"
+				and ln.resource == c.target_ref
+				and not ln.excluded
+				and old is not None
+			):
 				rates[ln.line_id] = replace(old, rate=rate, source=old.source + SCENARIO_SOURCE)
 		inputs.append(snapshot.to_plain(replace(inp, rates=rates)))
 	snap["inputs"] = inputs

@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "autoname": "format:YCSQT-{YYYY}-{#####}",
+ "creation": "2026-11-27 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "procedure",
+  "requested_by",
+  "source_suggestion",
+  "proposed_change",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "procedure",
+   "label": "Quy trình",
+   "fieldtype": "Link",
+   "options": "NC Clinical Procedure",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "requested_by",
+   "label": "Người yêu cầu",
+   "fieldtype": "Link",
+   "options": "User",
+   "reqd": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_suggestion",
+   "label": "Gợi ý nguồn",
+   "fieldtype": "Link",
+   "options": "NC Adjustment Suggestion",
+   "read_only": 1,
+   "description": "Trống với đề xuất người dùng tự nêu (FR-ADJ-007)"
+  },
+  {
+   "fieldname": "proposed_change",
+   "label": "Đề xuất thay đổi",
+   "fieldtype": "Text",
+   "reqd": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "options": "Mới\nĐã tiếp nhận\nTừ chối\nĐã thực hiện",
+   "reqd": 1,
+   "read_only": 1,
+   "default": "Mới",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Benchmark",
+ "name": "NC Procedure Change Request",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "procedure",
+ "track_changes": 1
+}
