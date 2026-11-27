@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["Golden, 1228 pytest, site sạch 2088 test OK, rules.py phủ 100%", "TC-ADJ-01..04, 08 và FR-ADJ-004/008 có test cùng mã, assertion đúng giá trị golden", "Diff test chỉ thêm; không sửa tài liệu chỉ đọc; CI PR #86 xanh", "Chưa kiểm UI bằng Playwright vì staging chưa có nhánh"], "commit": "167e872ffedd7bfd69c1f08f09a6cb249dc317d7"}
