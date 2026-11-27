@@ -203,4 +203,4 @@ class TestStages(HomeBase):
 		# bỏ truy vấn siêu dữ liệu của Frappe (is_virtual, information_schema), chỉ đếm truy vấn dữ liệu
 		data = [q for q in queries if "is_virtual" not in q and "information_schema" not in q]
 		print(f"\n[FEAT-002] get_home: {len(data)} truy vấn dữ liệu ({len(queries)} gồm siêu dữ liệu)")
-		self.assertEqual(len(data), 9)  # ASM-002-16: 9, không phụ thuộc số dịch vụ
+		self.assertEqual(len(data), 10)  # ASM-002-16: 9 + 1 nguồn việc chờ của FEAT-030 (ASM-030-18), không phụ thuộc số dịch vụ
