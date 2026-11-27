@@ -33,6 +33,17 @@ frappe.provide("normcore.export");
 		return `<div>${parts.join(" · ")}</div>`;
 	}
 
+	// Chọn giá trị cho ô Select: set_value của Frappe có thể chạy khi <option> chưa dựng nên selectedIndex = -1;
+	// nên ghi thẳng vào DOM và vào value của control (luôn là chuỗi).
+	function select_value(f, v) {
+		if (v === null || v === undefined || v === "") return;
+		v = String(v);
+		f.value = v;
+		if (f.$input) f.$input.val(v);
+		f.set_value(v);
+		if (f.$input && f.$input.val() !== v) f.$input.val(v);
+	}
+
 	function render(d, o, state) {
 		const opt = {};
 		o.options.forEach((x) => (opt[x.file_type] = x));
@@ -61,7 +72,7 @@ frappe.provide("normcore.export");
 		f.service_cost.refresh();
 		// Select chỉ có một lựa chọn thì tự chọn (ô không được để trống)
 		const only_cost = costs.length === 1 ? costs[0].name : null;
-		if (state.service_cost || only_cost) f.service_cost.set_value(state.service_cost || only_cost);
+		if (state.service_cost || only_cost) select_value(f.service_cost, state.service_cost || only_cost);
 		f.norm_set.df.options = (o.norm_sets || []).map((x) => ({ value: x.name, label: `${x.name} · ${x.service_code}` }));
 		if (state.norm_set && !(o.norm_sets || []).some((x) => x.name === state.norm_set)) f.norm_set.df.options.push({ value: state.norm_set, label: state.norm_set });
 		f.norm_set.refresh();
@@ -70,7 +81,7 @@ frappe.provide("normcore.export");
 			f.norm_set.df.options = [{ value: own.norm_set, label: `${own.norm_set} · ${own.service_code}` }];
 			f.norm_set.refresh();
 		}
-		if (state.norm_set || only_norm) f.norm_set.set_value(state.norm_set || only_norm);
+		if (state.norm_set || only_norm) select_value(f.norm_set, state.norm_set || only_norm);
 		const has_norm = (o.norm_sets || []).length || (own && own.norm_set);
 		f.cost_empty.$wrapper.toggle(!costs.length && !!state.run && !state.service_cost).html(`<div class="text-muted">${__("No successfully costed service in this run")}</div>`);
 		f.norm_empty.$wrapper.toggle(!has_norm && !state.norm_set).html(`<div class="text-muted">${__("This run has no norm set attached")}</div>`);
@@ -155,6 +166,8 @@ frappe.provide("normcore.export");
 				});
 				render(d, o, state);
 				d.show();
+				// dựng lại sau khi hiện để chắc chắn ô Select đã có option
+				render(d, o, state);
 			});
 	};
 
