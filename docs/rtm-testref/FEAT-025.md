@@ -1,0 +1,6 @@
+# Test ref — FEAT-025 (NORM-71)
+
+| FR | Test thật |
+| :-- | :-- |
+| FR-AI-006 | `test_FR_AI_006_nguon_luc_thieu_o_chuan_bi`, `test_FR_AI_006_khong_co_buoc_chuan_bi`, `test_FR_AI_006_buoc_thieu_nguoi_thuc_hien`, `test_FR_AI_006_loc_de_xuat_chong_chi_dinh` (tests/unit/test_procedure_consistency.py); `test_FR_AI_006_kiem_tra_nhat_quan_co_ai`, `test_UC005_6a_ai_khong_kha_dung_van_kiem_quy_tac`, `test_FR_AI_006_ai_tat_hoac_khong_co_chong_chi_dinh`, `test_FR_AI_006_quyen_kiem_tra_nhat_quan`, `test_FR_AI_011_payload_kiem_tra_va_de_xuat`, `test_mau_lenh_feat_025_v2` (api/test_procedure_consistency.py); tests/unit/test_feat_025_ui.py |
+| FR-AI-007 | `test_FR_AI_007_loc_ung_vien`, `test_FR_AI_007_loc_de_xuat_lien_ket` (tests/unit/test_norm_ai_link.py); `test_FR_AI_007_khoi_tao_de_xuat_lien_ket`, `test_UC009_8a_de_xuat_chua_xu_ly_chan_xac_nhan`, `test_FR_AI_007_chap_nhan_bo_sua_de_xuat`, `test_FR_AI_007_chap_nhan_bo_sua_de_xuat_controller`, `test_FR_AI_007_sua_truc_tiep_bo_nhan_de_xuat`, `test_FR_AI_007_tac_vu_nen_khong_goi_duoc_qua_http`, `test_FR_AI_007_ai_tat_hoac_loi_khong_de_xuat`, `test_FR_AI_007_quyen_de_xuat_lien_ket`, `test_FR_AI_011_payload_kiem_tra_va_de_xuat` (api/test_norm_ai_link.py); tests/unit/test_feat_025_ui.py |

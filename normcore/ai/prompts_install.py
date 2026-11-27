@@ -97,3 +97,68 @@ def ensure_draft_procedure_v2():
 			.name
 		)
 	return active.name if active else None
+
+
+CONSISTENCY_V2_SYSTEM = (
+	"Bạn là trợ lý rà soát quy trình kỹ thuật (QTKT) cho bệnh viện. Nhiệm vụ: tìm chỗ trong quy trình "
+	"(bước, dòng nguồn lực hoặc phần nội dung) trái với các chống chỉ định đã nêu trong `contraindications`. "
+	"Mỗi điểm lệch có đúng một đích: `step_id` hoặc `resource_row_id` hoặc `section` (khóa một phần ở "
+	"`sections`), `excerpt` chép NGUYÊN VĂN một đoạn của `contraindications`, `explanation` giải thích ngắn. "
+	"Không có điểm lệch thì trả danh sách rỗng. Chỉ trả về một đối tượng JSON: "
+	'{"issues": [{"step_id" | "resource_row_id" | "section", "excerpt", "explanation"}]}.'
+)
+CONSISTENCY_V2_USER = (
+	"Chống chỉ định: {{ variables.contraindications }}\n"
+	"Chỉ định: {{ variables.indications }}\n"
+	"Các phần: {{ variables.sections | tojson }}\n"
+	"Các bước: {{ variables.steps | tojson }}\n"
+	"Nguồn lực: {{ variables.resources | tojson }}"
+)
+LINK_V2_SYSTEM = (
+	"Bạn là trợ lý liên kết nguồn lực của quy trình với danh mục của bệnh viện. Với mỗi dòng trong "
+	"`lines`, chỉ được chọn MỘT bản ghi trong `candidates` của chính dòng đó; không chọn bản ghi ngoài danh "
+	"sách, không tự nghĩ ra. `component` phải hợp lệ với danh mục đã chọn theo `components`. "
+	"`confidence` là số từ 0 đến 1. Dòng không chắc chắn thì bỏ qua. Chỉ trả về một đối tượng JSON: "
+	'{"suggestions": [{"resource_row_id", "doctype", "name", "component", "confidence"}]}.'
+)
+LINK_V2_USER = (
+	"Các dòng: {{ variables.lines | tojson }}\nCấu phần hợp lệ: {{ variables.components | tojson }}"
+)
+
+
+def _ensure_v2(code, system, user):
+	"""Cài `{code}-v2` khi bản đang dùng là v1 còn đúng mặc định (ASM-025-11). Trả tên bản đang dùng."""
+	active = frappe.db.get_value(
+		"NC Prompt Template",
+		{"template_code": code, "is_active": 1},
+		["name", "system_prompt", "user_prompt"],
+		as_dict=True,
+	)
+	if (
+		active
+		and active.name == f"{code}-v1"
+		and (active.system_prompt, active.user_prompt) == (DEFAULT_SYSTEM, DEFAULT_USER)
+	):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "NC Prompt Template",
+					"template_code": code,
+					"is_active": 1,
+					"system_prompt": system,
+					"user_prompt": user,
+					"output_schema": DEFAULT_SCHEMA,
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
+	return active.name if active else None
+
+
+def ensure_consistency_check_v2():
+	return _ensure_v2("CONSISTENCY_CHECK", CONSISTENCY_V2_SYSTEM, CONSISTENCY_V2_USER)
+
+
+def ensure_suggest_norm_link_v2():
+	return _ensure_v2("SUGGEST_NORM_LINK", LINK_V2_SYSTEM, LINK_V2_USER)

@@ -1,0 +1,28 @@
+AI could not suggest links: {0}. You can link lines manually.,AI chưa đề xuất được: {0}. Bạn có thể liên kết thủ công.
+AI found no conflict with contraindications,AI không thấy nội dung trái chống chỉ định
+AI is suggesting catalog links…,AI đang đề xuất liên kết danh mục…
+Check again,Kiểm tra lại
+Check consistency,Kiểm tra nhất quán
+Checking…,Đang kiểm tra…
+Consistency check,Kiểm tra nhất quán
+Go to first,Tới dòng đầu
+No inconsistency found by rules,Không thấy điểm lệch theo quy tắc
+Possible conflicts with contraindications,Có thể trái chống chỉ định
+Prepared resources not used in any step,Nguồn lực chuẩn bị nhưng không dùng ở bước nào
+Procedure changed since this check,Quy trình đã thay đổi sau lần kiểm này
+Resources used in steps but missing from preparation,Nguồn lực có ở bước nhưng thiếu ở phần chuẩn bị
+Steps without performer,Bước thiếu người thực hiện
+Suggest links,Đề xuất liên kết
+{0} AI suggestions were discarded as invalid,Đã loại {0} đề xuất AI không hợp lệ
+{0} lines have AI link suggestions to review,{0} dòng có đề xuất liên kết của AI cần xem
+{0} suggestions added,Đã thêm {0} đề xuất
+Suggestion confidence {0}%,Độ tin cậy của đề xuất {0}%
+Component,Cấu phần
+Confidence,Độ tin cậy
+Line,Dòng
+Link suggestions,Đề xuất liên kết
+Name in procedure,Tên trong quy trình
+No AI link suggestions to review,Không có đề xuất liên kết của AI cần xem
+Step,Bước
+Suggested resource,Nguồn lực đề xuất
+View link suggestions,Xem đề xuất liên kết

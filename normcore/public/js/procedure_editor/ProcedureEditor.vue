@@ -16,6 +16,9 @@
 			<button v-if="doc && canCreate" class="btn btn-default btn-sm" type="button" @click="openForm('copy')">
 				{{ __("Copy from this procedure") }}
 			</button>
+			<button v-if="doc && doc.can_edit" class="btn btn-default btn-sm nc-pe__check" type="button" :disabled="checking" :aria-busy="checking ? 'true' : 'false'" @click="runConsistency">
+				{{ checking ? __("Checking…") : __("Check consistency") }}
+			</button>
 		</div>
 
 		<form v-if="form.kind === 'create' || form.kind === 'copy'" class="nc-pe__form" @submit.prevent="submitProcedureForm" @keydown.esc="closeForm">
@@ -111,6 +114,7 @@
 								class="nc-pe__card"
 								:class="{ 'nc-pe__card--sel': isSelected('step', st.step_id), 'nc-pe__card--ai': st.ai_suggested }"
 								:data-ai="st.ai_suggested ? '1' : null"
+								:data-step-card="st.step_id"
 							>
 								<header class="nc-pe__cardhead">
 									<button type="button" class="nc-pe__link" @click="select('step', st.step_id)">
@@ -168,7 +172,44 @@
 					</section>
 				</div>
 
-				<aside class="nc-pe__side" :aria-label="__('Citations')">
+				<aside v-if="consistency" class="nc-pe__side nc-pe__consistency" role="region" aria-live="polite" :aria-label="__('Consistency check')" @keydown.esc="closeConsistency">
+					<h4 class="nc-pe__h">{{ __("Consistency check") }} <span class="text-muted">{{ consistency.checked_on }}</span></h4>
+					<button type="button" class="btn btn-default btn-xs" @click="closeConsistency">{{ __("Close") }}</button>
+					<div v-if="consistencyStale" class="text-muted nc-pe__hint">
+						{{ __("Procedure changed since this check") }}
+						<button type="button" class="btn btn-default btn-xs" :disabled="checking" @click="runConsistency">{{ __("Check again") }}</button>
+					</div>
+					<div v-if="!ruleGroups.length && !noPrepStep" class="alert alert-success">{{ __("No inconsistency found by rules") }}</div>
+					<div v-if="noPrepStep" class="alert alert-warning">{{ noPrepStep.message }}</div>
+					<section v-for="g in ruleGroups" :key="g.kind" class="nc-pe__cgroup">
+						<h5>{{ __(g.title) }}</h5>
+						<ul class="nc-pe__clist">
+							<li v-for="(i, n) in g.items" :key="g.kind + n">
+								<span class="indicator-pill orange">{{ i.label }}</span>
+								<button v-for="sid in i.step_ids" :key="sid" type="button" class="nc-pe__link" @click="goStep(sid)">{{ sid }}</button>
+							</li>
+						</ul>
+					</section>
+					<section v-if="aiIssues" class="nc-pe__cgroup">
+						<h5>{{ __("Possible conflicts with contraindications") }}</h5>
+						<div v-if="!aiIssues.length" class="text-muted">{{ __("AI found no conflict with contraindications") }}</div>
+						<div v-for="(i, n) in aiIssues" :key="'ai' + n" class="nc-pe__cite">
+							<span class="indicator-pill purple">{{ __("Suggested") }}</span>
+							<button v-if="i.step_id" type="button" class="nc-pe__link" @click="goStep(i.step_id)">{{ i.step_id }}</button>
+							<button v-else-if="i.resource_row_id" type="button" class="nc-pe__link" @click="goResource(i.resource_row_id)">{{ i.resource_row_id }}</button>
+							<button v-else-if="i.section" type="button" class="nc-pe__link" @click="goSection(i.section)">{{ sectionLabel(i.section) }}</button>
+							<div>{{ i.explanation }}</div>
+							<blockquote class="nc-pe__quote">{{ i.excerpt }}</blockquote>
+						</div>
+						<div v-if="consistency.ai.rejected" class="text-muted">{{ __("{0} AI suggestions were discarded as invalid", [consistency.ai.rejected]) }}</div>
+					</section>
+					<div v-if="consistency.ai.status === 'failed'" class="alert alert-warning" role="alert">
+						{{ consistency.ai.message }}
+						<button type="button" class="btn btn-default btn-xs" :disabled="checking" @click="runConsistency">{{ __("Check again") }}</button>
+					</div>
+					<div v-else-if="consistency.ai.status === 'skipped'" class="text-muted">{{ consistency.ai.message }}</div>
+				</aside>
+				<aside v-else class="nc-pe__side" :aria-label="__('Citations')">
 					<h4 class="nc-pe__h">{{ __("Citations") }}: {{ selection.key ? (selection.type === "step" ? selection.key : __(selection.key)) : __("Select a section or step") }}</h4>
 					<div v-if="!citations.length" class="text-muted">{{ __("No citations for this selection.") }}</div>
 					<div v-for="c in citations" :key="c.name" class="nc-pe__cite">
@@ -293,6 +334,12 @@ function messageFromError(r) {
 		return "";
 	}
 }
+// FEAT-025 (FR-AI-006): nhóm kết quả kiểm tra nhất quán bằng quy tắc, theo thứ tự hiển thị
+const RULE_GROUPS = [
+	{ kind: "missing_in_preparation", title: "Resources used in steps but missing from preparation" },
+	{ kind: "unused_in_steps", title: "Prepared resources not used in any step" },
+	{ kind: "no_performer", title: "Steps without performer" },
+];
 export default {
 	name: "ProcedureEditor",
 	props: { initialName: { type: String, default: "" } },
@@ -326,9 +373,23 @@ export default {
 			compare: null,
 			onlyOpen: false,
 			commentForm: { target: "", text: "" },
+			consistency: null,
+			consistencyStale: false,
+			checking: false,
 		};
 	},
 	computed: {
+		ruleGroups() {
+			const items = (this.consistency && this.consistency.rule_issues) || [];
+			return RULE_GROUPS.map((g) => ({ ...g, items: items.filter((i) => i.kind === g.kind) })).filter((g) => g.items.length);
+		},
+		noPrepStep() {
+			return ((this.consistency && this.consistency.rule_issues) || []).find((i) => i.kind === "no_preparation_step");
+		},
+		aiIssues() {
+			const ai = this.consistency && this.consistency.ai;
+			return ai && ai.status === "done" ? ai.issues || [] : null;
+		},
 		// giữ giá trị đang chọn trong danh sách kể cả khi người dùng không có quyền đọc thư viện văn bản
 		legalDocumentOptions() {
 			const cur = this.form.legal_document;
@@ -489,6 +550,7 @@ export default {
 		},
 		load(name) {
 			this.closeForm();
+			if (!this.doc || this.doc.name !== name) this.closeConsistency();
 			if (!name) {
 				this.doc = null;
 				return Promise.resolve();
@@ -559,7 +621,49 @@ export default {
 			dialog.show();
 		},
 		reload() {
+			this.consistencyStale = !!this.consistency;
 			return this.load(this.doc.name);
+		},
+		// --- kiểm tra nhất quán (FEAT-025, SCR-DSK-009) ---
+		runConsistency() {
+			this.checking = true;
+			return this.call("check_consistency", { procedure: this.doc.name })
+				.then((r) => {
+					this.consistency = r;
+					this.consistencyStale = false;
+				})
+				.catch(() => {}) // lỗi máy chủ đã hiện ở dải role="alert" (call)
+				.finally(() => (this.checking = false));
+		},
+		closeConsistency() {
+			this.consistency = null;
+			this.consistencyStale = false;
+		},
+		focusStepCard(stepId) {
+			this.$nextTick(() => {
+				const card = this.$el.querySelector('[data-step-card="' + stepId + '"]');
+				if (card) {
+					card.scrollIntoView({ block: "nearest" });
+					const btn = card.querySelector("button");
+					if (btn) btn.focus();
+				}
+			});
+		},
+		goStep(stepId) {
+			this.select("step", stepId);
+			this.focusStepCard(stepId);
+		},
+		goResource(rowId) {
+			const r = (this.doc.resources || []).find((x) => x.resource_row_id === rowId);
+			if (r) this.goStep(r.step_id);
+		},
+		sectionLabel(key) {
+			const sec = (this.doc.sections || []).find((x) => x.key === key);
+			return sec ? __(sec.label) : key;
+		},
+		goSection(key) {
+			const sec = (this.doc.sections || []).find((x) => x.key === key);
+			if (sec) this.select("section", sec.label);
 		},
 		// --- thẩm định và duyệt (FEAT-007, SCR-DSK-010) ---
 		callWf(method, args) {
@@ -895,6 +999,10 @@ export default {
 }
 .nc-pe__form--cite {
 	grid-template-columns: 160px 2fr 2fr auto auto;
+}
+.nc-pe__clist {
+	list-style: none;
+	padding-left: 0;
 }
 .nc-pe__side {
 	border-left: 1px solid var(--border-color);
