@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["Staging: gõ THU-K02 + Tab ra 3 dòng THU-K02-A1/A2/A3 (Clinician Test)", "Site sạch: 1928 test OK; pytest 1142 pass, phủ 99%; check_conventions rc=0", "Đúng phạm vi, không xóa/skip/nới test; CI PR #76 xanh"], "commit": "34ba3b5a32d520cc9e57d2303fc1e6ce69fb5a90"}
