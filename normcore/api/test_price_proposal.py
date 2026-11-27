@@ -354,3 +354,108 @@ class TestProposalActions(ActionCase):
 		self.assertEqual([p["name"] for p in api.pending_for(self.dir)], [name])
 		self.assertEqual(api.pending_for(self.head2), [])
 		self.assertEqual(api.pending_for(self.aud), [])
+
+
+class TestComparisonExport(ActionCase):
+	"""FR-OUT-007, TC-OUT-05."""
+
+	def setUp(self):
+		super().setUp()
+		from normcore.tests.benchmark_utils import make_facility, price_values
+
+		for i, (prov, price) in enumerate([("Hà Nội", 250000), ("Hà Nội", 280000), ("Huế", 300000)]):
+			make_facility(f"BV-N84-{i}", province=prov)
+			doc = frappe.get_doc(
+				price_values(
+					facility=f"BV-N84-{i}",
+					price=price,
+					price_category="PC-GOLD",
+					technical_service="DV-TEST-A",
+					service_name_raw="Dịch vụ thử",
+					effective_date="2026-06-01",
+					source_doc_no=f"QD-{i}",
+				)
+			)
+			doc.insert(ignore_permissions=True)
+
+	def _events(self, ref):
+		return frappe.get_all(
+			"NC Audit Event", {"event_type": "Xuất tệp", "ref_name": ref}, ["user", "ref_doctype", "detail"]
+		)
+
+	def _file(self, fn, user, *args, **kw):
+		from normcore.api import export as export_api  # noqa: F401
+
+		frappe.set_user(user)
+		frappe.response.pop("filecontent", None)
+		try:
+			fn(*args, **kw)
+		finally:
+			frappe.set_user("Administrator")
+		return frappe.response["filename"], frappe.response["filecontent"]
+
+	def test_TC_OUT_05_xuat_bang_so_sanh_gia(self):
+		import io
+
+		from openpyxl import load_workbook
+
+		from normcore.api import export as export_api
+		from normcore.exports import meta as meta_mod
+
+		# từ lần tính đã khóa (hộp thoại SCR-DSK-028)
+		before = len(self._events(self.run.name))
+		name, content = self._file(export_api.export_file, self.fin, "price_comparison", run=self.run.name)
+		self.assertEqual(name, f"so-sanh-gia-{self.run.name}.xlsx")
+		wb = load_workbook(io.BytesIO(content))
+		ws = wb["Tổng hợp"]
+		header = [c.value for c in ws[1]]
+		self.assertNotIn("Giá đề xuất", header)
+		rows = {r[0].value: [c.value for c in r] for r in ws.iter_rows(min_row=2)}
+		a = rows["DV-TEST-A"]
+		self.assertEqual(a[header.index("Số đơn vị")], 3)
+		self.assertEqual(a[header.index("Thấp nhất")], 250000)
+		self.assertEqual(a[header.index("Trung vị")], 280000)
+		self.assertEqual(a[header.index("Cao nhất")], 300000)
+		self.assertEqual(a[header.index("Giá làm tròn")], 302100)
+		self.assertIsNotNone(a[header.index("Độ lệch (%)")])
+		b = rows["DV-TEST-B"]
+		self.assertEqual(b[header.index("Ghi chú")], "Chưa đủ dữ liệu so sánh")
+		wp = wb["Giá tham chiếu"]
+		ph = [c.value for c in wp[1]]
+		prices = [[c.value for c in r] for r in wp.iter_rows(min_row=2)]
+		self.assertEqual(len(prices), 3)
+		self.assertEqual(sorted(p[ph.index("Giá")] for p in prices), [250000, 280000, 300000])
+		self.assertTrue(all(p[ph.index("Ngày hiệu lực")] and p[ph.index("Nguồn")] and p[ph.index("Đơn vị tham chiếu")] for p in prices))
+		info = {r[0].value: r[1].value for r in wb[meta_mod.INFO_SHEET].iter_rows()}
+		self.assertEqual(info["Mã lần tính giá"], self.run.name)
+		ev = self._events(self.run.name)
+		self.assertEqual(len(ev), before + 1)
+		self.assertIn("Bảng so sánh giá", ev[-1]["detail"])
+
+		# từ phương án giá: có cột giá đề xuất; Trưởng khoa chỉ dòng của khoa mình
+		self._two_departments()
+		prop = self._create(apply_from="2027-01-01")
+		doc = frappe.get_doc(DT, prop)
+		doc.items[0].proposed_price = 295000
+		frappe.set_user(self.fin)
+		doc.save()
+		frappe.set_user("Administrator")
+		name, content = self._file(api.export_price_comparison, self.fin, prop)
+		self.assertEqual(name, f"so-sanh-gia-{prop}.xlsx")
+		wb = load_workbook(io.BytesIO(content))
+		ws = wb["Tổng hợp"]
+		header = [c.value for c in ws[1]]
+		rows = {r[0].value: [c.value for c in r] for r in ws.iter_rows(min_row=2)}
+		self.assertEqual(rows["DV-TEST-A"][header.index("Giá đề xuất")], 295000)
+		self.assertEqual(set(rows), {"DV-TEST-A", "DV-TEST-B"})
+		self.assertEqual(len(self._events(prop)), 1)
+		_n, content = self._file(api.export_price_comparison, self.head2, prop)
+		rows = [r[0].value for r in load_workbook(io.BytesIO(content))["Tổng hợp"].iter_rows(min_row=2)]
+		self.assertEqual(rows, ["DV-TEST-B"])
+		# không quyền: Clinician; Auditor đọc được
+		clin = make_user("clin2.n84@normcore.test", "NC Clinician")
+		with self.assertRaises(frappe.PermissionError):
+			self._file(api.export_price_comparison, clin, prop)
+		with self.assertRaises(frappe.PermissionError):
+			self._file(export_api.export_file, clin, "price_comparison", run=self.run.name)
+		self._file(api.export_price_comparison, self.aud, prop)

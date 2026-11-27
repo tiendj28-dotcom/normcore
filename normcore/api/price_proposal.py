@@ -7,9 +7,11 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, now_datetime, nowdate
 
+from normcore.api import benchmark as benchmark_api
 from normcore.api import price_compare
 from normcore.benchmark import proposal as logic
 from normcore.core import notify, settings
+from normcore.exports import price_comparison
 from normcore.core import permissions as scope
 
 DT = "NC Price Proposal"
@@ -413,3 +415,78 @@ def pending_for(user):
 			}
 		)
 	return out
+
+
+# ---- bảng so sánh giá (FR-OUT-007) -------------------------------------------------------------------------
+
+
+def comparison_data(run_doc, proposal_doc=None, departments=None):
+	"""Dữ liệu bảng so sánh giá: thống kê và giá tham chiếu theo đúng tập giá của Bàn so sánh giá (FEAT-028).
+
+	`departments`: chỉ giữ dịch vụ của các khoa này (Trưởng khoa, ASM-030-13).
+	"""
+	costs = frappe.get_all(
+		COST,
+		{"costing_run": run_doc.name, "calc_status": ["!=", "Lỗi"]},
+		["name", "technical_service", "department", "calculated_price", "rounded_price"],
+		order_by="technical_service",
+		limit_page_length=0,
+	)
+	if departments is not None:
+		costs = [c for c in costs if c.department in departments]
+	services = [c.technical_service for c in costs]
+	names = {
+		s.name: s.service_name
+		for s in frappe.get_all(
+			"NC Technical Service", {"name": ["in", services or [""]]}, ["name", "service_name"]
+		)
+	}
+	proposed = {i.technical_service: i.proposed_price for i in proposal_doc.items} if proposal_doc else {}
+	prices = benchmark_api.comparable_prices_bulk(services, run_doc.price_category, run_doc.costing_date)
+	filters = price_compare._filters(None, None, None)
+	out_services, out_prices = [], []
+	for c in costs:
+		summary, selected, _excluded = price_compare._stats_for(
+			c, prices.get(c.technical_service, []), run_doc, filters, False
+		)
+		out_services.append(
+			{
+				"service_code": c.technical_service,
+				"service_name": names.get(c.technical_service),
+				"department": c.department,
+				"calculated_price": c.calculated_price,
+				"rounded_price": c.rounded_price,
+				"proposed_price": proposed.get(c.technical_service),
+				**{k: summary[k] for k in ("count", "min", "median", "max", "deviation_pct", "label")},
+			}
+		)
+		for r in selected:
+			out_prices.append(
+				{**r, "service_code": c.technical_service, "service_name": names.get(c.technical_service)}
+			)
+	data = {"services": out_services, "prices": out_prices, "proposal": None}
+	if proposal_doc:
+		data["proposal"] = {"name": proposal_doc.name, "title": proposal_doc.title}
+	return data
+
+
+def build_comparison_file(run_doc, meta, proposal_doc=None, departments=None):
+	return price_comparison.build_workbook(comparison_data(run_doc, proposal_doc, departments), meta)
+
+
+@frappe.whitelist()
+def export_price_comparison(proposal):
+	"""FR-OUT-007: bảng so sánh giá từ phương án giá; Trưởng khoa chỉ nhận dòng của khoa mình (ASM-030-13)."""
+	from normcore.api import export as export_api
+
+	if not frappe.has_permission(DT, "read", doc=proposal):
+		_deny(_("Bạn không có quyền xem phương án giá này"))
+	doc = frappe.get_doc(DT, proposal)
+	run = frappe.get_doc(RUN, doc.costing_run)
+	meta = export_api._meta("price_comparison", f"{DT} {doc.name}", run.name)
+	filename = f"so-sanh-gia-{doc.name}.xlsx"
+	try:
+		content = build_comparison_file(run, meta, doc, scope.readable_departments(DT))
+	except Exception as e:
+		export_api._generation_error(filename, e)
+	return export_api._send(filename, content, "price_comparison", DT, doc.name)
