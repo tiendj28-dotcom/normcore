@@ -1,0 +1,6 @@
+{
+	"doctype": "NC Price Proposal",
+	"department_field": "department",
+	"public_read": {},
+	"child": ["NC Price Proposal Item", "department"]
+}
