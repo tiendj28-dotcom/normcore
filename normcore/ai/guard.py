@@ -131,3 +131,18 @@ def manufacturer_sections(sections, doc_names_in_scope):
 def budget_exceeded(used: int, budget: int) -> bool:
 	"""FR-AI-013: chặn khi lũy kế VƯỢT hạn mức (Lead, ASM-023-04). Hạn mức 0 = không giới hạn."""
 	return budget > 0 and used > budget
+
+
+def price_list_pages(pages) -> list[dict]:
+	"""Nguồn gửi AI cho FR-BM-003: chữ tách từ tệp bảng giá do người dùng nạp, `[{"page", "text"}]`.
+
+	Căn cứ ghi chú FR-BM-003: bảng giá công khai không thuộc dữ liệu cấm của FR-AI-011. Chỉ nhận đối tượng
+	kiểu `Page` (có `number`, `text`); dict hoặc mapping bất kỳ (bản ghi DocType) bị từ chối. Không đổi
+	`ALLOWED_SOURCES`, `FORBIDDEN_DOCTYPES`."""
+	out = []
+	for i, p in enumerate(pages or [], start=1):
+		if isinstance(p, Mapping) or not (hasattr(p, "number") and hasattr(p, "text")):
+			raise GuardError("Chỉ gửi chữ của tệp bảng giá cho AI")
+		if isinstance(p.text, str) and p.text.strip():
+			out.append({"page": p.number or i, "text": p.text})
+	return out

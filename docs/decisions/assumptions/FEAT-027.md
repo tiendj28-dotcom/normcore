@@ -1,0 +1,18 @@
+# Giả định của FEAT-027 (NORM-82)
+
+Theo ASM-NORM32-02: mỗi FEAT một tệp, mã `ASM-027-XX`. TD = `docs/features/FEAT-027/technical-design.md`, UI = `ui-design.md`.
+
+| Mã | TBD | FEAT/FR | Lựa chọn | Chỗ trong mã | Trạng thái |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| ASM-027-01 | — | FEAT-027, FR-BM-003, SCR-DSK-025 | Nút "Trích bảng giá PDF" đặt chỉ trên form NC Benchmark Facility (FR-BM-003: "tệp bảng giá PDF của một đơn vị"), nạp từ tệp JS riêng qua `hook_registry` (`frappe.ui.form.on` cộng dồn handler), không sửa JS của FEAT-026. Danh sách NC Benchmark Price không thêm nút (JS danh sách của FEAT-026 ghi đè `listview_settings`); kết quả trích mở danh sách lọc theo `ai_log` | `public/js/benchmark_pdf_ai.js`, `hook_registry/FEAT-027.json` | Áp dụng theo CLAUDE.md mục 6 |
+| ASM-027-02 | — | FEAT-027, FR-AI-010 | Chạy bằng tác vụ nền `queue="long"`, trạng thái ở cache + realtime, như FEAT-038 (lời gọi AI có thể tới 180 giây). Trong test `now=True` | `api/benchmark_ai.py` | Áp dụng theo CLAUDE.md mục 6 |
+| ASM-027-03 | — | FEAT-027, FR-BM-002, FR-BM-003 | Một tệp = một đơn vị + một loại giá, người dùng chọn trong hộp thoại; AI không đoán loại giá (NC Price Category nằm trong `FORBIDDEN_DOCTYPES`) | `start_price_list_extraction` | Áp dụng theo CLAUDE.md mục 6 |
+| ASM-027-04 | — | FEAT-027, FR-BM-003 | Ngày hiệu lực lấy theo dòng do AI đọc; dòng không có ngày dùng "Ngày hiệu lực mặc định" người dùng nhập; không có cả hai thì bỏ dòng, báo "Thiếu ngày hiệu lực" | `benchmark/pdf_extract.py::parse_rows` | Áp dụng theo CLAUDE.md mục 6 |
+| ASM-027-05 | — | FEAT-027, FR-AI-013 | Tối đa 30 trang mỗi tệp (hằng `MAX_PAGES`), vượt thì từ chối trước khi gọi AI | `pdf_extract.MAX_PAGES` | Áp dụng theo CLAUDE.md mục 6 (cấu hình được) |
+| ASM-027-06 | — | FEAT-027, UC-013 2a | Không thêm trường số trang (tránh AMD data-model): `source_url = file_url + "#page=N"` để mở đúng trang gốc; dài quá 140 ký tự thì để trống, vẫn còn `source_file` | `pdf_extract.source_url` | Áp dụng theo CLAUDE.md mục 6 |
+| ASM-027-07 | — | FEAT-027, FR-BM-003, FR-AI-005 | Dòng có tên dịch vụ không xuất hiện trong chữ của tệp (sau `normalize_name`) bị bỏ, đếm vào `rejected_citations` của NC AI Log. Hằng `REQUIRE_NAME_IN_SOURCE = False` thì giữ lại | `pdf_extract.parse_rows` | Áp dụng theo CLAUDE.md mục 6 (đảo ngược được) |
+| ASM-027-08 | — | FEAT-027, FR-BM-007, UC-013 2b | Dòng trùng hoặc lỗi lưu của một dòng không hủy cả lô: mỗi dòng một savepoint, dòng hỏng được liệt kê, dòng khác vẫn tạo. AI lỗi thì không tạo dòng nào (FR-AI-010) | `run_price_list_extraction` | Áp dụng theo CLAUDE.md mục 6 |
+| ASM-027-09 | — | FEAT-027, FR-BM-004, ASM-023-16 | Không dùng AI để gợi ý dịch vụ khớp (`MATCH_SERVICE_NAME`): FR-BM-003, FR-BM-004 không đòi; so khớp tên bằng quy tắc của FEAT-026 trong `before_insert` | — | Áp dụng theo CLAUDE.md mục 6 |
+| ASM-027-10 | — | FEAT-027, FR-AI-015 | `test_feat_026_ui.py::test_khong_co_chu_ai` cấm chữ "AI" trong JS và bản dịch của FEAT-026: không sửa các tệp đó; chuỗi mới ở `vi.d/FEAT-027.csv` | `public/js/benchmark_pdf_ai.js` | Áp dụng (giữ test cũ) |
+| ASM-027-11 | — | FEAT-027, FR-AI-014 | Cài `EXTRACT_PRICE_LIST-v2` lười ở lần chạy đầu khi v1 còn mặc định, không patch, không ghi đè bản Admin đã sửa (như ASM-025-11, ASM-038-14) | `prompts_install.ensure_extract_price_list_v2` | Áp dụng theo CLAUDE.md mục 6 |
+| ASM-027-12 | — | FEAT-027, TC-AI-07, ASM-023-16 | Phần "giá tham chiếu bằng tay khi tắt AI" của TC-AI-07 kiểm bằng test mới `test_FR_AI_015_tat_ai_gia_tham_chieu_thu_cong` trong FEAT-027; không sửa test TC-AI-07 của FEAT-023 | `api/test_benchmark_ai.py` | Áp dụng theo CLAUDE.md mục 6 |
