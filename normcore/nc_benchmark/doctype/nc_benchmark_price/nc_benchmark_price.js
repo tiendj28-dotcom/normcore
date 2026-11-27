@@ -14,7 +14,7 @@ frappe.ui.form.on("NC Benchmark Price", {
 				const go = () => call("confirm_prices", { names: [frm.doc.name], technical_service: frm.doc.technical_service });
 				frm.is_dirty() ? frm.save().then(go) : go();
 			}).addClass("btn-primary");
-			frm.add_custom_button(__("Reject"), () => call("reject_prices", { names: [frm.doc.name] }));
+			frm.add_custom_button(__("Reject", null, "NC Benchmark Price"), () => call("reject_prices", { names: [frm.doc.name] }));
 		} else {
 			frm.add_custom_button(__("Reopen"), () => call("reopen_prices", { names: [frm.doc.name] }), __("Actions"));
 		}

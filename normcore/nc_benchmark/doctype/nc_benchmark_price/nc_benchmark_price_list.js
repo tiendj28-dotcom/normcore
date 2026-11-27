@@ -30,7 +30,7 @@ frappe.listview_settings["NC Benchmark Price"] = {
 		});
 		if (!frappe.model.can_write("NC Benchmark Price")) return;
 		const bulk = (label, method, key) =>
-			listview.page.add_actions_menu_item(__(label), () => {
+			listview.page.add_actions_menu_item(__(label, null, "NC Benchmark Price"), () => {
 				const names = listview.get_checked_items(true);
 				if (!names.length) return;
 				const run = () =>
