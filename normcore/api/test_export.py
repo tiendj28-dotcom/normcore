@@ -269,7 +269,9 @@ class TestExportApi(FrappeTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			api.get_export_options(service_cost=self.cost_a)
 		with self.assertRaises(frappe.PermissionError):  # khoa khác không đọc được bộ định mức
-			api.export_file("norm_set_xlsx", norm_set=frappe.db.get_value("NC Service Cost", self.cost_a, "norm_set"))
+			api.export_file(
+				"norm_set_xlsx", norm_set=frappe.db.get_value("NC Service Cost", self.cost_a, "norm_set")
+			)
 		frappe.set_user(HEAD)  # Trưởng khoa không đọc được lần tính cha nhưng mở được hộp thoại giải trình
 		opts = api.get_export_options(service_cost=self.cost_a)
 		by = {o["file_type"]: o for o in opts["options"]}

@@ -50,7 +50,9 @@ class TestExportUi(unittest.TestCase):
 		self.assertIn("o.own_service", js)  # danh sách dịch vụ/bộ định mức khi không đọc được lần tính
 		self.assertIn("run_locked", js)  # trạng thái khóa từ máy chủ, không suy từ nút
 		self.assertIn("!state.service_cost", js)  # không hiện cost_empty khi đã có dịch vụ
-		self.assertIn("o.source.run_readable !== false) a.run", js)  # không gửi run khi không đọc được lần tính
+		self.assertIn(
+			"o.source.run_readable !== false) a.run", js
+		)  # không gửi run khi không đọc được lần tính
 		sc = text(FORMS["nc_service_cost"])
 		self.assertNotIn('frappe.db.get_value("NC Costing Run"', sc)  # tránh popup quyền
 
