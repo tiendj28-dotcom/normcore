@@ -348,6 +348,8 @@ def _fill_header(ws, data):
 def _finish(wb, code, data, errors):
 	m = dict(data.get("meta") or {})
 	m["template_note"] = meta_mod.TEMPLATE_NOTE
+	for ws in wb.worksheets:  # cố định khung dưới dòng tiêu đề cột (ui-design FEAT-019)
+		ws.freeze_panes = f"A{ANNEX[code]['header_row'] + 1}"
 	if errors:
 		m["extra"] = [
 			*(m.get("extra") or ()),

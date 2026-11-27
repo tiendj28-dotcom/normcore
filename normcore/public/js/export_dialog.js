@@ -55,11 +55,14 @@ frappe.provide("normcore.export");
 		const costs = (o.service_costs || []).filter((x) => x.calc_status !== "Lỗi");
 		f.service_cost.df.options = costs.map((x) => ({ value: x.name, label: `${x.service_code} — ${x.service_name || ""} · ${x.department}` }));
 		f.service_cost.refresh();
-		if (state.service_cost) f.service_cost.set_value(state.service_cost);
+		// Select chỉ có một lựa chọn thì tự chọn (ô không được để trống)
+		const only_cost = costs.length === 1 ? costs[0].name : null;
+		if (state.service_cost || only_cost) f.service_cost.set_value(state.service_cost || only_cost);
 		f.norm_set.df.options = (o.norm_sets || []).map((x) => ({ value: x.name, label: `${x.name} · ${x.service_code}` }));
 		if (state.norm_set && !(o.norm_sets || []).some((x) => x.name === state.norm_set)) f.norm_set.df.options.push({ value: state.norm_set, label: state.norm_set });
 		f.norm_set.refresh();
-		if (state.norm_set) f.norm_set.set_value(state.norm_set);
+		const only_norm = (o.norm_sets || []).length === 1 ? o.norm_sets[0].name : null;
+		if (state.norm_set || only_norm) f.norm_set.set_value(state.norm_set || only_norm);
 		f.cost_empty.$wrapper.toggle(!costs.length && !!state.run).html(`<div class="text-muted">${__("No successfully costed service in this run")}</div>`);
 		f.norm_empty.$wrapper.toggle(!(o.norm_sets || []).length && !state.norm_set).html(`<div class="text-muted">${__("This run has no norm set attached")}</div>`);
 		f.bundle_info.$wrapper.html(

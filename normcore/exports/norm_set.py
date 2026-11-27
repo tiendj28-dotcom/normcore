@@ -73,6 +73,7 @@ def _bold(ws, row):
 def _table(ws, headers, rows):
 	ws.append(list(headers))
 	_bold(ws, ws.max_row)
+	ws.freeze_panes = f"A{ws.max_row + 1}"  # cố định khung dưới dòng tiêu đề cột (ui-design FEAT-019)
 	for r in rows:
 		ws.append(list(r))
 
