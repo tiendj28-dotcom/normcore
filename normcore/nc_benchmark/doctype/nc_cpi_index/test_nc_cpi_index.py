@@ -70,7 +70,10 @@ class TestNCCPIIndex(FrappeTestCase):
 				self.assertFalse(frappe.has_permission(DOCTYPE, "delete"))
 
 	def test_quyen_feat_026_chi_so_auditor_va_clinician_khong_tao(self):
-		users = [make_user("bmcpi.aud@normcore.test", "NC Auditor"), make_user("bmcpi.cl@normcore.test", "NC Clinician")]
+		users = [
+			make_user("bmcpi.aud@normcore.test", "NC Auditor"),
+			make_user("bmcpi.cl@normcore.test", "NC Clinician"),
+		]
 		for email in users:
 			frappe.set_user(email)
 			self.assertRaises(frappe.PermissionError, _cpi().insert)

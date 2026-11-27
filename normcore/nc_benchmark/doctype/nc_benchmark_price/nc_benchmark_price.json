@@ -1,0 +1,193 @@
+{
+ "actions": [],
+ "autoname": "format:GTC-{#####}",
+ "creation": "2026-11-27 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "facility",
+  "service_name_raw",
+  "technical_service",
+  "price",
+  "price_category",
+  "effective_date",
+  "source_section",
+  "source_doc_no",
+  "source_url",
+  "source_file",
+  "status_section",
+  "status",
+  "verified_by",
+  "verified_on",
+  "ai_log",
+  "adjusted_section",
+  "adjusted_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "facility",
+   "label": "Đơn vị",
+   "fieldtype": "Link",
+   "options": "NC Benchmark Facility",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "service_name_raw",
+   "label": "Tên dịch vụ gốc",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "Để trống mà có mã dịch vụ thì lấy tên dịch vụ"
+  },
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "options": "NC Technical Service",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "price",
+   "label": "Giá",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "price_category",
+   "label": "Loại giá",
+   "fieldtype": "Link",
+   "options": "NC Price Category",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "effective_date",
+   "label": "Ngày hiệu lực",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "source_section",
+   "label": "Nguồn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "source_doc_no",
+   "label": "Số văn bản nguồn",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "source_url",
+   "label": "Đường dẫn nguồn",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "source_file",
+   "label": "Tệp nguồn",
+   "fieldtype": "Attach"
+  },
+  {
+   "fieldname": "status_section",
+   "label": "Trạng thái",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "options": "Đề xuất\nĐã xác nhận\nLoại bỏ",
+   "default": "Đề xuất",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "verified_by",
+   "label": "Người xác nhận",
+   "fieldtype": "Link",
+   "options": "User",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "verified_on",
+   "label": "Thời điểm xác nhận",
+   "fieldtype": "Datetime",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "ai_log",
+   "label": "Nhật ký AI",
+   "fieldtype": "Link",
+   "options": "NC AI Log",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "adjusted_section",
+   "label": "Giá hiệu chỉnh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "adjusted_html",
+   "label": "Giá hiệu chỉnh (BR-ADJ-009)",
+   "fieldtype": "HTML"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Benchmark",
+ "name": "NC Benchmark Price",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "export": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1,
+   "export": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "export": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1,
+   "export": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1,
+   "export": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1,
+   "export": 1
+  }
+ ],
+ "sort_field": "effective_date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "service_name_raw",
+ "track_changes": 1
+}
