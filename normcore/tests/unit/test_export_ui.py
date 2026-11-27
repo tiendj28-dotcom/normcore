@@ -45,6 +45,17 @@ class TestExportUi(unittest.TestCase):
 		self.assertIn("costs.length === 1", js)
 		self.assertIn("o.norm_sets || []).length === 1", js)
 
+	def test_NORM_78_hop_thoai_cho_truong_khoa(self):
+		js = text(DIALOG)
+		self.assertIn("o.own_service", js)  # danh sách dịch vụ/bộ định mức khi không đọc được lần tính
+		self.assertIn("run_locked", js)  # trạng thái khóa từ máy chủ, không suy từ nút
+		self.assertIn("!state.service_cost", js)  # không hiện cost_empty khi đã có dịch vụ
+		self.assertIn(
+			"o.source.run_readable !== false) a.run", js
+		)  # không gửi run khi không đọc được lần tính
+		sc = text(FORMS["nc_service_cost"])
+		self.assertNotIn('frappe.db.get_value("NC Costing Run"', sc)  # tránh popup quyền
+
 	def test_mot_lua_chon_ghi_thang_vao_dom_va_chuoi(self):
 		# NORM-77: set_value có thể chạy khi <option> chưa dựng (selectedIndex = -1) nên phải ghi DOM + ép chuỗi
 		js = text(DIALOG)
@@ -68,7 +79,16 @@ class TestExportUi(unittest.TestCase):
 
 	def test_hook_registry_khai_bao_tep(self):
 		reg = json.loads(text(ROOT / "hook_registry" / "FEAT-019.json"))
-		self.assertEqual(reg["app_include_js"], ["/assets/normcore/js/export_dialog.js"])
+		self.assertEqual(reg["app_include_js"], ["normcore_export.bundle.js"])
+
+	def test_bundle_nap_hop_thoai_chong_cache(self):
+		# AMD-019-02: URL có hash do Frappe sinh, không dùng /assets/... cố định (cache 1 năm)
+		bundle = ROOT / "public" / "js" / "normcore_export.bundle.js"
+		self.assertTrue(bundle.exists())
+		self.assertIn('import "./export_dialog.js";', text(bundle))
+		reg = json.loads(text(ROOT / "hook_registry" / "FEAT-019.json"))
+		for f in reg["app_include_js"]:
+			self.assertFalse(f.startswith("/assets/"), f)
 
 	def test_chuoi_co_ban_dich(self):
 		with open(ROOT / "translations" / "vi.d" / "FEAT-019.csv", encoding="utf-8", newline="") as f:

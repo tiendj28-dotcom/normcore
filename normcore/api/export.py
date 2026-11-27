@@ -382,6 +382,9 @@ def get_export_options(run=None, service_cost=None, norm_set=None):
 	if run:
 		doc = frappe.get_doc(RUN, run)
 		run_readable = _can_read(doc)
+		# trạng thái khóa trả riêng để giao diện không suy từ quyền (người không đọc được lần tính vẫn biết)
+		out["source"]["run_locked"] = doc.status == LOCKED
+		out["source"]["run_readable"] = run_readable
 		if not run_readable and not service_cost:
 			_deny()
 		if doc.status != LOCKED:
@@ -399,6 +402,24 @@ def get_export_options(run=None, service_cost=None, norm_set=None):
 			o["enabled"] = o["file_type"] in ("norm_set_xlsx", "norm_set_pdf")
 			o["reason"] = "" if o["enabled"] else _("Chỉ áp dụng cho lần tính giá")
 	out["service_costs"], out["norm_sets"], out["bundle"] = [], [], None
+	if service_cost:
+		# NORM-78: dịch vụ đang mở (quyền theo bản ghi dịch vụ) — khóa riêng, không đụng service_costs/norm_sets của lần tính
+		sc = _service_cost(service_cost)
+		out["own_service"] = {
+			"name": sc.name,
+			"service_code": sc.technical_service,
+			"service_name": frappe.db.get_value("NC Technical Service", sc.technical_service, "service_name"),
+			"department": sc.department,
+			"calc_status": sc.calc_status,
+			"norm_set": sc.norm_set
+			if sc.norm_set and frappe.has_permission(NS, "read", sc.norm_set)
+			else None,
+		}
+		if not run_readable and out["own_service"]["norm_set"]:
+			# bộ định mức của dịch vụ đọc được thì xuất được, không gắn lần tính (ASM-019-05)
+			for o in out["options"]:
+				if o["file_type"] in ("norm_set_xlsx", "norm_set_pdf"):
+					o["enabled"], o["reason"] = True, ""
 	if run and enabled and run_readable:
 		costs = frappe.get_all(
 			COST,
