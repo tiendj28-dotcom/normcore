@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["Site sạch: 2163 test bench OK; pytest 1273 pass, độ phủ 98%", "Đủ test TC-PRICE-01..07 và TC-OUT-05, có test vai không quyền và NC Auditor", "Không test bị xóa/skip/nới; test_home 9->10 theo ASM-030-18", "CI PR #88 xanh", "Giao diện chưa kiểm bằng trình duyệt"], "commit": "9cede4db3ff54a51132e6f9c07defc5b31e0ddf4"}
