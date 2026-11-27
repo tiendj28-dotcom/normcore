@@ -69,10 +69,10 @@ def log_event(
 	return doc
 
 
-def log_export(file_type, ref_doctype, ref_name, file_name=None):
+def log_export(file_type, ref_doctype, ref_name, file_name=None, user=None):
 	"""FR-AUD-004: điểm ghi việc xuất tệp; luồng xuất là FEAT-019."""
 	detail = f"{file_type}: {file_name}" if file_name else file_type
-	return log_event("Xuất tệp", ref_doctype, ref_name, detail=detail)
+	return log_event("Xuất tệp", ref_doctype, ref_name, detail=detail, user=user)
 
 
 def _state_field(doc):
