@@ -51,7 +51,7 @@ class ServiceFacts:
 	norm_lines: tuple
 	line_rates: dict  # line_id -> engine.LineRate (đơn giá đã dùng trong lần tính)
 	costing_date: date | str | None = None
-	price_valid_months: int = 12
+	price_valid_months: int = 24
 	equipment: dict = field(
 		default_factory=dict
 	)  # code -> {annual_cost, planned_hours, utilization, maintenance}
@@ -127,18 +127,21 @@ def rule_002_time_study(facts):
 		if ln.component != "LABOR" or ln.excluded or med is None:
 			continue
 		med = Decimal(str(med))
-		if ln.hospital_qty <= med * (1 + TIME_STUDY_MARGIN):
+		# số phút đang áp theo BR-COST-007 (min với định mức ban hành); trần định mức Bộ được giữ khi đề xuất
+		applied = engine.applied_qty(ln.hospital_qty, ln.authority_qty)
+		if applied <= med * (1 + TIME_STUDY_MARGIN):
 			continue
 		rate = facts.line_rates[ln.line_id]
-		delta = _amount(replace(ln, hospital_qty=med, authority_qty=None), rate) - _amount(ln, rate)
+		new_applied = engine.applied_qty(med, ln.authority_qty)
+		delta = _amount(replace(ln, hospital_qty=med), rate) - _amount(ln, rate)
 		out.append(
 			_make(
 				"BR-ADJ-002",
 				DOWN,
 				"LABOR",
 				ln.line_id,
-				f"{_fmt(ln.hospital_qty)} phút",
-				f"{_fmt(med)} phút",
+				f"{_fmt(applied)} phút",
+				f"{_fmt(new_applied)} phút",
 				impact(facts, delta),
 			)
 		)

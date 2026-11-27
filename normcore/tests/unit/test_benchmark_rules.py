@@ -94,6 +94,23 @@ class TestBenchmarkRules(unittest.TestCase):
 		assert rules.rule_002_time_study(_facts(time_study={("S002", "DD"): D("18")})) == []  # 20 <= 18*1.15
 		assert rules.rule_002_time_study(_facts(time_study={})) == []
 
+	def test_rule_002_dong_co_tran_dinh_muc_khong_tang_gia(self):
+		# L09 golden của DV-TEST-A: LABOR DD 15 phút, định mức ban hành 10, đang áp 10 (BR-COST-007)
+		l09 = _line("L09", "LABOR", "DD", 15, step="S003", authority_qty=D("10"))
+		rates = {**_facts().line_rates, "L09": engine.LineRate(D("59644.89"), "t")}
+		lines = (*_facts().norm_lines, l09)
+		# trung vị 12: số phút đang áp 10 không vượt 12 x 1,15 -> không gợi ý (trước đây sinh gợi ý Giảm nhưng tăng giá)
+		f = _facts(norm_lines=lines, line_rates=rates, time_study={("S003", "DD"): D("12")})
+		assert rules.rule_002_time_study(f) == []
+		assert rules.generate(f, D("20.85"), D(10)) != [] and all(
+			s.target_ref != "L09" for s in rules.generate(f, D("20.85"), D(10))
+		)
+		# trung vị 8: đang áp 10 > 9,2 -> gợi ý 10 -> 8 phút, tác động âm
+		f = _facts(norm_lines=lines, line_rates=rates, time_study={("S003", "DD"): D("8")})
+		(s,) = rules.rule_002_time_study(f)
+		assert (s.target_ref, s.current_value, s.suggested_value) == ("L09", "10 phút", "8 phút")
+		assert s.estimated_impact < 0
+
 	def test_rule_003_mat_hang_tuong_duong(self):
 		cheap = {
 			"L05": [("THUOCZ", engine.LineRate(D("500"), "t")), ("THUOCW", engine.LineRate(D("2000"), "t"))]
