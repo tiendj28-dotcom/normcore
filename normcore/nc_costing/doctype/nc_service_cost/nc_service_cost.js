@@ -226,13 +226,6 @@ frappe.ui.form.on("NC Service Cost", {
 		frm.set_df_property("test_system_costs", "hidden", 1);
 		if (frm.is_new()) return;
 		// FEAT-037 (SCR-DSK-040): lối vào phân tích độ nhạy; trang chỉ đọc
-		frappe.db.get_value("NC Costing Run", frm.doc.costing_run, "status").then((r) => {
-			if (!["Đã tính", "Đã khóa"].includes((r.message || {}).status)) return;
-			frm.add_custom_button(__("Sensitivity analysis"), () => {
-				frappe.route_options = { service_cost: frm.doc.name };
-				frappe.set_route("sensitivity", frm.doc.name);
-			});
-		});
 		const loading = frm.dashboard.add_section(`<div class="text-muted">${__("Loading explanation…")}</div>`, __("Cost explanation"));
 		frappe.call({
 			method: API + "get_explanation",
@@ -241,6 +234,13 @@ frappe.ui.form.on("NC Service Cost", {
 				if (!r.message) return;
 				render(loading, r.message);
 				// FEAT-019: trạng thái lần tính cha lấy từ get_explanation (Trưởng khoa không đọc được NC Costing Run)
+				// FEAT-037: lối vào độ nhạy cũng dùng run_status này, không đọc NC Costing Run trực tiếp (NORM-78)
+				if (["Đã tính", "Đã khóa"].includes(r.message.header.run_status)) {
+					frm.add_custom_button(__("Sensitivity analysis"), () => {
+						frappe.route_options = { service_cost: frm.doc.name };
+						frappe.set_route("sensitivity", frm.doc.name);
+					});
+				}
 				if (r.message.header.run_status === "Đã khóa") {
 					frm.add_custom_button(__("Export explanation PDF"), () => normcore.export.open({ service_cost: frm.doc.name }));
 				}
