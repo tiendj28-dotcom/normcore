@@ -117,6 +117,19 @@ def build_source(doctype: str, record: Mapping, fields: Iterable[str] | None = N
 	return out
 
 
+MANUFACTURER_DOC_TYPE = "Tài liệu của hãng"
+
+
+def manufacturer_sections(sections, doc_names_in_scope):
+	"""Mục của tài liệu của hãng gửi AI (FR-AI-016, ADR-007 [1.1]): chỉ mục của tài liệu trong phạm vi.
+
+	Mục của tài liệu khác, kể cả tài liệu của hãng không gắn với hệ thống, không bao giờ vào nguồn."""
+	allowed = set(doc_names_in_scope or ())
+	return [
+		build_source("NC Legal Section", s) for s in sections or [] if s.get("legal_document") in allowed
+	]
+
+
 def budget_exceeded(used: int, budget: int) -> bool:
 	"""FR-AI-013: chặn khi lũy kế VƯỢT hạn mức (Lead, ASM-023-04). Hạn mức 0 = không giới hạn."""
 	return budget > 0 and used > budget
