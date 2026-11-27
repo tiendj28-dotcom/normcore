@@ -38,7 +38,7 @@ function open_search_dialog() {
 				fieldname: "doc_type",
 				fieldtype: "Select",
 				label: __("Type"),
-				options: ["", "Luật", "Nghị định", "Thông tư", "Quyết định", "Công văn", "Tài liệu nội bộ"].join("\n"),
+				options: ["", "Luật", "Nghị định", "Thông tư", "Quyết định", "Công văn", "Tài liệu nội bộ", "Tài liệu của hãng"].join("\n"),
 			},
 			{
 				fieldname: "validity_status",

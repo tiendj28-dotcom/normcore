@@ -1,0 +1,29 @@
+AI,AI
+AI norm suggestion,AI đề xuất định mức
+AI norm suggestions,Đề xuất định mức của AI
+AI suggestion failed,Đề xuất bằng AI không thực hiện được
+All,Tất cả
+Apply {0} = {1} {2} to {3}?,Áp {0} = {1} {2} vào {3}?
+Could not load the suggestions.,Không tải được các đề xuất.
+Follows guideline,Theo hướng dẫn
+Item or equipment,"Mặt hàng, thiết bị"
+Link,Liên kết
+Link to catalog,Liên kết với danh mục
+Manufacturer document code with version,Mã tài liệu của hãng kèm phiên bản
+No basis yet,Chưa có căn cứ
+No pending AI suggestions.,Không có đề xuất AI nào chờ xử lý.
+Not in catalog,Ngoài danh mục
+Pending,Chờ xử lý
+Reject,Bỏ
+Review,Xem
+Review AI suggestions,Xem đề xuất AI
+Running…,Đang chạy…
+Show,Hiển thị
+Suggested value,Giá trị đề xuất
+Suggestion applied,Đã áp đề xuất
+Your data is unchanged.,Dữ liệu của bạn được giữ nguyên.
+the draft norm set,bộ định mức Nháp
+the item catalog,danh mục mặt hàng
+the quality plan,kế hoạch chất lượng
+{0} AI suggestions not yet processed,{0} đề xuất AI chưa xử lý
+"{0} suggestions created ({1} without basis, {2} not in catalog)","Đã tạo {0} đề xuất ({1} chưa có căn cứ, {2} ngoài danh mục)"

@@ -5,7 +5,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, getdate, today
 
-from normcore.library import supersession
+from normcore.library import manufacturer, supersession
 from normcore.library.search import normalize_doc_number
 from normcore.library.validity import compute_validity
 
@@ -23,6 +23,7 @@ class NCLegalDocument(Document):
 		self.check_dates()
 		self.check_file()
 		self.check_supersessions()
+		self.check_related_resources()
 		self.validity_status = compute_validity(self.effective_date, self.expiry_date, getdate(today()))
 		self.mark_for_index()
 
@@ -81,6 +82,13 @@ class NCLegalDocument(Document):
 		supersession.normalize_rows(rows)
 		for r, row in zip(self.supersessions, rows, strict=True):
 			r.superseded_sections = row["superseded_sections"]
+
+	def check_related_resources(self):
+		"""FR-LIB-013: tài liệu của hãng phải gắn mặt hàng hoặc thiết bị (TD 2.1)."""
+		rows = [r.as_dict() for r in self.get("related_resources") or []]
+		errors = manufacturer.resource_link_errors(self.doc_type, rows)
+		if errors:
+			frappe.throw("<br>".join(_(e) for e in errors))
 
 	def check_file(self):
 		url = self.file or ""

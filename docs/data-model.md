@@ -499,6 +499,28 @@ Form hiển thị (không lưu): bộ định mức hiện hành, kế hoạch c
 | iqc_lines | Nội kiểm | Table NC QC IQC Line | | |
 | calibration_lines | Chuẩn máy | Table NC QC Calibration Line | | |
 
+**NC AI Norm Suggestion** **[AMD-038-01]** — Đề xuất định mức cận lâm sàng của AI [FR-AI-016, FR-AI-017, FR-AI-018]. Naming: `AINS-.#####`. `track_changes` bật. Chỉ tác vụ đề xuất tạo bản ghi; người dùng chỉ đổi trạng thái và liên kết qua API.
+
+| Trường | Nhãn | Kiểu | BB | Ghi chú |
+| :-- | :-- | :-- | :-- | :-- |
+| test_system | Hệ thống xét nghiệm | Link NC Test System | Có | |
+| department | Khoa | Link NC Department | Có | Lấy từ hệ thống xét nghiệm; chỉ đọc; dùng cho phạm vi khoa |
+| suggestion_type | Loại đề xuất | Select | Có | Lượng hóa chất mỗi test / Tần suất chuẩn máy / Tần suất nội kiểm / Hạn dùng sau mở |
+| resource_doctype | Loại danh mục | Link DocType | | NC Item / NC Equipment |
+| resource | Mặt hàng, thiết bị | Dynamic Link | | Trống = ngoài danh mục [FR-AI-018] |
+| resource_text | Tên do AI ghi | Data | Có | Giữ nguyên văn bản AI trả |
+| not_in_catalog | Ngoài danh mục | Check | | Chỉ đọc; bật khi mã AI trả không có trong danh mục [FR-AI-018] |
+| value | Giá trị đề xuất | Float | Có | Lượng mỗi test; số lần chuẩn máy mỗi năm; số lần chạy nội kiểm mỗi ngày; số ngày |
+| uom | Đơn vị | Data | | |
+| relation | Căn cứ | Select | Có | Theo hướng dẫn / Chưa có căn cứ |
+| legal_section | Mục tài liệu | Link NC Legal Section | | BB trừ khi "Chưa có căn cứ" |
+| quote | Đoạn trích | Small Text | | Nguyên văn trong `legal_section` (cùng quy tắc DI-08) [FR-AI-005] |
+| status | Trạng thái | Select | Có | Đề xuất / Đã chấp nhận / Đã bỏ; mặc định "Đề xuất" |
+| norm_set | Bộ định mức đã áp | Link NC Norm Set | | Đặt khi chấp nhận loại "Lượng hóa chất mỗi test" |
+| applied_ref | Bản ghi đã áp | Data | | `line_id`, tên dòng kế hoạch hoặc mã mặt hàng |
+| ai_log | Nhật ký AI | Link NC AI Log | Có | |
+| processed_by, processed_on | Người xử lý, thời điểm | Link User, Datetime | | |
+
 **NC QC IQC Line** **[1.1]** — Bảng con của NC QC Plan [BR-CLS-006].
 
 | Trường | Nhãn | Kiểu | BB | Ghi chú |
@@ -830,7 +852,7 @@ R = đọc, W = tạo và sửa, A = thao tác duyệt theo luồng, — = khôn
 | Mẫu định mức **[1.1]** | R | R | — | W | R | — | R | R | W | R |
 | Sản lượng cận lâm sàng, phút khai thác, xuất kho thực tế **[1.1]** | — | R (khoa) | — | W | — | — | R | — | R | R |
 
-NC Consultant xem số liệu kế toán chỉ khi được cấp riêng bằng User Permission [FR-ACC-004]. **[1.1]** Bảng con theo quyền của DocType cha. Đối soát vật chất và sản lượng theo dòng "Lần tính giá, kết quả, đối soát".
+NC Consultant xem số liệu kế toán chỉ khi được cấp riêng bằng User Permission [FR-ACC-004]. **[1.1]** Bảng con theo quyền của DocType cha. Đối soát vật chất và sản lượng theo dòng "Lần tính giá, kết quả, đối soát". NC AI Norm Suggestion theo dòng "Hệ thống xét nghiệm, kế hoạch chất lượng, chương trình ngoại kiểm" **[AMD-038-01]**.
 
 ## 5. Luồng trạng thái
 
