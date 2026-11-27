@@ -22,7 +22,59 @@ EXECUTE = "normcore.nc_costing.doctype.nc_costing_run.nc_costing_run.execute_cos
 PROGRESS_EVENT = "normcore_costing_progress"
 
 
+SCENARIO_ONLY = "Kịch bản chỉ sửa qua Bàn so sánh giá"
+SCENARIO_NO_RUN = "Kịch bản điều chỉnh tính lại qua Bàn so sánh giá, không chạy, khóa hay nhân bản trực tiếp"
+CHANGE_FIELDS = (
+	"technical_service",
+	"change_type",
+	"target_ref",
+	"field",
+	"old_value",
+	"new_value",
+	"source_suggestion",
+)
+
+
 class NCCostingRun(Document):
+	@property
+	def is_scenario(self) -> bool:
+		"""FR-ADJ-006: kịch bản điều chỉnh là lần tính có `based_on_run` (ASM-029-01)."""
+		return bool(self.based_on_run)
+
+	def _scenario_rows(self, doc) -> list:
+		return [
+			tuple(str(r.get(f) or "") for f in CHANGE_FIELDS) for r in (doc.get("scenario_changes") or [])
+		]
+
+	def _validate_scenario(self, prev):
+		"""ASM-029-07: `based_on_run`, `scenario_changes` chỉ do API (flags.scenario_write) ghi."""
+		changed = (
+			bool(self.based_on_run or self.scenario_changes)
+			if prev is None
+			else (
+				(self.based_on_run or None) != (prev.based_on_run or None)
+				or self._scenario_rows(self) != self._scenario_rows(prev)
+			)
+		)
+		if not changed:
+			return
+		if not self.flags.scenario_write:
+			frappe.throw(_(SCENARIO_ONLY))
+		if self.scenario_changes and not self.based_on_run:
+			frappe.throw(_(SCENARIO_ONLY))
+		if self.based_on_run and (prev is None or prev.based_on_run != self.based_on_run):
+			origin = frappe.db.get_value(
+				"NC Costing Run", self.based_on_run, ["status", "based_on_run"], as_dict=True
+			)
+			if not origin or origin.based_on_run:
+				frappe.throw(
+					_("Kịch bản không lồng được: lần tính gốc {0} đã là kịch bản").format(self.based_on_run)
+				)
+			if origin.status not in (CALCULATED, LOCKED):
+				frappe.throw(
+					_("Lần tính gốc {0} chưa ở trạng thái Đã tính hoặc Đã khóa").format(self.based_on_run)
+				)
+
 	def validate(self):
 		"""FR-COST-001: đầu vào bắt buộc (reqd), lần nhập "Đã chốt", khóa đầu vào ngoài Nháp, Tính lỗi."""
 		if not self.status:
@@ -32,6 +84,7 @@ class NCCostingRun(Document):
 			if status != IMPORT_FINAL:
 				frappe.throw(_("Lần nhập kế toán {0} chưa chốt").format(self.accounting_import))
 		prev = None if self.is_new() else self.get_doc_before_save()
+		self._validate_scenario(prev)
 		if prev is None:
 			self.snapshot_file = self.snapshot_hash = None  # chỉ thao tác Khóa ghi (FR-COST-011)
 		elif prev.status == LOCKED and self._changed_since(prev):
@@ -82,6 +135,8 @@ class NCCostingRun(Document):
 	@frappe.whitelist()
 	def run_costing(self, confirm_ineligible=0):
 		"""FR-COST-003: tính cho mọi bộ định mức "Đã khóa" trong phạm vi (DI-06). Việc tính nằm ở normcore.costing."""
+		if self.is_scenario:
+			frappe.throw(_(SCENARIO_NO_RUN))
 		frappe.has_permission("NC Costing Run", "write", doc=self, throw=True)
 		if self.status == LOCKED:
 			frappe.throw(
@@ -150,6 +205,8 @@ class NCCostingRun(Document):
 	def lock_costing(self):
 		"""Khóa lần tính giá (UC-012 bước 8, data-model 5.4): từ chối khi còn dòng vượt ngưỡng chưa giải trình.
 		FEAT-018 (FR-COST-011): tính lại từ ảnh chụp đầu vào, trùng kết quả đã lưu mới lưu tệp, mã băm và khóa."""
+		if self.is_scenario:
+			frappe.throw(_(SCENARIO_NO_RUN))
 		frappe.has_permission("NC Costing Run", "write", doc=self, throw=True)
 		if self.status != CALCULATED:
 			frappe.throw(_("Chỉ khóa được lần tính giá ở trạng thái Đã tính"))
@@ -246,6 +303,8 @@ class NCCostingRun(Document):
 	@frappe.whitelist()
 	def duplicate_run(self):
 		"""FR-COST-012: lần tính mới ở "Nháp", cùng đầu vào và phạm vi, không mang kết quả, đối soát, ảnh chụp."""
+		if self.is_scenario:
+			frappe.throw(_(SCENARIO_NO_RUN))
 		frappe.has_permission("NC Costing Run", "read", doc=self, throw=True)
 		frappe.has_permission("NC Costing Run", "create", throw=True)
 		if self.status == CALCULATING:

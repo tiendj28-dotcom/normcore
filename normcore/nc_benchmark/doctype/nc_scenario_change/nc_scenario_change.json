@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "creation": "2026-11-27 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "technical_service",
+  "change_type",
+  "target_ref",
+  "field",
+  "old_value",
+  "new_value",
+  "source_suggestion"
+ ],
+ "fields": [
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "options": "NC Technical Service",
+   "read_only": 1,
+   "description": "Trống với thay đổi áp cho cả lần tính (Tham số, Thiết bị)"
+  },
+  {
+   "fieldname": "change_type",
+   "label": "Loại thay đổi",
+   "fieldtype": "Select",
+   "options": "Tham số\nThiết bị\nDòng định mức",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "target_ref",
+   "label": "Đối tượng",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "field",
+   "label": "Trường",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "old_value",
+   "label": "Giá trị cũ",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "new_value",
+   "label": "Giá trị mới",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "source_suggestion",
+   "label": "Gợi ý nguồn",
+   "fieldtype": "Link",
+   "options": "NC Adjustment Suggestion",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Benchmark",
+ "name": "NC Scenario Change",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
