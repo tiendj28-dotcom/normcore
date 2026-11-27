@@ -11,8 +11,8 @@ from normcore.api import benchmark as benchmark_api
 from normcore.api import price_compare
 from normcore.benchmark import proposal as logic
 from normcore.core import notify, settings
-from normcore.exports import price_comparison
 from normcore.core import permissions as scope
+from normcore.exports import price_comparison
 
 DT = "NC Price Proposal"
 RUN = "NC Costing Run"
@@ -30,7 +30,15 @@ def _cost_rows(run_name):
 	return frappe.get_all(
 		COST,
 		{"costing_run": run_name, "calc_status": ["!=", "Lỗi"]},
-		["name", "technical_service", "department", "full_cost", "calculated_price", "rounded_price", "calc_status"],
+		[
+			"name",
+			"technical_service",
+			"department",
+			"full_cost",
+			"calculated_price",
+			"rounded_price",
+			"calc_status",
+		],
 		limit_page_length=0,
 	)
 
@@ -217,9 +225,9 @@ def write_price_history(doc, use_authority=False, effective_date=None, authority
 	if conflicts:
 		c = conflicts[0]
 		frappe.throw(
-			_("Dịch vụ {0} đã có giá loại {1} áp dụng ngày {2} (phương án {3}), không ghi đè lịch sử giá").format(
-				c["technical_service"], c["price_category"], c["effective_date"], c["price_proposal"]
-			),
+			_(
+				"Dịch vụ {0} đã có giá loại {1} áp dụng ngày {2} (phương án {3}), không ghi đè lịch sử giá"
+			).format(c["technical_service"], c["price_category"], c["effective_date"], c["price_proposal"]),
 			title=_("Trùng lịch sử giá"),
 		)
 	for r in rows:
@@ -227,7 +235,10 @@ def write_price_history(doc, use_authority=False, effective_date=None, authority
 		svc.flags.price_history_write = True
 		svc.append(
 			"approved_prices",
-			{k: r[k] for k in ("price_category", "price", "effective_date", "price_proposal", "authority_doc_no")},
+			{
+				k: r[k]
+				for k in ("price_category", "price", "effective_date", "price_proposal", "authority_doc_no")
+			},
 		)
 		svc.save(ignore_permissions=True)
 	return len(rows)
@@ -296,7 +307,9 @@ def apply_action(proposal, action, reason=None, acknowledged=None, department=No
 		mine = _my_departments(doc, user)
 		if department:
 			if department not in mine:
-				_deny(_("Bạn không phải trưởng khoa của khoa {0} hoặc khoa này đã xác nhận").format(department))
+				_deny(
+					_("Bạn không phải trưởng khoa của khoa {0} hoặc khoa này đã xác nhận").format(department)
+				)
 			mine = [department]
 		conf = [c.as_dict() for c in doc.department_confirmations]
 		try:
@@ -395,8 +408,10 @@ def pending_for(user):
 	days = int(settings.get("approval_reminder_days"))
 	today = getdate(nowdate())
 	out = []
-	for row in frappe.get_all(DT, {"workflow_state": ["in", list(wanted)]}, ["name", "modified", "workflow_state", "title"]):
-		task, role = wanted[row.workflow_state]
+	for row in frappe.get_all(
+		DT, {"workflow_state": ["in", list(wanted)]}, ["name", "modified", "workflow_state", "title"]
+	):
+		task, _role = wanted[row.workflow_state]
 		doc = frappe.get_doc(DT, row.name)
 		if row.workflow_state == logic.WAIT_DEPT and not _my_departments(doc, user):
 			continue

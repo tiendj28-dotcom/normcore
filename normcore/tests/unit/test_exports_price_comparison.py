@@ -100,7 +100,16 @@ def test_TC_OUT_05_cot_va_du_lieu_tu_lan_tinh():
 	assert b[10].value == "Chưa đủ dữ liệu so sánh"
 	wp = wb[pc.PRICES_SHEET]
 	assert [c.value for c in wp[1]] == list(pc.PRICE_COLUMNS)
-	assert [c.value for c in wp[2]][2:] == ["BV Một", "Hà Nội", "Hạng I", "Công lập", "PC-GOLD", 300000.0, datetime(2026, 6, 1), "QD-12"]
+	assert [c.value for c in wp[2]][2:] == [
+		"BV Một",
+		"Hà Nội",
+		"Hạng I",
+		"Công lập",
+		"PC-GOLD",
+		300000.0,
+		datetime(2026, 6, 1),
+		"QD-12",
+	]
 	assert wp.cell(3, 10).value == "https://x.vn/g"  # nguồn: link khi không có số văn bản
 	assert wp.cell(3, 9).value == datetime(2026, 5, 1)
 

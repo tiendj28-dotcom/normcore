@@ -100,7 +100,9 @@ class ActionCase(ProposalCase):
 		frappe.db.set_value("NC Department", "KHOA-TEST-2", "head_user", self.head2)
 
 	def _two_departments(self):
-		cost = frappe.db.get_value("NC Service Cost", {"costing_run": self.run.name, "technical_service": "DV-TEST-B"})
+		cost = frappe.db.get_value(
+			"NC Service Cost", {"costing_run": self.run.name, "technical_service": "DV-TEST-B"}
+		)
 		frappe.db.set_value("NC Service Cost", cost, "department", "KHOA-TEST-2")
 
 	def _act(self, user, name, action, **kw):
@@ -133,9 +135,7 @@ class ActionCase(ProposalCase):
 		return name
 
 	def _logs(self, user, name):
-		return frappe.get_all(
-			"Notification Log", {"for_user": user, "document_name": name}, pluck="subject"
-		)
+		return frappe.get_all("Notification Log", {"for_user": user, "document_name": name}, pluck="subject")
 
 
 class TestProposalActions(ActionCase):
@@ -210,7 +210,12 @@ class TestProposalActions(ActionCase):
 		svc.flags.price_history_write = True
 		svc.append(
 			"approved_prices",
-			{"price_category": "PC-GOLD", "price": 290000, "effective_date": "2026-01-01", "price_proposal": self._create()},
+			{
+				"price_category": "PC-GOLD",
+				"price": 290000,
+				"effective_date": "2026-01-01",
+				"price_proposal": self._create(),
+			},
 		)
 		svc.save(ignore_permissions=True)
 		name = self._to_director(apply_from="2027-01-01")
@@ -220,7 +225,9 @@ class TestProposalActions(ActionCase):
 		self.assertEqual(len(hist), 2)
 		old, new = sorted(hist, key=lambda r: str(r.effective_date))
 		self.assertEqual((float(old.price), str(old.effective_date)), (290000.0, "2026-01-01"))
-		self.assertEqual((float(new.price), str(new.effective_date), new.price_proposal), (302100.0, "2027-01-01", name))
+		self.assertEqual(
+			(float(new.price), str(new.effective_date), new.price_proposal), (302100.0, "2027-01-01", name)
+		)
 		b = frappe.get_doc("NC Technical Service", "DV-TEST-B").approved_prices
 		self.assertEqual([float(r.price) for r in b], [92600.0])
 		# khóa: sửa dòng bị chặn
@@ -312,7 +319,12 @@ class TestProposalActions(ActionCase):
 		svc.flags.price_history_write = True
 		svc.append(
 			"approved_prices",
-			{"price_category": "PC-GOLD", "price": 1, "effective_date": "2027-01-01", "price_proposal": prior},
+			{
+				"price_category": "PC-GOLD",
+				"price": 1,
+				"effective_date": "2027-01-01",
+				"price_proposal": prior,
+			},
 		)
 		svc.save(ignore_permissions=True)
 		with self.assertRaises(frappe.ValidationError) as cm:
@@ -330,7 +342,15 @@ class TestProposalActions(ActionCase):
 		with self.assertRaises(frappe.ValidationError):
 			svc.save(ignore_permissions=True)
 		svc = frappe.get_doc("NC Technical Service", "DV-TEST-A")
-		svc.append("approved_prices", {"price_category": "PC-GOLD", "price": 2, "effective_date": "2030-01-01", "price_proposal": prior})
+		svc.append(
+			"approved_prices",
+			{
+				"price_category": "PC-GOLD",
+				"price": 2,
+				"effective_date": "2030-01-01",
+				"price_proposal": prior,
+			},
+		)
 		with self.assertRaises(frappe.ValidationError):
 			svc.save(ignore_permissions=True)
 		# sửa tên dịch vụ (không đụng lịch sử) vẫn được
@@ -341,7 +361,9 @@ class TestProposalActions(ActionCase):
 	def test_FR_NOTI_003_viec_cho(self):
 		self._two_departments()
 		name = self._submitted()
-		got = {user: api.pending_for(user) for user in (self.head, self.head2, self.head3, self.dir, self.fin)}
+		got = {
+			user: api.pending_for(user) for user in (self.head, self.head2, self.head3, self.dir, self.fin)
+		}
 		self.assertEqual([p["name"] for p in got[self.head]], [name])
 		self.assertEqual(got[self.head][0]["state"], pr.WAIT_DEPT)
 		self.assertEqual([p["name"] for p in got[self.head2]], [name])
@@ -384,7 +406,7 @@ class TestComparisonExport(ActionCase):
 		)
 
 	def _file(self, fn, user, *args, **kw):
-		from normcore.api import export as export_api  # noqa: F401
+		from normcore.api import export as export_api
 
 		frappe.set_user(user)
 		frappe.response.pop("filecontent", None)
@@ -425,7 +447,12 @@ class TestComparisonExport(ActionCase):
 		prices = [[c.value for c in r] for r in wp.iter_rows(min_row=2)]
 		self.assertEqual(len(prices), 3)
 		self.assertEqual(sorted(p[ph.index("Giá")] for p in prices), [250000, 280000, 300000])
-		self.assertTrue(all(p[ph.index("Ngày hiệu lực")] and p[ph.index("Nguồn")] and p[ph.index("Đơn vị tham chiếu")] for p in prices))
+		self.assertTrue(
+			all(
+				p[ph.index("Ngày hiệu lực")] and p[ph.index("Nguồn")] and p[ph.index("Đơn vị tham chiếu")]
+				for p in prices
+			)
+		)
 		info = {r[0].value: r[1].value for r in wb[meta_mod.INFO_SHEET].iter_rows()}
 		self.assertEqual(info["Mã lần tính giá"], self.run.name)
 		ev = self._events(self.run.name)

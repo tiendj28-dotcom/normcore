@@ -76,7 +76,9 @@ def build_items(costs, bench) -> list[dict]:
 				"technical_service": c["technical_service"],
 				"department": c.get("department"),
 				"full_cost": full,
-				"calculated_price": _dec(c["calculated_price"]) if c.get("calculated_price") is not None else None,
+				"calculated_price": _dec(c["calculated_price"])
+				if c.get("calculated_price") is not None
+				else None,
 				"rounded_price": rounded,
 				"benchmark_median": median,
 				"benchmark_count": count,

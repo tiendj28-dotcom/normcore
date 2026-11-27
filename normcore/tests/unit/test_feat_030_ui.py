@@ -9,7 +9,9 @@ ROOT = Path(__file__).resolve().parents[2]
 PP = ROOT / "nc_benchmark" / "doctype" / "nc_price_proposal"
 FORM = (PP / "nc_price_proposal.js").read_text(encoding="utf-8")
 LIST = (PP / "nc_price_proposal_list.js").read_text(encoding="utf-8")
-RUN_FORM = (ROOT / "nc_costing" / "doctype" / "nc_costing_run" / "nc_costing_run.js").read_text(encoding="utf-8")
+RUN_FORM = (ROOT / "nc_costing" / "doctype" / "nc_costing_run" / "nc_costing_run.js").read_text(
+	encoding="utf-8"
+)
 SERVICE = (ROOT / "nc_procedure" / "doctype" / "nc_technical_service" / "nc_technical_service.js").read_text(
 	encoding="utf-8"
 )

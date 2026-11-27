@@ -123,9 +123,8 @@ def build_workbook(data: dict, meta: dict) -> bytes:
 	with_proposed = bool(data.get("proposal"))
 	meta = dict(meta)
 	if with_proposed:
-		meta["extra"] = list(meta.get("extra") or ()) + [
-			("Phương án giá", f"{data['proposal']['name']} — {data['proposal'].get('title') or ''}")
-		]
+		label = f"{data['proposal']['name']} — {data['proposal'].get('title') or ''}"
+		meta["extra"] = [*(meta.get("extra") or ()), ("Phương án giá", label)]
 	wb = Workbook()
 	ws = wb.active
 	ws.title = SUMMARY_SHEET

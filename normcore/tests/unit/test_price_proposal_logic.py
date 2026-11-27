@@ -7,9 +7,9 @@ from decimal import Decimal
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "docs" / "golden"))
-import golden_engine as ge  # noqa: E402
+import golden_engine as ge
 
-from normcore.benchmark import proposal as pr  # noqa: E402
+from normcore.benchmark import proposal as pr
 
 D = Decimal
 
@@ -50,7 +50,16 @@ def _item(name, svc, dept, full, rounded, proposed=None, basis=None, **kw):
 class TestBuildItems(unittest.TestCase):
 	def test_FR_PRICE_001_build_items(self):
 		costs = _golden_costs()
-		costs.append({"technical_service": "DV-LOI", "department": "K", "full_cost": D(1), "calculated_price": D(1), "rounded_price": D(1), "calc_status": "Lỗi"})
+		costs.append(
+			{
+				"technical_service": "DV-LOI",
+				"department": "K",
+				"full_cost": D(1),
+				"calculated_price": D(1),
+				"rounded_price": D(1),
+				"calc_status": "Lỗi",
+			}
+		)
 		items = pr.build_items(costs, {"DV-TEST-A": (D("300000"), 4)})
 		self.assertEqual([i["technical_service"] for i in items], ["DV-TEST-A", "DV-TEST-B"])
 		a, b = items
@@ -62,7 +71,19 @@ class TestBuildItems(unittest.TestCase):
 		self.assertEqual(a["below_cost"], 0)
 
 	def test_FR_PRICE_001_build_items_dang_duoi_gia_thanh(self):
-		items = pr.build_items([{"technical_service": "X", "department": "K", "full_cost": D(10), "calculated_price": D(12), "rounded_price": D(9), "calc_status": "Cảnh báo"}], {})
+		items = pr.build_items(
+			[
+				{
+					"technical_service": "X",
+					"department": "K",
+					"full_cost": D(10),
+					"calculated_price": D(12),
+					"rounded_price": D(9),
+					"calc_status": "Cảnh báo",
+				}
+			],
+			{},
+		)
 		self.assertEqual(len(items), 1)
 		self.assertEqual(items[0]["below_cost"], 1)
 
@@ -75,7 +96,10 @@ class TestBelowCost(unittest.TestCase):
 		self.assertFalse(pr.is_below_cost(D("1"), None))
 
 	def test_FR_PRICE_003_approve_errors(self):
-		items = [_item("r1", "DV-TEST-A", "K", "287745.46", 302100, 280000, "x"), _item("r2", "DV-TEST-B", "K", 50000, 92600)]
+		items = [
+			_item("r1", "DV-TEST-A", "K", "287745.46", 302100, 280000, "x"),
+			_item("r2", "DV-TEST-B", "K", 50000, 92600),
+		]
 		items[0]["below_cost"] = 1
 		errs = pr.approve_errors(items, [])
 		self.assertEqual(len(errs), 1)
@@ -112,11 +136,19 @@ class TestSubmit(unittest.TestCase):
 
 class TestConfirm(unittest.TestCase):
 	def test_FR_PRICE_004_departments(self):
-		items = [_item("r1", "A", "K2", 1, 1), _item("r2", "B", "K1", 1, 1), _item("r3", "C", "K1", 1, 1), _item("r4", "D", None, 1, 1)]
+		items = [
+			_item("r1", "A", "K2", 1, 1),
+			_item("r2", "B", "K1", 1, 1),
+			_item("r3", "C", "K1", 1, 1),
+			_item("r4", "D", None, 1, 1),
+		]
 		self.assertEqual(pr.departments(items), ["K1", "K2"])
 
 	def test_FR_PRICE_004_005_confirm(self):
-		conf = [{"department": "K1", "confirmed_by": None, "confirmed_on": None}, {"department": "K2", "confirmed_by": None, "confirmed_on": None}]
+		conf = [
+			{"department": "K1", "confirmed_by": None, "confirmed_on": None},
+			{"department": "K2", "confirmed_by": None, "confirmed_on": None},
+		]
 		now = datetime(2026, 11, 27, 10, 0)
 		n, done = pr.confirm(conf, ["K1"], "a@x", now)
 		self.assertEqual((n, done), (1, False))
@@ -146,7 +178,7 @@ class TestApproval(unittest.TestCase):
 			pr.approved_state(None)
 
 	def test_transitions_hop_le(self):
-		for frm, act, to, role in pr.TRANSITIONS:
+		for frm, _act, to, role in pr.TRANSITIONS:
 			self.assertIn(frm, pr.STATES)
 			self.assertIn(to, pr.STATES)
 			self.assertNotEqual(role, "NC Auditor")
@@ -175,11 +207,23 @@ class TestHistory(unittest.TestCase):
 		self.assertEqual(rows[0]["authority_doc_no"], "QD-9")
 
 	def test_FR_PRICE_010_history_conflicts(self):
-		existing = {"DV-TEST-A": [{"price_category": "GIA-01", "effective_date": date(2026, 1, 1), "price_proposal": "PAG-0"}]}
+		existing = {
+			"DV-TEST-A": [
+				{"price_category": "GIA-01", "effective_date": date(2026, 1, 1), "price_proposal": "PAG-0"}
+			]
+		}
 		new = [
 			{"technical_service": "DV-TEST-A", "price_category": "GIA-01", "effective_date": "2026-01-01"},
-			{"technical_service": "DV-TEST-A", "price_category": "GIA-01", "effective_date": date(2027, 1, 1)},
-			{"technical_service": "DV-TEST-B", "price_category": "GIA-01", "effective_date": date(2026, 1, 1)},
+			{
+				"technical_service": "DV-TEST-A",
+				"price_category": "GIA-01",
+				"effective_date": date(2027, 1, 1),
+			},
+			{
+				"technical_service": "DV-TEST-B",
+				"price_category": "GIA-01",
+				"effective_date": date(2026, 1, 1),
+			},
 		]
 		c = pr.history_conflicts(existing, new)
 		self.assertEqual(len(c), 1)

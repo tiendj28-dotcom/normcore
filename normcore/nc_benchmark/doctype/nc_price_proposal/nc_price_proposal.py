@@ -24,7 +24,9 @@ _ITEM_FIELDS = (
 
 
 def _snapshot(doc):
-	rows = [tuple(str(r.get(f) if r.get(f) is not None else "") for f in _ITEM_FIELDS) for r in doc.items or []]
+	rows = [
+		tuple(str(r.get(f) if r.get(f) is not None else "") for f in _ITEM_FIELDS) for r in doc.items or []
+	]
 	return tuple(str(doc.get(f) or "") for f in _DATA_FIELDS), tuple(rows)
 
 
@@ -69,9 +71,7 @@ class NCPriceProposal(Document):
 		if not prev or prev.workflow_state == proposal.DRAFT or self.flags.proposal_action:
 			return
 		if _snapshot(prev) != _snapshot(self):
-			frappe.throw(
-				_("Phương án đang duyệt hoặc đã duyệt, không sửa được"), title=_("Bản ghi đã khóa")
-			)
+			frappe.throw(_("Phương án đang duyệt hoặc đã duyệt, không sửa được"), title=_("Bản ghi đã khóa"))
 
 	def on_trash(self):
 		if self.workflow_state != proposal.DRAFT:  # DI-07

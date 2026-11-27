@@ -45,6 +45,9 @@ class _Meta:
 def test_doc_departments_tu_dong_con(monkeypatch):
 	monkeypatch.setattr(perm.frappe, "get_meta", lambda dt: _Meta())
 	rule = perm.SCOPE_RULES["NC Price Proposal"]
-	doc = _Doc(doctype="NC Price Proposal", items=[{"department": "K1"}, {"department": "K2"}, {"department": "K1"}, {"department": None}])
+	doc = _Doc(
+		doctype="NC Price Proposal",
+		items=[{"department": "K1"}, {"department": "K2"}, {"department": "K1"}, {"department": None}],
+	)
 	assert perm._doc_departments(rule, doc) == {"K1", "K2"}
 	assert perm._doc_departments(rule, _Doc(doctype="NC Price Proposal", items=[])) == set()

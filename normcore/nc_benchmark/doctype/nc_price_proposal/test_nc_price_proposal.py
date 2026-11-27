@@ -34,9 +34,7 @@ class TestNCPriceProposal(FrappeTestCase):
 			["technical_service", "department", "full_cost", "calculated_price", "rounded_price"],
 			order_by="technical_service",
 		)
-		items = [
-			{**{k: c[k] for k in c}, "proposed_price": c.rounded_price} for c in cost
-		]
+		items = [{**{k: c[k] for k in c}, "proposed_price": c.rounded_price} for c in cost]
 		base = {"doctype": DOCTYPE, "title": "Phương án thử", "costing_run": self.run.name, "items": items}
 		base.update(kw)
 		return base
