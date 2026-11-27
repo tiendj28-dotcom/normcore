@@ -1,0 +1,255 @@
+{
+ "actions": [],
+ "autoname": "AINS-.#####",
+ "creation": "2026-11-27 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_system",
+  "department",
+  "suggestion_type",
+  "col_right",
+  "status",
+  "relation",
+  "target_section",
+  "resource_doctype",
+  "resource",
+  "resource_text",
+  "not_in_catalog",
+  "col_value",
+  "value",
+  "uom",
+  "basis_section",
+  "legal_section",
+  "quote",
+  "result_section",
+  "norm_set",
+  "applied_ref",
+  "ai_log",
+  "col_proc",
+  "processed_by",
+  "processed_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_system",
+   "label": "Hệ thống xét nghiệm",
+   "fieldtype": "Link",
+   "options": "NC Test System",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "reqd": 1,
+   "read_only": 1,
+   "fetch_from": "test_system.department",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "suggestion_type",
+   "label": "Loại đề xuất",
+   "fieldtype": "Select",
+   "options": "Lượng hóa chất mỗi test\nTần suất chuẩn máy\nTần suất nội kiểm\nHạn dùng sau mở",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_right",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "label": "Trạng thái",
+   "fieldtype": "Select",
+   "options": "Đề xuất\nĐã chấp nhận\nĐã bỏ",
+   "default": "Đề xuất",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "relation",
+   "label": "Căn cứ",
+   "fieldtype": "Select",
+   "options": "Theo hướng dẫn\nChưa có căn cứ",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "target_section",
+   "label": "Mặt hàng, thiết bị và giá trị",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "resource_doctype",
+   "label": "Loại danh mục",
+   "fieldtype": "Link",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resource",
+   "label": "Mặt hàng, thiết bị",
+   "fieldtype": "Dynamic Link",
+   "options": "resource_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resource_text",
+   "label": "Tên do AI ghi",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "not_in_catalog",
+   "label": "Ngoài danh mục",
+   "fieldtype": "Check",
+   "read_only": 1,
+   "default": "0"
+  },
+  {
+   "fieldname": "col_value",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "value",
+   "label": "Giá trị đề xuất",
+   "fieldtype": "Float",
+   "precision": "6",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "uom",
+   "label": "Đơn vị",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "basis_section",
+   "label": "Căn cứ trích dẫn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "legal_section",
+   "label": "Mục tài liệu",
+   "fieldtype": "Link",
+   "options": "NC Legal Section",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quote",
+   "label": "Đoạn trích",
+   "fieldtype": "Small Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_section",
+   "label": "Kết quả xử lý",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "norm_set",
+   "label": "Bộ định mức đã áp",
+   "fieldtype": "Link",
+   "options": "NC Norm Set",
+   "read_only": 1
+  },
+  {
+   "fieldname": "applied_ref",
+   "label": "Bản ghi đã áp",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ai_log",
+   "label": "Nhật ký AI",
+   "fieldtype": "Link",
+   "options": "NC AI Log",
+   "reqd": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_proc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "processed_by",
+   "label": "Người xử lý",
+   "fieldtype": "Link",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "processed_on",
+   "label": "Thời điểm xử lý",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "NC AI Norm Suggestion",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Clinician",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "NC Finance",
+   "read": 1
+  },
+  {
+   "role": "NC Resource Manager",
+   "read": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "resource_text",
+ "track_changes": 1
+}
