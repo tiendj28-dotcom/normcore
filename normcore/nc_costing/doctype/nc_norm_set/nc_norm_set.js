@@ -57,6 +57,8 @@ frappe.ui.form.on("NC Norm Set", {
 			});
 		}
 		normcore.norm_link.setup(frm);
+		// FEAT-038: đề xuất định mức của AI từ tài liệu của hãng (SCR-DSK-014); khối riêng, ngoài FEAT-014 và FEAT-025
+		if (frm.doc.test_system) normcore.cls_norm_ai.attach(frm, frm.doc.test_system, { draft_only: true });
 	},
 });
 
