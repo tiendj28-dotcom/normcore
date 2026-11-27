@@ -79,15 +79,29 @@ function normcore_chain_filter(listview) {
 	const dept_field = () => listview.page.fields_dict.department;
 	let routing = false; // đang đặt khoa từ liên kết: set_stage sẽ tính lại sau, không tính ở onchange khoa
 	let seq = 0; // bỏ kết quả của lần tính cũ khi khoa/mức đổi liên tiếp
+	let last_dept = null; // khoa dùng ở lần tính gần nhất của apply()
 	// Đổi khoa bằng tay: tính lại bộ lọc `name` theo khoa mới (NORM-58); không chọn mức thì chỉ làm mới danh sách.
 	if (dept_field()) {
 		dept_field().df.onchange = () => {
 			if (!routing) apply();
 		};
+		// Gõ tay rồi Tab (không chọn gợi ý): Frappe đọc khoa mới từ ô nhập nhưng df.onchange có thể không chạy
+		// (NORM-75). Khi ô đổi hoặc mất tiêu điểm, so khoa hiện tại với khoa lần tính gần nhất, khác thì tính lại.
+		const input = dept_field().$input;
+		if (input) {
+			input.on("change blur", () =>
+				setTimeout(() => {
+					if (routing) return;
+					const department = dept_field().get_value() || null;
+					if (department !== last_dept) apply();
+				}, 0)
+			);
+		}
 	}
 	function apply() {
 		const stage = field.get_value();
 		const mine = ++seq;
+		last_dept = (dept_field() && dept_field().get_value()) || null;
 		listview.filter_area.remove("name");
 		if (!stage) return Promise.resolve(listview.filter_area.debounced_refresh_list_view());
 		const department = dept_field() ? dept_field().get_value() : null;
