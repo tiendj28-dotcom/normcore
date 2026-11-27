@@ -312,3 +312,88 @@ class TestBenchmarkApi(FrappeTestCase):
 				self.assertRaises(frappe.PermissionError, call)
 		frappe.set_user(fin)
 		self.assertEqual(api.confirm_prices([p.name])["confirmed"], [p.name])
+
+
+class TestPriceSurvey(FrappeTestCase):
+	def setUp(self):
+		setup_data()
+		spec = frappe.db.get_value("NC Specialty", {}, "name")
+		if not spec:
+			spec = (
+				frappe.get_doc(
+					{
+						"doctype": "NC Specialty",
+						"specialty_code": "GTC-CK",
+						"specialty_name": "Chuyên khoa thử GTC",
+					}
+				)
+				.insert()
+				.name
+			)
+		self.spec = spec
+		frappe.db.set_value("NC Technical Service", {"name": ["in", list(SERVICES)]}, "specialty", None)
+		for code in ("GTC-DV-01", "GTC-DV-02"):
+			frappe.db.set_value("NC Technical Service", code, "specialty", spec)
+		frappe.db.set_value("NC Technical Service", "GTC-DV-03", {"specialty": spec, "is_active": 0})
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.db.rollback()
+
+	def _download(self, **kw):
+		from normcore.api import benchmark as api
+
+		api.download_price_survey(FACILITY, CATEGORY, **kw)
+		return frappe.response["filename"], frappe.response["filecontent"]
+
+	def test_FR_BM_008_phieu_khao_sat(self):
+		from openpyxl import load_workbook
+
+		name, content = self._download(specialty=self.spec)
+		self.assertTrue(name.endswith(".xlsx"))
+		ws = load_workbook(io.BytesIO(content)).worksheets[0]
+		header = [c.value for c in ws[1]]
+		self.assertEqual(header, head())
+		rows = [[c.value for c in r] for r in ws.iter_rows(min_row=2)]
+		# chỉ dịch vụ đang dùng của chuyên khoa (DV-03 không hoạt động bị bỏ)
+		codes = [r[1] for r in rows if r[1] in SERVICES]
+		self.assertEqual(codes, ["GTC-DV-01", "GTC-DV-02"])
+		# điền giá, ngày, nguồn rồi nhập lại bằng bộ nhập
+		wb = load_workbook(io.BytesIO(content))
+		sheet = wb.worksheets[0]
+		for r in range(2, sheet.max_row + 1):
+			if sheet.cell(r, 2).value in SERVICES:
+				sheet.cell(r, 4, 30000)
+				sheet.cell(r, 6, "2026-03-01")
+				sheet.cell(r, 7, "KS-01")
+			else:
+				sheet.delete_rows(r)
+		buf = io.BytesIO()
+		wb.save(buf)
+		res = importer_api.run_import(KEY, buf.getvalue(), "ghi")
+		self.assertEqual((res["created"], res["errors"]), (2, []))
+		# theo danh sách mã
+		_name, content = self._download(services=["GTC-DV-04", "GTC-DV-05"])
+		ws = load_workbook(io.BytesIO(content)).worksheets[0]
+		self.assertEqual([r[1].value for r in ws.iter_rows(min_row=2)], ["GTC-DV-04", "GTC-DV-05"])
+
+	def test_FR_BM_008_nhom_dich_vu_trong(self):
+		from normcore.api import benchmark as api
+
+		frappe.db.set_value("NC Technical Service", "GTC-DV-01", "is_active", 0)
+		frappe.db.set_value("NC Technical Service", "GTC-DV-02", "is_active", 0)
+		self.assertRaises(
+			frappe.ValidationError, api.download_price_survey, FACILITY, CATEGORY, specialty=self.spec
+		)
+		self.assertRaises(frappe.ValidationError, api.download_price_survey, FACILITY, CATEGORY)
+
+	def test_quyen_feat_026_phieu(self):
+		from normcore.api import benchmark as api
+
+		clin = make_user("bmsv.cl@normcore.test", "NC Clinician")
+		aud = make_user("bmsv.aud@normcore.test", "NC Auditor")
+		for user in (clin, aud):
+			frappe.set_user(user)
+			self.assertRaises(
+				frappe.PermissionError, api.download_price_survey, FACILITY, CATEGORY, specialty=self.spec
+			)

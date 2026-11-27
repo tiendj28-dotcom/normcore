@@ -8,6 +8,7 @@ from frappe import _
 
 from normcore.benchmark import reference as ref
 from normcore.core.importer import RowValueError
+from normcore.exports import price_survey
 from normcore.nc_benchmark.doctype.nc_benchmark_price.nc_benchmark_price import find_saved_duplicate
 
 
@@ -185,3 +186,31 @@ def get_adjusted_price(name, target_month=None):
 	target = _target_month(target_month, cpi)
 	out = _adjust({"price": doc.price, "effective_date": doc.effective_date}, cpi, target)
 	return {**out, "price": doc.price, "effective_date": doc.effective_date}
+
+
+@frappe.whitelist()
+def download_price_survey(facility, price_category, specialty=None, services=None):
+	"""FR-BM-008, UC-013 1a: phiếu khảo sát giá (.xlsx) cho một nhóm dịch vụ (chuyên khoa hoặc danh sách mã)."""
+	_check("create")
+	fac = frappe.get_doc("NC Benchmark Facility", facility)
+	filters = {"is_active": 1}
+	group = specialty
+	if services:
+		filters["name"] = ["in", _names(services)]
+		group = group or _("Danh sách dịch vụ chọn")
+	elif specialty:
+		filters["specialty"] = specialty
+	else:
+		frappe.throw(_("Chọn chuyên khoa hoặc danh sách dịch vụ"))
+	rows = frappe.get_all("NC Technical Service", filters=filters, fields=["name", "service_name"])
+	if not rows:
+		frappe.throw(_("Nhóm dịch vụ trống"))
+	meta = {
+		"group": group,
+		"author": frappe.utils.get_fullname(frappe.session.user),
+		"created": frappe.utils.getdate(),
+	}
+	content = price_survey.build_survey(fac.as_dict(), rows, price_category, meta)
+	frappe.response["filename"] = f"phieu-khao-sat-gia-{frappe.scrub(fac.name)}.xlsx"
+	frappe.response["filecontent"] = content
+	frappe.response["type"] = "binary"
