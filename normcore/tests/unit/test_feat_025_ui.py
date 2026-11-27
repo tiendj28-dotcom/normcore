@@ -33,7 +33,7 @@ class TestFeat025Ui(unittest.TestCase):
 	def test_trinh_soan_goi_check_consistency_va_hien_ket_qua(self):
 		self.assertIn('"check_consistency"', EDITOR)
 		self.assertIn('v-if="doc && doc.can_edit"', EDITOR)  # Auditor, bản đã ban hành: không có nút
-		self.assertIn('aria-busy', EDITOR)
+		self.assertIn("aria-busy", EDITOR)
 		self.assertIn('aria-live="polite"', EDITOR)
 		for kind in ("missing_in_preparation", "unused_in_steps", "no_performer", "no_preparation_step"):
 			self.assertIn(kind, EDITOR)
@@ -43,7 +43,13 @@ class TestFeat025Ui(unittest.TestCase):
 		self.assertIn("consistencyStale", EDITOR)
 
 	def test_form_goi_cac_api_norm_link(self):
-		for fn in ("start_link_suggestion", "get_link_suggestion_status", "accept_link_suggestions", "reject_link_suggestion", "list_link_suggestions"):
+		for fn in (
+			"start_link_suggestion",
+			"get_link_suggestion_status",
+			"accept_link_suggestions",
+			"reject_link_suggestion",
+			"list_link_suggestions",
+		):
 			self.assertIn(fn, BLOCK)
 		self.assertIn('const API = "normcore.api.norm_link."', BLOCK)
 		self.assertIn("normcore_ai_link", BLOCK)

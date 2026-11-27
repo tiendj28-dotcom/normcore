@@ -71,9 +71,33 @@ class TestAiLinkController(NormBase):
 class TestAiLinkApi(NormBase):
 	def setUp(self):
 		super().setUp()
-		ensure("NC Item", "item_code", "TH-LIDO", item_name="Lidocain 2%", item_type="Thuốc", uom="ống", norm_units_per_purchase_unit=1)
-		ensure("NC Item", "item_code", "VT-KIM", item_name="Kim tiêm 23G", item_type="Vật tư tiêu hao", uom="cái", norm_units_per_purchase_unit=1)
-		ensure("NC Item", "item_code", "CC-NOIKIEM", item_name="Kim tiêm nội kiểm", item_type="Vật liệu nội kiểm", uom="cái", norm_units_per_purchase_unit=1)
+		ensure(
+			"NC Item",
+			"item_code",
+			"TH-LIDO",
+			item_name="Lidocain 2%",
+			item_type="Thuốc",
+			uom="ống",
+			norm_units_per_purchase_unit=1,
+		)
+		ensure(
+			"NC Item",
+			"item_code",
+			"VT-KIM",
+			item_name="Kim tiêm 23G",
+			item_type="Vật tư tiêu hao",
+			uom="cái",
+			norm_units_per_purchase_unit=1,
+		)
+		ensure(
+			"NC Item",
+			"item_code",
+			"CC-NOIKIEM",
+			item_name="Kim tiêm nội kiểm",
+			item_type="Vật liệu nội kiểm",
+			uom="cái",
+			norm_units_per_purchase_unit=1,
+		)
 		make_equipment("TB-SA", department=DEPT, equipment_name="Máy siêu âm tim")
 		enable_ai(1)
 
@@ -94,11 +118,17 @@ class TestAiLinkApi(NormBase):
 		return publish_procedure(proc)
 
 	def rows(self, proc):
-		return {r.resource_type: r.resource_row_id for r in frappe.get_doc("NC Clinical Procedure", proc.name).resources}
+		return {
+			r.resource_type: r.resource_row_id
+			for r in frappe.get_doc("NC Clinical Procedure", proc.name).resources
+		}
 
 	def full_reply(self, proc):
 		r = self.rows(proc)
-		sug = lambda row, dt, n, comp, c: {"resource_row_id": r[row], "doctype": dt, "name": n, "component": comp, "confidence": c}
+
+		def sug(row, dt, n, comp, c):
+			return {"resource_row_id": r[row], "doctype": dt, "name": n, "component": comp, "confidence": c}
+
 		return {
 			"suggestions": [
 				sug("Thuốc", "NC Item", "TH-LIDO", "DRUG", 0.93),
@@ -116,7 +146,10 @@ class TestAiLinkApi(NormBase):
 		return frappe.get_all("NC AI Log", {"ref_doctype": "NC Norm Set"}, pluck="name")
 
 	def lines(self, name):
-		return {r.component + (r.procedure_resource_row or ""): r for r in frappe.get_doc("NC Norm Set", name).lines}
+		return {
+			r.component + (r.procedure_resource_row or ""): r
+			for r in frappe.get_doc("NC Norm Set", name).lines
+		}
 
 	def suggested_set(self):
 		proc = self.proc3()
@@ -153,10 +186,12 @@ class TestAiLinkApi(NormBase):
 		self.assertTrue(got["ai_enabled"])
 		self.assertTrue(got["can_edit"])
 		self.assertEqual(sorted(x["ai_confidence"] for x in got["lines"]), [71, 80, 93])
-		self.assertEqual({x["resource_text"] for x in got["lines"]}, {"Lidocain 2%", "Kim tiêm 23G", "Máy siêu âm tim"})
+		self.assertEqual(
+			{x["resource_text"] for x in got["lines"]}, {"Lidocain 2%", "Kim tiêm 23G", "Máy siêu âm tim"}
+		)
 
 	def test_UC009_8a_de_xuat_chua_xu_ly_chan_xac_nhan(self):
-		proc, name, _prov = self.suggested_set()
+		_proc, name, _prov = self.suggested_set()
 		ln = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.ai_suggested)
 		with self.assertRaises(frappe.ValidationError) as cm:
 			norm_api.confirm_line(name, ln.line_id)
@@ -174,7 +209,7 @@ class TestAiLinkApi(NormBase):
 		self.assertEqual(frappe.db.get_value("NC Norm Set", name, "status"), "Đã xác nhận chuyên môn")
 
 	def test_FR_AI_007_chap_nhan_bo_sua_de_xuat(self):
-		proc, name, _prov = self.suggested_set()
+		_proc, name, _prov = self.suggested_set()
 		lines = frappe.get_doc("NC Norm Set", name).lines
 		a, b, c = [r for r in lines if r.ai_suggested]
 		# Chấp nhận theo danh sách dòng: giữ liên kết, hết nhãn
@@ -210,7 +245,7 @@ class TestAiLinkApi(NormBase):
 				norm_api.save_line(name, {field: 1}, c.line_id)
 
 	def test_FR_AI_007_sua_truc_tiep_bo_nhan_de_xuat(self):
-		proc, name, _prov = self.suggested_set()
+		_proc, name, _prov = self.suggested_set()
 		d = frappe.get_doc("NC Norm Set", name)
 		row = next(r for r in d.lines if r.ai_suggested and r.component == "SUPPLY")
 		line_id = row.line_id
@@ -249,7 +284,7 @@ class TestAiLinkApi(NormBase):
 		self.assertEqual(api.get_link_suggestion_status("khong-co")["status"], "unknown")
 
 	def test_FR_AI_007_quyen_de_xuat_lien_ket(self):
-		proc, name, _prov = self.suggested_set()
+		_proc, name, _prov = self.suggested_set()
 		line = next(r for r in frappe.get_doc("NC Norm Set", name).lines if r.ai_suggested).line_id
 		for user in (self.aud, self.fin, self.clin2):
 			frappe.set_user(user)
@@ -276,7 +311,7 @@ class TestAiLinkApi(NormBase):
 				api.get_link_suggestion_status(job)
 
 	def test_FR_AI_011_payload_kiem_tra_va_de_xuat(self):
-		proc, name, prov = self.suggested_set()
+		__proc, _name, prov = self.suggested_set()
 		blob = json.dumps(prov.calls[0], ensure_ascii=False)
 		for forbidden in ("NC Norm", "NC Room", "price", "unit_cost", "hospital_qty", "authority"):
 			self.assertNotIn(forbidden, blob)

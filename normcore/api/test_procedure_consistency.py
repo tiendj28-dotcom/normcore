@@ -33,7 +33,13 @@ def make_consistency_procedure(service, dept):
 	):
 		proc.append(
 			"resources",
-			{"step_id": step.step_id, "resource_type": rtype, "resource_text": text, "quantity": 1, "uom": "cái"},
+			{
+				"step_id": step.step_id,
+				"resource_type": rtype,
+				"resource_text": text,
+				"quantity": 1,
+				"uom": "cái",
+			},
 		)
 	proc.save(ignore_permissions=True)
 	return proc

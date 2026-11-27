@@ -70,7 +70,9 @@ def _candidates(doctype):
 		out = []
 		for r in rows:
 			src = guard.build_source("NC Item", r)
-			out.append({"doctype": doctype, "name": src["item_code"], "label": src["item_name"], "uom": src["uom"]})
+			out.append(
+				{"doctype": doctype, "name": src["item_code"], "label": src["item_name"], "uom": src["uom"]}
+			)
 		return out
 	rows = frappe.get_all(
 		"NC Equipment", fields=["equipment_code", "equipment_name"], order_by="equipment_code"

@@ -121,7 +121,9 @@ LINK_V2_SYSTEM = (
 	"`confidence` là số từ 0 đến 1. Dòng không chắc chắn thì bỏ qua. Chỉ trả về một đối tượng JSON: "
 	'{"suggestions": [{"resource_row_id", "doctype", "name", "component", "confidence"}]}.'
 )
-LINK_V2_USER = "Các dòng: {{ variables.lines | tojson }}\nCấu phần hợp lệ: {{ variables.components | tojson }}"
+LINK_V2_USER = (
+	"Các dòng: {{ variables.lines | tojson }}\nCấu phần hợp lệ: {{ variables.components | tojson }}"
+)
 
 
 def _ensure_v2(code, system, user):

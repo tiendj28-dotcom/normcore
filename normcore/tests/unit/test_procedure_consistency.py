@@ -18,7 +18,8 @@ def R(rid, step, text, rtype="Vật tư", link=None):
 	}
 
 
-LABOR = lambda rid, step: R(rid, step, "Bác sĩ", "Nhân lực")
+def LABOR(rid, step):
+	return R(rid, step, "Bác sĩ", "Nhân lực")
 
 
 class TestConsistency(unittest.TestCase):
@@ -31,17 +32,23 @@ class TestConsistency(unittest.TestCase):
 			R("R4", "B02", "Lidocain 2%", "Thuốc"),
 		]
 		out = c.preparation_gaps(steps, res)
-		self.assertEqual([(i["kind"], i["label"], i["step_ids"]) for i in out], [
-			("unused_in_steps", "Bơm tiêm 5ml", ["B01"]),
-			("missing_in_preparation", "Lidocain 2%", ["B02"]),
-		])
+		self.assertEqual(
+			[(i["kind"], i["label"], i["step_ids"]) for i in out],
+			[
+				("unused_in_steps", "Bơm tiêm 5ml", ["B01"]),
+				("missing_in_preparation", "Lidocain 2%", ["B02"]),
+			],
+		)
 		# cùng khóa liên kết dù text khác -> một
 		res = [R("R1", "B01", "A", link=("NC Item", "X")), R("R2", "B02", "B", link=("NC Item", "X"))]
 		self.assertEqual(c.preparation_gaps(steps, res), [])
 		# Nhân lực không vào kiểm (1); message có
 		res = [LABOR("R1", "B02")]
 		self.assertEqual(c.preparation_gaps(steps, res), [])
-		msgs = [i["message"] for i in c.rule_issues(steps, [R("R4", "B02", "Lidocain", "Thuốc"), LABOR("R9", "B02")])]
+		msgs = [
+			i["message"]
+			for i in c.rule_issues(steps, [R("R4", "B02", "Lidocain", "Thuốc"), LABOR("R9", "B02")])
+		]
 		self.assertTrue(any("Lidocain" in m and "chuẩn bị" in m for m in msgs))
 		self.assertTrue(any("chưa có người thực hiện" in m and "B01" in m for m in msgs))
 		unused = c.rule_issues(steps, [R("R1", "B01", "Kim")])
@@ -50,7 +57,9 @@ class TestConsistency(unittest.TestCase):
 	def test_FR_AI_006_khong_co_buoc_chuan_bi(self):
 		out = c.preparation_gaps([S(1, "Thực hiện")], [R("R1", "B01", "Kim")])
 		self.assertEqual(out, [{"kind": "no_preparation_step"}])
-		self.assertIn("chưa có bước nào", c.rule_issues([S(1, "Thực hiện")], [LABOR("R", "B01")])[0]["message"])
+		self.assertIn(
+			"chưa có bước nào", c.rule_issues([S(1, "Thực hiện")], [LABOR("R", "B01")])[0]["message"]
+		)
 
 	def test_FR_AI_006_buoc_thieu_nguoi_thuc_hien(self):
 		steps = [S(2, "Thực hiện"), S(1, "Chuẩn bị")]

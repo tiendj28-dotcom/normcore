@@ -1006,7 +1006,14 @@ def check_consistency(procedure):
 	else:
 		prompts_install.ensure_consistency_check_v2()
 		payload = guard.build_source(DT, data)
-		for f in ("overview", "indications", "contraindications", "cautions", "preparation_notes", "monitoring"):
+		for f in (
+			"overview",
+			"indications",
+			"contraindications",
+			"cautions",
+			"preparation_notes",
+			"monitoring",
+		):
 			payload[f] = strip_html(payload.get(f) or "")
 		holder = {}
 

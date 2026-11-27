@@ -70,9 +70,7 @@ def request_variables(pending, resources_by_row, shortlists):
 				"quantity": r.get("quantity"),
 				"uom": r.get("uom"),
 				"component": ln.get("component"),
-				"candidates": [
-					{k: c.get(k) for k in ("doctype", "name", "label", "uom")} for c in cands
-				],
+				"candidates": [{k: c.get(k) for k in ("doctype", "name", "label", "uom")} for c in cands],
 			}
 		)
 	return {"lines": out, "components": {k: list(v) for k, v in COMPONENTS_BY_DOCTYPE.items()}}
@@ -97,7 +95,9 @@ def parse_suggestions(data, offered):
 			conf = _conf(it.get("confidence"))
 			ok = (
 				cands is not None
-				and any(c.get("doctype") == it.get("doctype") and c.get("name") == it.get("name") for c in cands)
+				and any(
+					c.get("doctype") == it.get("doctype") and c.get("name") == it.get("name") for c in cands
+				)
 				and it.get("component") in COMPONENTS_BY_DOCTYPE.get(it.get("doctype"), ())
 				and conf is not None
 				and row not in out

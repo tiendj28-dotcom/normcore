@@ -20,7 +20,7 @@ def resource_key(r):
 
 
 def _ordered_steps(steps):
-	return sorted(steps or [], key=lambda s: (s.get("idx") or 0))
+	return sorted(steps or [], key=lambda s: s.get("idx") or 0)
 
 
 def _step_rank(steps):
@@ -33,7 +33,11 @@ def preparation_gaps(steps, resources):
 	if not prep_ids:
 		return [{"kind": "no_preparation_step"}]
 	rows = sorted(
-		(r for r in resources or [] if r.get("step_id") in rank and r.get("resource_type") in PREP_CHECK_TYPES),
+		(
+			r
+			for r in resources or []
+			if r.get("step_id") in rank and r.get("resource_type") in PREP_CHECK_TYPES
+		),
 		key=lambda r: (rank[r["step_id"]], str(r.get("resource_row_id") or "")),
 	)
 	in_prep, elsewhere = {}, {}
@@ -87,7 +91,9 @@ def contra_variables(doc):
 	return {
 		"contraindications": doc.get("contraindications") or "",
 		"indications": doc.get("indications") or "",
-		"sections": {k: doc.get(k) or "" for k in CONTRA_SECTIONS if k != "indications" and k != "references"},
+		"sections": {
+			k: doc.get(k) or "" for k in CONTRA_SECTIONS if k != "indications" and k != "references"
+		},
 		"steps": doc.get("steps") or [],
 		"resources": doc.get("resources") or [],
 	}
@@ -114,9 +120,13 @@ def parse_contra(data, step_ids, row_ids, contraindications):
 				or (k == "section" and v in CONTRA_SECTIONS)
 			)
 		if ok:
-			ok = isinstance(it.get("excerpt"), str) and citation.quote_in_text(it["excerpt"], contraindications)
+			ok = isinstance(it.get("excerpt"), str) and citation.quote_in_text(
+				it["excerpt"], contraindications
+			)
 		if not ok:
 			rejected += 1
 			continue
-		out.append({**targets, "excerpt": it["excerpt"], "explanation": explanation.strip()[:MAX_EXPLANATION]})
+		out.append(
+			{**targets, "excerpt": it["excerpt"], "explanation": explanation.strip()[:MAX_EXPLANATION]}
+		)
 	return out, rejected

@@ -51,26 +51,91 @@ class TestAiLink(unittest.TestCase):
 		offered = {"R1": CANDS[:2], "R2": [EQ]}
 		data = {
 			"suggestions": [
-				{"resource_row_id": "R1", "doctype": "NC Item", "name": "I2", "component": "DRUG", "confidence": 0.876},
-				{"resource_row_id": "R1", "doctype": "NC Item", "name": "I1", "component": "DRUG", "confidence": 0.5},
-				{"resource_row_id": "R1", "doctype": "NC Item", "name": "ZZ", "component": "DRUG", "confidence": 0.5},
-				{"resource_row_id": "R2", "doctype": "NC Equipment", "name": "E1", "component": "SUPPLY", "confidence": 0.5},
-				{"resource_row_id": "R2", "doctype": "NC Equipment", "name": "E1", "component": "EQUIPMENT", "confidence": 1.2},
-				{"resource_row_id": "R2", "doctype": "NC Equipment", "name": "E1", "component": "EQUIPMENT", "confidence": "0.9"},
-				{"resource_row_id": "R2", "doctype": "NC Equipment", "name": "E1", "component": "EQUIPMENT", "confidence": True},
-				{"resource_row_id": "R9", "doctype": "NC Item", "name": "I1", "component": "DRUG", "confidence": 0.5},
+				{
+					"resource_row_id": "R1",
+					"doctype": "NC Item",
+					"name": "I2",
+					"component": "DRUG",
+					"confidence": 0.876,
+				},
+				{
+					"resource_row_id": "R1",
+					"doctype": "NC Item",
+					"name": "I1",
+					"component": "DRUG",
+					"confidence": 0.5,
+				},
+				{
+					"resource_row_id": "R1",
+					"doctype": "NC Item",
+					"name": "ZZ",
+					"component": "DRUG",
+					"confidence": 0.5,
+				},
+				{
+					"resource_row_id": "R2",
+					"doctype": "NC Equipment",
+					"name": "E1",
+					"component": "SUPPLY",
+					"confidence": 0.5,
+				},
+				{
+					"resource_row_id": "R2",
+					"doctype": "NC Equipment",
+					"name": "E1",
+					"component": "EQUIPMENT",
+					"confidence": 1.2,
+				},
+				{
+					"resource_row_id": "R2",
+					"doctype": "NC Equipment",
+					"name": "E1",
+					"component": "EQUIPMENT",
+					"confidence": "0.9",
+				},
+				{
+					"resource_row_id": "R2",
+					"doctype": "NC Equipment",
+					"name": "E1",
+					"component": "EQUIPMENT",
+					"confidence": True,
+				},
+				{
+					"resource_row_id": "R9",
+					"doctype": "NC Item",
+					"name": "I1",
+					"component": "DRUG",
+					"confidence": 0.5,
+				},
 				{"resource_row_id": 5},
 				"rác",
 			]
 		}
 		acc, rej = a.parse_suggestions(data, offered)
 		self.assertEqual(rej, 9)
-		self.assertEqual(acc, {"R1": {"resource_doctype": "NC Item", "resource": "I2", "component": "DRUG", "ai_confidence": 88}})
+		self.assertEqual(
+			acc,
+			{
+				"R1": {
+					"resource_doctype": "NC Item",
+					"resource": "I2",
+					"component": "DRUG",
+					"ai_confidence": 88,
+				}
+			},
+		)
 		self.assertEqual(a.parse_suggestions({"mock": True}, offered), ({}, 0))
-		acc["R3"] = {"resource_doctype": "NC Item", "resource": "I3", "component": "SUPPLY", "ai_confidence": 10}
+		acc["R3"] = {
+			"resource_doctype": "NC Item",
+			"resource": "I3",
+			"component": "SUPPLY",
+			"ai_confidence": 10,
+		}
 		done = a.apply_suggestions(lines, acc)
 		self.assertEqual(done, ["L1"])
-		self.assertEqual((lines[0]["resource"], lines[0]["ai_suggested"], lines[0]["ai_confidence"]), ("I2", 1, 88))
+		self.assertEqual(
+			(lines[0]["resource"], lines[0]["ai_suggested"], lines[0]["ai_confidence"]), ("I2", 1, 88)
+		)
 		self.assertEqual(lines[2]["resource"], "J1")
 		self.assertEqual(a.original_component("Thuốc"), "DRUG")
 		self.assertEqual(a.original_component("Lạ"), "SUPPLY")
