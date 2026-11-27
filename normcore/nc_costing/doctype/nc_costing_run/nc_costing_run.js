@@ -3,6 +3,8 @@ const API = "normcore.api.costing.";
 const PROGRESS_EVENT = "normcore_costing_progress";
 const LOCK_METHOD = "normcore.api.costing.lock_run"; // FEAT-017: khoa sau khi đối soát
 const RECON_REPORT = "NC Reconciliation";
+const PHYSICAL_REPORT = "NC Physical Reconciliation"; // FEAT-037
+const MISSING_REPORT = "NC Missing Data"; // FEAT-037
 const DUPLICATE_METHOD = "normcore.api.costing.duplicate_run"; // FEAT-018
 const VERIFY_METHOD = "normcore.api.costing.verify_snapshot";
 const COMPARE_REPORT = "NC Costing Run Comparison";
@@ -129,6 +131,35 @@ function open_reconciliation(frm) {
 	frappe.set_route("query-report", RECON_REPORT);
 }
 
+function open_physical(frm) {
+	frappe.route_options = { costing_run: frm.doc.name };
+	frappe.set_route("query-report", PHYSICAL_REPORT);
+}
+
+function open_missing(frm) {
+	const one = (rows, field) => (rows && rows.length === 1 ? rows[0][field] : undefined);
+	frappe.route_options = {
+		fiscal_year: frm.doc.fiscal_year,
+		costing_date: frm.doc.costing_date,
+		parameter_set: frm.doc.parameter_set,
+		price_category: frm.doc.price_category,
+		volume_scenario: frm.doc.volume_scenario,
+		department: one(frm.doc.scope_departments, "department"),
+		technical_service: one(frm.doc.scope_services, "technical_service"),
+	};
+	frappe.set_route("query-report", MISSING_REPORT);
+}
+
+function render_physical_banner(section, data) {
+	const n = data.physical_unreconciled || 0;
+	if (!n) return "";
+	return (
+		`<div class="alert alert-danger" role="alert"><b>${__("Material reconciliation pending")}</b>: ` +
+		`${__("{0} departments have no stock issue data. NC Finance must confirm with a reason before the costing run can be locked.", [n])} ` +
+		`<a href="#" class="nc-open-physical">${__("Material and volume reconciliation")}</a></div>`
+	);
+}
+
 function lock_run(frm) {
 	frappe.call({
 		method: API + "get_run_results",
@@ -139,11 +170,17 @@ function lock_run(frm) {
 				frappe.msgprint({
 					title: __("Cannot lock"),
 					indicator: "red",
-					message: `${__("{0} reconciliation lines are over tolerance and have no explanation.", [n])} <a href="#" class="open-recon">${__("Reconciliation table")}</a>`,
+					message:
+						`${__("{0} reconciliation lines are over tolerance or not reconciled and have no explanation.", [n])} ` +
+						`<a href="#" class="open-recon">${__("Reconciliation table")}</a> · <a href="#" class="open-physical">${__("Material and volume reconciliation")}</a>`,
 				});
 				$(".msgprint .open-recon").on("click", (e) => {
 					e.preventDefault();
 					open_reconciliation(frm);
+				});
+				$(".msgprint .open-physical").on("click", (e) => {
+					e.preventDefault();
+					open_physical(frm);
 				});
 				return;
 			}
@@ -300,6 +337,7 @@ function render_results(frm) {
 				.join("");
 			section.html(
 				render_run_warnings(section, data) +
+				render_physical_banner(section, data) +
 				`<div>${__("{0} services", [rows.length])} · ${counts}${blocked_pill}</div>${warn}` +
 					`<div class="table-responsive"><table class="table table-bordered"><thead><tr>` +
 					`<th>${__("Service code")}</th><th>${__("Service")}</th><th>${__("Department")}</th><th>${__("Result")}</th><th>${__("Message")}</th>` +
@@ -307,6 +345,10 @@ function render_results(frm) {
 					`</tr></thead><tbody>${body}</tbody></table></div>` +
 					render_systems(rows)
 			);
+			section.find(".nc-open-physical").on("click", (e) => {
+				e.preventDefault();
+				open_physical(frm);
+			});
 			section.find(".nc-show-more").on("click", function (e) {
 				e.preventDefault();
 				section.find(".nc-more").show();
@@ -418,7 +460,9 @@ frappe.ui.form.on("NC Costing Run", {
 				frappe.set_route("List", "NC Service Cost", { costing_run: frm.doc.name });
 			});
 			frm.add_custom_button(__("Reconciliation table"), () => open_reconciliation(frm));
+			frm.add_custom_button(__("Material and volume reconciliation"), () => open_physical(frm));
 		}
+		frm.add_custom_button(__("Missing data report"), () => open_missing(frm));
 		if (frm.doc.status === "Đã tính" && can_write(frm)) {
 			frm.add_custom_button(__("Lock"), () => lock_run(frm)).addClass("btn-primary");
 		}

@@ -2,7 +2,7 @@
 
 import frappe
 
-from normcore.costing import engine
+from normcore.costing import engine, reconcile
 
 DIRECT_FIELD = {
 	"LABOR": "direct_labor",
@@ -184,6 +184,25 @@ def recon_values(run_name, row) -> dict:
 	}
 
 
+def physical_values(run_name, row, dept_center) -> dict:
+	"""technical-design 2.1: ánh xạ dòng Vật chất, Sản lượng sang trường NC Reconciliation Line (ASM-037-08)."""
+	material = row.recon_type == reconcile.MATERIAL
+	return {
+		"costing_run": run_name,
+		"recon_type": row.recon_type,
+		"department": row.department,
+		"cost_center": dept_center.get(row.department),
+		"cost_category": reconcile.DRUG_SUPPLY if material else None,
+		"item": row.item,
+		"technical_service": row.service,
+		"calculated_qty": _f(row.calculated),
+		"actual_qty": _f(row.actual),
+		"variance_pct": _f(row.variance_pct),
+		"over_tolerance": 1 if row.over_tolerance else 0,
+		"recon_status": row.status,
+	}
+
+
 def canonical(doctype, values) -> dict:
 	"""Cùng một dạng cho giá trị sắp ghi và giá trị đọc lại: trường số rỗng = 0 (Frappe lưu None thành 0)."""
 	meta = frappe.get_meta(doctype)
@@ -243,6 +262,19 @@ def write_reconciliation(run, rows) -> list[str]:
 			continue
 		doc = frappe.new_doc("NC Reconciliation Line")
 		doc.update(recon_values(run.name, r))
+		doc.recon_type, doc.recon_status = reconcile.FINANCIAL, reconcile.RECONCILED
+		doc.flags.from_costing = True
+		doc.insert(ignore_permissions=True)
+		names.append(doc.name)
+	return names
+
+
+def write_physical_reconciliation(run, rows, dept_center) -> list[str]:
+	"""Tạo dòng đối soát Vật chất, Sản lượng (FEAT-037). Máy chủ ghi, quyền đã kiểm ở `run_costing`."""
+	names = []
+	for r in rows:
+		doc = frappe.new_doc("NC Reconciliation Line")
+		doc.update(physical_values(run.name, r, dept_center))
 		doc.flags.from_costing = True
 		doc.insert(ignore_permissions=True)
 		names.append(doc.name)

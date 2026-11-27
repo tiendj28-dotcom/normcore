@@ -1,0 +1,35 @@
+{
+ "content": null,
+ "creation": "2026-11-26 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-11-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Costing",
+ "name": "sensitivity",
+ "owner": "Administrator",
+ "page_name": "sensitivity",
+ "roles": [
+  {
+   "role": "NC Finance"
+  },
+  {
+   "role": "NC Director"
+  },
+  {
+   "role": "NC Admin"
+  },
+  {
+   "role": "NC Auditor"
+  },
+  {
+   "role": "NC Department Head"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Phân tích độ nhạy"
+}

@@ -86,8 +86,15 @@ function render_header(report) {
 			if (!["Đã tính", "Đã khóa"].includes(m.status)) {
 				parts.push(`<div class="text-muted">${__("This costing run has no reconciliation results yet. Run costing first.")}</div>`);
 			}
+			const ph = m.physical || {};
+			if (ph.available) {
+				const text = __("Material reconciliation: {0} lines over tolerance, {1} departments not reconciled need an explanation · Volume: {2} warnings", [ph.material_blocked, ph.unreconciled, ph.volume_warnings]);
+				parts.push(`<div class="${ph.material_blocked || ph.unreconciled ? "text-danger" : "text-muted"}"${ph.material_blocked || ph.unreconciled ? ' role="alert"' : ""}>${text} <a href="#" class="nc-open-physical">${__("Open material and volume reconciliation")}</a></div>`);
+			} else {
+				parts.push(`<div class="text-muted">${__("Material reconciliation is not prepared for this volume scenario.")}</div>`);
+			}
 			if (m.blocked) {
-				parts.push(banner("danger", __("{0} lines over tolerance have no explanation. The costing run cannot be locked yet.", [m.blocked])));
+				parts.push(banner("danger", __("{0} reconciliation lines (financial and material) have no explanation. The costing run cannot be locked yet.", [m.blocked])));
 			} else if (m.lines.some((x) => x.over_tolerance)) {
 				parts.push(banner("success", __("Every line over tolerance has an explanation.")));
 			}
@@ -99,6 +106,11 @@ function render_header(report) {
 			if (!m.include_depreciation) parts.push(`<div class="text-muted">${__("This price category has no depreciation: depreciation is neither allocated nor reconciled.")}</div>`);
 			if (m.status === "Đã khóa") parts.push(`<div class="text-muted">${__("This record is locked and cannot be edited.")}</div>`);
 			$box.html(parts.join(""));
+			$box.find(".nc-open-physical").on("click", (e) => {
+				e.preventDefault();
+				frappe.route_options = { costing_run: m.run };
+				frappe.set_route("query-report", "NC Physical Reconciliation");
+			});
 			if (m.can_lock) report.page.set_primary_action(__("Lock costing run"), () => lock(report, m.run));
 			report.page.add_inner_button(__("Open costing run"), () => frappe.set_route("Form", "NC Costing Run", m.run));
 		},

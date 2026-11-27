@@ -2,9 +2,10 @@
 frappe.ui.form.on("NC Reconciliation Line", {
 	refresh(frm) {
 		if (frm.is_new()) return;
-		frm.add_custom_button(__("Open reconciliation table"), () => {
+		const physical = ["Vật chất", "Sản lượng"].includes(frm.doc.recon_type);
+		frm.add_custom_button(physical ? __("Open material and volume reconciliation") : __("Open reconciliation table"), () => {
 			frappe.route_options = { costing_run: frm.doc.costing_run };
-			frappe.set_route("query-report", "NC Reconciliation");
+			frappe.set_route("query-report", physical ? "NC Physical Reconciliation" : "NC Reconciliation");
 		});
 		frappe.db.get_value("NC Costing Run", frm.doc.costing_run, "status").then((r) => {
 			const open = (r.message || {}).status === "Đã tính";
