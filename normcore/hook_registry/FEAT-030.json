@@ -1,0 +1,4 @@
+{
+ "after_install": ["normcore.benchmark.proposal_setup.after_install"],
+ "after_migrate": ["normcore.benchmark.proposal_setup.after_migrate"]
+}

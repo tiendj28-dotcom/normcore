@@ -10,6 +10,7 @@ class NCTechnicalService(Document):
 		self.validate_departments()
 		self.validate_paraclinical()
 		self.validate_external_codes()
+		self.validate_price_history()
 
 	def validate_departments(self):
 		"""Một khoa chỉ xuất hiện một lần trong khoa thực hiện (FR-SVC-003, ASM-056)."""
@@ -76,3 +77,24 @@ class NCTechnicalService(Document):
 						o.source_system, o.external_code, o.parent, name
 					)
 				)
+
+	def validate_price_history(self):
+		"""DI-07, FR-PRICE-010: `approved_prices` chỉ thêm dòng qua api.price_proposal (flags.price_history_write)."""
+		if self.flags.price_history_write:
+			return
+		before = self.get_doc_before_save()
+		old = [self._history_key(r) for r in (before.approved_prices if before else [])]
+		new = [self._history_key(r) for r in self.approved_prices or []]
+		if old != new:
+			frappe.throw(_("Lịch sử giá chỉ ghi qua phê duyệt phương án giá, không sửa tay"))
+
+	@staticmethod
+	def _history_key(row):
+		return (
+			row.name,
+			row.price_category,
+			str(row.price),
+			str(row.effective_date),
+			row.price_proposal,
+			row.authority_doc_no,
+		)

@@ -27,7 +27,9 @@
   "panel_costing_mode",
   "panel_components",
   "systems_section",
-  "cls_systems_html"
+  "cls_systems_html",
+  "prices_section",
+  "approved_prices"
  ],
  "fields": [
   {
@@ -183,6 +185,18 @@
    "fieldname": "cls_systems_html",
    "label": "Hệ thống xét nghiệm",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "prices_section",
+   "label": "Giá đã duyệt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "approved_prices",
+   "label": "Giá đã duyệt",
+   "fieldtype": "Table",
+   "options": "NC Service Price History",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,

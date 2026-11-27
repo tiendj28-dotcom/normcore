@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "creation": "2026-11-27 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "technical_service",
+  "department",
+  "full_cost",
+  "calculated_price",
+  "rounded_price",
+  "benchmark_median",
+  "benchmark_count",
+  "proposed_price",
+  "adjustment_basis",
+  "below_cost",
+  "director_ack",
+  "authority_price"
+ ],
+ "fields": [
+  {
+   "fieldname": "technical_service",
+   "label": "Dịch vụ",
+   "fieldtype": "Link",
+   "options": "NC Technical Service",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "department",
+   "label": "Khoa",
+   "fieldtype": "Link",
+   "options": "NC Department",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "full_cost",
+   "label": "Giá thành toàn bộ",
+   "fieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "calculated_price",
+   "label": "Giá tính toán",
+   "fieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rounded_price",
+   "label": "Giá làm tròn",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "benchmark_median",
+   "label": "Trung vị tham chiếu",
+   "fieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "benchmark_count",
+   "label": "Số đơn vị tham chiếu",
+   "fieldtype": "Int",
+   "read_only": 1
+  },
+  {
+   "fieldname": "proposed_price",
+   "label": "Giá đề xuất",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "adjustment_basis",
+   "label": "Căn cứ điều chỉnh",
+   "fieldtype": "Small Text",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "below_cost",
+   "label": "Dưới giá thành",
+   "fieldtype": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "director_ack",
+   "label": "Giám đốc xác nhận dòng dưới giá thành",
+   "fieldtype": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authority_price",
+   "label": "Giá cấp thẩm quyền duyệt",
+   "fieldtype": "Currency",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Benchmark",
+ "name": "NC Price Proposal Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

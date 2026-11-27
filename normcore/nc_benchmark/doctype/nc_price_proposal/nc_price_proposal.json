@@ -1,0 +1,170 @@
+{
+ "actions": [],
+ "autoname": "format:PAG-{YYYY}-{###}",
+ "creation": "2026-11-27 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "costing_run",
+  "price_category",
+  "approval_authority",
+  "col_right",
+  "apply_from",
+  "workflow_state",
+  "summary_html",
+  "items_section",
+  "items",
+  "confirm_section",
+  "department_confirmations",
+  "authority_section",
+  "authority_doc_no",
+  "authority_doc_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "label": "Tên phương án",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "costing_run",
+   "label": "Lần tính giá hoặc kịch bản",
+   "fieldtype": "Link",
+   "options": "NC Costing Run",
+   "reqd": 1,
+   "set_only_once": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "price_category",
+   "label": "Loại giá",
+   "fieldtype": "Link",
+   "options": "NC Price Category",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "approval_authority",
+   "label": "Cấp phê duyệt",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "fetch_from": "price_category.approval_authority"
+  },
+  {
+   "fieldname": "col_right",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "apply_from",
+   "label": "Ngày áp dụng",
+   "fieldtype": "Date"
+  },
+  {
+   "fieldname": "workflow_state",
+   "label": "Trạng thái",
+   "fieldtype": "Link",
+   "options": "Workflow State",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "summary_html",
+   "label": "Tóm tắt",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "items_section",
+   "label": "Dòng giá",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "label": "Dòng",
+   "fieldtype": "Table",
+   "options": "NC Price Proposal Item"
+  },
+  {
+   "fieldname": "confirm_section",
+   "label": "Xác nhận của khoa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "department_confirmations",
+   "label": "Xác nhận của khoa",
+   "fieldtype": "Table",
+   "options": "NC Proposal Dept Confirmation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authority_section",
+   "label": "Văn bản phê duyệt của cấp thẩm quyền",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:['Đã duyệt nội bộ, chờ trình','Đã được cấp thẩm quyền duyệt'].includes(doc.workflow_state)"
+  },
+  {
+   "fieldname": "authority_doc_no",
+   "label": "Số văn bản phê duyệt",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authority_doc_date",
+   "label": "Ngày văn bản phê duyệt",
+   "fieldtype": "Date",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NC Benchmark",
+ "name": "NC Price Proposal",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "NC Finance",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "NC Department Head",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "NC Director",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "NC Consultant",
+   "read": 1
+  },
+  {
+   "role": "NC Admin",
+   "read": 1
+  },
+  {
+   "role": "NC Auditor",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title",
+ "track_changes": 1
+}
