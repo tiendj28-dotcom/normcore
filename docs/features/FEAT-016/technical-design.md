@@ -47,7 +47,7 @@ Autoname `hash`; `title_field` = `account_prefix`; sắp xếp `account_prefix a
 
 ### 2.2 NC Accounting Import và bảng con (data-model 3.6, sửa theo AMD-010)
 
-Autoname `KT-.{fiscal_year}.-.##` (ví dụ `KT-2026-01`, `KT-2026-02` — FR-ACCT-011); `title_field` = `name`; sắp xếp `creation desc`; `track_changes` = 1.
+Autoname `KT-.{fiscal_year}.-.##` (ví dụ `KT-2026-01`, `KT-2026-02` — FR-ACCT-011); không đặt `title_field` (tên bản ghi là tiêu đề; đặt `title_field` = `name` làm ListView lỗi, NORM-87, ASM-NORM86-02); sắp xếp `creation desc`; `track_changes` = 1.
 
 | Trường | Nhãn | Kiểu | BB | Ràng buộc |
 | :-- | :-- | :-- | :-- | :-- |
