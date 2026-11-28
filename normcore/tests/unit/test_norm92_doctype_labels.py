@@ -45,6 +45,8 @@ class TestDoctypeLabels(unittest.TestCase):
 				if line.startswith("#") or len(p) < 4 or p[2] not in tr:
 					continue
 				label, target, kind = p[1], p[2], p[3]
-				if (kind == "DocType" and label != tr[target]) or (kind == "Report" and tr[target].lower() not in label.lower()):
+				if (kind == "DocType" and label != tr[target]) or (
+					kind == "Report" and tr[target].lower() not in label.lower()
+				):
 					bad.append((label, tr[target]))
 		self.assertEqual(bad, [])
