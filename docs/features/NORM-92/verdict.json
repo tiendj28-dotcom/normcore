@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["76 bản dịch tên DocType/Report NC đúng tên đã chốt", "Test mới OK; bộ test bench site sạch rc=0; CI PR xanh", "Không sửa/skip test nào, không chạm tài liệu chỉ đọc"], "commit": "024c1b60b9f322c6c0f01a1d26709a26993f30d4"}
