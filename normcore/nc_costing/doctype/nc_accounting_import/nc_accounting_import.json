@@ -110,7 +110,6 @@
  "sort_order": "DESC",
  "states": [],
  "autoname": "KT-.{fiscal_year}.-.##",
- "title_field": "name",
  "track_changes": 1,
  "permissions": [
   {
