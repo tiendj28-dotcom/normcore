@@ -110,3 +110,17 @@ class TestNCComplianceExpiry(FrappeTestCase):
 			},
 		)
 		self.assertEqual(report.ref_doctype, "NC Equipment Compliance")
+
+	def test_NORM_88_moi_vai_tro_cua_bao_cao_co_quyen_report_tren_ref_doctype(self):
+		roles = [r.role for r in frappe.get_doc("Report", "NC Compliance Expiry").roles]
+		for i, role in enumerate(roles):
+			user = make_user(f"norm88{i}@example.com", role)
+			self.assertTrue(
+				frappe.has_permission("NC Equipment Compliance", "report", user=user),
+				f"{role} thiếu quyền report",
+			)
+			frappe.set_user(user)
+			try:
+				frappe.get_attr("frappe.desk.query_report.run")("NC Compliance Expiry", {"as_of": nowdate()})
+			finally:
+				frappe.set_user("Administrator")
