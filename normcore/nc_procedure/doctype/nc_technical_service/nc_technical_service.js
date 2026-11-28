@@ -188,8 +188,17 @@ function show_approved_prices(frm) {
 	if (!(frm.doc.approved_prices || []).length) frm.fields_dict.approved_prices.$wrapper.append(`<div class="text-muted nc-no-price">${__("No approved price yet")}</div>`);
 }
 
+// NORM-89: vai trò không có quyền tạo không được thấy form trống qua URL /new (máy chủ vẫn chặn khi lưu).
+function block_new_without_create(frm) {
+	if (!frm.is_new() || frappe.model.can_create("NC Technical Service")) return false;
+	frappe.show_alert({ message: __("You are not permitted to create a technical service"), indicator: "red" });
+	frappe.set_route("List", "NC Technical Service");
+	return true;
+}
+
 frappe.ui.form.on("NC Technical Service", {
 	refresh(frm) {
+		if (block_new_without_create(frm)) return;
 		show_approved_prices(frm);
 		load_chain(frm);
 		load_systems(frm);
