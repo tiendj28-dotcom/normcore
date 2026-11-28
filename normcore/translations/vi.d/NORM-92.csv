@@ -1,20 +1,20 @@
 NC AI Log,Nhật ký AI
 NC AI Norm Suggestion,Gợi ý định mức của AI
 NC AI Settings,Cấu hình AI
-NC Account Mapping,Ánh xạ tài khoản
-NC Accounting Import,Nhập dữ liệu kế toán
+NC Account Mapping,Bảng ánh xạ tài khoản
+NC Accounting Import,Nhập số liệu kế toán
 NC Accounting Import Line,Dòng nhập dữ liệu kế toán
 NC Accounting Import Total,Tổng nhập dữ liệu kế toán
-NC Adjustment Suggestion,Gợi ý điều chỉnh
+NC Adjustment Suggestion,Gợi ý điều chỉnh giá
 NC Allocation Rule,Quy tắc phân bổ
-NC Audit Event,Sự kiện kiểm toán
-NC Benchmark Facility,Cơ sở đối sánh
-NC Benchmark Price,Giá đối sánh
-NC CPI Index,Chỉ số CPI
-NC Compliance Expiry,Hạn tuân thủ thiết bị
+NC Audit Event,Nhật ký
+NC Benchmark Facility,Đơn vị tham chiếu
+NC Benchmark Price,Giá tham chiếu
+NC CPI Index,Chỉ số giá tiêu dùng
+NC Compliance Expiry,Hạn hồ sơ tuân thủ
 NC Cost Center,Trung tâm chi phí
-NC Cost Center Driver,Tiêu thức trung tâm chi phí
-NC Costing Parameter Set,Bộ tham số tính giá
+NC Cost Center Driver,Tiêu chí trung tâm chi phí
+NC Costing Parameter Set,Bộ tham số
 NC Costing Run,Lần tính giá
 NC Costing Run Comparison,So sánh lần tính giá
 NC Costing Run Department,Khoa của lần tính giá
@@ -25,16 +25,16 @@ NC EQA Program,Chương trình ngoại kiểm
 NC EQA Service,Dịch vụ ngoại kiểm
 NC Equipment,Thiết bị
 NC Equipment Allocation,Phân bổ thiết bị
-NC Equipment Compliance,Tuân thủ thiết bị
+NC Equipment Compliance,Hồ sơ tuân thủ
 NC Equipment Component,Linh kiện thiết bị
 NC Equipment Type,Loại thiết bị
-NC Equipment Usage,Sử dụng thiết bị
-NC Item,Vật tư
-NC Item Price,Giá vật tư
+NC Equipment Usage,Phút khai thác thiết bị
+NC Item,Mặt hàng
+NC Item Price,Đơn giá mặt hàng
 NC Job Title,Chức danh
 NC Job Title Rate,Đơn giá chức danh
 NC Legal Document,Văn bản pháp lý
-NC Legal Section,Điều khoản pháp lý
+NC Legal Section,Mục văn bản
 NC Legal Supersession,Thay thế văn bản pháp lý
 NC Missing Data,Dữ liệu thiếu
 NC Norm Line,Dòng định mức
@@ -42,18 +42,18 @@ NC Norm Set,Bộ định mức
 NC Norm Template,Mẫu định mức
 NC Norm Template Item,Dòng mẫu định mức
 NC Panel Component,Thành phần gói xét nghiệm
-NC Physical Reconciliation,Đối chiếu thực tế
-NC Price Category,Nhóm giá
-NC Price Proposal,Đề xuất giá
-NC Price Proposal Item,Dòng đề xuất giá
+NC Physical Reconciliation,Đối soát vật chất
+NC Price Category,Loại giá
+NC Price Proposal,Phương án giá
+NC Price Proposal Item,Dòng phương án giá
 NC Procedure Change Request,Yêu cầu thay đổi quy trình
-NC Prompt Template,Mẫu lời nhắc AI
+NC Prompt Template,Mẫu lệnh AI
 NC Proposal Dept Confirmation,Xác nhận của khoa về đề xuất
 NC QC Calibration Line,Dòng hiệu chuẩn kiểm soát chất lượng
 NC QC IQC Line,Dòng nội kiểm
-NC QC Plan,Kế hoạch kiểm soát chất lượng
-NC Reconciliation,Đối chiếu
-NC Reconciliation Line,Dòng đối chiếu
+NC QC Plan,Kế hoạch chất lượng
+NC Reconciliation,Đối soát
+NC Reconciliation Line,Dòng đối soát
 NC Review Comment,Nhận xét duyệt
 NC Room,Phòng
 NC Scenario Change,Thay đổi kịch bản
@@ -64,13 +64,13 @@ NC Service Cost Line,Dòng giá thành dịch vụ
 NC Service Department,Khoa thực hiện dịch vụ
 NC Service Price History,Lịch sử giá dịch vụ
 NC Service Volume,Sản lượng dịch vụ
-NC Settings,Cấu hình Normcore
+NC Settings,Tham số vận hành
 NC Specialty,Chuyên khoa
 NC Stock Issue Actual,Xuất kho thực tế
 NC Technical Service,Dịch vụ kỹ thuật
 NC Test System,Hệ thống xét nghiệm
 NC Test System Cost,Chi phí hệ thống xét nghiệm
-NC Test System Volume,Sản lượng hệ thống xét nghiệm
-NC Time Study,Bấm giờ
+NC Test System Volume,Sản lượng cận lâm sàng
+NC Time Study,Phiếu bấm giờ
 NC Time Study Line,Dòng bấm giờ
 NC Time Study Result,Kết quả bấm giờ

@@ -29,3 +29,22 @@ class TestDoctypeLabels(unittest.TestCase):
 					names.add(j["name"])
 		self.assertTrue(names)
 		self.assertEqual(sorted(names - _translated()), [])
+
+	def test_shortcut_labels_match_translation(self):
+		"""Lối tắt DocType phải có nhãn đúng bản dịch tên DocType; Report: nhãn chứa bản dịch."""
+		tr = {}
+		for f in (ROOT / "translations" / "vi.d").glob("*.csv"):
+			with open(f, encoding="utf-8", newline="") as fh:
+				for r in csv.reader(fh):
+					if len(r) >= 2:
+						tr[r[0]] = r[1]
+		bad = []
+		for f in (ROOT / "nc_core" / "workspace" / "normcore" / "shortcuts.d").glob("*.txt"):
+			for line in f.read_text(encoding="utf-8").splitlines():
+				p = line.split("|")
+				if line.startswith("#") or len(p) < 4 or p[2] not in tr:
+					continue
+				label, target, kind = p[1], p[2], p[3]
+				if (kind == "DocType" and label != tr[target]) or (kind == "Report" and tr[target].lower() not in label.lower()):
+					bad.append((label, tr[target]))
+		self.assertEqual(bad, [])
