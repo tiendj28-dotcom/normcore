@@ -169,7 +169,10 @@ def get_run_results(run):
 		"physical_unreconciled": sum(
 			1
 			for r in recon
-			if _kind(r) == reconcile.MATERIAL and not r.item and r.recon_status == reconcile.UNRECONCILED
+			if _kind(r) == reconcile.MATERIAL
+			and not r.item
+			and r.recon_status == reconcile.UNRECONCILED
+			and reconcile.needs_explanation(r)
 		),
 		"snapshot_hash": run_doc.get("snapshot_hash"),
 		"can_duplicate": bool(frappe.has_permission(RUN, "create")),
