@@ -42,6 +42,17 @@ else
 	ln -s "$APP_DIR" apps/normcore
 fi
 
+# 1b. Bản cài editable của app (normcore.pth) cũng phải trỏ về checkout này, nếu không
+# `bench migrate` lỗi ModuleNotFoundError khi checkout cũ đã bị xóa.
+pth="$(env/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')/normcore.pth"
+if [ -f "$pth" ] && [ "$(head -n1 "$pth")" != "$APP_DIR" ]; then
+	echo "[preview] normcore.pth: $(head -n1 "$pth") -> $APP_DIR"
+	printf '%s\n' "$APP_DIR" > "$pth"
+elif [ ! -f "$pth" ]; then
+	echo "[preview] chưa có normcore.pth, cài editable: $APP_DIR"
+	env/bin/pip install -q -e "$APP_DIR"
+fi
+
 # 2. Redis của bench, nếu chưa chạy. Chạy nền trong cùng nhóm tiến trình nên dừng environment là dừng theo.
 for conf in config/redis_cache.conf config/redis_queue.conf; do
 	[ -f "$conf" ] || continue

@@ -1,0 +1,1 @@
+{"verdict": "accepted", "reasons": ["preview_env.sh ghi lại normcore.pth về APP_DIR trước bench migrate", "multica env start preview chạy được từ checkout mới, ping 200", "Không sửa/skip test nào"], "commit": "9c2fa38"}
