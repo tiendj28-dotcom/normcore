@@ -113,6 +113,18 @@ class TestCostingPhysicalApi(FrappeTestCase):
 			[(None, "Chưa đối soát", None)],
 		)
 
+	def test_chua_doi_soat_het_khi_da_giai_trinh_hoac_khoa(self):
+		# NORM-90: dòng vật chất đã giải trình thì không còn tính là chưa đối soát.
+		frappe.set_user("Administrator")
+		frappe.db.delete("NC Stock Issue Actual")
+		run = fx.make_run(self.world)
+		frappe.set_user(FIN)
+		api.start_costing(run.name)
+		self.assertEqual(api.get_run_results(run.name)["physical_unreconciled"], 1)
+		line = api.get_physical_reconciliation(run.name)["material"][0]["name"]
+		api.save_explanation(line, "Khoa chưa xuất kho kỳ này")
+		self.assertEqual(api.get_run_results(run.name)["physical_unreconciled"], 0)
+
 	def test_quyen(self):
 		line = self._physical()["material"][0]["name"]
 		for user in (CLIN, HEAD):
