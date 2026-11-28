@@ -1,4 +1,5 @@
 """NORM-91: preview_env.sh phải cập nhật normcore.pth về checkout hiện tại."""
+
 from pathlib import Path
 
 SCRIPT = (Path(__file__).resolve().parents[1] / "preview_env.sh").read_text()
@@ -10,4 +11,4 @@ def test_updates_pth_to_app_dir():
 
 
 def test_pth_updated_before_migrate():
-	assert SCRIPT.index("normcore.pth") < SCRIPT.index("bench --site \"$SITE\" migrate")
+	assert SCRIPT.index("normcore.pth") < SCRIPT.index('bench --site "$SITE" migrate')
